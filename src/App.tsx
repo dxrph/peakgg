@@ -5,7 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import LoginPage from "./pages/Login";
-import SignupPage from "./pages/Signup";
+import RegisterPage from "./pages/Register";
+import DashboardPage from "./pages/Dashboard";
+import ProfilePage from "./pages/Profile";
+import TournamentsPage from "./pages/Tournaments";
+import TeamsPage from "./pages/Teams";
+import LeaderboardPage from "./pages/Leaderboard";
+import PlayPage from "./pages/Play";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,8 +25,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
+          <Route path="/tournaments" element={<TournamentsPage />} />
+          <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/play" element={<PlayPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
