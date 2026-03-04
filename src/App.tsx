@@ -12,6 +12,9 @@ import TournamentsPage from "./pages/Tournaments";
 import TeamsPage from "./pages/Teams";
 import LeaderboardPage from "./pages/Leaderboard";
 import PlayPage from "./pages/Play";
+import TournamentDetailPage from "./pages/TournamentDetail";
+import TeamDetailPage from "./pages/TeamDetail";
+import AdminPage from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/teams" element={<TeamsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/play" element={<PlayPage />} />
+          <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
+          <Route path="/teams/:teamId" element={<TeamDetailPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
