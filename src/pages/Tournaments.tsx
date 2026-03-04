@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -50,7 +51,7 @@ export default function TournamentsPage() {
                 <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" />{t.slots} teams</div>
                 <div className="flex items-center gap-2"><Trophy className="h-3.5 w-3.5 text-accent" /><span className="text-accent font-semibold">{t.prize}</span></div>
               </div>
-              <Button variant="neonOutline" size="sm" className="w-full mt-4">View Details</Button>
+              <Link to={`/tournaments/${t.id}`}><Button variant="neonOutline" size="sm" className="w-full mt-4">View Details</Button></Link>
             </div>
           ))}
         </div>

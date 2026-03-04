@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,7 @@ export default function TeamsPage() {
                   <Badge variant="secondary" className="text-xs font-display">Full</Badge>
                 )}
               </div>
-              <Button variant="neonOutline" size="sm" className="w-full mt-4">View Team</Button>
+              <Link to={`/teams/${t.id}`}><Button variant="neonOutline" size="sm" className="w-full mt-4">View Team</Button></Link>
             </div>
           ))}
         </div>
