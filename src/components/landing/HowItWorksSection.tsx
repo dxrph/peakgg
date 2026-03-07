@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { UserPlus, Link as LinkIcon, Swords, Trophy } from "lucide-react";
+import { UserPlus, Gamepad2, Swords, Trophy } from "lucide-react";
 
 const steps = [
   { icon: UserPlus, step: "01", title: "Create Account", description: "Sign up and verify your email to access the platform." },
-  { icon: LinkIcon, step: "02", title: "Connect Riot ID", description: "Link your VALORANT account to unlock verified queues." },
+  { icon: Gamepad2, step: "02", title: "Pick Your Game", description: "Choose VALORANT, CS2, or Rainbow Six Siege and link your account." },
   { icon: Swords, step: "03", title: "Find a Match", description: "Join SoloQ or TeamQ. The system balances ELO and roles." },
-  { icon: Trophy, step: "04", title: "Climb the Ranks", description: "Win matches, earn ELO, compete in weekly tournaments." },
+  { icon: Trophy, step: "04", title: "Climb the Ranks", description: "Win matches, earn ELO, unlock tournament tiers, reach Apex." },
 ];
 
 export default function HowItWorksSection() {

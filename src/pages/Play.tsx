@@ -1,21 +1,27 @@
 import Navbar from "@/components/landing/Navbar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Crosshair, Clock, Shield, Swords, Users } from "lucide-react";
+import RankBadge from "@/components/RankBadge";
+import EloProgressBar from "@/components/EloProgressBar";
+import { Mountain, Clock, Shield, Swords, Users } from "lucide-react";
 import { useState } from "react";
+import { useGame } from "@/lib/game-context";
+import { GAMES } from "@/lib/ranks";
 
 export default function PlayPage() {
   const [queuing, setQueuing] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const { selectedGame } = useGame();
+  const game = GAMES.find(g => g.id === selectedGame)!;
 
   const startQueue = () => {
     setQueuing(true);
     setSeconds(0);
     const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
-    // cleanup would be needed in real app
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const userElo = 1247;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -26,22 +32,28 @@ export default function PlayPage() {
             <Swords className="h-10 w-10 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-display font-bold mb-2">Ranked Matchmaking</h1>
-          <p className="text-muted-foreground font-body mb-8">5v5 competitive queue — ELO-based matching</p>
+          <p className="text-muted-foreground font-body mb-4">5v5 competitive queue — {game.name}</p>
+
+          <div className="mb-6">
+            <RankBadge elo={userElo} size="lg" showElo />
+          </div>
+
+          <EloProgressBar elo={userElo} className="mb-8 text-left" />
 
           <div className="flex justify-center gap-6 mb-8 text-sm text-muted-foreground font-body">
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" />
-              <span>Your ELO: <strong className="text-foreground">1,247</strong></span>
+              <span className="text-lg">{game.icon}</span>
+              <span className="font-semibold text-foreground">{game.name}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-accent" />
-              <span>Online: <strong className="text-foreground">2,847</strong></span>
+              <span>Online: <strong className="text-foreground">4,213</strong></span>
             </div>
           </div>
 
           {!queuing ? (
             <Button variant="neon" size="xl" onClick={startQueue} className="px-16">
-              <Crosshair className="mr-2 h-5 w-5" />
+              <Mountain className="mr-2 h-5 w-5" />
               Find Match
             </Button>
           ) : (
@@ -64,7 +76,7 @@ export default function PlayPage() {
               <li>• You must accept within 30 seconds when a match is found</li>
               <li>• Declining or not responding results in a 5-minute cooldown</li>
               <li>• Both team captains must confirm the final score</li>
-              <li>• Mismatched scores trigger an automatic dispute</li>
+              <li>• Win: +25 ELO · Loss: -15 ELO</li>
             </ul>
           </div>
         </div>

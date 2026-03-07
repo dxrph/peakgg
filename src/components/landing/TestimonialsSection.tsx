@@ -1,22 +1,23 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
+import RankBadge from "@/components/RankBadge";
 
 const testimonials = [
   {
     name: "PhantomX",
-    rank: "Radiant",
+    elo: 2847,
     text: "Finally a platform that takes anti-smurf seriously. The matchmaking quality is insane compared to other platforms.",
     avatar: "PX",
   },
   {
     name: "NightShade",
-    rank: "Immortal",
-    text: "The tournament system is smooth and the brackets are clean. Check-in and dispute handling actually works.",
+    elo: 2600,
+    text: "The tournament tier system is genius. Working your way from Open Cup to Peak Championship feels so rewarding.",
     avatar: "NS",
   },
   {
     name: "AceViper",
-    rank: "Diamond",
+    elo: 1850,
     text: "Best team management I've seen. Creating a team and getting into team queue took less than 5 minutes.",
     avatar: "AV",
   },
@@ -57,7 +58,7 @@ export default function TestimonialsSection() {
                 </div>
                 <div>
                   <div className="font-semibold font-body text-sm">{t.name}</div>
-                  <div className="text-xs text-primary font-display">{t.rank}</div>
+                  <RankBadge elo={t.elo} size="sm" />
                 </div>
               </div>
             </motion.div>

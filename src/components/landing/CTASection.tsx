@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Crosshair } from "lucide-react";
+import { Mountain } from "lucide-react";
 
 export default function CTASection() {
   return (
@@ -15,11 +15,11 @@ export default function CTASection() {
             READY TO <span className="text-primary text-glow-red">COMPETE</span>?
           </h2>
           <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto font-body">
-            Join thousands of players on the most advanced competitive platform for VALORANT in Europe.
+            Join thousands of players on the most advanced multi-game competitive platform.
           </p>
           <Link to="/register">
             <Button variant="neon" size="xl">
-              <Crosshair className="mr-2 h-5 w-5" />
+              <Mountain className="mr-2 h-5 w-5" />
               Create Your Account
             </Button>
           </Link>

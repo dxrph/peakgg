@@ -2,12 +2,13 @@ import Navbar from "@/components/landing/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import RankBadge from "@/components/RankBadge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Shield, Users, Trophy, Swords, AlertTriangle, Ban, Search, Plus, Eye,
-  CheckCircle2, XCircle, Clock, FileText, Activity,
+  CheckCircle2, XCircle, FileText,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,11 +21,11 @@ const tabs = [
 ];
 
 const mockUsers = [
-  { id: 1, username: "PhantomX", elo: 2847, rank: "Radiant", risk: 5, status: "Active", verified: 3 },
-  { id: 2, username: "NexusGhost", elo: 2680, rank: "Immortal", risk: 12, status: "Active", verified: 2 },
-  { id: 3, username: "SmurfSuspect42", elo: 1850, rank: "Gold", risk: 78, status: "Flagged", verified: 0 },
-  { id: 4, username: "ToxicPlayer99", elo: 1200, rank: "Silver", risk: 45, status: "Banned", verified: 1 },
-  { id: 5, username: "AceViper", elo: 2590, rank: "Immortal", risk: 8, status: "Active", verified: 3 },
+  { id: 1, username: "PhantomX", elo: 3120, risk: 5, status: "Active", verified: 3 },
+  { id: 2, username: "NexusGhost", elo: 2680, risk: 12, status: "Active", verified: 2 },
+  { id: 3, username: "SmurfSuspect42", elo: 1850, risk: 78, status: "Flagged", verified: 0 },
+  { id: 4, username: "ToxicPlayer99", elo: 420, risk: 45, status: "Banned", verified: 1 },
+  { id: 5, username: "AceViper", elo: 2590, risk: 8, status: "Active", verified: 3 },
 ];
 
 const mockReports = [
@@ -48,7 +49,7 @@ const mockTournaments = [
 ];
 
 const mockMatches = [
-  { id: 4821, teams: "Rift Kings vs Void Reapers", score: "13-9", status: "Verified", map: "Ascent" },
+  { id: 4821, teams: "Peak Kings vs Void Reapers", score: "13-9", status: "Verified", map: "Ascent" },
   { id: 4820, teams: "Storm Elite vs Shadow Corp", score: "11-13", status: "Disputed", map: "Haven" },
   { id: 4819, teams: "Phoenix Rise vs Ice Protocol", score: "13-7", status: "Verified", map: "Bind" },
 ];
@@ -86,29 +87,21 @@ export default function AdminPage() {
           <Shield className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-display font-bold">Admin Panel</h1>
-            <p className="text-muted-foreground font-body text-sm">Manage users, tournaments, matches, and reports.</p>
+            <p className="text-muted-foreground font-body text-sm">PeakGG administration — manage users, tournaments, matches, and reports.</p>
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-1 mb-8 overflow-x-auto border-b border-border pb-px">
           {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-display font-semibold uppercase tracking-wider transition-colors border-b-2 -mb-px whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
+                activeTab === tab.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}>
+              <tab.icon className="h-4 w-4" />{tab.label}
             </button>
           ))}
         </div>
 
-        {/* Users Tab */}
         {activeTab === "users" && (
           <div className="space-y-4">
             <div className="flex gap-3">
@@ -122,8 +115,8 @@ export default function AdminPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="font-display">Username</TableHead>
+                    <TableHead className="font-display">PeakGG Rank</TableHead>
                     <TableHead className="font-display">ELO</TableHead>
-                    <TableHead className="font-display">Rank</TableHead>
                     <TableHead className="font-display">Risk Score</TableHead>
                     <TableHead className="font-display">Verified</TableHead>
                     <TableHead className="font-display">Status</TableHead>
@@ -134,8 +127,8 @@ export default function AdminPage() {
                   {mockUsers.map((u) => (
                     <TableRow key={u.id}>
                       <TableCell className="font-display font-semibold">{u.username}</TableCell>
+                      <TableCell><RankBadge elo={u.elo} size="sm" /></TableCell>
                       <TableCell className="font-mono">{u.elo}</TableCell>
-                      <TableCell className="font-display">{u.rank}</TableCell>
                       <TableCell><RiskBadge score={u.risk} /></TableCell>
                       <TableCell><span className="font-mono text-sm">Lv.{u.verified}</span></TableCell>
                       <TableCell><StatusBadge status={u.status} /></TableCell>
@@ -153,7 +146,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tournaments Tab */}
         {activeTab === "tournaments" && (
           <div className="space-y-4">
             <div className="flex justify-between">
@@ -165,16 +157,14 @@ export default function AdminPage() {
             </div>
             <div className="rounded-lg border border-border bg-card neon-border overflow-hidden">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-display">Name</TableHead>
-                    <TableHead className="font-display">Format</TableHead>
-                    <TableHead className="font-display">Date</TableHead>
-                    <TableHead className="font-display">Teams</TableHead>
-                    <TableHead className="font-display">Status</TableHead>
-                    <TableHead className="font-display">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+                <TableHeader><TableRow>
+                  <TableHead className="font-display">Name</TableHead>
+                  <TableHead className="font-display">Format</TableHead>
+                  <TableHead className="font-display">Date</TableHead>
+                  <TableHead className="font-display">Teams</TableHead>
+                  <TableHead className="font-display">Status</TableHead>
+                  <TableHead className="font-display">Actions</TableHead>
+                </TableRow></TableHeader>
                 <TableBody>
                   {mockTournaments.map((t) => (
                     <TableRow key={t.id}>
@@ -197,20 +187,17 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Matches Tab */}
         {activeTab === "matches" && (
           <div className="rounded-lg border border-border bg-card neon-border overflow-hidden">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-display">ID</TableHead>
-                  <TableHead className="font-display">Teams</TableHead>
-                  <TableHead className="font-display">Map</TableHead>
-                  <TableHead className="font-display">Score</TableHead>
-                  <TableHead className="font-display">Status</TableHead>
-                  <TableHead className="font-display">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow>
+                <TableHead className="font-display">ID</TableHead>
+                <TableHead className="font-display">Teams</TableHead>
+                <TableHead className="font-display">Map</TableHead>
+                <TableHead className="font-display">Score</TableHead>
+                <TableHead className="font-display">Status</TableHead>
+                <TableHead className="font-display">Actions</TableHead>
+              </TableRow></TableHeader>
               <TableBody>
                 {mockMatches.map((m) => (
                   <TableRow key={m.id}>
@@ -237,21 +224,18 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Reports Tab */}
         {activeTab === "reports" && (
           <div className="rounded-lg border border-border bg-card neon-border overflow-hidden">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-display">Reporter</TableHead>
-                  <TableHead className="font-display">Reported</TableHead>
-                  <TableHead className="font-display">Type</TableHead>
-                  <TableHead className="font-display">Match</TableHead>
-                  <TableHead className="font-display">Date</TableHead>
-                  <TableHead className="font-display">Status</TableHead>
-                  <TableHead className="font-display">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow>
+                <TableHead className="font-display">Reporter</TableHead>
+                <TableHead className="font-display">Reported</TableHead>
+                <TableHead className="font-display">Type</TableHead>
+                <TableHead className="font-display">Match</TableHead>
+                <TableHead className="font-display">Date</TableHead>
+                <TableHead className="font-display">Status</TableHead>
+                <TableHead className="font-display">Actions</TableHead>
+              </TableRow></TableHeader>
               <TableBody>
                 {mockReports.map((r) => (
                   <TableRow key={r.id}>
@@ -279,24 +263,19 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Audit Log Tab */}
         {activeTab === "audit" && (
           <div className="rounded-lg border border-border bg-card neon-border overflow-hidden">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-display">Actor</TableHead>
-                  <TableHead className="font-display">Action</TableHead>
-                  <TableHead className="font-display">Target</TableHead>
-                  <TableHead className="font-display">Time</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow>
+                <TableHead className="font-display">Actor</TableHead>
+                <TableHead className="font-display">Action</TableHead>
+                <TableHead className="font-display">Target</TableHead>
+                <TableHead className="font-display">Time</TableHead>
+              </TableRow></TableHeader>
               <TableBody>
                 {mockAudit.map((a) => (
                   <TableRow key={a.id}>
-                    <TableCell>
-                      <Badge variant={a.actor === "System" ? "secondary" : "outline"} className="font-display text-xs">{a.actor}</Badge>
-                    </TableCell>
+                    <TableCell><Badge variant={a.actor === "System" ? "secondary" : "outline"} className="font-display text-xs">{a.actor}</Badge></TableCell>
                     <TableCell className="font-body text-sm">{a.action}</TableCell>
                     <TableCell className="font-display font-semibold text-sm">{a.target}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{a.time}</TableCell>

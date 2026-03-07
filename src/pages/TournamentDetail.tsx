@@ -2,26 +2,27 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import RankBadge from "@/components/RankBadge";
 import { Trophy, Calendar, Users, MapPin, Clock, Shield, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 
 const tournamentData: Record<string, any> = {
   "1": {
-    name: "RiftArena Weekly #12",
+    name: "PeakGG Weekly #12",
     format: "5v5 Single Elimination",
     date: "March 8, 2026 — 19:00 CET",
     prize: "€500",
     slots: "12/16",
     status: "Open",
+    tier: 1,
     region: "EU-West",
-    description: "Weekly competitive tournament open to all verified players. Single elimination bracket with best-of-1 matches until semifinals, then best-of-3.",
+    description: "Weekly competitive tournament open to all players. Single elimination bracket with best-of-1 matches until semifinals, then best-of-3.",
     rules: [
-      "All players must have Verification Level ≥ 2",
-      "Smurf Risk Score must be below 40",
+      "Open to all PeakGG players (Tier 1 — Open Cup)",
       "Check-in opens 30 minutes before start",
       "No-show after 5 minutes = automatic forfeit",
-      "Standard VALORANT competitive rules apply",
-      "Map pool: Ascent, Haven, Bind, Split, Icebox, Breeze, Fracture",
+      "Standard competitive rules apply",
+      "Tournament Points awarded: +10 per win, +50 top 4, +100 champion",
     ],
     prizeBreakdown: [
       { place: "1st", amount: "€300" },
@@ -29,28 +30,28 @@ const tournamentData: Record<string, any> = {
       { place: "3rd-4th", amount: "€37.50" },
     ],
     participants: [
-      { name: "Rift Kings", tag: "RK", elo: 2650, checkedIn: true },
+      { name: "Peak Kings", tag: "PK", elo: 2650, checkedIn: true },
       { name: "Void Reapers", tag: "VR", elo: 2580, checkedIn: true },
       { name: "Storm Elite", tag: "SE", elo: 2490, checkedIn: false },
       { name: "Shadow Corp", tag: "SC", elo: 2420, checkedIn: true },
       { name: "Ice Protocol", tag: "IP", elo: 2380, checkedIn: false },
       { name: "Phoenix Rise", tag: "PR", elo: 2340, checkedIn: true },
       { name: "Nova Strike", tag: "NS", elo: 2300, checkedIn: false },
-      { name: "Lunar Vanguard", tag: "LV", elo: 2250, checkedIn: false },
-      { name: "Apex Predators", tag: "AP", elo: 2200, checkedIn: true },
-      { name: "Crimson Wolves", tag: "CW", elo: 2180, checkedIn: false },
-      { name: "Eclipse Gaming", tag: "EG", elo: 2150, checkedIn: true },
-      { name: "Zenith Esports", tag: "ZE", elo: 2100, checkedIn: false },
+      { name: "Lunar Vanguard", tag: "LV", elo: 1850, checkedIn: false },
+      { name: "Apex Predators", tag: "AP", elo: 1600, checkedIn: true },
+      { name: "Crimson Wolves", tag: "CW", elo: 1180, checkedIn: false },
+      { name: "Eclipse Gaming", tag: "EG", elo: 950, checkedIn: true },
+      { name: "Zenith Esports", tag: "ZE", elo: 720, checkedIn: false },
     ],
     bracket: [
       { round: "Quarterfinals", matches: [
-        { team1: "Rift Kings", team2: "Zenith Esports", score1: 13, score2: 7, status: "completed" },
+        { team1: "Peak Kings", team2: "Zenith Esports", score1: 13, score2: 7, status: "completed" },
         { team1: "Void Reapers", team2: "Eclipse Gaming", score1: null, score2: null, status: "upcoming" },
         { team1: "Storm Elite", team2: "Crimson Wolves", score1: null, score2: null, status: "upcoming" },
         { team1: "Shadow Corp", team2: "Apex Predators", score1: null, score2: null, status: "upcoming" },
       ]},
       { round: "Semifinals", matches: [
-        { team1: "Rift Kings", team2: "TBD", score1: null, score2: null, status: "upcoming" },
+        { team1: "Peak Kings", team2: "TBD", score1: null, score2: null, status: "upcoming" },
         { team1: "TBD", team2: "TBD", score1: null, score2: null, status: "upcoming" },
       ]},
       { round: "Grand Final", matches: [
@@ -64,24 +65,27 @@ export default function TournamentDetailPage() {
   const { id } = useParams();
   const tournament = tournamentData[id || "1"] || tournamentData["1"];
 
+  const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-24 pb-16">
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
           <Link to="/tournaments" className="hover:text-foreground transition-colors">Tournaments</Link>
           <ChevronRight className="h-3 w-3" />
           <span className="text-foreground">{tournament.name}</span>
         </div>
 
-        {/* Header */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8 neon-border mb-8">
           <div className="flex flex-col md:flex-row justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <Badge variant="outline" className="border-primary text-primary font-display">{tournament.status}</Badge>
                 <Badge variant="secondary" className="font-display">{tournament.format}</Badge>
+                <Badge variant="outline" className={`font-display ${tierColors[tournament.tier]}`}>
+                  Tier {tournament.tier}
+                </Badge>
               </div>
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{tournament.name}</h1>
               <p className="text-muted-foreground font-body max-w-2xl">{tournament.description}</p>
@@ -100,7 +104,6 @@ export default function TournamentDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Bracket */}
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h2 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
@@ -141,7 +144,6 @@ export default function TournamentDetailPage() {
               </div>
             </div>
 
-            {/* Participants */}
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />Participants ({tournament.participants.length})
@@ -153,7 +155,7 @@ export default function TournamentDetailPage() {
                       <div className="w-9 h-9 rounded gradient-primary flex items-center justify-center font-display font-bold text-primary-foreground text-xs">{p.tag}</div>
                       <div>
                         <span className="font-display font-semibold text-sm">{p.name}</span>
-                        <div className="text-xs text-muted-foreground">ELO {p.elo}</div>
+                        <div className="mt-0.5"><RankBadge elo={p.elo} size="sm" /></div>
                       </div>
                     </div>
                     {p.checkedIn && <CheckCircle2 className="h-4 w-4 text-success" />}
@@ -163,9 +165,7 @@ export default function TournamentDetailPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Prize Breakdown */}
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h3 className="font-display font-bold mb-4 flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-accent" />Prize Breakdown
@@ -180,7 +180,6 @@ export default function TournamentDetailPage() {
               </div>
             </div>
 
-            {/* Rules */}
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h3 className="font-display font-bold mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />Rules

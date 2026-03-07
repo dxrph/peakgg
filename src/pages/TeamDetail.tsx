@@ -2,24 +2,25 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import RankBadge from "@/components/RankBadge";
 import { Users, Globe, Shield, Trophy, ChevronRight, Swords, TrendingUp, UserPlus } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 
 const teamData: Record<string, any> = {
   "1": {
-    name: "Rift Kings",
-    tag: "RK",
+    name: "Peak Kings",
+    tag: "PK",
     elo: 2650,
     region: "EU-West",
-    description: "Top-tier competitive VALORANT team competing in RiftArena weekly tournaments. Founded in 2025, we focus on strategic play and consistent improvement.",
+    description: "Top-tier competitive team competing across VALORANT, CS2, and R6 on PeakGG. Founded in 2025, we focus on strategic play and consistent improvement.",
     recruiting: true,
     stats: { wins: 87, losses: 34, winRate: "72%", tournamentsWon: 3 },
     roster: [
-      { username: "PhantomX", role: "Duelist", elo: 2847, rank: "Radiant", captain: true },
-      { username: "NexusGhost", role: "Controller", elo: 2680, rank: "Immortal", captain: false },
-      { username: "AceViper", role: "Sentinel", elo: 2590, rank: "Immortal", captain: false },
-      { username: "CyberWolf", role: "Initiator", elo: 2540, rank: "Immortal", captain: false },
-      { username: "BladeRunner", role: "Flex", elo: 2510, rank: "Diamond", captain: false },
+      { username: "PhantomX", role: "Duelist", elo: 3120, captain: true },
+      { username: "NexusGhost", role: "Controller", elo: 2680, captain: false },
+      { username: "AceViper", role: "Sentinel", elo: 2590, captain: false },
+      { username: "CyberWolf", role: "Initiator", elo: 2540, captain: false },
+      { username: "BladeRunner", role: "Flex", elo: 1510, captain: false },
     ],
     recentMatches: [
       { opponent: "Void Reapers", result: "WIN", score: "13-9", map: "Ascent", date: "Mar 4" },
@@ -28,18 +29,11 @@ const teamData: Record<string, any> = {
       { opponent: "Phoenix Rise", result: "WIN", score: "13-11", map: "Split", date: "Feb 28" },
     ],
     tournamentHistory: [
-      { name: "Weekly #11", placement: "1st", prize: "€300" },
-      { name: "Monthly #2", placement: "2nd", prize: "€500" },
-      { name: "Weekly #9", placement: "1st", prize: "€300" },
+      { name: "Weekly #11", placement: "1st", prize: "€300", tier: 1 },
+      { name: "Challenger Series #2", placement: "2nd", prize: "€500", tier: 2 },
+      { name: "Weekly #9", placement: "1st", prize: "€300", tier: 1 },
     ],
   },
-};
-
-const rankColors: Record<string, string> = {
-  Radiant: "text-yellow-400",
-  Immortal: "text-primary",
-  Diamond: "text-purple-400",
-  Platinum: "text-cyan-400",
 };
 
 export default function TeamDetailPage() {
@@ -50,14 +44,12 @@ export default function TeamDetailPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-24 pb-16">
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
           <Link to="/teams" className="hover:text-foreground transition-colors">Teams</Link>
           <ChevronRight className="h-3 w-3" />
           <span className="text-foreground">{team.name}</span>
         </div>
 
-        {/* Team Header */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8 neon-border mb-8">
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center font-display font-bold text-primary-foreground text-2xl shrink-0">
@@ -71,9 +63,9 @@ export default function TeamDetailPage() {
                 )}
               </div>
               <p className="text-muted-foreground font-body mb-4 max-w-2xl">{team.description}</p>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-body">
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-body items-center">
                 <span className="flex items-center gap-1.5"><Globe className="h-4 w-4" />{team.region}</span>
-                <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-primary" /><span className="text-primary font-semibold">ELO {team.elo}</span></span>
+                <RankBadge elo={team.elo} showElo />
                 <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{team.roster.length}/5 members</span>
               </div>
             </div>
@@ -83,7 +75,6 @@ export default function TeamDetailPage() {
           </div>
         </div>
 
-        {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
             { icon: Swords, label: "Wins", value: team.stats.wins, color: "text-success" },
@@ -102,7 +93,6 @@ export default function TeamDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Roster */}
           <div className="lg:col-span-2">
             <div className="rounded-lg border border-border bg-card p-6 neon-border mb-6">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
@@ -124,16 +114,12 @@ export default function TeamDetailPage() {
                         <span className="text-xs text-muted-foreground font-body">{player.role}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-display font-bold text-sm ${rankColors[player.rank] || "text-foreground"}`}>{player.rank}</div>
-                      <div className="text-xs text-muted-foreground font-mono">ELO {player.elo}</div>
-                    </div>
+                    <RankBadge elo={player.elo} size="sm" showElo />
                   </Link>
                 ))}
               </div>
             </div>
 
-            {/* Recent Matches */}
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
                 <Swords className="h-5 w-5 text-primary" />Recent Matches
@@ -159,7 +145,6 @@ export default function TeamDetailPage() {
             </div>
           </div>
 
-          {/* Tournament History Sidebar */}
           <div>
             <div className="rounded-lg border border-border bg-card p-6 neon-border">
               <h3 className="font-display font-bold mb-4 flex items-center gap-2">
@@ -170,7 +155,10 @@ export default function TeamDetailPage() {
                   <div key={i} className="flex justify-between items-center py-3 border-b border-border last:border-0">
                     <div>
                       <div className="font-display font-semibold text-sm">{t.name}</div>
-                      <span className="text-xs text-muted-foreground">{t.placement}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{t.placement}</span>
+                        <Badge variant="outline" className="text-[10px] font-display">Tier {t.tier}</Badge>
+                      </div>
                     </div>
                     <span className="text-accent font-mono font-bold text-sm">{t.prize}</span>
                   </div>
