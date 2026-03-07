@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Crosshair } from "lucide-react";
+import { Mountain } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -9,12 +9,12 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded gradient-primary flex items-center justify-center">
-                <Crosshair className="h-3 w-3 text-primary-foreground" />
+                <Mountain className="h-3 w-3 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-lg text-primary">RIFTARENA</span>
+              <span className="font-display font-bold text-lg text-primary">PEAKGG</span>
             </div>
             <p className="text-sm text-muted-foreground font-body leading-relaxed">
-              The ultimate competitive platform for VALORANT in Europe.
+              The ultimate multi-game competitive platform for VALORANT, CS2, and Rainbow Six Siege.
             </p>
           </div>
           <div>
@@ -24,6 +24,7 @@ export default function Footer() {
               <li><Link to="/tournaments" className="hover:text-primary transition-colors">Tournaments</Link></li>
               <li><Link to="/leaderboard" className="hover:text-primary transition-colors">Leaderboard</Link></li>
               <li><Link to="/teams" className="hover:text-primary transition-colors">Teams</Link></li>
+              <li><Link to="/scrims" className="hover:text-primary transition-colors">Scrims</Link></li>
             </ul>
           </div>
           <div>
@@ -44,8 +45,8 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-muted-foreground font-body">© 2026 RiftArena. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground font-body">Not affiliated with Riot Games.</p>
+          <p className="text-xs text-muted-foreground font-body">© 2026 PeakGG. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground font-body">Not affiliated with Riot Games, Valve, or Ubisoft.</p>
         </div>
       </div>
     </footer>

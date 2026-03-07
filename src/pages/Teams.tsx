@@ -4,15 +4,16 @@ import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import RankBadge from "@/components/RankBadge";
 import { Search, Filter, Users, Globe, Shield } from "lucide-react";
 
 const teams = [
-  { id: 1, name: "Rift Kings", tag: "RK", elo: 2650, region: "EU-W", members: 5, recruiting: true },
+  { id: 1, name: "Peak Kings", tag: "PK", elo: 2650, region: "EU-W", members: 5, recruiting: true },
   { id: 2, name: "Void Reapers", tag: "VR", elo: 2580, region: "EU-W", members: 5, recruiting: false },
   { id: 3, name: "Storm Elite", tag: "SE", elo: 2490, region: "EU-E", members: 4, recruiting: true },
-  { id: 4, name: "Shadow Corp", tag: "SC", elo: 2420, region: "EU-N", members: 5, recruiting: true },
-  { id: 5, name: "Ice Protocol", tag: "IP", elo: 2380, region: "EU-N", members: 3, recruiting: true },
-  { id: 6, name: "Phoenix Rise", tag: "PR", elo: 2340, region: "EU-W", members: 5, recruiting: false },
+  { id: 4, name: "Shadow Corp", tag: "SC", elo: 1420, region: "EU-N", members: 5, recruiting: true },
+  { id: 5, name: "Ice Protocol", tag: "IP", elo: 980, region: "EU-N", members: 3, recruiting: true },
+  { id: 6, name: "Phoenix Rise", tag: "PR", elo: 640, region: "EU-W", members: 5, recruiting: false },
 ];
 
 export default function TeamsPage() {
@@ -45,10 +46,11 @@ export default function TeamsPage() {
                   <h3 className="font-display font-bold text-lg group-hover:text-primary transition-colors">{t.name}</h3>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Globe className="h-3 w-3" />{t.region}
-                    <span className="mx-1">·</span>
-                    <Shield className="h-3 w-3" />ELO {t.elo}
                   </div>
                 </div>
+              </div>
+              <div className="mb-3">
+                <RankBadge elo={t.elo} size="sm" showElo />
               </div>
               <div className="flex items-center justify-between text-sm text-muted-foreground font-body">
                 <span>{t.members}/5 members</span>

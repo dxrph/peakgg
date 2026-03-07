@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Crosshair, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mountain, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,9 +17,9 @@ export default function LoginPage() {
         <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] rounded-full bg-primary/[0.06] blur-[120px]" />
         <div className="relative z-10 text-center px-12">
           <div className="w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-6">
-            <Crosshair className="h-8 w-8 text-primary-foreground" />
+            <Mountain className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-5xl font-display font-bold mb-4">RIFTARENA</h1>
+          <h1 className="text-5xl font-display font-bold mb-4">PEAKGG</h1>
           <p className="text-muted-foreground text-lg font-body">Compete. Rise. Dominate.</p>
         </div>
       </div>
@@ -28,9 +28,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-              <Crosshair className="h-4 w-4 text-primary-foreground" />
+              <Mountain className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-xl">RIFTARENA</span>
+            <span className="font-display font-bold text-xl">PEAKGG</span>
           </div>
 
           <h2 className="text-3xl font-display font-bold mb-2">Welcome Back</h2>

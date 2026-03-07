@@ -1,34 +1,37 @@
 import Navbar from "@/components/landing/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, Crosshair, Shield, Swords, Trophy, TrendingUp, Users, Activity } from "lucide-react";
+import RankBadge from "@/components/RankBadge";
+import EloProgressBar from "@/components/EloProgressBar";
+import { Bell, Mountain, Shield, Swords, Trophy, TrendingUp, Users, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const recentMatches = [
-  { map: "Ascent", result: "WIN", score: "13-9", elo: "+28", time: "2h ago" },
-  { map: "Haven", result: "LOSS", score: "8-13", elo: "-22", time: "4h ago" },
-  { map: "Bind", result: "WIN", score: "13-11", elo: "+24", time: "Yesterday" },
+  { map: "Ascent", result: "WIN", score: "13-9", elo: "+25", time: "2h ago" },
+  { map: "Haven", result: "LOSS", score: "8-13", elo: "-15", time: "4h ago" },
+  { map: "Bind", result: "WIN", score: "13-11", elo: "+25", time: "Yesterday" },
 ];
 
 const notifications = [
-  { text: "You received a team invite from Rift Kings", time: "1h ago", type: "invite" },
+  { text: "You received a team invite from Peak Kings", time: "1h ago", type: "invite" },
   { text: "Tournament 'Weekly #12' starts in 2 hours", time: "2h ago", type: "tournament" },
   { text: "Your match result has been verified", time: "3h ago", type: "match" },
 ];
 
 export default function DashboardPage() {
+  const userElo = 2547;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-24 pb-16">
-        {/* Greeting */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-display font-bold">Welcome back, <span className="text-primary">PhantomX</span></h1>
             <p className="text-muted-foreground font-body mt-1">Here's your competitive overview.</p>
           </div>
           <div className="flex gap-3">
-            <Link to="/play"><Button variant="neon"><Crosshair className="mr-2 h-4 w-4" />Find Match</Button></Link>
+            <Link to="/play"><Button variant="neon"><Mountain className="mr-2 h-4 w-4" />Find Match</Button></Link>
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full gradient-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">3</span>
@@ -36,11 +39,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ELO Progress */}
+        <div className="rounded-lg border border-border bg-card p-5 neon-border mb-6">
+          <div className="flex items-center gap-4 mb-3">
+            <RankBadge elo={userElo} size="lg" showElo />
+            <span className="text-sm text-muted-foreground font-body">Tournament Points: <strong className="text-foreground">320</strong></span>
+          </div>
+          <EloProgressBar elo={userElo} />
+        </div>
+
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { icon: TrendingUp, label: "Current ELO", value: "2,847", color: "text-primary" },
-            { icon: Shield, label: "Rank", value: "Radiant", color: "text-accent" },
+            { icon: TrendingUp, label: "Current ELO", value: userElo.toLocaleString(), color: "text-primary" },
+            { icon: Shield, label: "Rank", value: "Master", color: "text-accent" },
             { icon: Swords, label: "Matches", value: "342", color: "text-foreground" },
             { icon: Trophy, label: "Tournaments Won", value: "5", color: "text-yellow-400" },
           ].map((s) => (
@@ -55,7 +67,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Matches */}
           <div className="lg:col-span-2 rounded-lg border border-border bg-card p-5 neon-border">
             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />Recent Matches
@@ -83,7 +94,6 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {/* Notifications */}
           <div className="rounded-lg border border-border bg-card p-5 neon-border">
             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
               <Bell className="h-5 w-5 text-accent" />Notifications
@@ -99,7 +109,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link to="/teams">
             <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/30 transition-all cursor-pointer neon-border text-center">
@@ -113,10 +122,10 @@ export default function DashboardPage() {
               <span className="font-display font-bold">Join Tournament</span>
             </div>
           </Link>
-          <Link to="/profile/PhantomX">
+          <Link to="/scrims">
             <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/30 transition-all cursor-pointer neon-border text-center">
-              <Shield className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
-              <span className="font-display font-bold">View Profile</span>
+              <Swords className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+              <span className="font-display font-bold">Find Scrims</span>
             </div>
           </Link>
         </div>

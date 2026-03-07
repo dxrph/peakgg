@@ -1,7 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Crosshair, Menu, X } from "lucide-react";
+import { Mountain, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import GameSwitcher from "@/components/GameSwitcher";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,17 +21,19 @@ export default function Navbar() {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-            <Crosshair className="h-4 w-4 text-primary-foreground" />
+            <Mountain className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-xl tracking-tight">RIFTARENA</span>
+          <span className="font-display font-bold text-xl tracking-tight">PEAKGG</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
+          <GameSwitcher />
           {[
             ["/play", "Play"],
             ["/tournaments", "Tournaments"],
             ["/leaderboard", "Leaderboard"],
             ["/teams", "Teams"],
+            ["/scrims", "Scrims"],
           ].map(([href, label]) => (
             <Link key={href} to={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold uppercase tracking-wider">
               {label}
@@ -50,11 +53,13 @@ export default function Navbar() {
 
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-background px-4 py-6 space-y-4">
+          <GameSwitcher className="mb-4" />
           {[
             ["/play", "Play"],
             ["/tournaments", "Tournaments"],
             ["/leaderboard", "Leaderboard"],
             ["/teams", "Teams"],
+            ["/scrims", "Scrims"],
           ].map(([href, label]) => (
             <Link key={href} to={href} onClick={() => setMobileOpen(false)} className="block text-sm font-display font-semibold uppercase tracking-wider py-2">
               {label}
