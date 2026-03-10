@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { GameProvider } from "@/lib/game-context";
+import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
@@ -24,28 +25,30 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <GameProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/profile/:username" element={<ProfilePage />} />
-            <Route path="/tournaments" element={<TournamentsPage />} />
-            <Route path="/teams" element={<TeamsPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="/play" element={<PlayPage />} />
-            <Route path="/scrims" element={<ScrimsPage />} />
-            <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
-            <Route path="/teams/:teamId" element={<TeamDetailPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </GameProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <GameProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/profile/:username" element={<ProfilePage />} />
+              <Route path="/tournaments" element={<TournamentsPage />} />
+              <Route path="/teams" element={<TeamsPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/play" element={<PlayPage />} />
+              <Route path="/scrims" element={<ScrimsPage />} />
+              <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
+              <Route path="/teams/:teamId" element={<TeamDetailPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </GameProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

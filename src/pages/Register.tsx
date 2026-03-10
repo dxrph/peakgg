@@ -1,12 +1,41 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mountain, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mountain, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await signUp(email, password, username);
+    setIsLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Account created! Check your email to verify your account.");
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -34,12 +63,13 @@ export default function RegisterPage() {
           <h2 className="text-3xl font-display font-bold mb-2">Create Account</h2>
           <p className="text-muted-foreground mb-8 font-body">Start your competitive journey</p>
 
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="username" className="font-body">Username</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="username" placeholder="Your gamer tag" className="pl-10 bg-card border-border" />
+                <Input id="username" placeholder="Your gamer tag" value={username}
+                  onChange={(e) => setUsername(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
               </div>
             </div>
 
@@ -47,7 +77,8 @@ export default function RegisterPage() {
               <Label htmlFor="email" className="font-body">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="player@example.com" className="pl-10 bg-card border-border" />
+                <Input id="email" type="email" placeholder="player@example.com" value={email}
+                  onChange={(e) => setEmail(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
               </div>
             </div>
 
@@ -55,8 +86,8 @@ export default function RegisterPage() {
               <Label htmlFor="password" className="font-body">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min 8 characters"
-                  className="pl-10 pr-10 bg-card border-border" />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min 6 characters"
+                  value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-card border-border" disabled={isLoading} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -64,15 +95,8 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button variant="neon" className="w-full" size="lg">Create Account</Button>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-              <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground font-body">or</span></div>
-            </div>
-
-            <Button variant="outline" className="w-full" size="lg">
-              Sign up with Discord
+            <Button variant="neon" className="w-full" size="lg" disabled={isLoading}>
+              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create Account"}
             </Button>
           </form>
 
