@@ -19,6 +19,8 @@ import TournamentDetailPage from "./pages/TournamentDetail";
 import TeamDetailPage from "./pages/TeamDetail";
 import AdminPage from "./pages/Admin";
 import AimGuidePage from "./pages/AimGuide";
+import ChatPage from "./pages/Chat";
+import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
