@@ -94,7 +94,7 @@ export function useChat() {
         { event: "INSERT", schema: "public", table: "chat_messages" },
         (payload) => {
           const newMsg = payload.new as any;
-          if (newMsg.channel_id === activeChannelId) {
+          if (newMsg.channel_id === activeChannelIdRef.current) {
             // Fetch the profile for the new message
             supabase
               .from("profiles")
