@@ -10,11 +10,13 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ChatWidget() {
   const { user } = useAuth();
+  const location = useLocation();
   const chat = useChat();
   const [open, setOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
 
-  if (!user) return null;
+  // Don't render on the full chat page
+  if (!user || location.pathname === "/chat") return null;
 
   const activeChannel = chat.channels.find((c) => c.id === chat.activeChannelId) || null;
 
