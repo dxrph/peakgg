@@ -48,8 +48,10 @@ const App = () => (
               <Route path="/teams/:teamId" element={<TeamDetailPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/aim-guide" element={<AimGuidePage />} />
+              <Route path="/chat" element={<ChatPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <ChatWidget />
           </GameProvider>
         </AuthProvider>
       </BrowserRouter>
