@@ -143,11 +143,28 @@ export function useChat() {
       if (now - lastSentAt.current < 1000) return;
       lastSentAt.current = now;
 
-      await supabase.from("chat_messages").insert({
+      const trimmed = content.trim().slice(0, 500);
+
+      const { data, error } = await supabase.from("chat_messages").insert({
         channel_id: activeChannelId,
         user_id: user.id,
-        content: content.trim().slice(0, 500),
-      });
+        content: trimmed,
+      }).select().single();
+
+      if (!error && data) {
+        // Fetch own profile for display
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar_url, elo")
+          .eq("id", user.id)
+          .single();
+
+        setMessages((prev) => {
+          // Avoid duplicates from realtime
+          if (prev.some((m) => m.id === data.id)) return prev;
+          return [...prev, { ...data, profile: profile || undefined }];
+        });
+      }
     },
     [user, activeChannelId]
   );
