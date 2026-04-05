@@ -45,6 +45,7 @@ const App = () => (
               <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </GameProvider>
