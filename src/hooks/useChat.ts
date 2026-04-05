@@ -133,7 +133,7 @@ export function useChat() {
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [user, activeChannelId]);
+  }, [user]);
 
   const sendMessage = useCallback(
     async (content: string) => {
