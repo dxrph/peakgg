@@ -18,6 +18,7 @@ import ScrimsPage from "./pages/Scrims";
 import TournamentDetailPage from "./pages/TournamentDetail";
 import TeamDetailPage from "./pages/TeamDetail";
 import AdminPage from "./pages/Admin";
+import AimGuidePage from "./pages/AimGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </GameProvider>
