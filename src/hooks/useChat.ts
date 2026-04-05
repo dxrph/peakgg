@@ -121,7 +121,7 @@ export function useChat() {
         { event: "DELETE", schema: "public", table: "chat_messages" },
         (payload) => {
           const deleted = payload.old as any;
-          if (deleted.channel_id === activeChannelId) {
+          if (deleted.channel_id === activeChannelIdRef.current) {
             setMessages((prev) => prev.filter((m) => m.id !== deleted.id));
           }
         }
