@@ -32,6 +32,10 @@ export function useChat() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const lastSentAt = useRef(0);
   const channelRef = useRef<any>(null);
+  const activeChannelIdRef = useRef<string | null>(null);
+
+  // Keep ref in sync
+  activeChannelIdRef.current = activeChannelId;
 
   // Fetch channels
   useEffect(() => {
@@ -90,7 +94,7 @@ export function useChat() {
         { event: "INSERT", schema: "public", table: "chat_messages" },
         (payload) => {
           const newMsg = payload.new as any;
-          if (newMsg.channel_id === activeChannelId) {
+          if (newMsg.channel_id === activeChannelIdRef.current) {
             // Fetch the profile for the new message
             supabase
               .from("profiles")
@@ -98,10 +102,10 @@ export function useChat() {
               .eq("id", newMsg.user_id)
               .single()
               .then(({ data: profile }) => {
-                setMessages((prev) => [
-                  ...prev,
-                  { ...newMsg, profile: profile || undefined },
-                ]);
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === newMsg.id)) return prev;
+                  return [...prev, { ...newMsg, profile: profile || undefined }];
+                });
               });
           } else {
             // Increment unread
@@ -117,7 +121,7 @@ export function useChat() {
         { event: "DELETE", schema: "public", table: "chat_messages" },
         (payload) => {
           const deleted = payload.old as any;
-          if (deleted.channel_id === activeChannelId) {
+          if (deleted.channel_id === activeChannelIdRef.current) {
             setMessages((prev) => prev.filter((m) => m.id !== deleted.id));
           }
         }
@@ -129,7 +133,7 @@ export function useChat() {
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [user, activeChannelId]);
+  }, [user]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -139,11 +143,28 @@ export function useChat() {
       if (now - lastSentAt.current < 1000) return;
       lastSentAt.current = now;
 
-      await supabase.from("chat_messages").insert({
+      const trimmed = content.trim().slice(0, 500);
+
+      const { data, error } = await supabase.from("chat_messages").insert({
         channel_id: activeChannelId,
         user_id: user.id,
-        content: content.trim().slice(0, 500),
-      });
+        content: trimmed,
+      }).select().single();
+
+      if (!error && data) {
+        // Fetch own profile for display
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar_url, elo")
+          .eq("id", user.id)
+          .single();
+
+        setMessages((prev) => {
+          // Avoid duplicates from realtime
+          if (prev.some((m) => m.id === data.id)) return prev;
+          return [...prev, { ...data, profile: profile || undefined }];
+        });
+      }
     },
     [user, activeChannelId]
   );
