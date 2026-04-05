@@ -32,6 +32,10 @@ export function useChat() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const lastSentAt = useRef(0);
   const channelRef = useRef<any>(null);
+  const activeChannelIdRef = useRef<string | null>(null);
+
+  // Keep ref in sync
+  activeChannelIdRef.current = activeChannelId;
 
   // Fetch channels
   useEffect(() => {
