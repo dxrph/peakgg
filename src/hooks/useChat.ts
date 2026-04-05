@@ -102,10 +102,10 @@ export function useChat() {
               .eq("id", newMsg.user_id)
               .single()
               .then(({ data: profile }) => {
-                setMessages((prev) => [
-                  ...prev,
-                  { ...newMsg, profile: profile || undefined },
-                ]);
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === newMsg.id)) return prev;
+                  return [...prev, { ...newMsg, profile: profile || undefined }];
+                });
               });
           } else {
             // Increment unread
