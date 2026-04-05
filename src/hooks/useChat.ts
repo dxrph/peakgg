@@ -53,14 +53,23 @@ export function useChat() {
     const fetchMessages = async () => {
       const { data } = await supabase
         .from("chat_messages")
-        .select("*, profile:profiles!chat_messages_user_id_fkey(username, avatar_url, elo)")
+        .select("*")
         .eq("channel_id", activeChannelId)
         .order("created_at", { ascending: true })
         .limit(PAGE_SIZE);
-      if (data) {
+      if (data && data.length > 0) {
+        // Fetch profiles for message authors
+        const userIds = [...new Set(data.map((m: any) => m.user_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, avatar_url, elo")
+          .in("id", userIds);
+        const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
         setMessages(
-          data.map((m: any) => ({ ...m, profile: m.profile }))
+          data.map((m: any) => ({ ...m, profile: profileMap.get(m.user_id) }))
         );
+      } else {
+        setMessages([]);
       }
       setLoading(false);
       // Clear unread for this channel
