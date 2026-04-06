@@ -65,10 +65,13 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
             const rank = msg.profile ? getRankByElo(msg.profile.elo) : null;
 
             return (
-              <div
+              <motion.div
                 key={msg.id}
+                initial={{ opacity: 0, x: isOwn ? 20 : -20, y: 8 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
                 className={cn(
-                  "group flex gap-2 animate-in fade-in-0 duration-300",
+                  "group flex gap-2",
                   isOwn ? "flex-row-reverse" : "flex-row",
                   !isGrouped ? "mt-3" : "mt-0.5"
                 )}
@@ -83,7 +86,6 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
                 ) : null}
 
                 <div className={cn("max-w-[75%]", compact && "max-w-[85%]")}>
-                  {/* Username */}
                   {!isGrouped && !isOwn && (
                     <p className="text-xs font-semibold mb-0.5" style={rank ? { color: rank.color } : undefined}>
                       {msg.profile?.username || "Utente"}
@@ -98,8 +100,7 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
                     )}
                   >
                     {msg.content}
-                    {/* Delete button */}
-                    {(isOwn) && (
+                    {isOwn && (
                       <button
                         onClick={() => onDelete(msg.id)}
                         className="absolute -right-6 top-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
@@ -114,7 +115,7 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
                     </p>
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
