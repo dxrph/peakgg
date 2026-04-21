@@ -22,6 +22,7 @@ import AimGuidePage from "./pages/AimGuide";
 import ChatPage from "./pages/Chat";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -37,11 +38,11 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/profile/:username" element={<ProfilePage />} />
-              <Route path="/tournaments" element={<TournamentsPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
               <Route path="/teams" element={<TeamsPage />} />
-              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
               <Route path="/play" element={<PlayPage />} />
               <Route path="/scrims" element={<ScrimsPage />} />
               <Route path="/tournaments/:id" element={<TournamentDetailPage />} />

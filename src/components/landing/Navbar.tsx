@@ -1,12 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mountain, Menu, X } from "lucide-react";
+import { Mountain, Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import GameSwitcher from "@/components/GameSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import GoogleButton from "@/components/GoogleButton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, profile, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -42,8 +52,25 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login"><Button variant="ghost" size="sm">Login</Button></Link>
-          <Link to="/register"><Button variant="neon" size="sm">Register</Button></Link>
+          {loading ? null : user ? (
+            <>
+              <Link to={profile?.username ? `/profile/${profile.username}` : "/dashboard"} className="flex items-center gap-2">
+                <Avatar className="h-8 w-8 border border-border">
+                  <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
+                  <AvatarFallback>{(profile?.username ?? "U").slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-display font-semibold">{profile?.username ?? "Player"}</span>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Logout">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login"><Button variant="ghost" size="sm">Login</Button></Link>
+              <div className="w-[200px]"><GoogleButton label="Accedi con Google" /></div>
+            </>
+          )}
         </div>
 
         <button className="md:hidden p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -66,8 +93,16 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-4 border-t border-border flex gap-3">
-            <Link to="/login" className="flex-1"><Button variant="outline" className="w-full">Login</Button></Link>
-            <Link to="/register" className="flex-1"><Button variant="neon" className="w-full">Register</Button></Link>
+            {user ? (
+              <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" /> Logout
+              </Button>
+            ) : (
+              <div className="w-full space-y-2">
+                <Link to="/login" className="block"><Button variant="outline" className="w-full">Login</Button></Link>
+                <GoogleButton label="Accedi con Google" />
+              </div>
+            )}
           </div>
         </div>
       )}
