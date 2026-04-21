@@ -211,6 +211,7 @@ export type Database = {
           discord_username: string | null
           display_name: string | null
           elo: number
+          email: string | null
           id: string
           peak_coins: number
           rank: string
@@ -226,6 +227,7 @@ export type Database = {
           discord_username?: string | null
           display_name?: string | null
           elo?: number
+          email?: string | null
           id: string
           peak_coins?: number
           rank?: string
@@ -241,6 +243,7 @@ export type Database = {
           discord_username?: string | null
           display_name?: string | null
           elo?: number
+          email?: string | null
           id?: string
           peak_coins?: number
           rank?: string

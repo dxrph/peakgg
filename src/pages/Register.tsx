@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Mountain, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import GoogleButton from "@/components/GoogleButton";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -99,6 +100,14 @@ export default function RegisterPage() {
               {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create Account"}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground font-body">oppure</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <GoogleButton label="Registrati con Google" />
 
           <p className="text-sm text-muted-foreground text-center mt-4 font-body">
             By signing up you agree to our <Link to="/terms" className="text-primary hover:underline">Terms</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
