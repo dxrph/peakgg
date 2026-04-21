@@ -116,6 +116,47 @@ export type Database = {
           },
         ]
       }
+      lfp_board: {
+        Row: {
+          created_at: string
+          game: string
+          id: string
+          is_active: boolean
+          message: string | null
+          rank: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          game: string
+          id?: string
+          is_active?: boolean
+          message?: string | null
+          rank?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          game?: string
+          id?: string
+          is_active?: boolean
+          message?: string | null
+          rank?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lfp_board_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           created_at: string
@@ -203,6 +244,73 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      peak_coins_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peak_coins_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -214,6 +322,7 @@ export type Database = {
           email: string | null
           id: string
           peak_coins: number
+          preferred_game: string | null
           rank: string
           region: string | null
           tournament_points: number
@@ -230,6 +339,7 @@ export type Database = {
           email?: string | null
           id: string
           peak_coins?: number
+          preferred_game?: string | null
           rank?: string
           region?: string | null
           tournament_points?: number
@@ -246,6 +356,7 @@ export type Database = {
           email?: string | null
           id?: string
           peak_coins?: number
+          preferred_game?: string | null
           rank?: string
           region?: string | null
           tournament_points?: number
@@ -465,6 +576,42 @@ export type Database = {
           },
         ]
       }
+      tournament_registrations: {
+        Row: {
+          id: string
+          registered_at: string
+          team_id: string
+          tournament_id: string
+        }
+        Insert: {
+          id?: string
+          registered_at?: string
+          team_id: string
+          tournament_id: string
+        }
+        Update: {
+          id?: string
+          registered_at?: string
+          team_id?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_registrations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournaments: {
         Row: {
           created_at: string
@@ -527,15 +674,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -662,6 +836,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
