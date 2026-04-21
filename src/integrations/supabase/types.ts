@@ -208,9 +208,12 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          discord_username: string | null
           display_name: string | null
           elo: number
           id: string
+          peak_coins: number
+          rank: string
           region: string | null
           tournament_points: number
           updated_at: string
@@ -220,9 +223,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          discord_username?: string | null
           display_name?: string | null
           elo?: number
           id: string
+          peak_coins?: number
+          rank?: string
           region?: string | null
           tournament_points?: number
           updated_at?: string
@@ -232,9 +238,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          discord_username?: string | null
           display_name?: string | null
           elo?: number
           id?: string
+          peak_coins?: number
+          rank?: string
           region?: string | null
           tournament_points?: number
           updated_at?: string
