@@ -6,6 +6,7 @@ import { Mountain, Clock, Shield, Swords, Users } from "lucide-react";
 import { useState } from "react";
 import { useGame } from "@/lib/game-context";
 import { GAMES } from "@/lib/ranks";
+import GameIcon from "@/components/GameIcon";
 
 export default function PlayPage() {
   const [queuing, setQueuing] = useState(false);
@@ -42,7 +43,7 @@ export default function PlayPage() {
 
           <div className="flex justify-center gap-6 mb-8 text-sm text-muted-foreground font-body">
             <div className="flex items-center gap-2">
-              <span className="text-lg">{game.icon}</span>
+              <GameIcon game={game.id} size={24} />
               <span className="font-semibold text-foreground">{game.name}</span>
             </div>
             <div className="flex items-center gap-2">
