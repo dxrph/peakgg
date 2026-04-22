@@ -1,166 +1,299 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RankBadge from "@/components/RankBadge";
-import { useGame } from "@/lib/game-context";
-import { GAMES } from "@/lib/ranks";
-import { Crown, TrendingUp, Users } from "lucide-react";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Crown, Search, Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
-const playersData: Record<string, any[]> = {
-  valorant: [
-    { rank: 1, name: "PhantomX", elo: 3120, wr: "68%", tp: 840, tierReached: 3, team: "Peak Kings", isUser: false },
-    { rank: 2, name: "NightShade", elo: 2891, wr: "65%", tp: 720, tierReached: 3, team: "Void Reapers", isUser: false },
-    { rank: 3, name: "AceViper", elo: 2756, wr: "63%", tp: 580, tierReached: 2, team: "—", isUser: false },
-    { rank: 4, name: "BlitzStorm", elo: 2698, wr: "61%", tp: 520, tierReached: 2, team: "Storm Elite", isUser: false },
-    { rank: 5, name: "ShadowReaper", elo: 2254, wr: "60%", tp: 410, tierReached: 2, team: "Shadow Corp", isUser: false },
-    { rank: 6, name: "CyberJett", elo: 1821, wr: "59%", tp: 290, tierReached: 1, team: "—", isUser: false },
-    { rank: 7, name: "FrostByte", elo: 1598, wr: "58%", tp: 230, tierReached: 1, team: "Ice Protocol", isUser: false },
-    { rank: 8, name: "NovaFlash", elo: 1267, wr: "57%", tp: 180, tierReached: 1, team: "—", isUser: false },
-    { rank: 9, name: "IronClad", elo: 943, wr: "56%", tp: 120, tierReached: 1, team: "Phoenix Rise", isUser: false },
-    { rank: 10, name: "ViperStrike", elo: 521, wr: "55%", tp: 60, tierReached: 1, team: "—", isUser: false },
-  ],
-  cs2: [
-    { rank: 1, name: "HeadHunter", elo: 2980, wr: "66%", tp: 780, tierReached: 3, team: "CS Masters", isUser: false },
-    { rank: 2, name: "AWPKing", elo: 2750, wr: "64%", tp: 640, tierReached: 2, team: "—", isUser: false },
-    { rank: 3, name: "FlashBang", elo: 2540, wr: "61%", tp: 490, tierReached: 2, team: "Smoke Screen", isUser: false },
-  ],
-  r6: [
-    { rank: 1, name: "SiegeMain", elo: 2820, wr: "65%", tp: 700, tierReached: 3, team: "Ops Elite", isUser: false },
-    { rank: 2, name: "BreachMaster", elo: 2620, wr: "62%", tp: 550, tierReached: 2, team: "—", isUser: false },
-    { rank: 3, name: "GadgetGuru", elo: 2380, wr: "59%", tp: 380, tierReached: 2, team: "R6 Crew", isUser: false },
-  ],
-};
+type GameFilter = "all" | "valorant" | "cs2" | "r6";
 
-// Mock: user's own row
-const userRow = { rank: 47, name: "YourName", elo: 1340, wr: "52%", tp: 120, tierReached: 1, team: "—", isUser: true };
+const GAME_TABS: { id: GameFilter; label: string }[] = [
+  { id: "all", label: "Tutti" },
+  { id: "valorant", label: "Valorant" },
+  { id: "cs2", label: "CS2" },
+  { id: "r6", label: "Rainbow Six" },
+];
 
-const teamsData: Record<string, any[]> = {
-  valorant: [
-    { rank: 1, name: "Peak Kings", elo: 2650, wr: "72%", tp: 1200, members: 5 },
-    { rank: 2, name: "Void Reapers", elo: 2580, wr: "68%", tp: 980, members: 5 },
-    { rank: 3, name: "Storm Elite", elo: 2490, wr: "65%", tp: 840, members: 4 },
-  ],
-  cs2: [
-    { rank: 1, name: "CS Masters", elo: 2700, wr: "70%", tp: 1050, members: 5 },
-  ],
-  r6: [
-    { rank: 1, name: "Ops Elite", elo: 2620, wr: "67%", tp: 920, members: 5 },
-  ],
-};
+const PAGE_SIZE = 25;
 
-function getRankHighlight(r: number) {
-  if (r === 1) return "bg-yellow-400/10 border-l-2 border-l-yellow-400";
-  if (r === 2) return "bg-gray-300/5 border-l-2 border-l-gray-400";
-  if (r === 3) return "bg-amber-600/5 border-l-2 border-l-amber-600";
-  return "";
+interface PlayerRow {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  elo: number;
+  preferred_game: string | null;
+  wins: number;
+  losses: number;
+  team_name: string | null;
+  team_tag: string | null;
 }
 
-const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
+function getRowHighlight(rank: number) {
+  if (rank === 1) return "bg-yellow-400/10 border-l-4 border-l-yellow-400";
+  if (rank === 2) return "bg-zinc-300/5 border-l-4 border-l-zinc-300";
+  if (rank === 3) return "bg-amber-700/10 border-l-4 border-l-amber-600";
+  return "border-l-4 border-l-transparent";
+}
+
+function CrownIcon({ rank }: { rank: number }) {
+  if (rank > 3) return null;
+  const colors = ["text-yellow-400", "text-zinc-300", "text-amber-600"];
+  return <Crown className={`inline h-4 w-4 mr-1 ${colors[rank - 1]}`} />;
+}
 
 export default function LeaderboardPage() {
-  const { selectedGame } = useGame();
-  const [season, setSeason] = useState("1");
+  const { user } = useAuth();
+  const [game, setGame] = useState<GameFilter>("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [allPlayers, setAllPlayers] = useState<PlayerRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const players = playersData[selectedGame] || [];
-  const teams = teamsData[selectedGame] || [];
-  const game = GAMES.find(g => g.id === selectedGame)!;
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+
+      // Fetch profiles ordered by elo desc
+      let query = supabase
+        .from("profiles")
+        .select("id, username, display_name, avatar_url, elo, preferred_game")
+        .order("elo", { ascending: false })
+        .limit(1000);
+
+      if (game !== "all") {
+        query = query.eq("preferred_game", game);
+      }
+
+      const { data: profiles } = await query;
+      if (cancelled || !profiles) return;
+
+      const ids = profiles.map((p) => p.id);
+
+      // Matches for win-rate
+      const { data: matches } = await supabase
+        .from("matches")
+        .select("player_a_id, player_b_id, winner_id, status")
+        .in("status", ["completed"])
+        .or(`player_a_id.in.(${ids.join(",")}),player_b_id.in.(${ids.join(",")})`);
+
+      // Team membership
+      const { data: members } = await supabase
+        .from("team_members")
+        .select("user_id, teams!inner(name, tag)")
+        .in("user_id", ids);
+
+      const winsMap = new Map<string, number>();
+      const lossMap = new Map<string, number>();
+      (matches ?? []).forEach((m: any) => {
+        const players = [m.player_a_id, m.player_b_id].filter(Boolean);
+        players.forEach((pid: string) => {
+          if (m.winner_id === pid) winsMap.set(pid, (winsMap.get(pid) ?? 0) + 1);
+          else if (m.winner_id) lossMap.set(pid, (lossMap.get(pid) ?? 0) + 1);
+        });
+      });
+
+      const teamMap = new Map<string, { name: string; tag: string }>();
+      (members ?? []).forEach((m: any) => {
+        if (m.teams) teamMap.set(m.user_id, { name: m.teams.name, tag: m.teams.tag });
+      });
+
+      const rows: PlayerRow[] = profiles.map((p) => ({
+        id: p.id,
+        username: p.username,
+        display_name: p.display_name,
+        avatar_url: p.avatar_url,
+        elo: p.elo ?? 0,
+        preferred_game: p.preferred_game,
+        wins: winsMap.get(p.id) ?? 0,
+        losses: lossMap.get(p.id) ?? 0,
+        team_name: teamMap.get(p.id)?.name ?? null,
+        team_tag: teamMap.get(p.id)?.tag ?? null,
+      }));
+
+      if (!cancelled) {
+        setAllPlayers(rows);
+        setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [game]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return allPlayers;
+    return allPlayers.filter(
+      (p) =>
+        p.username.toLowerCase().includes(q) ||
+        (p.display_name ?? "").toLowerCase().includes(q),
+    );
+  }, [allPlayers, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageRows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const userRank = useMemo(() => {
+    if (!user) return null;
+    const idx = allPlayers.findIndex((p) => p.id === user.id);
+    return idx >= 0 ? idx + 1 : null;
+  }, [allPlayers, user]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [game, search]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-24 pb-16">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-display font-bold"><Crown className="inline h-8 w-8 text-accent mr-2" />Leaderboard</h1>
-            <p className="text-muted-foreground font-body mt-1">Season {season} — {game.name} — Top players and teams.</p>
+            <h1 className="text-4xl font-display font-bold">
+              <Trophy className="inline h-8 w-8 text-accent mr-2" />
+              Leaderboard
+            </h1>
+            <p className="text-muted-foreground font-body mt-1">
+              I migliori giocatori di PeakGG, ordinati per ELO.
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <select
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              className="bg-card border border-border rounded-md px-3 py-2 text-sm font-display text-foreground"
-            >
-              <option value="1">Season 1</option>
-              <option value="2">Season 2</option>
-            </select>
+          {user && userRank && (
+            <div className="rounded-md border border-primary/40 bg-primary/10 px-4 py-2 font-display">
+              <span className="text-sm text-muted-foreground">La tua posizione:</span>{" "}
+              <span className="text-primary font-bold text-lg">#{userRank}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-3 mb-6">
+          <Tabs value={game} onValueChange={(v) => setGame(v as GameFilter)} className="w-full md:w-auto">
+            <TabsList className="bg-card border border-border">
+              {GAME_TABS.map((t) => (
+                <TabsTrigger key={t.id} value={t.id} className="font-display">
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cerca per username..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
           </div>
         </div>
 
-        <Tabs defaultValue="players" className="w-full">
-          <TabsList className="bg-card border border-border mb-6">
-            <TabsTrigger value="players" className="font-display">Players</TabsTrigger>
-            <TabsTrigger value="teams" className="font-display">Teams</TabsTrigger>
-          </TabsList>
+        {/* Table */}
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="grid grid-cols-[3rem_1fr_auto_5rem] md:grid-cols-[3rem_1fr_auto_6rem_5rem_1fr] gap-3 px-4 py-3 bg-secondary/50 text-xs text-muted-foreground font-display uppercase tracking-widest">
+            <span>#</span>
+            <span>Player</span>
+            <span>Rank</span>
+            <span className="text-right">ELO</span>
+            <span className="hidden md:block text-right">Win Rate</span>
+            <span className="hidden md:block">Team</span>
+          </div>
 
-          <TabsContent value="players">
-            <div className="rounded-lg border border-border bg-card overflow-hidden neon-border">
-              <div className="grid grid-cols-[2.5rem_1fr_auto_4rem] md:grid-cols-[2.5rem_1fr_auto_5rem_4rem_5rem_5rem] gap-3 px-4 py-3 bg-secondary/50 text-xs text-muted-foreground font-display uppercase tracking-widest">
-                <span>#</span><span>Player</span><span>Rank</span><span className="text-right">ELO</span>
-                <span className="hidden md:block text-right">WR</span>
-                <span className="hidden md:block text-right">TP</span>
-                <span className="hidden md:block text-right">Tier</span>
-              </div>
-              {players.map((p) => (
-                <div key={p.rank} className={`grid grid-cols-[2.5rem_1fr_auto_4rem] md:grid-cols-[2.5rem_1fr_auto_5rem_4rem_5rem_5rem] gap-3 px-4 py-3 border-t border-border hover:bg-secondary/20 transition-colors items-center ${getRankHighlight(p.rank)}`}>
+          {loading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              Caricamento classifica...
+            </div>
+          ) : pageRows.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground font-body">
+              Nessun giocatore trovato.
+            </div>
+          ) : (
+            pageRows.map((p) => {
+              const globalRank = allPlayers.findIndex((x) => x.id === p.id) + 1;
+              const total = p.wins + p.losses;
+              const wr = total > 0 ? Math.round((p.wins / total) * 100) : 0;
+              const isMe = user?.id === p.id;
+              const highlight = isMe
+                ? "bg-primary/10 border-l-4 border-l-primary hover:bg-primary/15"
+                : getRowHighlight(globalRank);
+
+              return (
+                <Link
+                  key={p.id}
+                  to={`/profile/${p.username}`}
+                  className={`grid grid-cols-[3rem_1fr_auto_5rem] md:grid-cols-[3rem_1fr_auto_6rem_5rem_1fr] gap-3 px-4 py-3 border-t border-border transition-colors items-center hover:bg-secondary/30 ${highlight}`}
+                >
                   <span className="font-display font-bold text-lg">
-                    {p.rank <= 3 && <Crown className="inline h-4 w-4 text-yellow-400 mr-1" />}
-                    {p.rank}
+                    <CrownIcon rank={globalRank} />
+                    {globalRank}
                   </span>
-                  <span className="font-semibold font-body truncate">{p.name}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="h-9 w-9 border border-border shrink-0">
+                      <AvatarImage src={p.avatar_url ?? undefined} alt={p.username} />
+                      <AvatarFallback>{p.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="font-semibold font-body truncate">
+                        {p.username}
+                        {isMe && <span className="ml-2 text-xs text-primary">(Tu)</span>}
+                      </div>
+                      {p.display_name && p.display_name !== p.username && (
+                        <div className="text-xs text-muted-foreground truncate">{p.display_name}</div>
+                      )}
+                    </div>
+                  </div>
                   <RankBadge elo={p.elo} size="sm" />
                   <span className="text-right font-mono font-bold text-primary">{p.elo}</span>
-                  <span className="hidden md:block text-right text-sm text-muted-foreground">{p.wr}</span>
-                  <span className="hidden md:block text-right text-sm font-mono">{p.tp}</span>
-                  <span className={`hidden md:block text-right text-sm font-display font-bold ${tierColors[p.tierReached]}`}>
-                    Tier {p.tierReached}
+                  <span className="hidden md:block text-right text-sm text-muted-foreground font-mono">
+                    {total > 0 ? `${wr}%` : "—"}
                   </span>
-                </div>
-              ))}
-              {/* User's own row */}
-              <div className="grid grid-cols-[2.5rem_1fr_auto_4rem] md:grid-cols-[2.5rem_1fr_auto_5rem_4rem_5rem_5rem] gap-3 px-4 py-3 border-t-2 border-primary/30 bg-primary/5 items-center">
-                <span className="font-display font-bold text-lg text-primary">{userRow.rank}</span>
-                <span className="font-semibold font-body truncate text-primary">{userRow.name} (You)</span>
-                <RankBadge elo={userRow.elo} size="sm" />
-                <span className="text-right font-mono font-bold text-primary">{userRow.elo}</span>
-                <span className="hidden md:block text-right text-sm text-muted-foreground">{userRow.wr}</span>
-                <span className="hidden md:block text-right text-sm font-mono">{userRow.tp}</span>
-                <span className={`hidden md:block text-right text-sm font-display font-bold ${tierColors[userRow.tierReached]}`}>
-                  Tier {userRow.tierReached}
-                </span>
-              </div>
-            </div>
-          </TabsContent>
+                  <span className="hidden md:block text-sm text-muted-foreground truncate">
+                    {p.team_tag ? `[${p.team_tag}] ${p.team_name}` : "—"}
+                  </span>
+                </Link>
+              );
+            })
+          )}
+        </div>
 
-          <TabsContent value="teams">
-            <div className="rounded-lg border border-border bg-card overflow-hidden neon-border">
-              <div className="grid grid-cols-[2.5rem_1fr_auto_5rem] md:grid-cols-[2.5rem_1fr_auto_5rem_4rem_5rem_4rem] gap-3 px-4 py-3 bg-secondary/50 text-xs text-muted-foreground font-display uppercase tracking-widest">
-                <span>#</span><span>Team</span><span>Rank</span><span className="text-right">ELO</span>
-                <span className="hidden md:block text-right">WR</span>
-                <span className="hidden md:block text-right">TP</span>
-                <span className="hidden md:block text-right">Members</span>
-              </div>
-              {teams.map((t) => (
-                <div key={t.rank} className={`grid grid-cols-[2.5rem_1fr_auto_5rem] md:grid-cols-[2.5rem_1fr_auto_5rem_4rem_5rem_4rem] gap-3 px-4 py-3 border-t border-border hover:bg-secondary/20 transition-colors items-center ${getRankHighlight(t.rank)}`}>
-                  <span className="font-display font-bold text-lg">
-                    {t.rank <= 3 && <Crown className="inline h-4 w-4 text-yellow-400 mr-1" />}
-                    {t.rank}
-                  </span>
-                  <span className="font-semibold font-body truncate">{t.name}</span>
-                  <RankBadge elo={t.elo} size="sm" />
-                  <span className="text-right font-mono font-bold text-primary">{t.elo}</span>
-                  <span className="hidden md:block text-right text-sm text-muted-foreground">{t.wr}</span>
-                  <span className="hidden md:block text-right text-sm font-mono">{t.tp}</span>
-                  <span className="hidden md:block text-right text-sm text-muted-foreground">{t.members}/5</span>
-                </div>
-              ))}
-              {teams.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground font-body">No teams ranked yet for {game.name}.</div>
-              )}
+        {/* Pagination */}
+        {!loading && filtered.length > PAGE_SIZE && (
+          <div className="flex items-center justify-between mt-6">
+            <span className="text-sm text-muted-foreground font-body">
+              Pagina {safePage} di {totalPages} — {filtered.length} giocatori
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Precedente
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+              >
+                Successiva
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
       <Footer />
     </div>
