@@ -40,13 +40,32 @@ export interface GameInfo {
   id: GameId;
   name: string;
   shortName: string;
-  icon: string; // emoji for mock
+  icon: string; // legacy emoji (kept for chat channel labels, etc.)
+  iconUrl: string; // official logo URL — use via <GameIcon /> component
 }
 
 export const GAMES: GameInfo[] = [
-  { id: "valorant", name: "VALORANT", shortName: "VAL", icon: "🎯" },
-  { id: "cs2", name: "Counter-Strike 2", shortName: "CS2", icon: "💥" },
-  { id: "r6", name: "Rainbow Six Siege", shortName: "R6", icon: "🛡️" },
+  {
+    id: "valorant",
+    name: "VALORANT",
+    shortName: "VAL",
+    icon: "🎯",
+    iconUrl: "https://cdn.worldvectorlogo.com/logos/valorant.svg",
+  },
+  {
+    id: "cs2",
+    name: "Counter-Strike 2",
+    shortName: "CS2",
+    icon: "💥",
+    iconUrl: "https://cdn.worldvectorlogo.com/logos/counter-strike-2.svg",
+  },
+  {
+    id: "r6",
+    name: "Rainbow Six Siege",
+    shortName: "R6",
+    icon: "🛡️",
+    iconUrl: "https://cdn.worldvectorlogo.com/logos/rainbow-six-siege.svg",
+  },
 ];
 
 export function getGameById(id: GameId): GameInfo {
