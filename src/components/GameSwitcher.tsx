@@ -1,5 +1,6 @@
 import { GAMES, type GameId } from "@/lib/ranks";
 import { useGame } from "@/lib/game-context";
+import GameIcon from "@/components/GameIcon";
 
 export default function GameSwitcher({ className = "" }: { className?: string }) {
   const { selectedGame, setSelectedGame } = useGame();
@@ -16,7 +17,7 @@ export default function GameSwitcher({ className = "" }: { className?: string })
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <span className="mr-1">{game.icon}</span>
+          <GameIcon game={game.id} size={16} className="mr-1.5 align-middle" />
           {game.shortName}
         </button>
       ))}

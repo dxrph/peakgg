@@ -16,8 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { GAMES, getGameById, type GameId } from "@/lib/ranks";
-
-const gameIcons: Record<string, string> = { valorant: "🎯", cs2: "💥", r6: "🛡️" };
+import GameIcon from "@/components/GameIcon";
 
 type Profile = {
   id: string;
@@ -183,7 +182,9 @@ export default function ProfilePage() {
                 </div>
                 {profile.preferred_game && (
                   <div>
-                    <div className="text-2xl">{gameIcons[profile.preferred_game] ?? "🎮"}</div>
+                    <div className="flex justify-center">
+                      <GameIcon game={profile.preferred_game as GameId} size={48} />
+                    </div>
                     <div className="text-xs text-muted-foreground font-display uppercase">
                       {getGameById(profile.preferred_game as GameId).shortName}
                     </div>
@@ -267,7 +268,7 @@ export default function ProfilePage() {
               const date = new Date(m.played_at ?? m.created_at).toLocaleDateString();
               return (
                 <div key={m.id} className="grid grid-cols-[2rem_1fr_4rem_5rem_5rem] gap-3 px-4 py-3 border-t border-border items-center text-sm">
-                  <span>{gameIcons[m.game] ?? "🎮"}</span>
+                  <GameIcon game={m.game as GameId} size={20} />
                   <span className="font-body truncate">{m.map ?? "Match"}</span>
                   <span className={`font-display font-bold ${result === "V" ? "text-success" : result === "S" ? "text-destructive" : "text-muted-foreground"}`}>
                     {result}
@@ -408,7 +409,12 @@ function EditProfileDialog({
               <SelectTrigger><SelectValue placeholder="Select a game" /></SelectTrigger>
               <SelectContent>
                 {GAMES.map(g => (
-                  <SelectItem key={g.id} value={g.id}>{g.icon} {g.name}</SelectItem>
+                  <SelectItem key={g.id} value={g.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <GameIcon game={g.id} size={16} />
+                      {g.name}
+                    </span>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
