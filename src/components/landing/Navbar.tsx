@@ -6,6 +6,7 @@ import GameSwitcher from "@/components/GameSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import GoogleButton from "@/components/GoogleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NotificationsBell from "@/components/NotificationsBell";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,6 +55,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {loading ? null : user ? (
             <>
+              <NotificationsBell />
               <Link to={profile?.username ? `/profile/${profile.username}` : "/dashboard"} className="flex items-center gap-2">
                 <Avatar className="h-8 w-8 border border-border">
                   <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
