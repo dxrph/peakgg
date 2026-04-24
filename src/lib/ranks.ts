@@ -1,6 +1,15 @@
 // PeakGG Rank System — platform-wide, game-agnostic
+// 8-tier system: Rookie → Bronze → Silver → Gold → Platinum → Diamond → Master → Apex
 
-export type RankTier = "Rookie" | "Contender" | "Rival" | "Expert" | "Elite" | "Master" | "Apex";
+export type RankTier =
+  | "Rookie"
+  | "Bronze"
+  | "Silver"
+  | "Gold"
+  | "Platinum"
+  | "Diamond"
+  | "Master"
+  | "Apex";
 
 export interface RankInfo {
   tier: number;
@@ -8,21 +17,29 @@ export interface RankInfo {
   minElo: number;
   maxElo: number;
   color: string; // HSL for CSS vars
-  hex: string;   // For direct use
+  hex: string;   // Primary brand color
+  gradient?: string; // Optional CSS gradient (used by Apex)
 }
 
 export const RANKS: RankInfo[] = [
-  { tier: 1, name: "Rookie",     minElo: 0,    maxElo: 499,  color: "0 0% 62%",       hex: "#9e9e9e" },
-  { tier: 2, name: "Contender",  minElo: 500,  maxElo: 999,  color: "122 39% 49%",    hex: "#4caf50" },
-  { tier: 3, name: "Rival",      minElo: 1000, maxElo: 1499, color: "187 100% 37%",   hex: "#00bcd4" },
-  { tier: 4, name: "Expert",     minElo: 1500, maxElo: 1999, color: "210 79% 46%",    hex: "#2196f3" },
-  { tier: 5, name: "Elite",      minElo: 2000, maxElo: 2499, color: "291 64% 42%",    hex: "#9c27b0" },
-  { tier: 6, name: "Master",     minElo: 2500, maxElo: 2999, color: "36 100% 50%",    hex: "#ff9800" },
-  { tier: 7, name: "Apex",       minElo: 3000, maxElo: 9999, color: "352 100% 62%",   hex: "#ff4655" },
+  { tier: 1, name: "Rookie",   minElo: 0,    maxElo: 999,  color: "220 9% 60%",  hex: "#9CA3AF" },
+  { tier: 2, name: "Bronze",   minElo: 1000, maxElo: 1199, color: "27 86% 27%",  hex: "#92400E" },
+  { tier: 3, name: "Silver",   minElo: 1200, maxElo: 1399, color: "220 9% 65%",  hex: "#C0C5CE" },
+  { tier: 4, name: "Gold",     minElo: 1400, maxElo: 1649, color: "38 92% 50%",  hex: "#F59E0B" },
+  { tier: 5, name: "Platinum", minElo: 1650, maxElo: 1899, color: "189 94% 43%", hex: "#06B6D4" },
+  { tier: 6, name: "Diamond",  minElo: 1900, maxElo: 2099, color: "217 91% 60%", hex: "#3B82F6" },
+  { tier: 7, name: "Master",   minElo: 2100, maxElo: 2399, color: "258 90% 66%", hex: "#8B5CF6" },
+  { tier: 8, name: "Apex",     minElo: 2400, maxElo: 99999, color: "12 90% 55%", hex: "#EF4444",
+    gradient: "linear-gradient(135deg, #EF4444 0%, #F97316 100%)" },
 ];
 
 export function getRankByElo(elo: number): RankInfo {
-  return RANKS.find(r => elo >= r.minElo && elo <= r.maxElo) || RANKS[0];
+  const safe = Math.max(0, Math.floor(elo || 0));
+  return RANKS.find(r => safe >= r.minElo && safe <= r.maxElo) || RANKS[0];
+}
+
+export function getRankByName(name: string): RankInfo {
+  return RANKS.find(r => r.name.toLowerCase() === (name || "").toLowerCase()) || RANKS[0];
 }
 
 export function getEloProgress(elo: number): { current: number; nextThreshold: number; percent: number; nextRank: RankInfo | null } {
@@ -84,6 +101,6 @@ export interface TournamentTier {
 
 export const TOURNAMENT_TIERS: TournamentTier[] = [
   { tier: 1, name: "Open Cup", requirement: "Free entry — anyone can join" },
-  { tier: 2, name: "Challenger Series", requirement: "Complete Tier 1 OR reach Contender rank", unlockRank: "Contender", unlockPreviousTier: true, pointsToUnlock: 80 },
-  { tier: 3, name: "Peak Championship", requirement: "Complete Tier 2 OR reach Elite rank", unlockRank: "Elite", unlockPreviousTier: true, pointsToUnlock: 200 },
+  { tier: 2, name: "Challenger Series", requirement: "Complete Tier 1 OR reach Silver rank", unlockRank: "Silver", unlockPreviousTier: true, pointsToUnlock: 80 },
+  { tier: 3, name: "Peak Championship", requirement: "Complete Tier 2 OR reach Diamond rank", unlockRank: "Diamond", unlockPreviousTier: true, pointsToUnlock: 200 },
 ];
