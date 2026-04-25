@@ -538,8 +538,11 @@ function ProfileBanner({
     setLastFile(file);
     const res = await onUpload(file);
     setBusy(false);
-    if (res.ok) setError(null);
-    else setError(res.error);
+    if (res.ok === true) {
+      setError(null);
+    } else {
+      setError(res.error);
+    }
   };
 
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
