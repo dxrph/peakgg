@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import { Badge } from "@/components/ui/badge";
@@ -530,7 +530,7 @@ function ProfileBanner({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const runUpload = async (file: File) => {
     setBusy(true);
@@ -538,8 +538,8 @@ function ProfileBanner({
     setLastFile(file);
     const res = await onUpload(file);
     setBusy(false);
-    if (!res.ok) setError(res.error);
-    else setError(null);
+    if (res.ok) setError(null);
+    else setError(res.error);
   };
 
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
