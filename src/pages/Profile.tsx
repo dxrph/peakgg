@@ -593,7 +593,9 @@ function EditProfileDialog({
   const [bio, setBio] = useState(profile.bio ?? "");
   const [preferredGame, setPreferredGame] = useState(profile.preferred_game ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
+  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? "");
   const [uploading, setUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -615,6 +617,27 @@ function EditProfileDialog({
     }
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); e.target.value = ""; return; }
+    setBannerUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+      const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
+      setBannerUrl(data.publicUrl);
+      toast.success("Banner caricato");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setBannerUploading(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const updates: any = {
@@ -622,6 +645,7 @@ function EditProfileDialog({
       bio: bio.trim() || null,
       preferred_game: preferredGame || null,
       avatar_url: avatarUrl || null,
+      banner_url: bannerUrl || null,
     };
     const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
     setSaving(false);
@@ -653,6 +677,22 @@ function EditProfileDialog({
                 Upload avatar
               </span>
             </Label>
+          </div>
+          <div>
+            <Label>Banner</Label>
+            <div
+              className="mt-1 h-24 rounded-md border border-border bg-cover bg-center relative gradient-hero"
+              style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
+            >
+              <Label className="absolute bottom-2 right-2 cursor-pointer">
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleBannerUpload} />
+                <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
+                  {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                  Cambia banner
+                </span>
+              </Label>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
           </div>
           <div>
             <Label>Username</Label>
