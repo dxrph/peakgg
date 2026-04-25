@@ -11,11 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
-import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords } from "lucide-react";
+import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { GAMES, getGameById, type GameId } from "@/lib/ranks";
+import { GAMES, getGameById, type GameId, getRankByElo } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
 type Profile = {
@@ -23,6 +23,7 @@ type Profile = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  banner_url: string | null;
   bio: string | null;
   elo: number;
   peak_coins: number;
@@ -32,7 +33,7 @@ type Profile = {
 };
 
 type TeamRow = {
-  team: { id: string; name: string; tag: string; avatar_url: string | null; game: string } | null;
+  team: { id: string; name: string; tag: string; avatar_url: string | null; game: string; avg_elo: number } | null;
 };
 
 type MatchRow = {
@@ -44,6 +45,20 @@ type MatchRow = {
   map: string | null;
 };
 
+type TrophyRow = {
+  id: string;
+  placement: number | null;
+  points_earned: number | null;
+  registered_at: string;
+  tournament: {
+    id: string;
+    name: string;
+    game: string;
+    tier: number;
+    end_date: string | null;
+  } | null;
+};
+
 export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -52,6 +67,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [team, setTeam] = useState<TeamRow["team"] | null>(null);
   const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [trophies, setTrophies] = useState<TrophyRow[]>([]);
+  const [activeGames, setActiveGames] = useState<GameId[]>([]);
   const [ownsTeam, setOwnsTeam] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
@@ -64,7 +81,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, avatar_url, bio, elo, peak_coins, tournament_points, preferred_game, rank")
+        .select("id, username, display_name, avatar_url, banner_url, bio, elo, peak_coins, tournament_points, preferred_game, rank")
         .eq("username", username!)
         .maybeSingle();
 
@@ -72,10 +89,10 @@ export default function ProfilePage() {
       if (!p) { setProfile(null); setLoading(false); return; }
       setProfile(p as Profile);
 
-      const [{ data: tm }, { data: ms }] = await Promise.all([
+      const [{ data: tm }, { data: ms }, { data: trs }] = await Promise.all([
         supabase
           .from("team_members")
-          .select("team:teams(id, name, tag, avatar_url, game)")
+          .select("team:teams(id, name, tag, avatar_url, game, avg_elo)")
           .eq("user_id", p.id)
           .limit(1)
           .maybeSingle(),
@@ -85,10 +102,26 @@ export default function ProfilePage() {
           .or(`player_a_id.eq.${p.id},player_b_id.eq.${p.id}`)
           .order("created_at", { ascending: false })
           .limit(10),
+        supabase
+          .from("tournament_entries")
+          .select("id, placement, points_earned, registered_at, tournament:tournaments(id, name, game, tier, end_date)")
+          .eq("user_id", p.id)
+          .not("placement", "is", null)
+          .order("registered_at", { ascending: false })
+          .limit(12),
       ]);
       if (!active) return;
       setTeam((tm as any)?.team ?? null);
       setMatches((ms as MatchRow[]) ?? []);
+      setTrophies(((trs as any[]) ?? []).filter(t => t.tournament) as TrophyRow[]);
+
+      // Derive active games from matches + preferred game + team game
+      const games = new Set<GameId>();
+      ((ms as MatchRow[]) ?? []).forEach(m => { if (isGameId(m.game)) games.add(m.game as GameId); });
+      if (isGameId(p.preferred_game)) games.add(p.preferred_game as GameId);
+      const teamGame = (tm as any)?.team?.game;
+      if (isGameId(teamGame)) games.add(teamGame as GameId);
+      setActiveGames(Array.from(games));
 
       // Check if viewer owns a team (for invite button)
       if (user && user.id !== p.id) {
@@ -131,6 +164,7 @@ export default function ProfilePage() {
   }
 
   const stats = computeStats(matches, profile.id);
+  const rankInfo = getRankByElo(profile.elo);
 
   const handleInvite = async () => {
     if (!ownsTeam) return;
@@ -138,90 +172,165 @@ export default function ProfilePage() {
     toast.success(`Invite sent to ${profile.username} for ${ownsTeam.name}`);
   };
 
+  const handleBannerUpload = async (file: File) => {
+    if (!isOwnProfile) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
+    if (upErr) { toast.error(upErr.message); return; }
+    const { data: pub } = supabase.storage.from("profile-banners").getPublicUrl(path);
+    const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
+    if (updErr) { toast.error(updErr.message); return; }
+    setProfile({ ...profile, banner_url: pub.publicUrl });
+    toast.success("Banner aggiornato");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <div className="container pt-24 pb-16">
-        {/* Header */}
-        <div className="relative rounded-lg border border-border bg-card overflow-hidden mb-8 neon-border">
-          <div className="h-32 md:h-44 gradient-hero relative">
-            <div className="absolute inset-0 scanline pointer-events-none opacity-50" />
+      <div className="container pt-20 pb-16">
+        {/* Banner + header card */}
+        <div className="relative rounded-xl border border-border bg-card overflow-hidden mb-6">
+          <ProfileBanner
+            url={profile.banner_url}
+            isOwn={isOwnProfile}
+            onUpload={handleBannerUpload}
+          />
+
+          {/* Top-right header actions */}
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            {isOwnProfile ? (
+              <Button onClick={() => setEditOpen(true)} size="sm" className="backdrop-blur bg-background/70 hover:bg-background/90 text-foreground border border-border">
+                <Pencil className="h-4 w-4 mr-2" /> Edit profile
+              </Button>
+            ) : (
+              ownsTeam && (
+                <Button onClick={handleInvite} size="sm">
+                  <UserPlus className="h-4 w-4 mr-2" /> Invite to {ownsTeam.name}
+                </Button>
+              )
+            )}
           </div>
+
           <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row items-start md:items-end gap-4 -mt-10 md:-mt-12">
-              <Avatar className="w-20 h-20 md:w-24 md:h-24 border-4 border-card">
-                <AvatarImage src={profile.avatar_url ?? undefined} alt={profile.username} />
-                <AvatarFallback className="gradient-primary text-primary-foreground font-display font-bold text-2xl">
-                  {profile.username.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-display font-bold">{profile.display_name || profile.username}</h1>
+            <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-12 md:-mt-14">
+              {/* Avatar with rank-coloured ring */}
+              <div
+                className="rounded-full p-[3px] shrink-0"
+                style={{ background: rankInfo.gradient ?? rankInfo.hex }}
+              >
+                <Avatar className="w-24 h-24 border-4 border-card">
+                  <AvatarImage src={profile.avatar_url ?? undefined} alt={profile.username} />
+                  <AvatarFallback className="gradient-primary text-primary-foreground font-display font-bold text-2xl">
+                    {profile.username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              <div className="flex-1 min-w-0 pt-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl md:text-3xl font-display font-bold leading-tight">
+                    {profile.display_name || profile.username}
+                  </h1>
                   {team && (
                     <Link to={`/teams/${team.id}`} className="text-sm font-mono text-primary hover:underline">
                       [{team.tag}]
                     </Link>
                   )}
-                  <RankBadge elo={profile.elo} size="md" />
                 </div>
                 <p className="text-sm text-muted-foreground font-body">@{profile.username}</p>
-                {profile.bio && <p className="text-sm mt-2 font-body max-w-prose">{profile.bio}</p>}
+                <div className="mt-2">
+                  <RankBadge elo={profile.elo} size="lg" showLabel />
+                </div>
+                {profile.bio && <p className="text-sm mt-3 font-body max-w-prose text-muted-foreground">{profile.bio}</p>}
               </div>
-              <div className="flex items-center gap-6 text-center">
+
+              <div className="flex items-center gap-5 text-center md:self-start md:pt-2">
                 <div>
                   <div className="text-2xl font-display font-bold text-primary">{profile.elo}</div>
-                  <div className="text-xs text-muted-foreground font-display uppercase">ELO</div>
+                  <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">ELO</div>
                 </div>
                 <div>
                   <div className="text-2xl font-display font-bold flex items-center gap-1 justify-center">
                     <Coins className="h-5 w-5 text-yellow-400" />
                     {profile.peak_coins}
                   </div>
-                  <div className="text-xs text-muted-foreground font-display uppercase">Coins</div>
+                  <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">Coins</div>
                 </div>
-                {profile.preferred_game && (
-                  <div>
-                    <div className="flex justify-center">
-                      <GameIcon game={profile.preferred_game as GameId} size={48} />
-                    </div>
-                    <div className="text-xs text-muted-foreground font-display uppercase">
-                      {getGameById(profile.preferred_game as GameId).shortName}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
-            <EloProgressBar elo={profile.elo} className="mt-4 max-w-md" />
 
-            <div className="mt-4 flex gap-2">
-              {isOwnProfile ? (
-                <Button onClick={() => setEditOpen(true)} variant="outline">
-                  <Pencil className="h-4 w-4 mr-2" /> Edit profile
-                </Button>
-              ) : (
-                ownsTeam && (
-                  <Button onClick={handleInvite}>
-                    <UserPlus className="h-4 w-4 mr-2" /> Invite to {ownsTeam.name}
-                  </Button>
-                )
-              )}
+            <EloProgressBar elo={profile.elo} className="mt-5 max-w-md" />
+          </div>
+        </div>
+
+        {/* Games */}
+        <SectionCard title="Giochi" icon={GameIcon as any} hideIcon>
+          {activeGames.length === 0 ? (
+            <p className="text-sm text-muted-foreground font-body">Nessun gioco collegato.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {activeGames.map(g => {
+                const info = getGameById(g);
+                const preferred = profile.preferred_game === g;
+                return (
+                  <div
+                    key={g}
+                    className={`flex items-center gap-2 rounded-md px-3 py-2 bg-secondary/40 border ${
+                      preferred ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]" : "border-border"
+                    }`}
+                    title={preferred ? "Gioco preferito" : info.name}
+                  >
+                    <GameIcon game={g} size={24} />
+                    <span className="font-display font-semibold text-sm">{info.shortName}</span>
+                    {preferred && <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary text-primary">Preferito</Badge>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SectionCard>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
+          <StatCard
+            icon={Swords}
+            label="Matches"
+            value={stats.played}
+            sub={`${stats.thisMonth} questo mese`}
+          />
+          <StatCard
+            icon={Trophy}
+            label="Wins"
+            value={stats.wins}
+            color="text-success"
+            sub={stats.streak > 1 ? `🔥 ${stats.streak} streak` : "—"}
+          />
+          <StatCard
+            icon={Swords}
+            label="Losses"
+            value={stats.losses}
+            color="text-destructive"
+            sub={stats.lastLossDays != null ? `Ultima sconfitta: ${stats.lastLossDays}gg fa` : "Nessuna sconfitta"}
+          />
+          <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
+            <Trophy className="h-5 w-5 mx-auto mb-2 text-primary" />
+            <div className="text-xl font-display font-bold">{stats.winRate}%</div>
+            <div className="text-xs text-muted-foreground font-display uppercase tracking-wider mb-2">Win Rate</div>
+            <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+              <div
+                className={`h-full transition-all ${stats.winRate >= 50 ? "bg-success" : "bg-destructive"}`}
+                style={{ width: `${stats.winRate}%` }}
+              />
             </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={Swords} label="Matches" value={stats.played} />
-          <StatCard icon={Trophy} label="Wins" value={stats.wins} color="text-success" />
-          <StatCard icon={Swords} label="Losses" value={stats.losses} color="text-destructive" />
-          <StatCard icon={Trophy} label="Win Rate" value={`${stats.winRate}%`} color="text-primary" />
-        </div>
-
         {/* Tournament points */}
-        <div className="rounded-lg border border-border bg-card p-4 mb-8 neon-border flex items-center justify-between">
+        <div className="rounded-lg border border-border bg-card p-4 mb-6 neon-border flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Trophy className="h-6 w-6 text-accent" />
+            <Award className="h-6 w-6 text-accent" />
             <div>
               <div className="text-xs text-muted-foreground font-display uppercase tracking-wider">Tournament Points</div>
               <div className="text-2xl font-display font-bold">{profile.tournament_points}</div>
@@ -230,56 +339,87 @@ export default function ProfilePage() {
           <Badge variant="outline" className="font-display">Highest tier reached: T{tierFromTP(profile.tournament_points)}</Badge>
         </div>
 
-        {/* Current team */}
-        {team && (
-          <div className="rounded-lg border border-border bg-card p-4 mb-8 neon-border">
-            <h2 className="text-sm font-display uppercase tracking-wider text-muted-foreground mb-3">Current Team</h2>
+        {/* Team */}
+        <SectionCard title="Team" icon={Users}>
+          {team ? (
             <Link to={`/teams/${team.id}`} className="flex items-center gap-4 hover:bg-secondary/30 -m-2 p-2 rounded-md transition-colors">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-14 w-14">
                 <AvatarImage src={team.avatar_url ?? undefined} alt={team.name} />
                 <AvatarFallback className="bg-secondary font-display font-bold">{team.tag.slice(0, 2)}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="font-display font-bold">{team.name} <span className="text-muted-foreground font-mono text-sm">[{team.tag}]</span></div>
-                <div className="text-xs text-muted-foreground uppercase font-display">{team.game}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-display font-bold truncate">
+                  {team.name} <span className="text-muted-foreground font-mono text-sm">[{team.tag}]</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  {isGameId(team.game) && <GameIcon game={team.game as GameId} size={16} />}
+                  <span className="text-xs text-muted-foreground uppercase font-display">{team.game}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-xs font-display uppercase tracking-wider text-muted-foreground">Rank medio</span>
+                  <RankBadge elo={team.avg_elo ?? 0} size="sm" showLabel />
+                </div>
               </div>
-              <span className="text-primary text-sm font-display">View →</span>
+              <Button size="sm" variant="outline">Vai al team</Button>
             </Link>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <p className="text-sm text-muted-foreground font-body">Nessun team — questo giocatore non è in alcun team.</p>
+              <Link to="/teams">
+                <Button size="sm" variant="outline"><Search className="h-4 w-4 mr-2" /> Cerca un team</Button>
+              </Link>
+            </div>
+          )}
+        </SectionCard>
 
-        {/* Match history */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="px-4 py-3 bg-secondary/50 text-xs text-muted-foreground font-display uppercase tracking-widest">
-            Recent Matches
-          </div>
+        {/* Trophies */}
+        <SectionCard title="Trofei" icon={Trophy} className="mt-6">
+          {trophies.length === 0 ? (
+            <p className="text-sm text-muted-foreground font-body">Nessun trofeo ancora.</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {trophies.map(t => <TrophyCard key={t.id} row={t} />)}
+            </div>
+          )}
+        </SectionCard>
+
+        {/* Recent matches */}
+        <SectionCard title="Recent Matches" icon={Swords} className="mt-6" bodyClassName="p-0">
           {matches.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground font-body">
+            <div className="text-center py-12 text-muted-foreground font-body px-4">
               <Swords className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-              <p>No matches played yet.</p>
+              <p className="mb-3">Nessuna partita ancora.</p>
+              <Link to="/tournaments"><Button size="sm" variant="outline">Iscriviti a un torneo</Button></Link>
             </div>
           ) : (
-            matches.map((m) => {
-              const isPlayerA = m.player_a_id === profile.id;
-              const myScore = isPlayerA ? m.score_a : m.score_b;
-              const oppScore = isPlayerA ? m.score_b : m.score_a;
-              const won = m.winner_id ? (isPlayerA ? m.winner_id === m.player_a_id : m.winner_id === m.player_b_id) : null;
-              const result = m.status !== "completed" ? "—" : won === null ? "—" : won ? "V" : "S";
-              const date = new Date(m.played_at ?? m.created_at).toLocaleDateString();
-              return (
-                <div key={m.id} className="grid grid-cols-[2rem_1fr_4rem_5rem_5rem] gap-3 px-4 py-3 border-t border-border items-center text-sm">
-                  <GameIcon game={m.game as GameId} size={20} />
-                  <span className="font-body truncate">{m.map ?? "Match"}</span>
-                  <span className={`font-display font-bold ${result === "V" ? "text-success" : result === "S" ? "text-destructive" : "text-muted-foreground"}`}>
-                    {result}
-                  </span>
-                  <span className="font-mono text-muted-foreground">{myScore ?? "-"} : {oppScore ?? "-"}</span>
-                  <span className="text-xs text-muted-foreground text-right">{date}</span>
-                </div>
-              );
-            })
+            <div>
+              {matches.map((m) => {
+                const isPlayerA = m.player_a_id === profile.id;
+                const myScore = isPlayerA ? m.score_a : m.score_b;
+                const oppScore = isPlayerA ? m.score_b : m.score_a;
+                const won = m.winner_id ? (isPlayerA ? m.winner_id === m.player_a_id : m.winner_id === m.player_b_id) : null;
+                const result = m.status !== "completed" ? "—" : won === null ? "—" : won ? "V" : "S";
+                const date = new Date(m.played_at ?? m.created_at).toLocaleDateString();
+                return (
+                  <div key={m.id} className="grid grid-cols-[2rem_1fr_3.5rem_5rem_6rem] gap-3 px-4 py-3 border-t border-border items-center text-sm">
+                    {isGameId(m.game) ? <GameIcon game={m.game as GameId} size={20} /> : <span className="w-5" />}
+                    <span className="font-body truncate">vs <span className="text-muted-foreground">{m.map ?? "Avversario"}</span></span>
+                    <Badge
+                      className={`justify-center font-display font-bold ${
+                        result === "V" ? "bg-success text-success-foreground hover:bg-success" :
+                        result === "S" ? "bg-destructive text-destructive-foreground hover:bg-destructive" :
+                        "bg-secondary text-muted-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {result}
+                    </Badge>
+                    <span className="font-mono text-foreground">{myScore ?? "-"} : {oppScore ?? "-"}</span>
+                    <span className="text-xs text-muted-foreground text-right">{date}</span>
+                  </div>
+                );
+              })}
+            </div>
           )}
-        </div>
+        </SectionCard>
       </div>
 
       {isOwnProfile && (
@@ -294,26 +434,145 @@ export default function ProfilePage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, color = "text-foreground" }: { icon: any; label: string; value: string | number; color?: string }) {
+function StatCard({ icon: Icon, label, value, color = "text-foreground", sub }: { icon: any; label: string; value: string | number; color?: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
       <Icon className={`h-5 w-5 mx-auto mb-2 ${color}`} />
       <div className="text-xl font-display font-bold">{value}</div>
       <div className="text-xs text-muted-foreground font-display uppercase tracking-wider">{label}</div>
+      {sub && <div className="mt-1 text-[11px] text-muted-foreground font-body">{sub}</div>}
     </div>
   );
+}
+
+function SectionCard({
+  title, icon: Icon, hideIcon, children, className = "", bodyClassName = "p-4",
+}: { title: string; icon?: any; hideIcon?: boolean; children: React.ReactNode; className?: string; bodyClassName?: string }) {
+  return (
+    <div className={`rounded-lg border border-border bg-card overflow-hidden neon-border ${className}`}>
+      <div className="px-4 py-3 bg-secondary/40 flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-widest border-b border-border">
+        {!hideIcon && Icon && <Icon className="h-3.5 w-3.5" />}
+        {title}
+      </div>
+      <div className={bodyClassName}>{children}</div>
+    </div>
+  );
+}
+
+function ProfileBanner({
+  url, isOwn, onUpload,
+}: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    try { await onUpload(file); } finally { setBusy(false); e.target.value = ""; }
+  };
+  return (
+    <div
+      className="h-[180px] relative bg-cover bg-center"
+      style={{
+        backgroundImage: url
+          ? `linear-gradient(to bottom, rgba(0,0,0,0.0) 40%, hsl(var(--card))), url(${url})`
+          : undefined,
+      }}
+    >
+      {!url && (
+        <div className="absolute inset-0 gradient-hero">
+          <div className="absolute inset-0 scanline pointer-events-none opacity-50" />
+          <div
+            className="absolute inset-0 opacity-[0.18]"
+            style={{
+              backgroundImage:
+                "linear-gradient(hsl(var(--primary)/0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.3) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
+        </div>
+      )}
+      {isOwn && (
+        <Label className="absolute top-4 left-4 cursor-pointer">
+          <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handle} disabled={busy} />
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+            Cambia banner
+          </span>
+        </Label>
+      )}
+    </div>
+  );
+}
+
+function TrophyCard({ row }: { row: TrophyRow }) {
+  const t = row.tournament!;
+  const placement = row.placement ?? 0;
+  const placementColor =
+    placement === 1 ? "text-yellow-400" :
+    placement === 2 ? "text-slate-300" :
+    placement === 3 ? "text-amber-700" :
+    "text-muted-foreground";
+  const tierLabel = t.tier === 3 ? "Peak Championship" : t.tier === 2 ? "Challenger" : "Open Cup";
+  const tierBg =
+    t.tier === 3 ? "from-purple-500/20 to-primary/10 border-purple-500/40" :
+    t.tier === 2 ? "from-cyan-500/20 to-primary/10 border-cyan-500/40" :
+    "from-secondary to-secondary border-border";
+  const date = t.end_date ? new Date(t.end_date).toLocaleDateString() : new Date(row.registered_at).toLocaleDateString();
+  return (
+    <div className={`rounded-lg border bg-gradient-to-br p-3 ${tierBg}`}>
+      <div className="flex items-start justify-between mb-2">
+        <Trophy className={`h-7 w-7 ${placementColor}`} />
+        <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-display uppercase">T{t.tier}</Badge>
+      </div>
+      <div className="font-display font-bold text-sm leading-tight line-clamp-2">{t.name}</div>
+      <div className="text-[11px] text-muted-foreground font-display uppercase tracking-wider mt-1">{tierLabel}</div>
+      <div className="flex items-center justify-between mt-2 text-[11px]">
+        <span className="flex items-center gap-1 text-muted-foreground">
+          {isGameId(t.game) && <GameIcon game={t.game as GameId} size={14} />}
+          {t.game}
+        </span>
+        <span className={`font-display font-bold ${placementColor}`}>#{placement}</span>
+      </div>
+      <div className="text-[10px] text-muted-foreground mt-1">{date}</div>
+    </div>
+  );
+}
+
+function isGameId(g: string | null | undefined): g is GameId {
+  return g === "valorant" || g === "cs2" || g === "r6";
 }
 
 function computeStats(matches: MatchRow[], userId: string) {
   const completed = matches.filter(m => m.status === "completed" && m.winner_id);
   const played = completed.length;
-  const wins = completed.filter(m => {
+  const wonOf = (m: MatchRow) => {
     const isA = m.player_a_id === userId;
     return isA ? m.winner_id === m.player_a_id : m.winner_id === m.player_b_id;
-  }).length;
+  };
+  const wins = completed.filter(wonOf).length;
   const losses = played - wins;
   const winRate = played === 0 ? 0 : Math.round((wins / played) * 100);
-  return { played, wins, losses, winRate };
+
+  // matches in current calendar month (based on played_at or created_at)
+  const now = new Date();
+  const thisMonth = matches.filter(m => {
+    const d = new Date(m.played_at ?? m.created_at);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+
+  // current win streak (most recent first → consecutive wins)
+  let streak = 0;
+  for (const m of completed) { // matches list is ordered desc by created_at
+    if (wonOf(m)) streak++; else break;
+  }
+
+  // days since last loss
+  const lastLoss = completed.find(m => !wonOf(m));
+  const lastLossDays = lastLoss
+    ? Math.max(0, Math.floor((now.getTime() - new Date(lastLoss.played_at ?? lastLoss.created_at).getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  return { played, wins, losses, winRate, thisMonth, streak, lastLossDays };
 }
 
 function tierFromTP(tp: number) {
@@ -334,7 +593,9 @@ function EditProfileDialog({
   const [bio, setBio] = useState(profile.bio ?? "");
   const [preferredGame, setPreferredGame] = useState(profile.preferred_game ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
+  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? "");
   const [uploading, setUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,6 +617,27 @@ function EditProfileDialog({
     }
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); e.target.value = ""; return; }
+    setBannerUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+      const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
+      setBannerUrl(data.publicUrl);
+      toast.success("Banner caricato");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setBannerUploading(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const updates: any = {
@@ -363,6 +645,7 @@ function EditProfileDialog({
       bio: bio.trim() || null,
       preferred_game: preferredGame || null,
       avatar_url: avatarUrl || null,
+      banner_url: bannerUrl || null,
     };
     const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
     setSaving(false);
@@ -394,6 +677,22 @@ function EditProfileDialog({
                 Upload avatar
               </span>
             </Label>
+          </div>
+          <div>
+            <Label>Banner</Label>
+            <div
+              className="mt-1 h-24 rounded-md border border-border bg-cover bg-center relative gradient-hero"
+              style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
+            >
+              <Label className="absolute bottom-2 right-2 cursor-pointer">
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleBannerUpload} />
+                <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
+                  {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                  Cambia banner
+                </span>
+              </Label>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
           </div>
           <div>
             <Label>Username</Label>
