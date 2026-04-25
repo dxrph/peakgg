@@ -222,18 +222,33 @@ export default function ProfilePage() {
     toast.success(`Invite sent to ${profile.username} for ${ownsTeam.name}`);
   };
 
-  const handleBannerUpload = async (file: File) => {
-    if (!isOwnProfile) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); return; }
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const path = `${profile.id}/banner-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
-    if (upErr) { toast.error(upErr.message); return; }
-    const { data: pub } = supabase.storage.from("profile-banners").getPublicUrl(path);
-    const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
-    if (updErr) { toast.error(updErr.message); return; }
-    setProfile({ ...profile, banner_url: pub.publicUrl });
-    toast.success("Banner aggiornato");
+  const handleBannerUpload = async (file: File): Promise<UploadResult> => {
+    if (!isOwnProfile) {
+      return { ok: false, error: "Non sei il proprietario di questo profilo." };
+    }
+    const validationError = validateBannerFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      return { ok: false, error: validationError };
+    }
+    try {
+      const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+      const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-banners")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("profile-banners").getPublicUrl(path);
+      const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
+      if (updErr) throw updErr;
+      setProfile({ ...profile, banner_url: pub.publicUrl });
+      toast.success("Banner aggiornato");
+      return { ok: true, url: pub.publicUrl };
+    } catch (err) {
+      const message = friendlyBannerError(err);
+      toast.error(message);
+      return { ok: false, error: message };
+    }
   };
 
   return (
