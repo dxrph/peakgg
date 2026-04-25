@@ -526,14 +526,34 @@ function SectionCard({
 
 function ProfileBanner({
   url, isOwn, onUpload,
-}: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<void> }) {
+}: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<UploadResult> }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFile, setLastFile] = useState<File | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const runUpload = async (file: File) => {
+    setBusy(true);
+    setError(null);
+    setLastFile(file);
+    const res = await onUpload(file);
+    setBusy(false);
+    if (!res.ok) setError(res.error);
+    else setError(null);
+  };
+
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setBusy(true);
-    try { await onUpload(file); } finally { setBusy(false); e.target.value = ""; }
+    await runUpload(file);
   };
+
+  const handleRetry = async () => {
+    if (lastFile) await runUpload(lastFile);
+    else inputRef.current?.click();
+  };
+
   return (
     <div
       className="h-[180px] relative bg-cover bg-center"
@@ -557,13 +577,41 @@ function ProfileBanner({
         </div>
       )}
       {isOwn && (
-        <Label className="absolute top-4 left-4 cursor-pointer">
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handle} disabled={busy} />
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-            Cambia banner
-          </span>
-        </Label>
+        <>
+          <Label className="absolute top-4 left-4 cursor-pointer">
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handle}
+              disabled={busy}
+            />
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+              {busy ? "Caricamento…" : "Cambia banner"}
+            </span>
+          </Label>
+
+          {error && !busy && (
+            <div
+              role="alert"
+              className="absolute bottom-3 left-4 right-4 max-w-xl flex items-start gap-2 px-3 py-2 rounded-md bg-destructive/15 border border-destructive/40 backdrop-blur text-destructive-foreground"
+            >
+              <AlertCircle className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
+              <div className="flex-1 text-xs font-body text-destructive">{error}</div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 px-2 gap-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                onClick={handleRetry}
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Riprova
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
