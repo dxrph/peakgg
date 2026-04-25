@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+/* ------------------------------------------------------------------ */
+/* Banner upload — validation + friendly error mapping                */
+/* ------------------------------------------------------------------ */
+
+const BANNER_MAX_BYTES = 5 * 1024 * 1024;
+const BANNER_ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
+const BANNER_ALLOWED_EXT = ["jpg", "jpeg", "png", "webp"];
+
+function validateBannerFile(file: File): string | null {
+  const ext = (file.name.split(".").pop() ?? "").toLowerCase();
+  const mimeOk = BANNER_ALLOWED_MIME.includes(file.type);
+  const extOk = BANNER_ALLOWED_EXT.includes(ext);
+  if (!mimeOk && !extOk) {
+    return "Formato non supportato. Usa JPG, PNG o WebP.";
+  }
+  if (file.size > BANNER_MAX_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    return `File troppo grande (${mb} MB). Massimo 5 MB.`;
+  }
+  if (file.size === 0) {
+    return "Il file è vuoto o danneggiato.";
+  }
+  return null;
+}
+
+function friendlyBannerError(err: unknown): string {
+  const raw = (err as any)?.message ?? String(err ?? "");
+  const msg = raw.toLowerCase();
+  if (!navigator.onLine) return "Sei offline — controlla la connessione e riprova.";
+  if (msg.includes("row-level security") || msg.includes("not authorized") || msg.includes("permission") || msg.includes("403") || msg.includes("unauthorized")) {
+    return "Permesso negato. Esegui di nuovo il login e riprova.";
+  }
+  if (msg.includes("payload too large") || msg.includes("413") || msg.includes("exceeded the maximum allowed size")) {
+    return "File troppo grande. Massimo 5 MB.";
+  }
+  if (msg.includes("mime") || msg.includes("invalid_mime") || msg.includes("not allowed")) {
+    return "Formato non supportato. Usa JPG, PNG o WebP.";
+  }
+  if (msg.includes("network") || msg.includes("failed to fetch") || msg.includes("fetch failed")) {
+    return "Errore di rete durante il caricamento. Riprova.";
+  }
+  if (msg.includes("bucket not found")) {
+    return "Storage non configurato (bucket mancante). Contatta l'amministratore.";
+  }
+  return raw || "Caricamento fallito. Riprova.";
+}
+
+type UploadResult = { ok: true; url: string } | { ok: false; error: string };
+
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { GAMES, getGameById, type GameId, getRankByElo } from "@/lib/ranks";
@@ -172,18 +222,33 @@ export default function ProfilePage() {
     toast.success(`Invite sent to ${profile.username} for ${ownsTeam.name}`);
   };
 
-  const handleBannerUpload = async (file: File) => {
-    if (!isOwnProfile) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); return; }
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const path = `${profile.id}/banner-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
-    if (upErr) { toast.error(upErr.message); return; }
-    const { data: pub } = supabase.storage.from("profile-banners").getPublicUrl(path);
-    const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
-    if (updErr) { toast.error(updErr.message); return; }
-    setProfile({ ...profile, banner_url: pub.publicUrl });
-    toast.success("Banner aggiornato");
+  const handleBannerUpload = async (file: File): Promise<UploadResult> => {
+    if (!isOwnProfile) {
+      return { ok: false, error: "Non sei il proprietario di questo profilo." };
+    }
+    const validationError = validateBannerFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      return { ok: false, error: validationError };
+    }
+    try {
+      const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+      const path = `${profile.id}/banner-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-banners")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("profile-banners").getPublicUrl(path);
+      const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
+      if (updErr) throw updErr;
+      setProfile({ ...profile, banner_url: pub.publicUrl });
+      toast.success("Banner aggiornato");
+      return { ok: true, url: pub.publicUrl };
+    } catch (err) {
+      const message = friendlyBannerError(err);
+      toast.error(message);
+      return { ok: false, error: message };
+    }
   };
 
   return (
@@ -461,14 +526,37 @@ function SectionCard({
 
 function ProfileBanner({
   url, isOwn, onUpload,
-}: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<void> }) {
+}: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<UploadResult> }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFile, setLastFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const runUpload = async (file: File) => {
+    setBusy(true);
+    setError(null);
+    setLastFile(file);
+    const res = await onUpload(file);
+    setBusy(false);
+    if (res.ok === true) {
+      setError(null);
+    } else {
+      setError(res.error);
+    }
+  };
+
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setBusy(true);
-    try { await onUpload(file); } finally { setBusy(false); e.target.value = ""; }
+    await runUpload(file);
   };
+
+  const handleRetry = async () => {
+    if (lastFile) await runUpload(lastFile);
+    else inputRef.current?.click();
+  };
+
   return (
     <div
       className="h-[180px] relative bg-cover bg-center"
@@ -492,13 +580,41 @@ function ProfileBanner({
         </div>
       )}
       {isOwn && (
-        <Label className="absolute top-4 left-4 cursor-pointer">
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handle} disabled={busy} />
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-            Cambia banner
-          </span>
-        </Label>
+        <>
+          <Label className="absolute top-4 left-4 cursor-pointer">
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handle}
+              disabled={busy}
+            />
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+              {busy ? "Caricamento…" : "Cambia banner"}
+            </span>
+          </Label>
+
+          {error && !busy && (
+            <div
+              role="alert"
+              className="absolute bottom-3 left-4 right-4 max-w-xl flex items-start gap-2 px-3 py-2 rounded-md bg-destructive/15 border border-destructive/40 backdrop-blur text-destructive-foreground"
+            >
+              <AlertCircle className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
+              <div className="flex-1 text-xs font-body text-destructive">{error}</div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 px-2 gap-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                onClick={handleRetry}
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Riprova
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -596,6 +712,9 @@ function EditProfileDialog({
   const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? "");
   const [uploading, setUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [lastBannerFile, setLastBannerFile] = useState<File | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -617,25 +736,45 @@ function EditProfileDialog({
     }
   };
 
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); e.target.value = ""; return; }
+  const uploadBannerFile = async (file: File) => {
+    const validationError = validateBannerFile(file);
+    if (validationError) {
+      setBannerError(validationError);
+      toast.error(validationError);
+      return;
+    }
     setBannerUploading(true);
+    setBannerError(null);
+    setLastBannerFile(file);
     try {
       const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
       const path = `${profile.id}/banner-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
+      const { error: upErr } = await supabase.storage
+        .from("profile-banners")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
       setBannerUrl(data.publicUrl);
       toast.success("Banner caricato");
-    } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+    } catch (err) {
+      const message = friendlyBannerError(err);
+      setBannerError(message);
+      toast.error(message);
     } finally {
       setBannerUploading(false);
-      e.target.value = "";
     }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await uploadBannerFile(file);
+  };
+
+  const retryBannerUpload = async () => {
+    if (lastBannerFile) await uploadBannerFile(lastBannerFile);
+    else bannerInputRef.current?.click();
   };
 
   const handleSave = async () => {
@@ -685,14 +824,41 @@ function EditProfileDialog({
               style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
             >
               <Label className="absolute bottom-2 right-2 cursor-pointer">
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleBannerUpload} />
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleBannerUpload}
+                  disabled={bannerUploading}
+                />
                 <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
                   {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                  Cambia banner
+                  {bannerUploading ? "Caricamento…" : "Cambia banner"}
                 </span>
               </Label>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
+            {bannerError ? (
+              <div
+                role="alert"
+                className="mt-2 flex items-start gap-2 px-3 py-2 rounded-md bg-destructive/10 border border-destructive/40 text-destructive"
+              >
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                <div className="flex-1 text-xs font-body">{bannerError}</div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-2 gap-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                  onClick={retryBannerUpload}
+                  disabled={bannerUploading}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Riprova
+                </Button>
+              </div>
+            ) : (
+              <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
+            )}
           </div>
           <div>
             <Label>Username</Label>
