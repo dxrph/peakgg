@@ -1,4 +1,5 @@
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
+import { useI18n } from "@/i18n";
 
 /**
  * RankBadge — visual icon + (optional) label for a player or team rank.
@@ -40,11 +41,13 @@ export default function RankBadge({
     typeof elo === "number" ? getRankByElo(elo) : getRankByName(rank ?? "Rookie");
   const px = SIZE_PX[size];
   const labelSize = size === "sm" ? "text-[10px]" : size === "md" ? "text-xs" : "text-sm";
+  const { tRank } = useI18n();
+  const localizedName = tRank(info.name);
 
   return (
     <span
       className={`inline-flex items-center gap-2 ${className}`}
-      title={`${info.name}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
+      title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
       <span
         className="rank-badge-icon relative inline-flex items-center justify-center rounded-lg transition-all duration-200"
@@ -61,7 +64,7 @@ export default function RankBadge({
       </span>
       {(showLabel || showElo) && (
         <span className={`flex flex-col leading-tight font-display font-bold ${labelSize}`}>
-          <span style={{ color: info.hex }}>{info.name}</span>
+          <span style={{ color: info.hex }}>{localizedName}</span>
           {showElo && typeof elo === "number" && (
             <span className="font-mono opacity-70 text-muted-foreground">{elo}</span>
           )}

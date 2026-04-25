@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import GoogleButton from "@/components/GoogleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsBell from "@/components/NotificationsBell";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,6 +54,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <LanguageSwitcher />
           {loading ? null : user ? (
             <>
               <NotificationsBell />
