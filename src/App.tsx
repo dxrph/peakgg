@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { GameProvider } from "@/lib/game-context";
 import { AuthProvider } from "@/hooks/useAuth";
+import { I18nProvider } from "@/i18n";
 import Index from "./pages/Index";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
@@ -32,6 +33,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
+          <I18nProvider>
           <GameProvider>
             <Toaster />
             <Sonner />
@@ -56,6 +58,7 @@ const App = () => (
             </Routes>
             <ChatWidget />
           </GameProvider>
+          </I18nProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
