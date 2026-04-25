@@ -712,6 +712,9 @@ function EditProfileDialog({
   const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? "");
   const [uploading, setUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [lastBannerFile, setLastBannerFile] = useState<File | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -733,25 +736,45 @@ function EditProfileDialog({
     }
   };
 
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Banner max 5 MB"); e.target.value = ""; return; }
+  const uploadBannerFile = async (file: File) => {
+    const validationError = validateBannerFile(file);
+    if (validationError) {
+      setBannerError(validationError);
+      toast.error(validationError);
+      return;
+    }
     setBannerUploading(true);
+    setBannerError(null);
+    setLastBannerFile(file);
     try {
       const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
       const path = `${profile.id}/banner-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("profile-banners").upload(path, file, { upsert: true });
+      const { error: upErr } = await supabase.storage
+        .from("profile-banners")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
       setBannerUrl(data.publicUrl);
       toast.success("Banner caricato");
-    } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+    } catch (err) {
+      const message = friendlyBannerError(err);
+      setBannerError(message);
+      toast.error(message);
     } finally {
       setBannerUploading(false);
-      e.target.value = "";
     }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await uploadBannerFile(file);
+  };
+
+  const retryBannerUpload = async () => {
+    if (lastBannerFile) await uploadBannerFile(lastBannerFile);
+    else bannerInputRef.current?.click();
   };
 
   const handleSave = async () => {
