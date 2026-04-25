@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
@@ -316,14 +315,15 @@ export default function ProfilePage() {
             sub={stats.lastLossDays != null ? `Ultima sconfitta: ${stats.lastLossDays}gg fa` : "Nessuna sconfitta"}
           />
           <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
-            <Trophy className={`h-5 w-5 mx-auto mb-2 text-primary`} />
+            <Trophy className="h-5 w-5 mx-auto mb-2 text-primary" />
             <div className="text-xl font-display font-bold">{stats.winRate}%</div>
             <div className="text-xs text-muted-foreground font-display uppercase tracking-wider mb-2">Win Rate</div>
-            <Progress
-              value={stats.winRate}
-              className="h-1.5"
-              indicatorClassName={stats.winRate >= 50 ? "bg-success" : "bg-destructive"}
-            />
+            <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+              <div
+                className={`h-full transition-all ${stats.winRate >= 50 ? "bg-success" : "bg-destructive"}`}
+                style={{ width: `${stats.winRate}%` }}
+              />
+            </div>
           </div>
         </div>
 
