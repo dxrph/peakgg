@@ -12,7 +12,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+/* ------------------------------------------------------------------ */
+/* Banner upload — validation + friendly error mapping                */
+/* ------------------------------------------------------------------ */
+
+const BANNER_MAX_BYTES = 5 * 1024 * 1024;
+const BANNER_ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
+const BANNER_ALLOWED_EXT = ["jpg", "jpeg", "png", "webp"];
+
+function validateBannerFile(file: File): string | null {
+  const ext = (file.name.split(".").pop() ?? "").toLowerCase();
+  const mimeOk = BANNER_ALLOWED_MIME.includes(file.type);
+  const extOk = BANNER_ALLOWED_EXT.includes(ext);
+  if (!mimeOk && !extOk) {
+    return "Formato non supportato. Usa JPG, PNG o WebP.";
+  }
+  if (file.size > BANNER_MAX_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    return `File troppo grande (${mb} MB). Massimo 5 MB.`;
+  }
+  if (file.size === 0) {
+    return "Il file è vuoto o danneggiato.";
+  }
+  return null;
+}
+
+function friendlyBannerError(err: unknown): string {
+  const raw = (err as any)?.message ?? String(err ?? "");
+  const msg = raw.toLowerCase();
+  if (!navigator.onLine) return "Sei offline — controlla la connessione e riprova.";
+  if (msg.includes("row-level security") || msg.includes("not authorized") || msg.includes("permission") || msg.includes("403") || msg.includes("unauthorized")) {
+    return "Permesso negato. Esegui di nuovo il login e riprova.";
+  }
+  if (msg.includes("payload too large") || msg.includes("413") || msg.includes("exceeded the maximum allowed size")) {
+    return "File troppo grande. Massimo 5 MB.";
+  }
+  if (msg.includes("mime") || msg.includes("invalid_mime") || msg.includes("not allowed")) {
+    return "Formato non supportato. Usa JPG, PNG o WebP.";
+  }
+  if (msg.includes("network") || msg.includes("failed to fetch") || msg.includes("fetch failed")) {
+    return "Errore di rete durante il caricamento. Riprova.";
+  }
+  if (msg.includes("bucket not found")) {
+    return "Storage non configurato (bucket mancante). Contatta l'amministratore.";
+  }
+  return raw || "Caricamento fallito. Riprova.";
+}
+
+type UploadResult = { ok: true; url: string } | { ok: false; error: string };
+
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { GAMES, getGameById, type GameId, getRankByElo } from "@/lib/ranks";
