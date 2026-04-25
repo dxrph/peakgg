@@ -824,14 +824,41 @@ function EditProfileDialog({
               style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
             >
               <Label className="absolute bottom-2 right-2 cursor-pointer">
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleBannerUpload} />
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleBannerUpload}
+                  disabled={bannerUploading}
+                />
                 <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
                   {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                  Cambia banner
+                  {bannerUploading ? "Caricamento…" : "Cambia banner"}
                 </span>
               </Label>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
+            {bannerError ? (
+              <div
+                role="alert"
+                className="mt-2 flex items-start gap-2 px-3 py-2 rounded-md bg-destructive/10 border border-destructive/40 text-destructive"
+              >
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                <div className="flex-1 text-xs font-body">{bannerError}</div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-2 gap-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                  onClick={retryBannerUpload}
+                  disabled={bannerUploading}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Riprova
+                </Button>
+              </div>
+            ) : (
+              <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
+            )}
           </div>
           <div>
             <Label>Username</Label>
