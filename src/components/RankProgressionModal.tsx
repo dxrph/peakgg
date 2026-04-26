@@ -125,7 +125,15 @@ export default function RankProgressionModal({
                   : r.tier === current.tier
                   ? "current"
                   : "locked";
-              return <RankCell key={r.name} rank={r} state={state} label={tRank(r.name)} />;
+              return (
+                <RankCell
+                  key={r.name}
+                  rank={r}
+                  state={state}
+                  label={tRank(r.name)}
+                  currentLabel={t("rank.current_badge")}
+                />
+              );
             })}
           </div>
 
@@ -201,10 +209,12 @@ function RankCell({
   rank,
   state,
   label,
+  currentLabel,
 }: {
   rank: RankInfo;
   state: "passed" | "current" | "locked";
   label: string;
+  currentLabel: string;
 }) {
   const isCurrent = state === "current";
   const isLocked = state === "locked";
@@ -231,7 +241,7 @@ function RankCell({
             letterSpacing: "0.08em",
           }}
         >
-          Attuale
+          {currentLabel}
         </span>
       )}
       <div style={{ width: 40, height: 40 }} className="flex items-center justify-center">
