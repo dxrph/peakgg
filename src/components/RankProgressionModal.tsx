@@ -1,14 +1,14 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RANKS, getRankByElo, getEloProgress, type RankInfo } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import { useI18n } from "@/i18n";
-import { Trophy } from "lucide-react";
+import { Check } from "lucide-react";
 
 export interface RankProgressionModalProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   elo: number;
-  /** Optional username — when present and not own profile, title becomes "Progressione di X" */
   username?: string;
   isOwn?: boolean;
 }
@@ -24,98 +24,179 @@ export default function RankProgressionModal({
   const current = getRankByElo(elo);
   const progress = getEloProgress(elo);
   const isApex = current.name === "Apex";
+  const next = progress.nextRank;
 
-  const title = isOwn ? "La tua progressione" : `Progressione di ${username ?? "—"}`;
+  // Animate progress bar fill on open
+  const [fillPct, setFillPct] = useState(0);
+  useEffect(() => {
+    if (open) {
+      setFillPct(0);
+      const t = window.setTimeout(() => setFillPct(progress.percent), 60);
+      return () => window.clearTimeout(t);
+    }
+  }, [open, progress.percent]);
+
+  const motivation = isApex
+    ? "Hai raggiunto il massimo. Sei nella élite di PeakGG 👑"
+    : progress.percent >= 50
+    ? "Sei a metà strada, ancora un po'! 🔥"
+    : "Continua a giocare per salire di rango! 💪";
+
+  const topBorder = current.gradient ?? current.hex;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl animate-scale-in">
-        <DialogHeader>
-          <DialogTitle className="font-display text-xl">{title}</DialogTitle>
-        </DialogHeader>
+      <DialogContent
+        className="rank-modal max-w-[600px] sm:max-w-[600px] w-[calc(100%-2rem)] p-0 gap-0 border border-[#1E1E24] bg-[#0D0D0F] overflow-hidden rounded-xl"
+        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}
+      >
+        {/* Top accent border (rank-coloured) */}
+        <div
+          className="h-1 w-full"
+          style={{ background: topBorder }}
+          aria-hidden
+        />
 
-        {/* Current rank — large central display */}
-        <div className="flex flex-col items-center text-center gap-3 py-2">
-          <RankBadge elo={elo} size="lg" />
-          <div className="font-display font-bold text-2xl" style={{ color: current.hex }}>
-            {tRank(current.name)}
-          </div>
-          <div className="font-display font-bold text-3xl">
-            {elo.toLocaleString("it-IT")}{" "}
-            <span className="text-base text-muted-foreground tracking-widest">ELO</span>
-          </div>
-        </div>
-
-        {/* Horizontal rank progression */}
-        <div className="relative mt-2 -mx-2 overflow-x-auto">
-          <div className="flex items-start justify-between gap-2 px-2 min-w-[640px] relative">
-            {/* connector line */}
-            <div className="absolute left-2 right-2 top-[26px] h-[2px] bg-border" />
-            {RANKS.map((r) => (
-              <RankNode
-                key={r.name}
-                rank={r}
-                state={
-                  r.tier < current.tier
-                    ? "passed"
-                    : r.tier === current.tier
-                    ? "current"
-                    : "locked"
-                }
-                label={tRank(r.name)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Distance to next rank */}
-        <div className="mt-4 rounded-lg border border-border bg-secondary/30 p-4">
-          {isApex ? (
-            <div className="text-center font-display font-bold text-base">
-              Hai raggiunto il rango massimo{" "}
-              <Trophy className="inline h-4 w-4 text-yellow-400 -mt-1" /> 🏆
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between text-sm font-body mb-2">
-                <span>
-                  Sei a{" "}
-                  <span className="font-display font-bold text-foreground">
-                    {Math.max(0, progress.nextThreshold - elo)} ELO
-                  </span>{" "}
-                  da{" "}
-                  <span
-                    className="font-display font-bold"
-                    style={{ color: progress.nextRank?.hex }}
-                  >
-                    {progress.nextRank ? tRank(progress.nextRank.name) : "—"}
-                  </span>
-                </span>
-                <span className="text-xs text-muted-foreground font-mono">
-                  {progress.percent}%
-                </span>
+        <div className="px-6 pt-6 pb-5 space-y-5">
+          {/* Section 1 — current rank */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <div
+                className="rank-glow flex items-center justify-center rounded-xl shrink-0"
+                style={{
+                  width: 80,
+                  height: 80,
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: `1px solid ${current.hex}55`,
+                  ["--rank-color" as any]: current.hex,
+                }}
+              >
+                <RankBadge rank={current.name} size="lg" />
               </div>
-              <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+              <div className="min-w-0">
                 <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${progress.percent}%`,
-                    background: current.gradient ?? current.hex,
-                  }}
-                />
+                  className="font-display font-bold leading-none truncate"
+                  style={{ fontSize: 28, color: current.hex }}
+                >
+                  {tRank(current.name)}
+                </div>
+                <div
+                  className="font-display uppercase tracking-widest mt-2"
+                  style={{ fontSize: 12, color: "#6B7280" }}
+                >
+                  {isOwn ? "Rango attuale" : `Progressione di ${username ?? "—"}`}
+                </div>
               </div>
-              <div className="mt-2 text-[11px] text-muted-foreground font-mono text-right">
-                {elo} / {progress.nextThreshold}
+            </div>
+
+            <div className="text-right shrink-0">
+              <div
+                className="font-display font-bold leading-none text-white"
+                style={{ fontSize: 48 }}
+              >
+                {elo.toLocaleString("it-IT")}
               </div>
-            </>
-          )}
+              <div
+                className="font-display uppercase tracking-widest mt-1"
+                style={{ fontSize: 11, color: "#6B7280" }}
+              >
+                ELO
+              </div>
+              {!isApex && next && (
+                <div
+                  className="font-display font-semibold mt-2"
+                  style={{ fontSize: 12, color: current.hex }}
+                >
+                  {Math.max(0, progress.nextThreshold - elo)} ELO al prossimo
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="h-px w-full" style={{ background: "#1E1E24" }} />
+
+          {/* Section 2 — rank grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {RANKS.map((r) => {
+              const state: "passed" | "current" | "locked" =
+                r.tier < current.tier
+                  ? "passed"
+                  : r.tier === current.tier
+                  ? "current"
+                  : "locked";
+              return <RankCell key={r.name} rank={r} state={state} label={tRank(r.name)} />;
+            })}
+          </div>
+
+          {/* Section 3 — progress bar */}
+          <div className="pt-1">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <RankBadge rank={current.name} size="sm" />
+                <span
+                  className="font-display font-bold uppercase text-[11px] tracking-wider truncate"
+                  style={{ color: current.hex }}
+                >
+                  {tRank(current.name)}
+                </span>
+              </div>
+              {next ? (
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="font-display font-bold uppercase text-[11px] tracking-wider truncate"
+                    style={{ color: next.hex }}
+                  >
+                    {tRank(next.name)}
+                  </span>
+                  <RankBadge rank={next.name} size="sm" />
+                </div>
+              ) : (
+                <span className="font-display font-bold uppercase text-[11px] tracking-wider text-[#9CA3AF]">
+                  MAX
+                </span>
+              )}
+            </div>
+
+            <div
+              className="h-2 w-full rounded-full overflow-hidden"
+              style={{ background: "#1E1E24" }}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${isApex ? 100 : fillPct}%`,
+                  background: next
+                    ? `linear-gradient(90deg, ${current.hex}, ${next.hex})`
+                    : current.gradient ?? current.hex,
+                  transition: "width 0.8s ease-out",
+                }}
+              />
+            </div>
+
+            <div
+              className="mt-2 text-center font-mono"
+              style={{ fontSize: 13, color: "#9CA3AF" }}
+            >
+              {isApex
+                ? `${elo.toLocaleString("it-IT")} ELO — Apex tier`
+                : `${elo} / ${progress.nextThreshold} — ${progress.percent}% completato`}
+            </div>
+          </div>
+
+          {/* Section 4 — motivational line */}
+          <div
+            className="text-center italic"
+            style={{ fontSize: 13, color: "#6B7280" }}
+          >
+            {motivation}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-function RankNode({
+function RankCell({
   rank,
   state,
   label,
@@ -126,37 +207,56 @@ function RankNode({
 }) {
   const isCurrent = state === "current";
   const isLocked = state === "locked";
+  const isPassed = state === "passed";
+
   return (
     <div
-      className={`relative flex flex-col items-center gap-1 transition-all ${
-        isLocked ? "opacity-40" : "opacity-100"
-      } ${isCurrent ? "scale-110" : ""}`}
-      style={{ flex: "0 0 auto", width: 70 }}
+      className="relative rounded-lg flex flex-col items-center justify-center gap-1 py-3 px-2 transition-all"
+      style={{
+        background: isCurrent ? "#1B1B22" : "#16161A",
+        border: `1px solid ${isCurrent ? rank.hex : "#1E1E24"}`,
+        boxShadow: isCurrent ? `0 0 18px ${rank.hex}66, inset 0 0 0 1px ${rank.hex}33` : undefined,
+        opacity: isLocked ? 0.35 : 1,
+        filter: isLocked ? "grayscale(100%)" : undefined,
+      }}
     >
-      <div
-        className={`relative z-10 rounded-lg ${
-          isCurrent ? "ring-2 ring-offset-2 ring-offset-background" : ""
-        }`}
-        style={
-          isCurrent
-            ? {
-                boxShadow: `0 0 18px ${rank.hex}99`,
-                ["--tw-ring-color" as any]: rank.hex,
-              }
-            : undefined
-        }
-      >
-        <RankBadge rank={rank.name} size="sm" />
+      {isCurrent && (
+        <span
+          className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded font-display font-bold uppercase tracking-wider"
+          style={{
+            fontSize: 9,
+            background: rank.hex,
+            color: "#0D0D0F",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Attuale
+        </span>
+      )}
+      <div style={{ width: 40, height: 40 }} className="flex items-center justify-center">
+        <RankBadge rank={rank.name} size="md" />
       </div>
       <span
-        className="font-display font-bold text-[11px] mt-1 text-center leading-tight"
-        style={{ color: isLocked ? undefined : rank.hex }}
+        className="font-display font-bold uppercase tracking-wider mt-1 leading-none text-center"
+        style={{ fontSize: 11, color: isLocked ? "#6B7280" : rank.hex }}
       >
         {label}
       </span>
-      <span className="font-mono text-[9px] text-muted-foreground leading-tight text-center">
+      <span
+        className="font-mono leading-none text-center"
+        style={{ fontSize: 10, color: "#6B7280" }}
+      >
         {rank.maxElo > 9000 ? `${rank.minElo}+` : `${rank.minElo}-${rank.maxElo}`}
       </span>
+      {isPassed && (
+        <span
+          className="absolute bottom-1.5 right-1.5 inline-flex items-center justify-center rounded-full"
+          style={{ width: 14, height: 14, background: "#10B981" }}
+          aria-label="Superato"
+        >
+          <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+        </span>
+      )}
     </div>
   );
 }
