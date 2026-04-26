@@ -1,129 +1,94 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { RankTier } from "@/lib/ranks";
+import { useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { I18nextProvider, useTranslation } from "react-i18next";
+import i18n, { LOCALE_META, SUPPORTED_LOCALES, STORAGE_KEY, type SupportedLocale } from "./config";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
-export type Locale = "en" | "fr" | "it";
+export type Locale = SupportedLocale;
 
-type Dict = {
-  ranks: Record<RankTier, string>;
-  ui: { language: string };
-};
+function normalize(l: string | undefined | null): Locale {
+  if (!l) return "en";
+  const base = l.toLowerCase().split("-")[0];
+  return (SUPPORTED_LOCALES as readonly string[]).includes(base) ? (base as Locale) : "en";
+}
 
-const DICTS: Record<Locale, Dict> = {
-  en: {
-    ranks: {
-      Rookie: "Rookie",
-      Bronze: "Bronze",
-      Silver: "Silver",
-      Gold: "Gold",
-      Platinum: "Platinum",
-      Diamond: "Diamond",
-      Master: "Master",
-      Apex: "Apex",
-    },
-    ui: { language: "Language" },
-  },
-  fr: {
-    ranks: {
-      Rookie: "Recrue",
-      Bronze: "Bronze",
-      Silver: "Argent",
-      Gold: "Or",
-      Platinum: "Platine",
-      Diamond: "Diamant",
-      Master: "Maître",
-      Apex: "Apex",
-    },
-    ui: { language: "Langue" },
-  },
-  it: {
-    ranks: {
-      Rookie: "Rookie",
-      Bronze: "Bronzo",
-      Silver: "Argento",
-      Gold: "Oro",
-      Platinum: "Platino",
-      Diamond: "Diamante",
-      Master: "Maestro",
-      Apex: "Apex",
-    },
-    ui: { language: "Lingua" },
-  },
-};
+/**
+ * Bridges the auth profile with i18next: when a logged-in user has
+ * a saved `language` preference, apply it (overrides browser/localStorage).
+ */
+function ProfileLocaleSync() {
+  const { profile } = useAuth();
+  useEffect(() => {
+    if (!profile?.language) return;
+    const next = normalize(profile.language);
+    if (i18n.language?.split("-")[0] !== next) {
+      i18n.changeLanguage(next);
+      try { window.localStorage.setItem(STORAGE_KEY, next); } catch {}
+    }
+  }, [profile?.language]);
+  return null;
+}
 
-const STORAGE_KEY = "peakgg.locale";
+export function I18nProvider({ children }: { children: ReactNode }) {
+  // Reflect locale on <html lang>
+  useEffect(() => {
+    const apply = () => { document.documentElement.lang = normalize(i18n.language); };
+    apply();
+    i18n.on("languageChanged", apply);
+    return () => { i18n.off("languageChanged", apply); };
+  }, []);
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <ProfileLocaleSync />
+      {children}
+    </I18nextProvider>
+  );
+}
 
 interface I18nContextValue {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
   tRank: (rank: string) => string;
 }
 
-const I18nContext = createContext<I18nContextValue | null>(null);
-
-function detectInitial(): Locale {
-  if (typeof window === "undefined") return "en";
-  const saved = window.localStorage.getItem(STORAGE_KEY) as Locale | null;
-  if (saved && DICTS[saved]) return saved;
-  const nav = window.navigator.language.toLowerCase();
-  if (nav.startsWith("fr")) return "fr";
-  if (nav.startsWith("it")) return "it";
-  return "en";
-}
-
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => detectInitial());
-
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, l);
-      document.documentElement.lang = l;
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  const value = useMemo<I18nContextValue>(() => {
-    const dict = DICTS[locale];
-    return {
-      locale,
-      setLocale,
-      t: (key: string) => {
-        const parts = key.split(".");
-        let cur: any = dict;
-        for (const p of parts) cur = cur?.[p];
-        return typeof cur === "string" ? cur : key;
-      },
-      tRank: (rank: string) => dict.ranks[rank as RankTier] ?? rank,
-    };
-  }, [locale, setLocale]);
-
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
-}
-
+/**
+ * Backwards-compatible hook used across the app. Internally backed by i18next.
+ * Also persists the choice to `profiles.language` when a user is logged in.
+ */
 export function useI18n(): I18nContextValue {
-  const ctx = useContext(I18nContext);
-  if (!ctx) {
-    // Safe fallback so components don't crash if provider is missing.
-    return {
-      locale: "en",
-      setLocale: () => {},
-      t: (k) => k,
-      tRank: (r) => DICTS.en.ranks[r as RankTier] ?? r,
-    };
-  }
-  return ctx;
+  const { t, i18n: i18next } = useTranslation();
+  const { user } = useAuth();
+  const locale = normalize(i18next.language);
+
+  const setLocale = useCallback(
+    (l: Locale) => {
+      const next = normalize(l);
+      void i18next.changeLanguage(next);
+      try { window.localStorage.setItem(STORAGE_KEY, next); } catch {}
+      if (user?.id) {
+        // Best-effort persistence; ignore errors silently.
+        void supabase.from("profiles").update({ language: next }).eq("id", user.id);
+      }
+    },
+    [i18next, user?.id]
+  );
+
+  return useMemo<I18nContextValue>(() => ({
+    locale,
+    setLocale,
+    t: (key, options) => t(key, options) as string,
+    tRank: (rank) => t(`ranks.${rank}`, { defaultValue: rank }) as string,
+  }), [locale, setLocale, t]);
 }
 
-export const LOCALES: { code: Locale; label: string }[] = [
-  { code: "en", label: "EN" },
-  { code: "fr", label: "FR" },
-  { code: "it", label: "IT" },
-];
+export const LOCALES: { code: Locale; label: string; flag: string; name: string }[] =
+  (SUPPORTED_LOCALES as readonly Locale[]).map((c) => LOCALE_META[c]);
 
 export function translateRank(rank: string, locale: Locale): string {
-  return DICTS[locale]?.ranks[rank as RankTier] ?? rank;
+  return (i18n.getFixedT(locale)(`ranks.${rank}`, { defaultValue: rank }) as string);
 }
+
+export { LOCALE_META };
+export default i18n;
