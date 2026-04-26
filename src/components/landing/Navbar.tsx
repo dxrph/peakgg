@@ -8,12 +8,14 @@ import GoogleButton from "@/components/GoogleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsBell from "@/components/NotificationsBell";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useI18n } from "@/i18n";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,13 +42,13 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-6">
           <GameSwitcher />
-          {[
-            ["/play", "Play"],
-            ["/tournaments", "Tournaments"],
-            ["/leaderboard", "Leaderboard"],
-            ["/teams", "Teams"],
-            ["/scrims", "Scrims"],
-          ].map(([href, label]) => (
+          {([
+            ["/play", t("nav.play")],
+            ["/tournaments", t("nav.tournaments")],
+            ["/leaderboard", t("nav.leaderboard")],
+            ["/teams", t("nav.teams")],
+            ["/scrims", t("nav.scrims")],
+          ] as const).map(([href, label]) => (
             <Link key={href} to={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold uppercase tracking-wider">
               {label}
             </Link>
@@ -65,14 +67,14 @@ export default function Navbar() {
                 </Avatar>
                 <span className="text-sm font-display font-semibold">{profile?.username ?? "Player"}</span>
               </Link>
-              <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Logout">
+              <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label={t("auth.signout")}>
                 <LogOut className="h-4 w-4" />
               </Button>
             </>
           ) : (
             <>
-              <Link to="/login"><Button variant="ghost" size="sm">Login</Button></Link>
-              <div className="w-[200px]"><GoogleButton label="Accedi con Google" /></div>
+              <Link to="/login"><Button variant="ghost" size="sm">{t("auth.login")}</Button></Link>
+              <div className="w-[200px]"><GoogleButton label={t("auth.signin_google")} /></div>
             </>
           )}
         </div>
@@ -85,13 +87,14 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-background px-4 py-6 space-y-4">
           <GameSwitcher className="mb-4" />
-          {[
-            ["/play", "Play"],
-            ["/tournaments", "Tournaments"],
-            ["/leaderboard", "Leaderboard"],
-            ["/teams", "Teams"],
-            ["/scrims", "Scrims"],
-          ].map(([href, label]) => (
+          <div className="pb-2"><LanguageSwitcher /></div>
+          {([
+            ["/play", t("nav.play")],
+            ["/tournaments", t("nav.tournaments")],
+            ["/leaderboard", t("nav.leaderboard")],
+            ["/teams", t("nav.teams")],
+            ["/scrims", t("nav.scrims")],
+          ] as const).map(([href, label]) => (
             <Link key={href} to={href} onClick={() => setMobileOpen(false)} className="block text-sm font-display font-semibold uppercase tracking-wider py-2">
               {label}
             </Link>
@@ -99,12 +102,12 @@ export default function Navbar() {
           <div className="pt-4 border-t border-border flex gap-3">
             {user ? (
               <Button variant="outline" className="w-full" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" /> Logout
+                <LogOut className="h-4 w-4 mr-2" /> {t("auth.signout")}
               </Button>
             ) : (
               <div className="w-full space-y-2">
-                <Link to="/login" className="block"><Button variant="outline" className="w-full">Login</Button></Link>
-                <GoogleButton label="Accedi con Google" />
+                <Link to="/login" className="block"><Button variant="outline" className="w-full">{t("auth.login")}</Button></Link>
+                <GoogleButton label={t("auth.signin_google")} />
               </div>
             )}
           </div>
