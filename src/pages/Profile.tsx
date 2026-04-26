@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
+import RankProgressionModal from "@/components/RankProgressionModal";
 import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,6 +123,7 @@ export default function ProfilePage() {
   const [ownsTeam, setOwnsTeam] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [rankModalOpen, setRankModalOpen] = useState(false);
 
   const isOwnProfile = !!user && !!profile && user.id === profile.id;
 
@@ -314,7 +316,14 @@ export default function ProfilePage() {
                   @{profile.username}
                 </p>
                 <div className="mt-2 flex items-center gap-3 flex-wrap">
-                  <RankBadge elo={profile.elo} size="lg" showLabel />
+                  <button
+                    type="button"
+                    onClick={() => setRankModalOpen(true)}
+                    className="rounded-md transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Mostra progressione ranghi"
+                  >
+                    <RankBadge elo={profile.elo} size="lg" showLabel />
+                  </button>
                   {team && (
                     <Link to={`/teams/${team.id}`} className="text-sm font-mono text-primary hover:underline">
                       [{team.tag}]
