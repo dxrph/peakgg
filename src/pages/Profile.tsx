@@ -533,6 +533,14 @@ export default function ProfilePage() {
           onSaved={(p) => setProfile({ ...profile, ...p })}
         />
       )}
+
+      <RankProgressionModal
+        open={rankModalOpen}
+        onOpenChange={setRankModalOpen}
+        elo={profile.elo}
+        username={profile.display_name || profile.username}
+        isOwn={isOwnProfile}
+      />
     </div>
   );
 }
