@@ -265,7 +265,7 @@ export default function ProfilePage() {
           />
 
           {/* Header section — dark background, avatar lives entirely inside */}
-          <div className="relative bg-[hsl(var(--card))] px-4 md:px-8 py-4 md:py-5 border-t border-border">
+          <div className="relative bg-card px-4 md:px-8 py-4 md:py-5 border-t border-border">
             {/* Top-right action button */}
             <div className="absolute top-4 right-4 flex gap-2 z-10">
               {isOwnProfile ? (
