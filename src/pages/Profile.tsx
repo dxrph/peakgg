@@ -255,34 +255,40 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-20 pb-16">
-        {/* Banner + header card */}
-        <div className="relative rounded-xl border border-border bg-card overflow-hidden mb-6">
+        {/* Banner + header card (banner and header are stacked, no overlap) */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden mb-6">
+          {/* Banner — strictly 180px, nothing overlaps it */}
           <ProfileBanner
             url={profile.banner_url}
             isOwn={isOwnProfile}
             onUpload={handleBannerUpload}
           />
 
-          {/* Top-right header actions */}
-          <div className="absolute top-4 right-4 flex gap-2 z-10">
-            {isOwnProfile ? (
-              <Button onClick={() => setEditOpen(true)} size="sm" className="backdrop-blur bg-background/70 hover:bg-background/90 text-foreground border border-border">
-                <Pencil className="h-4 w-4 mr-2" /> Edit profile
-              </Button>
-            ) : (
-              ownsTeam && (
-                <Button onClick={handleInvite} size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" /> Invite to {ownsTeam.name}
+          {/* Header section — dark background, avatar lives entirely inside */}
+          <div className="relative bg-card px-4 md:px-8 py-4 md:py-5 border-t border-border">
+            {/* Top-right action button */}
+            <div className="absolute top-4 right-4 flex gap-2 z-10">
+              {isOwnProfile ? (
+                <Button
+                  onClick={() => setEditOpen(true)}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Pencil className="h-4 w-4 mr-2" /> Edit profile
                 </Button>
-              )
-            )}
-          </div>
+              ) : (
+                ownsTeam && (
+                  <Button onClick={handleInvite} size="sm">
+                    <UserPlus className="h-4 w-4 mr-2" /> Invite to {ownsTeam.name}
+                  </Button>
+                )
+              )}
+            </div>
 
-          <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-12 md:-mt-14">
-              {/* Avatar with rank-coloured ring */}
+            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+              {/* Avatar with rank-coloured ring — fully inside the header */}
               <div
-                className="rounded-full p-[3px] shrink-0"
+                className="rounded-full p-[3px] shrink-0 self-start md:self-center"
                 style={{ background: rankInfo.gradient ?? rankInfo.hex }}
               >
                 <Avatar className="w-24 h-24 border-4 border-card">
@@ -293,25 +299,38 @@ export default function ProfilePage() {
                 </Avatar>
               </div>
 
-              <div className="flex-1 min-w-0 pt-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-display font-bold leading-tight">
-                    {profile.display_name || profile.username}
-                  </h1>
+              {/* Right column: username / @handle / RankBadge / ELO bar */}
+              <div className="flex-1 min-w-0">
+                <h1
+                  className="font-display font-bold leading-tight text-foreground break-words"
+                  style={{ fontSize: "24px", overflow: "visible", textOverflow: "clip" }}
+                >
+                  {profile.display_name || profile.username}
+                </h1>
+                <p
+                  className="font-body text-muted-foreground break-words"
+                  style={{ fontSize: "14px", overflow: "visible", textOverflow: "clip" }}
+                >
+                  @{profile.username}
+                </p>
+                <div className="mt-2 flex items-center gap-3 flex-wrap">
+                  <RankBadge elo={profile.elo} size="lg" showLabel />
                   {team && (
                     <Link to={`/teams/${team.id}`} className="text-sm font-mono text-primary hover:underline">
                       [{team.tag}]
                     </Link>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground font-body">@{profile.username}</p>
-                <div className="mt-2">
-                  <RankBadge elo={profile.elo} size="lg" showLabel />
-                </div>
-                {profile.bio && <p className="text-sm mt-3 font-body max-w-prose text-muted-foreground">{profile.bio}</p>}
+                <EloProgressBar elo={profile.elo} className="mt-3 w-full" />
+                {profile.bio && (
+                  <p className="text-sm mt-3 font-body max-w-prose text-muted-foreground">
+                    {profile.bio}
+                  </p>
+                )}
               </div>
 
-              <div className="flex items-center gap-5 text-center md:self-start md:pt-2">
+              {/* ELO + Coins — wraps below on mobile */}
+              <div className="flex items-center gap-5 text-center md:self-start md:pt-1 md:pr-28">
                 <div>
                   <div className="text-2xl font-display font-bold text-primary">{profile.elo}</div>
                   <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">ELO</div>
@@ -325,37 +344,47 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+          </div>
 
-            <EloProgressBar elo={profile.elo} className="mt-5 max-w-md" />
+          {/* Games — inline row, no card border, slightly lighter background */}
+          <div className="px-4 md:px-8 py-2 bg-secondary/30 border-t border-border flex items-center gap-3 flex-wrap">
+            <span className="text-[11px] font-display uppercase tracking-widest text-muted-foreground shrink-0">
+              Giochi
+            </span>
+            {activeGames.length === 0 ? (
+              <span className="text-xs text-muted-foreground font-body">Nessun gioco collegato.</span>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {activeGames.map((g) => {
+                  const info = getGameById(g);
+                  const preferred = profile.preferred_game === g;
+                  return (
+                    <div
+                      key={g}
+                      className={`flex items-center gap-2 rounded-md px-2.5 py-1 bg-card/60 border ${
+                        preferred
+                          ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]"
+                          : "border-border"
+                      }`}
+                      title={preferred ? "Gioco preferito" : info.name}
+                    >
+                      <GameIcon game={g} size={18} />
+                      <span className="font-display font-semibold text-xs">{info.shortName}</span>
+                      {preferred && (
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] py-0 px-1 border-primary text-primary"
+                        >
+                          Preferito
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Games */}
-        <SectionCard title="Giochi" icon={GameIcon as any} hideIcon>
-          {activeGames.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-body">Nessun gioco collegato.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {activeGames.map(g => {
-                const info = getGameById(g);
-                const preferred = profile.preferred_game === g;
-                return (
-                  <div
-                    key={g}
-                    className={`flex items-center gap-2 rounded-md px-3 py-2 bg-secondary/40 border ${
-                      preferred ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]" : "border-border"
-                    }`}
-                    title={preferred ? "Gioco preferito" : info.name}
-                  >
-                    <GameIcon game={g} size={24} />
-                    <span className="font-display font-semibold text-sm">{info.shortName}</span>
-                    {preferred && <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary text-primary">Preferito</Badge>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </SectionCard>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
