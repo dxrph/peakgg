@@ -1,0 +1,99 @@
+{
+  "nav": {
+    "play": "Jouer",
+    "tournaments": "Tournois",
+    "leaderboard": "Classement",
+    "teams": "Équipes",
+    "scrims": "Scrims"
+  },
+  "auth": {
+    "signin_google": "Se connecter avec Google",
+    "signout": "Déconnexion",
+    "welcome": "Bienvenue sur PeakGG",
+    "login": "Connexion"
+  },
+  "profile": {
+    "edit": "Modifier le profil",
+    "change_banner": "Changer la bannière",
+    "rank": "Rang",
+    "elo": "ELO",
+    "coins": "Pièces",
+    "matches": "Matchs",
+    "wins": "Victoires",
+    "losses": "Défaites",
+    "winrate": "Taux de victoires",
+    "no_team": "Pas d'équipe",
+    "no_matches": "Pas encore de matchs",
+    "no_trophies": "Pas encore de trophées",
+    "recent_matches": "Matchs récents",
+    "trophies": "Trophées",
+    "games": "Jeux",
+    "preferred": "Préféré",
+    "join_tournament": "Rejoindre un tournoi"
+  },
+  "rank": {
+    "current_rank": "Rang actuel",
+    "progression": "Ta progression",
+    "progression_other": "Progression de {{name}}",
+    "elo_to_next": "ELO au prochain rang",
+    "completed": "complété",
+    "max_rank": "Tu as atteint le sommet. Tu fais partie de l'élite de PeakGG 👑",
+    "motivation_low": "Continue à jouer pour monter en rang ! 💪",
+    "motivation_high": "À mi-chemin, encore un effort ! 🔥",
+    "current_badge": "ACTUEL"
+  },
+  "tournaments": {
+    "upcoming": "À venir",
+    "ongoing": "En cours",
+    "completed": "Terminés",
+    "register": "S'inscrire",
+    "prize_pool": "Cagnotte",
+    "max_teams": "Équipes max",
+    "full": "Tournoi complet"
+  },
+  "board": {
+    "lft": "Cherche une équipe",
+    "lfp": "Cherche des joueurs",
+    "post": "Publier une annonce",
+    "contact": "Contacter",
+    "expires": "Expire dans"
+  },
+  "team": {
+    "create": "Créer une équipe",
+    "join": "Rejoindre",
+    "leave": "Quitter l'équipe",
+    "invite": "Inviter dans l'équipe",
+    "owner": "Propriétaire",
+    "member": "Membre",
+    "no_trophies": "Pas encore de trophées"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all_read": "Tout marquer comme lu",
+    "empty": "Aucune notification",
+    "see_all": "Voir tout"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "all": "Tous"
+  },
+  "ui": {
+    "language": "Langue"
+  },
+  "ranks": {
+    "Rookie": "Recrue",
+    "Bronze": "Bronze",
+    "Silver": "Argent",
+    "Gold": "Or",
+    "Platinum": "Platine",
+    "Diamond": "Diamant",
+    "Master": "Maître",
+    "Apex": "Apex"
+  }
+}

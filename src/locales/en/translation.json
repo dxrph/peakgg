@@ -1,0 +1,99 @@
+{
+  "nav": {
+    "play": "Play",
+    "tournaments": "Tournaments",
+    "leaderboard": "Leaderboard",
+    "teams": "Teams",
+    "scrims": "Scrims"
+  },
+  "auth": {
+    "signin_google": "Sign in with Google",
+    "signout": "Sign out",
+    "welcome": "Welcome to PeakGG",
+    "login": "Login"
+  },
+  "profile": {
+    "edit": "Edit profile",
+    "change_banner": "Change banner",
+    "rank": "Rank",
+    "elo": "ELO",
+    "coins": "Coins",
+    "matches": "Matches",
+    "wins": "Wins",
+    "losses": "Losses",
+    "winrate": "Win Rate",
+    "no_team": "No team",
+    "no_matches": "No matches yet",
+    "no_trophies": "No trophies yet",
+    "recent_matches": "Recent matches",
+    "trophies": "Trophies",
+    "games": "Games",
+    "preferred": "Preferred",
+    "join_tournament": "Join a tournament"
+  },
+  "rank": {
+    "current_rank": "Current rank",
+    "progression": "Your progression",
+    "progression_other": "{{name}}'s progression",
+    "elo_to_next": "ELO to next rank",
+    "completed": "completed",
+    "max_rank": "You reached the top. You're in PeakGG's elite 👑",
+    "motivation_low": "Keep playing to rank up! 💪",
+    "motivation_high": "Halfway there, keep going! 🔥",
+    "current_badge": "CURRENT"
+  },
+  "tournaments": {
+    "upcoming": "Upcoming",
+    "ongoing": "Ongoing",
+    "completed": "Completed",
+    "register": "Register",
+    "prize_pool": "Prize pool",
+    "max_teams": "Max teams",
+    "full": "Tournament full"
+  },
+  "board": {
+    "lft": "Looking for Team",
+    "lfp": "Looking for Players",
+    "post": "Post listing",
+    "contact": "Contact",
+    "expires": "Expires in"
+  },
+  "team": {
+    "create": "Create team",
+    "join": "Join",
+    "leave": "Leave team",
+    "invite": "Invite to team",
+    "owner": "Owner",
+    "member": "Member",
+    "no_trophies": "No trophies yet"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all_read": "Mark all as read",
+    "empty": "No notifications",
+    "see_all": "See all"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All"
+  },
+  "ui": {
+    "language": "Language"
+  },
+  "ranks": {
+    "Rookie": "Rookie",
+    "Bronze": "Bronze",
+    "Silver": "Silver",
+    "Gold": "Gold",
+    "Platinum": "Platinum",
+    "Diamond": "Diamond",
+    "Master": "Master",
+    "Apex": "Apex"
+  }
+}

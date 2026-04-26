@@ -322,6 +322,7 @@ export type Database = {
           elo: number
           email: string | null
           id: string
+          language: string
           peak_coins: number
           preferred_game: string | null
           rank: string
@@ -340,6 +341,7 @@ export type Database = {
           elo?: number
           email?: string | null
           id: string
+          language?: string
           peak_coins?: number
           preferred_game?: string | null
           rank?: string
@@ -358,6 +360,7 @@ export type Database = {
           elo?: number
           email?: string | null
           id?: string
+          language?: string
           peak_coins?: number
           preferred_game?: string | null
           rank?: string
