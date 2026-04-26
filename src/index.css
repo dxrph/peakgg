@@ -127,3 +127,25 @@
     transform: translateY(-1px);
   }
 }
+
+/* Rank progression modal — open animation + current-tier glow pulse */
+@keyframes rankModalIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes rankGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 18px 0 var(--rank-color, #ff4655);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 28px 4px var(--rank-color, #ff4655);
+    opacity: 0.85;
+  }
+}
+.rank-modal[data-state="open"] {
+  animation: rankModalIn 0.25s ease-out !important;
+}
+.rank-glow {
+  animation: rankGlowPulse 2s ease-in-out infinite;
+}
