@@ -36,11 +36,12 @@ export default function RankProgressionModal({
     }
   }, [open, progress.percent]);
 
+  const { t } = useI18n();
   const motivation = isApex
-    ? "Hai raggiunto il massimo. Sei nella élite di PeakGG 👑"
+    ? t("rank.max_rank")
     : progress.percent >= 50
-    ? "Sei a metà strada, ancora un po'! 🔥"
-    : "Continua a giocare per salire di rango! 💪";
+    ? t("rank.motivation_high")
+    : t("rank.motivation_low");
 
   const topBorder = current.gradient ?? current.hex;
 
@@ -84,7 +85,7 @@ export default function RankProgressionModal({
                   className="font-display uppercase tracking-widest mt-2"
                   style={{ fontSize: 12, color: "#6B7280" }}
                 >
-                  {isOwn ? "Rango attuale" : `Progressione di ${username ?? "—"}`}
+                  {isOwn ? t("rank.current_rank") : t("rank.progression_other", { name: username ?? "—" })}
                 </div>
               </div>
             </div>
@@ -107,7 +108,7 @@ export default function RankProgressionModal({
                   className="font-display font-semibold mt-2"
                   style={{ fontSize: 12, color: current.hex }}
                 >
-                  {Math.max(0, progress.nextThreshold - elo)} ELO al prossimo
+                  {Math.max(0, progress.nextThreshold - elo)} {t("rank.elo_to_next")}
                 </div>
               )}
             </div>
@@ -178,8 +179,8 @@ export default function RankProgressionModal({
               style={{ fontSize: 13, color: "#9CA3AF" }}
             >
               {isApex
-                ? `${elo.toLocaleString("it-IT")} ELO — Apex tier`
-                : `${elo} / ${progress.nextThreshold} — ${progress.percent}% completato`}
+                ? `${elo.toLocaleString()} ELO — Apex tier`
+                : `${elo} / ${progress.nextThreshold} — ${progress.percent}% ${t("rank.completed")}`}
             </div>
           </div>
 
