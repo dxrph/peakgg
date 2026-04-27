@@ -51,7 +51,7 @@ export function getEloProgress(elo: number): { current: number; nextThreshold: n
   return { current: elo, nextThreshold: nextRank.minElo, percent: Math.min(100, Math.round((progress / rangeSize) * 100)), nextRank };
 }
 
-export type GameId = "valorant" | "cs2" | "r6";
+export type GameId = "valorant" | "cs2" | "r6s";
 
 export interface GameInfo {
   id: GameId;
@@ -77,7 +77,7 @@ export const GAMES: GameInfo[] = [
     iconUrl: "https://cdn.worldvectorlogo.com/logos/counter-strike-2.svg",
   },
   {
-    id: "r6",
+    id: "r6s",
     name: "Rainbow Six Siege",
     shortName: "R6",
     icon: "🛡️",
