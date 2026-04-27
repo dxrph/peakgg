@@ -1,26 +1,43 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { RANKS, getRankByElo, getEloProgress, type RankInfo } from "@/lib/ranks";
+import { RANKS, GAMES, getRankByElo, getEloProgress, getGameById, type RankInfo, type GameId } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
+import GameIcon from "@/components/GameIcon";
 import { useI18n } from "@/i18n";
 import { Check } from "lucide-react";
+
+export interface PerGameStat {
+  elo: number;
+  wins?: number;
+  losses?: number;
+  matches_played?: number;
+}
 
 export interface RankProgressionModalProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  elo: number;
   username?: string;
   isOwn?: boolean;
+  stats: Partial<Record<GameId, PerGameStat | null>>;
+  game: GameId;
+  onGameChange: (g: GameId) => void;
 }
 
 export default function RankProgressionModal({
   open,
   onOpenChange,
-  elo,
   username,
   isOwn = true,
+  stats,
+  game,
+  onGameChange,
 }: RankProgressionModalProps) {
   const { tRank } = useI18n();
+  const stat = stats[game] ?? null;
+  const elo = stat?.elo ?? 1000;
+  const wins = stat?.wins ?? 0;
+  const losses = stat?.losses ?? 0;
+  const matches = stat?.matches_played ?? wins + losses;
   const current = getRankByElo(elo);
   const progress = getEloProgress(elo);
   const isApex = current.name === "Apex";
@@ -34,7 +51,7 @@ export default function RankProgressionModal({
       const t = window.setTimeout(() => setFillPct(progress.percent), 60);
       return () => window.clearTimeout(t);
     }
-  }, [open, progress.percent]);
+  }, [open, progress.percent, game]);
 
   const { t } = useI18n();
   const motivation = isApex
@@ -58,7 +75,29 @@ export default function RankProgressionModal({
           aria-hidden
         />
 
-        <div className="px-6 pt-6 pb-5 space-y-5">
+        <div className="px-6 pt-5 pb-5 space-y-5">
+          {/* Game selector */}
+          <div className="flex items-center justify-center gap-1 p-1 rounded-lg bg-[#16161A] border border-[#1E1E24]">
+            {GAMES.map((g) => {
+              const active = g.id === game;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => onGameChange(g.id)}
+                  className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-display font-bold uppercase tracking-wider transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <GameIcon game={g.id} size={14} />
+                  {g.shortName}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Section 1 — current rank */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
@@ -85,7 +124,7 @@ export default function RankProgressionModal({
                   className="font-display uppercase tracking-widest mt-2"
                   style={{ fontSize: 12, color: "#6B7280" }}
                 >
-                  {isOwn ? t("rank.current_rank") : t("rank.progression_other", { name: username ?? "—" })}
+                  {getGameById(game).name} — {isOwn ? t("rank.current_rank") : t("rank.progression_other", { name: username ?? "—" })}
                 </div>
               </div>
             </div>
@@ -111,6 +150,28 @@ export default function RankProgressionModal({
                   {Math.max(0, progress.nextThreshold - elo)} {t("rank.elo_to_next")}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Per-game W/L summary */}
+          <div className="flex items-center justify-center gap-6 text-center">
+            <div>
+              <div className="font-mono font-bold text-foreground" style={{ fontSize: 18 }}>{matches}</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">Matches</div>
+            </div>
+            <div>
+              <div className="font-mono font-bold text-success" style={{ fontSize: 18 }}>{wins}</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">Wins</div>
+            </div>
+            <div>
+              <div className="font-mono font-bold text-destructive" style={{ fontSize: 18 }}>{losses}</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">Losses</div>
+            </div>
+            <div>
+              <div className="font-mono font-bold text-primary" style={{ fontSize: 18 }}>
+                {wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%
+              </div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">Win rate</div>
             </div>
           </div>
 
