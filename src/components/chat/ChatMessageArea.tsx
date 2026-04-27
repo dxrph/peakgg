@@ -85,7 +85,7 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
 
                 <div className={cn("max-w-[75%]", compact && "max-w-[85%]")}>
                   {!isGrouped && !isOwn && (
-                    <p className="text-xs font-semibold mb-0.5" style={rank ? { color: rank.color } : undefined}>
+                    <p className="text-xs font-semibold mb-0.5 text-primary">
                       {msg.profile?.username || "Utente"}
                     </p>
                   )}
