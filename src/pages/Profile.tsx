@@ -627,16 +627,6 @@ function PerGameCard({
   );
 }
 
-function _UnusedStatCardKept_({ icon: Icon, label, value, color = "text-foreground", sub }: { icon: any; label: string; value: string | number; color?: string; sub?: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
-      <Icon className={`h-5 w-5 mx-auto mb-2 ${color}`} />
-      <div className="text-xl font-display font-bold">{value}</div>
-      <div className="text-xs text-muted-foreground font-display uppercase tracking-wider">{label}</div>
-      {sub && <div className="mt-1 text-[11px] text-muted-foreground font-body">{sub}</div>}
-    </div>
-  );
-}
 
 function SectionCard({
   title, icon: Icon, hideIcon, children, className = "", bodyClassName = "p-4",
