@@ -538,7 +538,9 @@ export default function ProfilePage() {
       <RankProgressionModal
         open={rankModalOpen}
         onOpenChange={setRankModalOpen}
-        elo={profile.elo}
+        stats={stats}
+        game={rankModalGame}
+        onGameChange={setRankModalGame}
         username={profile.display_name || profile.username}
         isOwn={isOwnProfile}
       />
@@ -702,7 +704,7 @@ function TrophyCard({ row }: { row: TrophyRow }) {
 }
 
 function isGameId(g: string | null | undefined): g is GameId {
-  return g === "valorant" || g === "cs2" || g === "r6";
+  return g === "valorant" || g === "cs2" || g === "r6s";
 }
 
 function computeStats(matches: MatchRow[], userId: string) {
