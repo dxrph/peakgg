@@ -559,6 +559,85 @@ function StatCard({ icon: Icon, label, value, color = "text-foreground", sub }: 
   );
 }
 
+function PerGameCard({
+  game, stat, preferred, onClick,
+}: {
+  game: GameId;
+  stat: PlayerStat | null;
+  preferred: boolean;
+  onClick: () => void;
+}) {
+  const info = getGameById(game);
+  const elo = stat?.elo ?? 1000;
+  const wins = stat?.wins ?? 0;
+  const losses = stat?.losses ?? 0;
+  const total = wins + losses;
+  const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+  const rankInfo = getRankByElo(elo);
+  const progress = getEloProgress(elo);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left rounded-lg border bg-card/70 p-4 transition-all hover:border-primary/60 hover:bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        preferred ? "border-primary/70 shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]" : "border-border"
+      }`}
+      aria-label={`Apri progressione ${info.name}`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <GameIcon game={game} size={22} />
+          <span className="font-display font-bold text-sm truncate">{info.name}</span>
+        </div>
+        {preferred && (
+          <Badge variant="outline" className="text-[9px] py-0 px-1 border-primary text-primary shrink-0">
+            Preferito
+          </Badge>
+        )}
+      </div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <RankBadge elo={elo} size="sm" />
+          <span className="font-display font-bold text-sm truncate" style={{ color: rankInfo.hex }}>
+            {rankInfo.name}
+          </span>
+        </div>
+        <span className="font-mono font-bold text-primary text-sm">{elo}</span>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono mb-2">
+        <span><span className="text-success font-bold">{wins}W</span> / <span className="text-destructive font-bold">{losses}L</span></span>
+        <span>{total > 0 ? `${winRate}% WR` : "—"}</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+        <div
+          className="h-full transition-all"
+          style={{
+            width: `${progress.percent}%`,
+            background: progress.nextRank
+              ? `linear-gradient(90deg, ${rankInfo.hex}, ${progress.nextRank.hex})`
+              : (rankInfo.gradient ?? rankInfo.hex),
+          }}
+        />
+      </div>
+      <div className="text-[10px] text-muted-foreground font-mono mt-1 text-right">
+        {progress.nextRank ? `${Math.max(0, progress.nextThreshold - elo)} → ${progress.nextRank.name}` : "MAX"}
+      </div>
+    </button>
+  );
+}
+
+function _UnusedStatCardKept_({ icon: Icon, label, value, color = "text-foreground", sub }: { icon: any; label: string; value: string | number; color?: string; sub?: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
+      <Icon className={`h-5 w-5 mx-auto mb-2 ${color}`} />
+      <div className="text-xl font-display font-bold">{value}</div>
+      <div className="text-xs text-muted-foreground font-display uppercase tracking-wider">{label}</div>
+      {sub && <div className="mt-1 text-[11px] text-muted-foreground font-body">{sub}</div>}
+    </div>
+  );
+}
+
 function SectionCard({
   title, icon: Icon, hideIcon, children, className = "", bodyClassName = "p-4",
 }: { title: string; icon?: any; hideIcon?: boolean; children: React.ReactNode; className?: string; bodyClassName?: string }) {
