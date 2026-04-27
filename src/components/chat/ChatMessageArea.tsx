@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ChatMessage, ChatChannel } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { getRankByElo } from "@/lib/ranks";
 import { Trash2, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -62,7 +61,6 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
             const isOwn = msg.user_id === user?.id;
             const prevMsg = i > 0 ? messages[i - 1] : null;
             const isGrouped = prevMsg?.user_id === msg.user_id;
-            const rank = msg.profile ? getRankByElo(msg.profile.elo) : null;
 
             return (
               <motion.div
@@ -87,7 +85,7 @@ export default function ChatMessageArea({ channel, messages, loading, onSend, on
 
                 <div className={cn("max-w-[75%]", compact && "max-w-[85%]")}>
                   {!isGrouped && !isOwn && (
-                    <p className="text-xs font-semibold mb-0.5" style={rank ? { color: rank.color } : undefined}>
+                    <p className="text-xs font-semibold mb-0.5 text-primary">
                       {msg.profile?.username || "Utente"}
                     </p>
                   )}

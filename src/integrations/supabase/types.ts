@@ -311,6 +311,56 @@ export type Database = {
           },
         ]
       }
+      player_stats: {
+        Row: {
+          best_win_streak: number
+          created_at: string
+          elo: number
+          game: string
+          id: string
+          losses: number
+          matches_played: number
+          updated_at: string
+          user_id: string
+          win_streak: number
+          wins: number
+        }
+        Insert: {
+          best_win_streak?: number
+          created_at?: string
+          elo?: number
+          game: string
+          id?: string
+          losses?: number
+          matches_played?: number
+          updated_at?: string
+          user_id: string
+          win_streak?: number
+          wins?: number
+        }
+        Update: {
+          best_win_streak?: number
+          created_at?: string
+          elo?: number
+          game?: string
+          id?: string
+          losses?: number
+          matches_played?: number
+          updated_at?: string
+          user_id?: string
+          win_streak?: number
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -319,15 +369,12 @@ export type Database = {
           created_at: string
           discord_username: string | null
           display_name: string | null
-          elo: number
           email: string | null
           id: string
           language: string
           peak_coins: number
           preferred_game: string | null
-          rank: string
           region: string | null
-          tournament_points: number
           updated_at: string
           username: string
         }
@@ -338,15 +385,12 @@ export type Database = {
           created_at?: string
           discord_username?: string | null
           display_name?: string | null
-          elo?: number
           email?: string | null
           id: string
           language?: string
           peak_coins?: number
           preferred_game?: string | null
-          rank?: string
           region?: string | null
-          tournament_points?: number
           updated_at?: string
           username: string
         }
@@ -357,15 +401,12 @@ export type Database = {
           created_at?: string
           discord_username?: string | null
           display_name?: string | null
-          elo?: number
           email?: string | null
           id?: string
           language?: string
           peak_coins?: number
           preferred_game?: string | null
-          rank?: string
           region?: string | null
-          tournament_points?: number
           updated_at?: string
           username?: string
         }

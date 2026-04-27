@@ -11,13 +11,15 @@ import { Crown, Search, Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucid
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-type GameFilter = "all" | "valorant" | "cs2" | "r6";
+import { type GameId } from "@/lib/ranks";
+import GameIcon from "@/components/GameIcon";
+
+type GameFilter = GameId;
 
 const GAME_TABS: { id: GameFilter; label: string }[] = [
-  { id: "all", label: "Tutti" },
   { id: "valorant", label: "Valorant" },
   { id: "cs2", label: "CS2" },
-  { id: "r6", label: "Rainbow Six" },
+  { id: "r6s", label: "Rainbow Six" },
 ];
 
 const PAGE_SIZE = 25;
@@ -28,7 +30,6 @@ interface PlayerRow {
   display_name: string | null;
   avatar_url: string | null;
   elo: number;
-  preferred_game: string | null;
   wins: number;
   losses: number;
   team_name: string | null;
@@ -50,7 +51,7 @@ function CrownIcon({ rank }: { rank: number }) {
 
 export default function LeaderboardPage() {
   const { user } = useAuth();
-  const [game, setGame] = useState<GameFilter>("all");
+  const [game, setGame] = useState<GameFilter>("valorant");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [allPlayers, setAllPlayers] = useState<PlayerRow[]>([]);
@@ -61,62 +62,49 @@ export default function LeaderboardPage() {
     async function load() {
       setLoading(true);
 
-      // Fetch profiles ordered by elo desc
-      let query = supabase
-        .from("profiles")
-        .select("id, username, display_name, avatar_url, elo, preferred_game")
+      // Fetch player_stats for the selected game, with embedded profile
+      const { data: stats } = await supabase
+        .from("player_stats")
+        .select("user_id, elo, wins, losses, profile:profiles!inner(id, username, display_name, avatar_url)")
+        .eq("game", game)
         .order("elo", { ascending: false })
         .limit(1000);
-
-      if (game !== "all") {
-        query = query.eq("preferred_game", game);
+      if (cancelled || !stats) {
+        if (!cancelled) {
+          setAllPlayers([]);
+          setLoading(false);
+        }
+        return;
       }
 
-      const { data: profiles } = await query;
-      if (cancelled || !profiles) return;
-
-      const ids = profiles.map((p) => p.id);
-
-      // Matches for win-rate
-      const { data: matches } = await supabase
-        .from("matches")
-        .select("player_a_id, player_b_id, winner_id, status")
-        .in("status", ["completed"])
-        .or(`player_a_id.in.(${ids.join(",")}),player_b_id.in.(${ids.join(",")})`);
+      const ids = stats.map((s: any) => s.user_id);
 
       // Team membership
-      const { data: members } = await supabase
-        .from("team_members")
-        .select("user_id, teams!inner(name, tag)")
-        .in("user_id", ids);
-
-      const winsMap = new Map<string, number>();
-      const lossMap = new Map<string, number>();
-      (matches ?? []).forEach((m: any) => {
-        const players = [m.player_a_id, m.player_b_id].filter(Boolean);
-        players.forEach((pid: string) => {
-          if (m.winner_id === pid) winsMap.set(pid, (winsMap.get(pid) ?? 0) + 1);
-          else if (m.winner_id) lossMap.set(pid, (lossMap.get(pid) ?? 0) + 1);
-        });
-      });
+      const { data: members } = ids.length
+        ? await supabase
+            .from("team_members")
+            .select("user_id, teams!inner(name, tag)")
+            .in("user_id", ids)
+        : { data: [] as any[] };
 
       const teamMap = new Map<string, { name: string; tag: string }>();
       (members ?? []).forEach((m: any) => {
         if (m.teams) teamMap.set(m.user_id, { name: m.teams.name, tag: m.teams.tag });
       });
 
-      const rows: PlayerRow[] = profiles.map((p) => ({
-        id: p.id,
-        username: p.username,
-        display_name: p.display_name,
-        avatar_url: p.avatar_url,
-        elo: p.elo ?? 0,
-        preferred_game: p.preferred_game,
-        wins: winsMap.get(p.id) ?? 0,
-        losses: lossMap.get(p.id) ?? 0,
-        team_name: teamMap.get(p.id)?.name ?? null,
-        team_tag: teamMap.get(p.id)?.tag ?? null,
-      }));
+      const rows: PlayerRow[] = (stats as any[])
+        .filter((s) => s.profile)
+        .map((s: any) => ({
+          id: s.profile.id,
+          username: s.profile.username,
+          display_name: s.profile.display_name,
+          avatar_url: s.profile.avatar_url,
+          elo: s.elo ?? 0,
+          wins: s.wins ?? 0,
+          losses: s.losses ?? 0,
+          team_name: teamMap.get(s.user_id)?.name ?? null,
+          team_tag: teamMap.get(s.user_id)?.tag ?? null,
+        }));
 
       if (!cancelled) {
         setAllPlayers(rows);
@@ -181,6 +169,7 @@ export default function LeaderboardPage() {
             <TabsList className="bg-card border border-border">
               {GAME_TABS.map((t) => (
                 <TabsTrigger key={t.id} value={t.id} className="font-display">
+                  <GameIcon game={t.id} size={14} className="mr-1.5" />
                   {t.label}
                 </TabsTrigger>
               ))}

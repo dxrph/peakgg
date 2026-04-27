@@ -66,7 +66,7 @@ type UploadResult = { ok: true; url: string } | { ok: false; error: string };
 
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { GAMES, getGameById, type GameId, getRankByElo } from "@/lib/ranks";
+import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
 type Profile = {
@@ -76,11 +76,19 @@ type Profile = {
   avatar_url: string | null;
   banner_url: string | null;
   bio: string | null;
-  elo: number;
   peak_coins: number;
-  tournament_points: number;
   preferred_game: string | null;
-  rank: string;
+};
+
+type PlayerStat = {
+  user_id: string;
+  game: GameId;
+  elo: number;
+  matches_played: number;
+  wins: number;
+  losses: number;
+  win_streak: number;
+  best_win_streak: number;
 };
 
 type TeamRow = {
@@ -119,11 +127,16 @@ export default function ProfilePage() {
   const [team, setTeam] = useState<TeamRow["team"] | null>(null);
   const [matches, setMatches] = useState<MatchRow[]>([]);
   const [trophies, setTrophies] = useState<TrophyRow[]>([]);
-  const [activeGames, setActiveGames] = useState<GameId[]>([]);
+  const [stats, setStats] = useState<Record<GameId, PlayerStat | null>>({
+    valorant: null,
+    cs2: null,
+    r6s: null,
+  });
   const [ownsTeam, setOwnsTeam] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [rankModalOpen, setRankModalOpen] = useState(false);
+  const [rankModalGame, setRankModalGame] = useState<GameId>("valorant");
 
   const isOwnProfile = !!user && !!profile && user.id === profile.id;
 
@@ -133,7 +146,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, avatar_url, banner_url, bio, elo, peak_coins, tournament_points, preferred_game, rank")
+        .select("id, username, display_name, avatar_url, banner_url, bio, peak_coins, preferred_game")
         .eq("username", username!)
         .maybeSingle();
 
@@ -141,7 +154,7 @@ export default function ProfilePage() {
       if (!p) { setProfile(null); setLoading(false); return; }
       setProfile(p as Profile);
 
-      const [{ data: tm }, { data: ms }, { data: trs }] = await Promise.all([
+      const [{ data: tm }, { data: ms }, { data: trs }, { data: ps }] = await Promise.all([
         supabase
           .from("team_members")
           .select("team:teams(id, name, tag, avatar_url, game, avg_elo)")
@@ -161,19 +174,24 @@ export default function ProfilePage() {
           .not("placement", "is", null)
           .order("registered_at", { ascending: false })
           .limit(12),
+        supabase
+          .from("player_stats")
+          .select("user_id, game, elo, matches_played, wins, losses, win_streak, best_win_streak")
+          .eq("user_id", p.id),
       ]);
       if (!active) return;
       setTeam((tm as any)?.team ?? null);
       setMatches((ms as MatchRow[]) ?? []);
       setTrophies(((trs as any[]) ?? []).filter(t => t.tournament) as TrophyRow[]);
 
-      // Derive active games from matches + preferred game + team game
-      const games = new Set<GameId>();
-      ((ms as MatchRow[]) ?? []).forEach(m => { if (isGameId(m.game)) games.add(m.game as GameId); });
-      if (isGameId(p.preferred_game)) games.add(p.preferred_game as GameId);
-      const teamGame = (tm as any)?.team?.game;
-      if (isGameId(teamGame)) games.add(teamGame as GameId);
-      setActiveGames(Array.from(games));
+      // Map per-game stats
+      const map: Record<GameId, PlayerStat | null> = { valorant: null, cs2: null, r6s: null };
+      ((ps as any[]) ?? []).forEach((row: any) => {
+        if (row.game === "valorant" || row.game === "cs2" || row.game === "r6s") {
+          map[row.game as GameId] = row as PlayerStat;
+        }
+      });
+      setStats(map);
 
       // Check if viewer owns a team (for invite button)
       if (user && user.id !== p.id) {
@@ -215,8 +233,15 @@ export default function ProfilePage() {
     );
   }
 
-  const stats = computeStats(matches, profile.id);
-  const rankInfo = getRankByElo(profile.elo);
+  const matchStats = computeStats(matches, profile.id);
+  // Header rank: use the user's preferred game stats (fallback to highest ELO across games)
+  const preferredGame: GameId = isGameId(profile.preferred_game) ? (profile.preferred_game as GameId) : "valorant";
+  const headerStat: PlayerStat | null =
+    stats[preferredGame] ??
+    (Object.values(stats).filter(Boolean) as PlayerStat[]).sort((a, b) => b.elo - a.elo)[0] ??
+    null;
+  const headerElo = headerStat?.elo ?? 1000;
+  const rankInfo = getRankByElo(headerElo);
 
   const handleInvite = async () => {
     if (!ownsTeam) return;
@@ -322,7 +347,7 @@ export default function ProfilePage() {
                     className="rounded-md transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Mostra progressione ranghi"
                   >
-                    <RankBadge elo={profile.elo} size="lg" showLabel />
+                    <RankBadge elo={headerElo} size="lg" showLabel />
                   </button>
                   {team && (
                     <Link to={`/teams/${team.id}`} className="text-sm font-mono text-primary hover:underline">
@@ -330,7 +355,7 @@ export default function ProfilePage() {
                     </Link>
                   )}
                 </div>
-                <EloProgressBar elo={profile.elo} className="mt-3 w-full" />
+                <EloProgressBar elo={headerElo} className="mt-3 w-full" />
                 {profile.bio && (
                   <p className="text-sm mt-3 font-body max-w-prose text-muted-foreground">
                     {profile.bio}
@@ -341,8 +366,10 @@ export default function ProfilePage() {
               {/* ELO + Coins — wraps below on mobile */}
               <div className="flex items-center gap-5 text-center md:self-start md:pt-1 md:pr-28">
                 <div>
-                  <div className="text-2xl font-display font-bold text-primary">{profile.elo}</div>
-                  <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">ELO</div>
+                  <div className="text-2xl font-display font-bold text-primary">{headerElo}</div>
+                  <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">
+                    ELO {getGameById(preferredGame).shortName}
+                  </div>
                 </div>
                 <div>
                   <div className="text-2xl font-display font-bold flex items-center gap-1 justify-center">
@@ -355,43 +382,29 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Games — inline row, no card border, slightly lighter background */}
-          <div className="px-4 md:px-8 py-2 bg-secondary/30 border-t border-border flex items-center gap-3 flex-wrap">
-            <span className="text-[11px] font-display uppercase tracking-widest text-muted-foreground shrink-0">
+          {/* Per-game stats cards */}
+          <div className="px-4 md:px-8 py-4 bg-secondary/20 border-t border-border">
+            <div className="text-[11px] font-display uppercase tracking-widest text-muted-foreground mb-3">
               Giochi
-            </span>
-            {activeGames.length === 0 ? (
-              <span className="text-xs text-muted-foreground font-body">Nessun gioco collegato.</span>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {activeGames.map((g) => {
-                  const info = getGameById(g);
-                  const preferred = profile.preferred_game === g;
-                  return (
-                    <div
-                      key={g}
-                      className={`flex items-center gap-2 rounded-md px-2.5 py-1 bg-card/60 border ${
-                        preferred
-                          ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]"
-                          : "border-border"
-                      }`}
-                      title={preferred ? "Gioco preferito" : info.name}
-                    >
-                      <GameIcon game={g} size={18} />
-                      <span className="font-display font-semibold text-xs">{info.shortName}</span>
-                      {preferred && (
-                        <Badge
-                          variant="outline"
-                          className="text-[9px] py-0 px-1 border-primary text-primary"
-                        >
-                          Preferito
-                        </Badge>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {GAMES.map((g) => {
+                const s = stats[g.id];
+                const preferred = profile.preferred_game === g.id;
+                return (
+                  <PerGameCard
+                    key={g.id}
+                    game={g.id}
+                    stat={s}
+                    preferred={preferred}
+                    onClick={() => {
+                      setRankModalGame(g.id);
+                      setRankModalOpen(true);
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -400,46 +413,34 @@ export default function ProfilePage() {
           <StatCard
             icon={Swords}
             label="Matches"
-            value={stats.played}
-            sub={`${stats.thisMonth} questo mese`}
+            value={matchStats.played}
+            sub={`${matchStats.thisMonth} questo mese`}
           />
           <StatCard
             icon={Trophy}
             label="Wins"
-            value={stats.wins}
+            value={matchStats.wins}
             color="text-success"
-            sub={stats.streak > 1 ? `🔥 ${stats.streak} streak` : "—"}
+            sub={matchStats.streak > 1 ? `🔥 ${matchStats.streak} streak` : "—"}
           />
           <StatCard
             icon={Swords}
             label="Losses"
-            value={stats.losses}
+            value={matchStats.losses}
             color="text-destructive"
-            sub={stats.lastLossDays != null ? `Ultima sconfitta: ${stats.lastLossDays}gg fa` : "Nessuna sconfitta"}
+            sub={matchStats.lastLossDays != null ? `Ultima sconfitta: ${matchStats.lastLossDays}gg fa` : "Nessuna sconfitta"}
           />
           <div className="rounded-lg border border-border bg-card p-4 text-center neon-border">
             <Trophy className="h-5 w-5 mx-auto mb-2 text-primary" />
-            <div className="text-xl font-display font-bold">{stats.winRate}%</div>
+            <div className="text-xl font-display font-bold">{matchStats.winRate}%</div>
             <div className="text-xs text-muted-foreground font-display uppercase tracking-wider mb-2">Win Rate</div>
             <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
               <div
-                className={`h-full transition-all ${stats.winRate >= 50 ? "bg-success" : "bg-destructive"}`}
-                style={{ width: `${stats.winRate}%` }}
+                className={`h-full transition-all ${matchStats.winRate >= 50 ? "bg-success" : "bg-destructive"}`}
+                style={{ width: `${matchStats.winRate}%` }}
               />
             </div>
           </div>
-        </div>
-
-        {/* Tournament points */}
-        <div className="rounded-lg border border-border bg-card p-4 mb-6 neon-border flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Award className="h-6 w-6 text-accent" />
-            <div>
-              <div className="text-xs text-muted-foreground font-display uppercase tracking-wider">Tournament Points</div>
-              <div className="text-2xl font-display font-bold">{profile.tournament_points}</div>
-            </div>
-          </div>
-          <Badge variant="outline" className="font-display">Highest tier reached: T{tierFromTP(profile.tournament_points)}</Badge>
         </div>
 
         {/* Team */}
@@ -537,7 +538,9 @@ export default function ProfilePage() {
       <RankProgressionModal
         open={rankModalOpen}
         onOpenChange={setRankModalOpen}
-        elo={profile.elo}
+        stats={stats}
+        game={rankModalGame}
+        onGameChange={setRankModalGame}
         username={profile.display_name || profile.username}
         isOwn={isOwnProfile}
       />
@@ -555,6 +558,75 @@ function StatCard({ icon: Icon, label, value, color = "text-foreground", sub }: 
     </div>
   );
 }
+
+function PerGameCard({
+  game, stat, preferred, onClick,
+}: {
+  game: GameId;
+  stat: PlayerStat | null;
+  preferred: boolean;
+  onClick: () => void;
+}) {
+  const info = getGameById(game);
+  const elo = stat?.elo ?? 1000;
+  const wins = stat?.wins ?? 0;
+  const losses = stat?.losses ?? 0;
+  const total = wins + losses;
+  const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+  const rankInfo = getRankByElo(elo);
+  const progress = getEloProgress(elo);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left rounded-lg border bg-card/70 p-4 transition-all hover:border-primary/60 hover:bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        preferred ? "border-primary/70 shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]" : "border-border"
+      }`}
+      aria-label={`Apri progressione ${info.name}`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <GameIcon game={game} size={22} />
+          <span className="font-display font-bold text-sm truncate">{info.name}</span>
+        </div>
+        {preferred && (
+          <Badge variant="outline" className="text-[9px] py-0 px-1 border-primary text-primary shrink-0">
+            Preferito
+          </Badge>
+        )}
+      </div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <RankBadge elo={elo} size="sm" />
+          <span className="font-display font-bold text-sm truncate" style={{ color: rankInfo.hex }}>
+            {rankInfo.name}
+          </span>
+        </div>
+        <span className="font-mono font-bold text-primary text-sm">{elo}</span>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono mb-2">
+        <span><span className="text-success font-bold">{wins}W</span> / <span className="text-destructive font-bold">{losses}L</span></span>
+        <span>{total > 0 ? `${winRate}% WR` : "—"}</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+        <div
+          className="h-full transition-all"
+          style={{
+            width: `${progress.percent}%`,
+            background: progress.nextRank
+              ? `linear-gradient(90deg, ${rankInfo.hex}, ${progress.nextRank.hex})`
+              : (rankInfo.gradient ?? rankInfo.hex),
+          }}
+        />
+      </div>
+      <div className="text-[10px] text-muted-foreground font-mono mt-1 text-right">
+        {progress.nextRank ? `${Math.max(0, progress.nextThreshold - elo)} → ${progress.nextRank.name}` : "MAX"}
+      </div>
+    </button>
+  );
+}
+
 
 function SectionCard({
   title, icon: Icon, hideIcon, children, className = "", bodyClassName = "p-4",
@@ -701,7 +773,7 @@ function TrophyCard({ row }: { row: TrophyRow }) {
 }
 
 function isGameId(g: string | null | undefined): g is GameId {
-  return g === "valorant" || g === "cs2" || g === "r6";
+  return g === "valorant" || g === "cs2" || g === "r6s";
 }
 
 function computeStats(matches: MatchRow[], userId: string) {
