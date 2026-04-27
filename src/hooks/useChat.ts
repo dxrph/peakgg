@@ -18,7 +18,7 @@ export interface ChatMessage {
   user_id: string;
   content: string;
   created_at: string;
-  profile?: { username: string; avatar_url: string | null; elo: number };
+  profile?: { username: string; avatar_url: string | null };
 }
 
 const PAGE_SIZE = 50;
@@ -66,7 +66,7 @@ export function useChat() {
         const userIds = [...new Set(data.map((m: any) => m.user_id))];
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("id, username, avatar_url, elo")
+          .select("id, username, avatar_url")
           .in("id", userIds);
         const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
         setMessages(
@@ -98,7 +98,7 @@ export function useChat() {
             // Fetch the profile for the new message
             supabase
               .from("profiles")
-              .select("username, avatar_url, elo")
+              .select("username, avatar_url")
               .eq("id", newMsg.user_id)
               .single()
               .then(({ data: profile }) => {
@@ -155,7 +155,7 @@ export function useChat() {
         // Fetch own profile for display
         const { data: profile } = await supabase
           .from("profiles")
-          .select("username, avatar_url, elo")
+          .select("username, avatar_url")
           .eq("id", user.id)
           .single();
 
