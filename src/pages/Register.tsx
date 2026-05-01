@@ -3,10 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mountain, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mountain, Mail, Lock, User, Eye, EyeOff, Loader2, Check, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import GoogleButton from "@/components/GoogleButton";
+import {
+  passwordSchema,
+  passwordStrength,
+  emailSchema,
+  usernameSchema,
+  isDisposableEmail,
+} from "@/lib/security";
+import { containsProfanity } from "@/lib/profanity";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,12 +31,37 @@ export default function RegisterPage() {
       toast.error("Please fill in all fields");
       return;
     }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+
+    const usernameCheck = usernameSchema.safeParse(username);
+    if (!usernameCheck.success) {
+      toast.error(usernameCheck.error.issues[0].message);
       return;
     }
+    if (containsProfanity(usernameCheck.data)) {
+      toast.error("Please choose a different username.");
+      return;
+    }
+
+    const emailCheck = emailSchema.safeParse(email);
+    if (!emailCheck.success) {
+      toast.error(emailCheck.error.issues[0].message);
+      return;
+    }
+
+    const pwCheck = passwordSchema.safeParse(password);
+    if (!pwCheck.success) {
+      toast.error(pwCheck.error.issues[0].message);
+      return;
+    }
+
     setIsLoading(true);
-    const { error } = await signUp(email, password, username);
+    if (await isDisposableEmail(emailCheck.data)) {
+      setIsLoading(false);
+      toast.error("Disposable email addresses are not allowed.");
+      return;
+    }
+
+    const { error } = await signUp(emailCheck.data, pwCheck.data, usernameCheck.data);
     setIsLoading(false);
     if (error) {
       toast.error(error.message);
@@ -87,13 +120,14 @@ export default function RegisterPage() {
               <Label htmlFor="password" className="font-body">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min 6 characters"
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="At least 8 characters"
                   value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-card border-border" disabled={isLoading} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <PasswordChecklist password={password} />
             </div>
 
             <Button variant="neon" className="w-full" size="lg" disabled={isLoading}>
