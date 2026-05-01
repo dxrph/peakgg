@@ -10,7 +10,11 @@ import {
   Shield, Users, Trophy, Swords, AlertTriangle, Ban, Search, Plus, Eye,
   CheckCircle2, XCircle, FileText,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const tabs = [
   { id: "users", label: "Users", icon: Users },
@@ -78,6 +82,43 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("users");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        navigate("/", { replace: true });
+      } else {
+        setIsAdmin(true);
+      }
+      setChecking(false);
+    }
+    check();
+    return () => { cancelled = true; };
+  }, [user, navigate]);
+
+  if (checking || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <div className="container pt-24 pb-16 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
