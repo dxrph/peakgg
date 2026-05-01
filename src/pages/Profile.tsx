@@ -23,49 +23,52 @@ const BANNER_MAX_BYTES = 5 * 1024 * 1024;
 const BANNER_ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
 const BANNER_ALLOWED_EXT = ["jpg", "jpeg", "png", "webp"];
 
-function validateBannerFile(file: File): string | null {
+type TFn = (key: string, options?: Record<string, unknown>) => string;
+
+function validateBannerFile(file: File, t: TFn): string | null {
   const ext = (file.name.split(".").pop() ?? "").toLowerCase();
   const mimeOk = BANNER_ALLOWED_MIME.includes(file.type);
   const extOk = BANNER_ALLOWED_EXT.includes(ext);
   if (!mimeOk && !extOk) {
-    return "Formato non supportato. Usa JPG, PNG o WebP.";
+    return t("profile_page.banner_unsupported");
   }
   if (file.size > BANNER_MAX_BYTES) {
     const mb = (file.size / (1024 * 1024)).toFixed(1);
-    return `File troppo grande (${mb} MB). Massimo 5 MB.`;
+    return t("profile_page.file_too_large", { mb });
   }
   if (file.size === 0) {
-    return "Il file è vuoto o danneggiato.";
+    return t("profile_page.banner_empty");
   }
   return null;
 }
 
-function friendlyBannerError(err: unknown): string {
+function friendlyBannerError(err: unknown, t: TFn): string {
   const raw = (err as any)?.message ?? String(err ?? "");
   const msg = raw.toLowerCase();
-  if (!navigator.onLine) return "Sei offline — controlla la connessione e riprova.";
+  if (!navigator.onLine) return t("profile_page.offline");
   if (msg.includes("row-level security") || msg.includes("not authorized") || msg.includes("permission") || msg.includes("403") || msg.includes("unauthorized")) {
-    return "Permesso negato. Esegui di nuovo il login e riprova.";
+    return t("profile_page.banner_perm_denied");
   }
   if (msg.includes("payload too large") || msg.includes("413") || msg.includes("exceeded the maximum allowed size")) {
-    return "File troppo grande. Massimo 5 MB.";
+    return t("profile_page.file_too_large_simple");
   }
   if (msg.includes("mime") || msg.includes("invalid_mime") || msg.includes("not allowed")) {
-    return "Formato non supportato. Usa JPG, PNG o WebP.";
+    return t("profile_page.banner_unsupported_mime");
   }
   if (msg.includes("network") || msg.includes("failed to fetch") || msg.includes("fetch failed")) {
-    return "Errore di rete durante il caricamento. Riprova.";
+    return t("profile_page.network_error");
   }
   if (msg.includes("bucket not found")) {
-    return "Storage non configurato (bucket mancante). Contatta l'amministratore.";
+    return t("profile_page.banner_storage_missing");
   }
-  return raw || "Caricamento fallito. Riprova.";
+  return raw || t("profile_page.upload_failed");
 }
 
 type UploadResult = { ok: true; url: string } | { ok: false; error: string };
 
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n";
 import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
@@ -122,6 +125,7 @@ export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
   const { user, profile: myProfile } = useAuth();
+  const { t } = useI18n();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [team, setTeam] = useState<TeamRow["team"] | null>(null);
@@ -251,9 +255,9 @@ export default function ProfilePage() {
 
   const handleBannerUpload = async (file: File): Promise<UploadResult> => {
     if (!isOwnProfile) {
-      return { ok: false, error: "Non sei il proprietario di questo profilo." };
+      return { ok: false, error: t("profile_page.not_owner") };
     }
-    const validationError = validateBannerFile(file);
+    const validationError = validateBannerFile(file, t);
     if (validationError) {
       toast.error(validationError);
       return { ok: false, error: validationError };
@@ -269,10 +273,10 @@ export default function ProfilePage() {
       const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
       if (updErr) throw updErr;
       setProfile({ ...profile, banner_url: pub.publicUrl });
-      toast.success("Banner aggiornato");
+      toast.success(t("profile_page.banner_updated"));
       return { ok: true, url: pub.publicUrl };
     } catch (err) {
-      const message = friendlyBannerError(err);
+      const message = friendlyBannerError(err, t);
       toast.error(message);
       return { ok: false, error: message };
     }
@@ -645,6 +649,7 @@ function SectionCard({
 function ProfileBanner({
   url, isOwn, onUpload,
 }: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<UploadResult> }) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
@@ -710,7 +715,7 @@ function ProfileBanner({
             />
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-              {busy ? "Caricamento…" : "Cambia banner"}
+              {busy ? t("profile_page.loading") : t("profile_page.change_banner")}
             </span>
           </Label>
 
@@ -823,6 +828,7 @@ function EditProfileDialog({
   profile: Profile;
   onSaved: (p: Partial<Profile>) => void;
 }) {
+  const { t } = useI18n();
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio ?? "");
   const [preferredGame, setPreferredGame] = useState(profile.preferred_game ?? "");
@@ -855,7 +861,7 @@ function EditProfileDialog({
   };
 
   const uploadBannerFile = async (file: File) => {
-    const validationError = validateBannerFile(file);
+    const validationError = validateBannerFile(file, t);
     if (validationError) {
       setBannerError(validationError);
       toast.error(validationError);
@@ -873,9 +879,9 @@ function EditProfileDialog({
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
       setBannerUrl(data.publicUrl);
-      toast.success("Banner caricato");
+      toast.success(t("profile_page.banner_updated"));
     } catch (err) {
-      const message = friendlyBannerError(err);
+      const message = friendlyBannerError(err, t);
       setBannerError(message);
       toast.error(message);
     } finally {
@@ -952,7 +958,7 @@ function EditProfileDialog({
                 />
                 <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
                   {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                  {bannerUploading ? "Caricamento…" : "Cambia banner"}
+                  {bannerUploading ? t("profile_page.loading") : t("profile_page.change_banner")}
                 </span>
               </Label>
             </div>

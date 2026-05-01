@@ -451,5 +451,29 @@
     "title": "404",
     "subtitle": "Ops! Pagina non trovata",
     "back_home": "Torna alla home"
+  },
+  "notifications_page": {
+    "title": "Notifiche",
+    "unread_count": "Hai {{count}} notifiche non lette",
+    "all_caught_up": "Sei in pari con tutte le notifiche.",
+    "mark_all_read": "Segna tutte come lette",
+    "loading": "Caricamento…",
+    "empty": "Nessuna notifica ricevuta."
+  },
+  "profile_page": {
+    "not_owner": "Non sei il proprietario di questo profilo.",
+    "loading": "Caricamento…",
+    "file_too_large": "File troppo grande ({{mb}} MB). Massimo 5 MB.",
+    "file_too_large_simple": "File troppo grande. Massimo 5 MB.",
+    "offline": "Sei offline — controlla la connessione e riprova.",
+    "network_error": "Errore di rete durante il caricamento. Riprova.",
+    "upload_failed": "Caricamento fallito. Riprova.",
+    "banner_unsupported": "Formato non supportato. Usa JPG, PNG o WebP.",
+    "banner_empty": "Il file è vuoto o danneggiato.",
+    "banner_perm_denied": "Permesso negato. Esegui di nuovo il login e riprova.",
+    "banner_unsupported_mime": "Formato non supportato. Usa JPG, PNG o WebP.",
+    "banner_storage_missing": "Storage non configurato (bucket mancante). Contatta l'amministratore.",
+    "change_banner": "Cambia banner",
+    "banner_updated": "Banner aggiornato"
   }
 }
