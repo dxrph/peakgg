@@ -482,7 +482,15 @@
     "loading": "Chargement du classement…",
     "empty": "Aucun joueur trouvé.",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "search_placeholder": "Recherche par pseudo…",
+    "you": "(Toi)",
+    "page_info": "Page {{page}} sur {{total}} — {{count}} joueurs",
+    "col_player": "Joueur",
+    "col_rank": "Rang",
+    "col_elo": "ELO",
+    "col_winrate": "Win Rate",
+    "col_team": "Équipe"
   },
   "profile_page_extra": {
     "not_found": "Profil introuvable",

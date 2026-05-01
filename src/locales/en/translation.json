@@ -483,7 +483,15 @@
     "loading": "Loading leaderboard…",
     "empty": "No players found.",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "search_placeholder": "Search by username…",
+    "you": "(You)",
+    "page_info": "Page {{page}} of {{total}} — {{count}} players",
+    "col_player": "Player",
+    "col_rank": "Rank",
+    "col_elo": "ELO",
+    "col_winrate": "Win Rate",
+    "col_team": "Team"
   },
   "profile_page_extra": {
     "not_found": "Profile not found",

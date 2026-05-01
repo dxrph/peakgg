@@ -483,7 +483,15 @@
     "loading": "Caricamento classifica…",
     "empty": "Nessun giocatore trovato.",
     "previous": "Precedente",
-    "next": "Successiva"
+    "next": "Successiva",
+    "search_placeholder": "Cerca per username…",
+    "you": "(Tu)",
+    "page_info": "Pagina {{page}} di {{total}} — {{count}} giocatori",
+    "col_player": "Giocatore",
+    "col_rank": "Rank",
+    "col_elo": "ELO",
+    "col_winrate": "Win Rate",
+    "col_team": "Team"
   },
   "profile_page_extra": {
     "not_found": "Profilo non trovato",
