@@ -925,7 +925,7 @@ function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Edit profile</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("profile_page_extra.edit_profile")}</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
@@ -982,7 +982,7 @@ function EditProfileDialog({
                 </Button>
               </div>
             ) : (
-              <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG o WebP — max 5 MB</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{t("profile_page_extra.file_hint")}</p>
             )}
           </div>
           <div>
@@ -994,7 +994,7 @@ function EditProfileDialog({
             <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={280} />
           </div>
           <div>
-            <Label>Preferred game</Label>
+            <Label>{t("profile_page_extra.preferred_game")}</Label>
             <Select value={preferredGame} onValueChange={setPreferredGame}>
               <SelectTrigger><SelectValue placeholder="Select a game" /></SelectTrigger>
               <SelectContent>
