@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          reason: string | null
+          target_id: string | null
+          target_resource: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_resource?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_resource?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       chat_mutes: {
         Row: {
           created_at: string
@@ -74,6 +110,21 @@ export type Database = {
           video_url?: string | null
           votes?: number
           week?: string | null
+        }
+        Relationships: []
+      }
+      disposable_email_domains: {
+        Row: {
+          added_at: string
+          domain: string
+        }
+        Insert: {
+          added_at?: string
+          domain: string
+        }
+        Update: {
+          added_at?: string
+          domain?: string
         }
         Relationships: []
       }
@@ -161,6 +212,45 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      gdpr_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          export_url: string | null
+          id: string
+          notes: string | null
+          scheduled_for: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          export_url?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_for?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          export_url?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_for?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -919,6 +1009,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_disposable_email: { Args: { _email: string }; Returns: boolean }
       is_muted: {
         Args: { _scope: string; _team_id?: string; _user_id: string }
         Returns: boolean
