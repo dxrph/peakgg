@@ -1,4 +1,5 @@
 import Navbar from "@/components/landing/Navbar";
+import SEO from "@/components/SEO";
 import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

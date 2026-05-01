@@ -32,7 +32,7 @@ export default function Footer() {
             <h4 className="font-display font-bold mb-4 uppercase tracking-wider text-sm">Support</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
               <li><Link to="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
-              <li><a href="https://discord.gg" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Discord</a></li>
+              <li><a href="https://discord.gg" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Discord</a></li>
               <li><Link to="/report" className="hover:text-primary transition-colors">Report</Link></li>
             </ul>
           </div>

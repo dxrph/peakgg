@@ -1,4 +1,5 @@
 import Navbar from "@/components/landing/Navbar";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
@@ -18,6 +19,7 @@ export default function PlayPage() {
   if (game.status !== "live") {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <SEO title="Play — PeakGG | Ranked Matchmaking" description="Queue ranked matches on PeakGG with skill-based matchmaking and anti-smurf protection." path="/play" />
         <Navbar />
         <div className="pt-24"><GameComingSoon /></div>
       </div>
@@ -36,6 +38,7 @@ export default function PlayPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO title="Play — PeakGG | Ranked Matchmaking" description="Queue Valorant ranked matches on PeakGG. Skill-based matchmaking, anti-smurf protection and live ELO updates." path="/play" />
       <Navbar />
       <div className="container pt-24 pb-16 flex flex-col items-center justify-center min-h-[80vh]">
         <div className="text-center max-w-lg">

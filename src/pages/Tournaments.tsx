@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,9 +33,28 @@ export default function TournamentsPage() {
   const filtered = tournaments.filter(t => t.game === selectedGame);
   const game = GAMES.find(g => g.id === selectedGame)!;
 
+  const seo = (
+    <SEO
+      title="Tournaments — PeakGG | Valorant CS2 R6 Competitions"
+      description="Join free Valorant tournaments and competitive events on PeakGG. Open Cup, Challenger Series and Peak Championship for Valorant, CS2 and Rainbow Six Siege players."
+      keywords="free Valorant tournaments, CS2 competitive platform, Rainbow Six Siege tournaments, FPS esports Europe, PeakGG tournaments"
+      path="/tournaments"
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        name: "PeakGG Open Cup Season 1",
+        sport: "Esports",
+        organizer: { "@type": "Organization", name: "PeakGG", url: "https://peakgg.net" },
+        url: "https://peakgg.net/tournaments",
+        description: "Free competitive Valorant tournament on PeakGG",
+      }}
+    />
+  );
+
   if (game.status !== "live") {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        {seo}
         <Navbar />
         <div className="pt-24"><GameComingSoon /></div>
         <Footer />
@@ -44,6 +64,7 @@ export default function TournamentsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {seo}
       <Navbar />
       <div className="container pt-24 pb-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
