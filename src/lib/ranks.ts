@@ -59,6 +59,7 @@ export interface GameInfo {
   shortName: string;
   icon: string; // legacy emoji (kept for chat channel labels, etc.)
   iconUrl: string; // official logo URL — use via <GameIcon /> component
+  status: "live" | "coming_soon";
 }
 
 export const GAMES: GameInfo[] = [
@@ -68,6 +69,7 @@ export const GAMES: GameInfo[] = [
     shortName: "VAL",
     icon: "🎯",
     iconUrl: "https://cdn.worldvectorlogo.com/logos/valorant.svg",
+    status: "live",
   },
   {
     id: "cs2",
@@ -75,6 +77,7 @@ export const GAMES: GameInfo[] = [
     shortName: "CS2",
     icon: "💥",
     iconUrl: "https://cdn.worldvectorlogo.com/logos/counter-strike-2.svg",
+    status: "coming_soon",
   },
   {
     id: "r6s",
@@ -82,6 +85,7 @@ export const GAMES: GameInfo[] = [
     shortName: "R6",
     icon: "🛡️",
     iconUrl: "https://cdn.worldvectorlogo.com/logos/rainbow-six-siege.svg",
+    status: "coming_soon",
   },
 ];
 
