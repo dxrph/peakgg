@@ -28,19 +28,32 @@ export default function TopPlayersWeek() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const { data } = await supabase
+      const { data: stats } = await supabase
         .from("player_stats")
-        .select("user_id, elo, wins, profiles!inner(username, avatar_url)")
+        .select("user_id, elo, wins")
         .order("elo", { ascending: false })
         .limit(5);
+      if (cancelled || !stats?.length) {
+        setPlayers([]);
+        return;
+      }
+      const ids = stats.map((s) => s.user_id);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .in("id", ids);
       if (cancelled) return;
-      const mapped: TopPlayer[] = (data ?? []).map((row: any) => ({
-        user_id: row.user_id,
-        elo: row.elo,
-        wins: row.wins,
-        username: row.profiles?.username ?? "Player",
-        avatar_url: row.profiles?.avatar_url ?? null,
-      }));
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const mapped: TopPlayer[] = stats.map((s: any) => {
+        const prof = profMap.get(s.user_id);
+        return {
+          user_id: s.user_id,
+          elo: s.elo,
+          wins: s.wins,
+          username: prof?.username ?? "Player",
+          avatar_url: prof?.avatar_url ?? null,
+        };
+      });
       // Only show real leaderboard if at least one player has played a match (elo != default 1000 or wins > 0)
       const hasActivity = mapped.some((p) => p.wins > 0 || p.elo !== 1000);
       setPlayers(hasActivity ? mapped : []);
