@@ -8,6 +8,7 @@ import { useGame } from "@/lib/game-context";
 import { GAMES } from "@/lib/ranks";
 import { Search, Filter, Calendar, Clock, Users, Swords, Plus, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import GameComingSoon from "@/components/GameComingSoon";
 
 const mockScrims = [
   { id: 1, team: "Peak Kings", tag: "PK", avgElo: 2650, game: "valorant", date: "Mar 8", time: "20:00", format: "5v5 BO3", notes: "Looking for Elite+ teams. Serious practice.", status: "open" },
@@ -22,6 +23,16 @@ export default function ScrimsPage() {
   const { selectedGame } = useGame();
   const filtered = mockScrims.filter(s => s.game === selectedGame);
   const game = GAMES.find(g => g.id === selectedGame)!;
+
+  if (game.status !== "live") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <div className="pt-24"><GameComingSoon /></div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
