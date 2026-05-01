@@ -21,6 +21,7 @@ import TeamDetailPage from "./pages/TeamDetail";
 import AdminPage from "./pages/Admin";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
+import SettingsPage from "./pages/Settings";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -62,6 +63,7 @@ const App = () => (
               />
               <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ChatWidget />
