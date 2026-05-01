@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Gamepad2, Swords, Trophy, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -22,14 +23,37 @@ function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
   return <span ref={ref}>{val.toLocaleString()}</span>;
 }
 
-const STATS = [
-  { icon: Gamepad2, value: 1240, label: "Players Registered", color: "text-primary" },
-  { icon: Swords,   value: 89,   label: "Matches Played",     color: "text-accent" },
-  { icon: Trophy,   value: 12,   label: "Tournaments Live",   color: "text-primary" },
-  { icon: Users,    value: 34,   label: "Active Teams",       color: "text-accent" },
-];
-
 export default function LiveStatsBar() {
+  const [stats, setStats] = useState({ players: 0, matches: 0, tournaments: 0, teams: 0 });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const [players, matches, tournaments, teams] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("matches").select("*", { count: "exact", head: true }),
+        supabase.from("tournaments").select("*", { count: "exact", head: true }).in("status", ["upcoming", "active", "live"]),
+        supabase.from("teams").select("*", { count: "exact", head: true }),
+      ]);
+      if (cancelled) return;
+      setStats({
+        players: players.count ?? 0,
+        matches: matches.count ?? 0,
+        tournaments: tournaments.count ?? 0,
+        teams: teams.count ?? 0,
+      });
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const STATS = [
+    { icon: Gamepad2, value: stats.players,     label: "Players Registered", color: "text-primary" },
+    { icon: Swords,   value: stats.matches,     label: "Matches Played",     color: "text-accent" },
+    { icon: Trophy,   value: stats.tournaments, label: "Tournaments Live",   color: "text-primary" },
+    { icon: Users,    value: stats.teams,       label: "Active Teams",       color: "text-accent" },
+  ];
+
   return (
     <section className="py-12 border-y border-border/60 bg-[#0a0a0a]/80 backdrop-blur-sm relative overflow-hidden">
       <div
