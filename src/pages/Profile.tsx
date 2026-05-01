@@ -68,6 +68,7 @@ type UploadResult = { ok: true; url: string } | { ok: false; error: string };
 
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n";
 import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
