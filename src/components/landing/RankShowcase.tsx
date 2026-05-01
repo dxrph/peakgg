@@ -5,9 +5,11 @@ import RankBadge from "@/components/RankBadge";
 import { RANKS } from "@/lib/ranks";
 import { Mountain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/i18n";
 
 export default function RankShowcase() {
   const { user } = useAuth();
+  const { t, tRank } = useI18n();
   const href = user ? "/play" : "/register";
   return (
     <section className="py-24 relative overflow-hidden">
@@ -27,10 +29,10 @@ export default function RankShowcase() {
           className="text-center mb-14"
         >
           <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight">
-            YOUR JOURNEY <span className="text-primary text-glow-red">STARTS HERE</span>
+            {t("rank_showcase.title_pre")} <span className="text-primary text-glow-red">{t("rank_showcase.title_accent")}</span>
           </h2>
           <p className="mt-4 text-muted-foreground font-body max-w-xl mx-auto">
-            Every match counts. Every win matters. Where will you peak?
+            {t("rank_showcase.subtitle")}
           </p>
         </motion.div>
 
@@ -54,7 +56,7 @@ export default function RankShowcase() {
                 >
                   {isApex && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-widest text-accent uppercase bg-[#0a0a0a] px-2 py-0.5 rounded-full border border-accent/40">
-                      Goal
+                      {t("rank_showcase.goal_label")}
                     </span>
                   )}
                   <div
@@ -67,7 +69,7 @@ export default function RankShowcase() {
                     className="mt-3 font-display font-bold text-sm md:text-base"
                     style={{ color: r.hex }}
                   >
-                    {r.name}
+                    {tRank(r.name)}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground font-mono mt-0.5">
                     {r.minElo}{r.maxElo < 99999 ? `–${r.maxElo}` : "+"}
@@ -86,7 +88,7 @@ export default function RankShowcase() {
               className="rounded-md hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
             >
               <Mountain className="mr-2 h-5 w-5" />
-              Start Your Climb
+              {t("rank_showcase.cta")}
             </Button>
           </Link>
         </div>
