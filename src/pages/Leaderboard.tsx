@@ -139,6 +139,8 @@ export default function LeaderboardPage() {
     return idx >= 0 ? idx + 1 : null;
   }, [allPlayers, user]);
 
+  const { t } = useI18n();
+
   useEffect(() => {
     setPage(1);
   }, [game, search]);
@@ -157,15 +159,15 @@ export default function LeaderboardPage() {
           <div>
             <h1 className="text-4xl font-display font-bold">
               <Trophy className="inline h-8 w-8 text-accent mr-2" />
-              Leaderboard
+              {t("leaderboard_page.title")}
             </h1>
             <p className="text-muted-foreground font-body mt-1">
-              I migliori giocatori di PeakGG, ordinati per ELO.
+              {t("leaderboard_page.subtitle")}
             </p>
           </div>
           {user && userRank && (
             <div className="rounded-md border border-primary/40 bg-primary/10 px-4 py-2 font-display">
-              <span className="text-sm text-muted-foreground">La tua posizione:</span>{" "}
+              <span className="text-sm text-muted-foreground">{t("leaderboard_page.your_position")}</span>{" "}
               <span className="text-primary font-bold text-lg">#{userRank}</span>
             </div>
           )}
@@ -186,7 +188,7 @@ export default function LeaderboardPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Cerca per username..."
+              placeholder={t("leaderboard_page.search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -198,21 +200,21 @@ export default function LeaderboardPage() {
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <div className="grid grid-cols-[3rem_1fr_auto_5rem] md:grid-cols-[3rem_1fr_auto_6rem_5rem_1fr] gap-3 px-4 py-3 bg-secondary/50 text-xs text-muted-foreground font-display uppercase tracking-widest">
             <span>#</span>
-            <span>Player</span>
-            <span>Rank</span>
-            <span className="text-right">ELO</span>
-            <span className="hidden md:block text-right">Win Rate</span>
-            <span className="hidden md:block">Team</span>
+            <span>{t("leaderboard_page.col_player")}</span>
+            <span>{t("leaderboard_page.col_rank")}</span>
+            <span className="text-right">{t("leaderboard_page.col_elo")}</span>
+            <span className="hidden md:block text-right">{t("leaderboard_page.col_winrate")}</span>
+            <span className="hidden md:block">{t("leaderboard_page.col_team")}</span>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
-              Caricamento classifica...
+              {t("leaderboard_page.loading")}
             </div>
           ) : pageRows.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground font-body">
-              Nessun giocatore trovato.
+              {t("leaderboard_page.empty")}
             </div>
           ) : (
             pageRows.map((p) => {
@@ -242,7 +244,7 @@ export default function LeaderboardPage() {
                     <div className="min-w-0">
                       <div className="font-semibold font-body truncate">
                         {p.username}
-                        {isMe && <span className="ml-2 text-xs text-primary">(Tu)</span>}
+                        {isMe && <span className="ml-2 text-xs text-primary">{t("leaderboard_page.you")}</span>}
                       </div>
                       {p.display_name && p.display_name !== p.username && (
                         <div className="text-xs text-muted-foreground truncate">{p.display_name}</div>
@@ -267,7 +269,7 @@ export default function LeaderboardPage() {
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-6">
             <span className="text-sm text-muted-foreground font-body">
-              Pagina {safePage} di {totalPages} — {filtered.length} giocatori
+              {t("leaderboard_page.page_info", { page: safePage, total: totalPages, count: filtered.length })}
             </span>
             <div className="flex gap-2">
               <Button
@@ -277,7 +279,7 @@ export default function LeaderboardPage() {
                 disabled={safePage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
-                Precedente
+                {t("leaderboard_page.previous")}
               </Button>
               <Button
                 variant="outline"
@@ -285,7 +287,7 @@ export default function LeaderboardPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
               >
-                Successiva
+                {t("leaderboard_page.next")}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
