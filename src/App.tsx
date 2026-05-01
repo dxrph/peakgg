@@ -46,12 +46,12 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
-              <Route path="/teams" element={<TeamsPage />} />
+              <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-              <Route path="/play" element={<PlayPage />} />
-              <Route path="/scrims" element={<ScrimsPage />} />
-              <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
-              <Route path="/teams/:teamId" element={<TeamDetailPage />} />
+              <Route path="/play" element={<ProtectedRoute><PlayPage /></ProtectedRoute>} />
+              <Route path="/scrims" element={<ProtectedRoute><ScrimsPage /></ProtectedRoute>} />
+              <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetailPage /></ProtectedRoute>} />
+              <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
               <Route
                 path="/admin"
                 element={

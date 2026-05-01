@@ -34,12 +34,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        const wasSignedIn = Boolean((window as any).__peakgg_was_signed_in);
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
+          (window as any).__peakgg_was_signed_in = true;
           setTimeout(() => fetchProfile(session.user.id), 500);
         } else {
           setProfile(null);
+          if (wasSignedIn && _event === "TOKEN_REFRESHED") {
+            // refresh failed → effectively expired
+            (window as any).__peakgg_was_signed_in = false;
+            if (!window.location.pathname.startsWith("/login")) {
+              window.location.href = "/login?expired=1";
+            }
+          }
         }
         setLoading(false);
       }
