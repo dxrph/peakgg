@@ -827,6 +827,7 @@ function EditProfileDialog({
   profile: Profile;
   onSaved: (p: Partial<Profile>) => void;
 }) {
+  const { t } = useI18n();
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio ?? "");
   const [preferredGame, setPreferredGame] = useState(profile.preferred_game ?? "");
@@ -859,7 +860,7 @@ function EditProfileDialog({
   };
 
   const uploadBannerFile = async (file: File) => {
-    const validationError = validateBannerFile(file);
+    const validationError = validateBannerFile(file, t);
     if (validationError) {
       setBannerError(validationError);
       toast.error(validationError);
@@ -877,9 +878,9 @@ function EditProfileDialog({
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("profile-banners").getPublicUrl(path);
       setBannerUrl(data.publicUrl);
-      toast.success("Banner caricato");
+      toast.success(t("profile_page.banner_updated"));
     } catch (err) {
-      const message = friendlyBannerError(err);
+      const message = friendlyBannerError(err, t);
       setBannerError(message);
       toast.error(message);
     } finally {
