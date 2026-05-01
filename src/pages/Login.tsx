@@ -8,6 +8,7 @@ import { Mountain, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import GoogleButton from "@/components/GoogleButton";
+import { useI18n } from "@/i18n";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,19 +18,20 @@ export default function LoginPage() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const from = (location.state as { from?: string } | null)?.from || "/dashboard";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("expired") === "1") {
-      toast.error("Your session expired, please log in again");
+      toast.error(t("auth.session_expired"));
     }
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Please fill in all fields");
+      toast.error(t("auth.fill_all_fields"));
       return;
     }
     setIsLoading(true);
@@ -38,7 +40,7 @@ export default function LoginPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Welcome back!");
+      toast.success(t("auth.welcome_toast"));
       navigate(from, { replace: true });
     }
   };
@@ -53,7 +55,7 @@ export default function LoginPage() {
             <Mountain className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-5xl font-display font-bold mb-4">PEAKGG</h1>
-          <p className="text-muted-foreground text-lg font-body">Compete. Rise. Dominate.</p>
+          <p className="text-muted-foreground text-lg font-body">{t("auth.tagline")}</p>
         </div>
       </div>
 
@@ -66,27 +68,27 @@ export default function LoginPage() {
             <span className="font-display font-bold text-xl">PEAKGG</span>
           </div>
 
-          <h2 className="text-3xl font-display font-bold mb-2">Welcome Back</h2>
-          <p className="text-muted-foreground mb-8 font-body">Sign in to your account to continue</p>
+          <h2 className="text-3xl font-display font-bold mb-2">{t("auth.welcome_back")}</h2>
+          <p className="text-muted-foreground mb-8 font-body">{t("auth.welcome_back_sub")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-body">Email</Label>
+              <Label htmlFor="email" className="font-body">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="player@example.com" value={email}
+                <Input id="email" type="email" placeholder={t("auth.email_placeholder")} value={email}
                   onChange={(e) => setEmail(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label htmlFor="password" className="font-body">Password</Label>
-                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-body">Forgot password?</Link>
+                <Label htmlFor="password" className="font-body">{t("auth.password")}</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-body">{t("auth.forgot_password")}</Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder={t("auth.password_placeholder")}
                   value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-card border-border" disabled={isLoading} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -96,20 +98,20 @@ export default function LoginPage() {
             </div>
 
             <Button variant="neon" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Sign In"}
+              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("auth.signing_in")}</> : t("auth.sign_in")}
             </Button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground font-body">oppure</span>
+            <span className="text-xs text-muted-foreground font-body">{t("auth.or")}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
           <GoogleButton />
 
           <p className="text-center text-sm text-muted-foreground mt-6 font-body">
-            Don't have an account? <Link to="/register" className="text-primary hover:underline font-medium">Register</Link>
+            {t("auth.no_account")} <Link to="/register" className="text-primary hover:underline font-medium">{t("auth.register")}</Link>
           </p>
         </div>
       </div>
