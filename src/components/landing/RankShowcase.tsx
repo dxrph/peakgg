@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import { RANKS } from "@/lib/ranks";
 import { Mountain } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RankShowcase() {
+  const { user } = useAuth();
+  const href = user ? "/play" : "/register";
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0a0a0a]/60" />
@@ -76,7 +79,7 @@ export default function RankShowcase() {
         </div>
 
         <div className="text-center mt-14">
-          <Link to="/play">
+          <Link to={href}>
             <Button
               variant="neon"
               size="xl"

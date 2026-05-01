@@ -2,8 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mountain } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function CTASection() {
+  const { user } = useAuth();
+  const href = user ? "/play" : "/register";
+  const label = user ? "Start Playing" : "Create Your Account";
   return (
     <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 gradient-hero" />
@@ -17,10 +21,10 @@ export default function CTASection() {
           <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto font-body">
             Join thousands of players on the most advanced multi-game competitive platform.
           </p>
-          <Link to="/register">
+          <Link to={href}>
             <Button variant="neon" size="xl">
               <Mountain className="mr-2 h-5 w-5" />
-              Create Your Account
+              {label}
             </Button>
           </Link>
         </motion.div>

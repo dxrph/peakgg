@@ -7,12 +7,22 @@ import { useState } from "react";
 import { useGame } from "@/lib/game-context";
 import { GAMES } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
+import GameComingSoon from "@/components/GameComingSoon";
 
 export default function PlayPage() {
   const [queuing, setQueuing] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const { selectedGame } = useGame();
   const game = GAMES.find(g => g.id === selectedGame)!;
+
+  if (game.status !== "live") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <div className="pt-24"><GameComingSoon /></div>
+      </div>
+    );
+  }
 
   const startQueue = () => {
     setQueuing(true);

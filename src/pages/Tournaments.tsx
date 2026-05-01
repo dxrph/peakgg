@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Trophy, Users, Calendar, Search, Filter, Lock } from "lucide-react";
 import { useGame } from "@/lib/game-context";
-import { TOURNAMENT_TIERS } from "@/lib/ranks";
+import { TOURNAMENT_TIERS, GAMES } from "@/lib/ranks";
+import GameComingSoon from "@/components/GameComingSoon";
 
 const tournaments = [
   { id: 1, name: "PeakGG Weekly #12", format: "5v5", date: "Mar 8, 2026", prize: "€500", slots: "12/16", status: "Open", tier: 1, game: "valorant" },
@@ -29,6 +30,17 @@ const userTierProgress = { completedTier1: true, completedTier2: false, tourname
 export default function TournamentsPage() {
   const { selectedGame } = useGame();
   const filtered = tournaments.filter(t => t.game === selectedGame);
+  const game = GAMES.find(g => g.id === selectedGame)!;
+
+  if (game.status !== "live") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <div className="pt-24"><GameComingSoon /></div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
