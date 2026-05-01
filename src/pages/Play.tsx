@@ -1,4 +1,5 @@
 import Navbar from "@/components/landing/Navbar";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
