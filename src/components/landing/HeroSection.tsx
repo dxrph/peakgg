@@ -29,16 +29,26 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center gradient-hero overflow-hidden">
-      <div className="absolute inset-0 scanline pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
-        backgroundSize: "80px 80px",
-      }} />
-      <div className="absolute top-1/4 right-1/5 w-[600px] h-[600px] rounded-full bg-primary/[0.06] blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-accent/[0.04] blur-[120px] pointer-events-none" />
+      {/* Diagonal lines + grid texture */}
+      <div
+        className="absolute inset-0 opacity-[0.05] pointer-events-none"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, hsl(var(--foreground) / 0.6) 0 1px, transparent 1px 22px), linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+          backgroundSize: "auto, 80px 80px, 80px 80px",
+        }}
+      />
+      {/* Soft red/orange radial glow — bottom-left origin */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 900px 700px at 15% 95%, hsl(352 100% 62% / 0.22), transparent 60%), radial-gradient(ellipse 600px 500px at 25% 85%, hsl(24 100% 63% / 0.12), transparent 65%)",
+        }}
+      />
 
       <div className="container relative z-10 pt-28 pb-20">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0)}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-8"
           >
@@ -57,23 +67,27 @@ export default function HeroSection() {
           </motion.h1>
 
           <motion.p initial="hidden" animate="visible" variants={fadeUp(0.3)}
-            className="text-lg md:text-xl text-muted-foreground max-w-xl mb-10 leading-relaxed font-body"
+            className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed font-body"
           >
             The ultimate multi-game competitive platform. Ranked matchmaking, 
             tournaments, and team management for VALORANT, CS2, and Rainbow Six Siege.
           </motion.p>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
-            className="flex flex-col sm:flex-row gap-4 mb-16"
+            className="flex flex-col sm:flex-row gap-4 mb-16 justify-center"
           >
             <Link to="/register">
-              <Button variant="neon" size="xl">
+              <Button
+                variant="neon"
+                size="xl"
+                className="rounded-md hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
+              >
                 <Mountain className="mr-2 h-5 w-5" />
                 Start Playing
               </Button>
             </Link>
             <Link to="/leaderboard">
-              <Button variant="neonOutline" size="xl">
+              <Button variant="neonOutline" size="xl" className="rounded-md">
                 View Leaderboard
                 <ChevronRight className="ml-1 h-5 w-5" />
               </Button>
@@ -81,7 +95,7 @@ export default function HeroSection() {
           </motion.div>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.55)}
-            className="flex flex-wrap gap-6 md:gap-12 p-5 rounded-lg border border-border bg-card/50 backdrop-blur-sm"
+            className="flex flex-wrap gap-6 md:gap-12 p-5 rounded-lg border border-border bg-card/50 backdrop-blur-sm justify-center"
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
@@ -106,6 +120,11 @@ export default function HeroSection() {
             </div>
           </motion.div>
         </div>
+      </div>
+
+      {/* Animated gradient separator */}
+      <div className="absolute bottom-0 left-0 right-0 h-px overflow-hidden">
+        <div className="h-full w-[200%] animate-gradient-slide bg-[linear-gradient(90deg,transparent,hsl(var(--primary)/0.7),hsl(var(--accent)/0.7),transparent)]" />
       </div>
     </section>
   );
