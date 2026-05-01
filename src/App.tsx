@@ -24,6 +24,7 @@ import NotificationsPage from "./pages/Notifications";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleGuard from "./components/RoleGuard";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +50,16 @@ const App = () => (
               <Route path="/scrims" element={<ScrimsPage />} />
               <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />} />
-              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allow={["admin"]}>
+                      <AdminPage />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
