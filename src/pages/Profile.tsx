@@ -229,9 +229,9 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
         <div className="container pt-24 text-center">
-          <h1 className="text-2xl font-display font-bold mb-2">Profile not found</h1>
+          <h1 className="text-2xl font-display font-bold mb-2">{t("profile_page_extra.not_found")}</h1>
           <p className="text-muted-foreground mb-4">No player matches "{username}".</p>
-          <Button onClick={() => navigate("/leaderboard")}>Browse leaderboard</Button>
+          <Button onClick={() => navigate("/leaderboard")}>{t("profile_page_extra.browse_leaderboard")}</Button>
         </div>
       </div>
     );
@@ -305,7 +305,7 @@ export default function ProfilePage() {
                   size="sm"
                   variant="outline"
                 >
-                  <Pencil className="h-4 w-4 mr-2" /> Edit profile
+                  <Pencil className="h-4 w-4 mr-2" /> {t("profile_page_extra.edit_profile")}
                 </Button>
               ) : (
                 ownsTeam && (
@@ -463,17 +463,17 @@ export default function ProfilePage() {
                   {isGameId(team.game) && <GameIcon game={team.game as GameId} size={16} />}
                   <span className="text-xs text-muted-foreground uppercase font-display">{team.game}</span>
                   <span className="text-muted-foreground">·</span>
-                  <span className="text-xs font-display uppercase tracking-wider text-muted-foreground">Rank medio</span>
+                  <span className="text-xs font-display uppercase tracking-wider text-muted-foreground">{t("profile_page_extra.avg_rank")}</span>
                   <RankBadge elo={team.avg_elo ?? 0} size="sm" showLabel />
                 </div>
               </div>
-              <Button size="sm" variant="outline">Vai al team</Button>
+              <Button size="sm" variant="outline">{t("profile_page_extra.go_to_team")}</Button>
             </Link>
           ) : (
             <div className="flex items-center justify-between gap-4 flex-wrap">
-              <p className="text-sm text-muted-foreground font-body">Nessun team — questo giocatore non è in alcun team.</p>
+              <p className="text-sm text-muted-foreground font-body">{t("profile_page_extra.no_team")}</p>
               <Link to="/teams">
-                <Button size="sm" variant="outline"><Search className="h-4 w-4 mr-2" /> Cerca un team</Button>
+                <Button size="sm" variant="outline"><Search className="h-4 w-4 mr-2" /> {t("profile_page_extra.search_team")}</Button>
               </Link>
             </div>
           )}
@@ -482,7 +482,7 @@ export default function ProfilePage() {
         {/* Trophies */}
         <SectionCard title="Trofei" icon={Trophy} className="mt-6">
           {trophies.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-body">Nessun trofeo ancora.</p>
+            <p className="text-sm text-muted-foreground font-body">{t("profile_page_extra.no_trophies")}</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {trophies.map(t => <TrophyCard key={t.id} row={t} />)}
@@ -495,8 +495,8 @@ export default function ProfilePage() {
           {matches.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground font-body px-4">
               <Swords className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="mb-3">Nessuna partita ancora.</p>
-              <Link to="/tournaments"><Button size="sm" variant="outline">Iscriviti a un torneo</Button></Link>
+              <p className="mb-3">{t("profile_page_extra.no_matches")}</p>
+              <Link to="/tournaments"><Button size="sm" variant="outline">{t("profile_page_extra.join_tournament")}</Button></Link>
             </div>
           ) : (
             <div>
@@ -596,7 +596,7 @@ function PerGameCard({
         </div>
         {preferred && (
           <Badge variant="outline" className="text-[9px] py-0 px-1 border-primary text-primary shrink-0">
-            Preferito
+            {t("profile_page_extra.preferred")}
           </Badge>
         )}
       </div>
