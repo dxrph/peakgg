@@ -23,6 +23,7 @@ import AdminSecurityPage from "./pages/admin/Security";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
+import EloExplainedPage from "./pages/EloExplained";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -73,6 +74,7 @@ const App = () => (
                 }
               />
               <Route path="/aim-guide" element={<AimGuidePage />} />
+              <Route path="/elo" element={<EloExplainedPage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
