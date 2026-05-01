@@ -231,10 +231,6 @@ export default function ChatWidget() {
   const [globalUnread, setGlobalUnread] = useState(0);
   const [teamUnread, setTeamUnread] = useState(0);
 
-  // Hide on admin chat page later; not needed right now
-  if (!user) return null;
-  if (location.pathname.startsWith("/admin")) return null;
-
   // Find first team
   useEffect(() => {
     if (!user) return;
@@ -280,6 +276,10 @@ export default function ChatWidget() {
   }, [open, tab]);
 
   const totalUnread = globalUnread + teamUnread;
+
+  // Hide on admin chat page; placed after hooks to keep hook order stable
+  if (!user) return null;
+  if (location.pathname.startsWith("/admin")) return null;
 
   return (
     <>
