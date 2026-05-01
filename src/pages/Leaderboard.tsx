@@ -18,6 +18,12 @@ import GameIcon from "@/components/GameIcon";
 
 type GameFilter = GameId;
 
+const GAME_TABS: { id: GameFilter; label: string }[] = [
+  { id: "valorant", label: "Valorant" },
+  { id: "cs2", label: "CS2" },
+  { id: "r6s", label: "Rainbow Six" },
+];
+
 const PAGE_SIZE = 25;
 
 interface PlayerRow {
