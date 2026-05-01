@@ -34,6 +34,7 @@ import ChatWidget from "./components/chat/ChatWidget";
 import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import RoleGuard from "./components/RoleGuard";
 
 const queryClient = new QueryClient();
@@ -51,8 +52,8 @@ const App = () => (
             <Analytics />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+              <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
