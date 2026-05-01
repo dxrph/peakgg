@@ -183,14 +183,16 @@ export default function AdminSecurityPage() {
     metadata: Record<string, unknown> = {},
   ) => {
     if (!user) return;
-    await supabase.from("admin_actions").insert({
-      admin_id: user.id,
-      action,
-      target_user_id: targetUserId,
-      target_resource: targetUserId ? "user" : null,
-      reason: sanitizeText(reason).slice(0, 500),
-      metadata,
-    });
+    await supabase.from("admin_actions").insert([
+      {
+        admin_id: user.id,
+        action,
+        target_user_id: targetUserId,
+        target_resource: targetUserId ? "user" : null,
+        reason: sanitizeText(reason).slice(0, 500),
+        metadata: metadata as any,
+      },
+    ]);
   };
 
   const handleBan = async () => {
