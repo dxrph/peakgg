@@ -25,6 +25,11 @@ import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
 import EloExplainedPage from "./pages/EloExplained";
+import AboutPage from "./pages/About";
+import FAQPage from "./pages/FAQ";
+import ContactPage from "./pages/Contact";
+import PrivacyPage from "./pages/Privacy";
+import TermsPage from "./pages/Terms";
 import ChatWidget from "./components/chat/ChatWidget";
 import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
@@ -79,6 +84,11 @@ const App = () => (
               />
               <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="/elo" element={<EloExplainedPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
