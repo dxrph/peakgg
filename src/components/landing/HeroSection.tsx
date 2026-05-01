@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mountain, Trophy, ChevronRight, Swords } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const fadeUp = (delay: number) => ({
   hidden: { opacity: 0, y: 30 },
@@ -27,6 +28,10 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
 }
 
 export default function HeroSection() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const startHref = user ? "/play" : "/register";
+  const leaderboardClick = () => navigate(user ? "/leaderboard" : "/login", user ? undefined : { state: { from: "/leaderboard" } });
   return (
     <section className="relative min-h-screen flex items-center gradient-hero overflow-hidden">
       {/* Diagonal lines + grid texture */}
@@ -76,7 +81,7 @@ export default function HeroSection() {
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
             className="flex flex-col sm:flex-row gap-4 mb-16 justify-center"
           >
-            <Link to="/register">
+            <Link to={startHref}>
               <Button
                 variant="neon"
                 size="xl"
@@ -86,12 +91,10 @@ export default function HeroSection() {
                 Start Playing
               </Button>
             </Link>
-            <Link to="/leaderboard">
-              <Button variant="neonOutline" size="xl" className="rounded-md">
-                View Leaderboard
-                <ChevronRight className="ml-1 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button variant="neonOutline" size="xl" className="rounded-md" onClick={leaderboardClick}>
+              View Leaderboard
+              <ChevronRight className="ml-1 h-5 w-5" />
+            </Button>
           </motion.div>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.55)}
