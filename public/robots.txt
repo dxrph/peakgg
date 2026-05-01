@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /mod/
+Disallow: /api/
+Disallow: /auth/
+Sitemap: https://peakgg.net/sitemap.xml
