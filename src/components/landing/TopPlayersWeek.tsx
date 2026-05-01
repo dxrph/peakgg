@@ -44,14 +44,14 @@ export default function TopPlayersWeek() {
                 SEASON 1 — COMING SOON
               </h3>
               <p className="mt-2 text-sm text-muted-foreground font-body max-w-md">
-                We're in closed beta. The first ranked season starts at launch — every match
-                you play from day one counts toward the global leaderboard.
+                Season 1 hasn't started yet — every match you play from day one will count
+                toward the global leaderboard.
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-6 mt-2 text-center">
               {[
-                { label: "Players in beta", value: "—" },
+                { label: "Players registered", value: "—" },
                 { label: "Matches played", value: "—" },
                 { label: "Season starts", value: "TBA" },
               ].map((s) => (
@@ -74,7 +74,7 @@ export default function TopPlayersWeek() {
 
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground mb-4 font-body italic">
-            Want to be in the first season? — <Link to="/register" className="text-primary hover:underline">Join the beta</Link>
+            Want to be in the first season? — <Link to="/register" className="text-primary hover:underline">Start playing</Link>
           </p>
           <Link to="/leaderboard">
             <Button variant="neonOutline" size="lg" className="rounded-md">
