@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { GAMES, getRankFromElo } from "@/lib/ranks";
+import { GAMES, getRankByElo } from "@/lib/ranks";
 import { Trophy, TrendingUp, TrendingDown, Swords, Clock, Info, ShieldCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -184,7 +184,7 @@ export default function EloExplained() {
               {rows.map((r) => {
                 const game = GAMES.find((g) => g.id === r.game);
                 const positive = r.delta >= 0;
-                const tier = getRankFromElo(r.elo_after);
+                const tier = getRankByElo(r.elo_after);
                 return (
                   <li key={r.id} className="px-5 py-4 flex items-center gap-4 hover:bg-secondary/30 transition-colors">
                     <div className={`h-10 w-10 rounded-full flex items-center justify-center border ${positive ? "border-success/40 bg-success/10 text-success" : "border-destructive/40 bg-destructive/10 text-destructive"}`}>
