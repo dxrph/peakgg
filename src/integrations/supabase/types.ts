@@ -14,107 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      chat_channels: {
+      chat_mutes: {
         Row: {
           created_at: string
-          game: string | null
-          icon: string | null
+          expires_at: string | null
           id: string
-          name: string
+          muted_by: string
+          reason: string | null
+          scope: string
           team_id: string | null
-          type: string
-        }
-        Insert: {
-          created_at?: string
-          game?: string | null
-          icon?: string | null
-          id?: string
-          name: string
-          team_id?: string | null
-          type: string
-        }
-        Update: {
-          created_at?: string
-          game?: string | null
-          icon?: string | null
-          id?: string
-          name?: string
-          team_id?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_channels_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_members: {
-        Row: {
-          channel_id: string
-          id: string
-          joined_at: string
-          role: string
           user_id: string
         }
         Insert: {
-          channel_id: string
+          created_at?: string
+          expires_at?: string | null
           id?: string
-          joined_at?: string
-          role?: string
+          muted_by: string
+          reason?: string | null
+          scope: string
+          team_id?: string | null
           user_id: string
         }
         Update: {
-          channel_id?: string
+          created_at?: string
+          expires_at?: string | null
           id?: string
-          joined_at?: string
-          role?: string
+          muted_by?: string
+          reason?: string | null
+          scope?: string
+          team_id?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_members_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "chat_channels"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      chat_messages: {
+      global_messages: {
         Row: {
-          channel_id: string
           content: string
           created_at: string
+          flag_reason: string | null
+          flagged: boolean
           id: string
+          report_count: number
           user_id: string
         }
         Insert: {
-          channel_id: string
           content: string
           created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
           id?: string
+          report_count?: number
           user_id: string
         }
         Update: {
-          channel_id?: string
           content?: string
           created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
           id?: string
+          report_count?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "chat_channels"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       lfp_board: {
         Row: {
@@ -524,6 +485,39 @@ export type Database = {
           },
         ]
       }
+      team_messages: {
+        Row: {
+          content: string
+          created_at: string
+          flag_reason: string | null
+          flagged: boolean
+          id: string
+          report_count: number
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
+          id?: string
+          report_count?: number
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
+          id?: string
+          report_count?: number
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           avatar_url: string | null
@@ -752,6 +746,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_muted: {
+        Args: { _scope: string; _team_id?: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
     }
