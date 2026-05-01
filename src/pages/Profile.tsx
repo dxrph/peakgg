@@ -23,43 +23,45 @@ const BANNER_MAX_BYTES = 5 * 1024 * 1024;
 const BANNER_ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
 const BANNER_ALLOWED_EXT = ["jpg", "jpeg", "png", "webp"];
 
-function validateBannerFile(file: File): string | null {
+type TFn = (key: string, options?: Record<string, unknown>) => string;
+
+function validateBannerFile(file: File, t: TFn): string | null {
   const ext = (file.name.split(".").pop() ?? "").toLowerCase();
   const mimeOk = BANNER_ALLOWED_MIME.includes(file.type);
   const extOk = BANNER_ALLOWED_EXT.includes(ext);
   if (!mimeOk && !extOk) {
-    return "Formato non supportato. Usa JPG, PNG o WebP.";
+    return t("profile_page.banner_unsupported");
   }
   if (file.size > BANNER_MAX_BYTES) {
     const mb = (file.size / (1024 * 1024)).toFixed(1);
-    return `File troppo grande (${mb} MB). Massimo 5 MB.`;
+    return t("profile_page.file_too_large", { mb });
   }
   if (file.size === 0) {
-    return "Il file è vuoto o danneggiato.";
+    return t("profile_page.banner_empty");
   }
   return null;
 }
 
-function friendlyBannerError(err: unknown): string {
+function friendlyBannerError(err: unknown, t: TFn): string {
   const raw = (err as any)?.message ?? String(err ?? "");
   const msg = raw.toLowerCase();
-  if (!navigator.onLine) return "Sei offline — controlla la connessione e riprova.";
+  if (!navigator.onLine) return t("profile_page.offline");
   if (msg.includes("row-level security") || msg.includes("not authorized") || msg.includes("permission") || msg.includes("403") || msg.includes("unauthorized")) {
-    return "Permesso negato. Esegui di nuovo il login e riprova.";
+    return t("profile_page.banner_perm_denied");
   }
   if (msg.includes("payload too large") || msg.includes("413") || msg.includes("exceeded the maximum allowed size")) {
-    return "File troppo grande. Massimo 5 MB.";
+    return t("profile_page.file_too_large_simple");
   }
   if (msg.includes("mime") || msg.includes("invalid_mime") || msg.includes("not allowed")) {
-    return "Formato non supportato. Usa JPG, PNG o WebP.";
+    return t("profile_page.banner_unsupported_mime");
   }
   if (msg.includes("network") || msg.includes("failed to fetch") || msg.includes("fetch failed")) {
-    return "Errore di rete durante il caricamento. Riprova.";
+    return t("profile_page.network_error");
   }
   if (msg.includes("bucket not found")) {
-    return "Storage non configurato (bucket mancante). Contatta l'amministratore.";
+    return t("profile_page.banner_storage_missing");
   }
-  return raw || "Caricamento fallito. Riprova.";
+  return raw || t("profile_page.upload_failed");
 }
 
 type UploadResult = { ok: true; url: string } | { ok: false; error: string };
