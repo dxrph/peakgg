@@ -104,6 +104,10 @@ export default {
           "0%, 100%": { boxShadow: "0 0 20px hsl(352 100% 62% / 0.15)" },
           "50%": { boxShadow: "0 0 40px hsl(352 100% 62% / 0.3)" },
         },
+        "gradient-slide": {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -113,6 +117,7 @@ export default {
         "fade-in": "fade-in 0.4s ease-out",
         "count-up": "count-up 0.5s ease-out",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        "gradient-slide": "gradient-slide 4s linear infinite",
       },
     },
   },
