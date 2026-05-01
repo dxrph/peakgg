@@ -8,7 +8,7 @@ export default function HowItWorksSection() {
     { icon: UserPlus, step: "01", title: t("how_it_works.step1_title"), description: t("how_it_works.step1_desc") },
     { icon: Gamepad2, step: "02", title: t("how_it_works.step2_title"), description: t("how_it_works.step2_desc") },
     { icon: Swords, step: "03", title: t("how_it_works.step3_title"), description: t("how_it_works.step3_desc") },
-    { icon: Trophy, step: "04", title: t("how_it_works.step3_title"), description: t("how_it_works.step3_desc") },
+    { icon: Trophy, step: "04", title: t("how_it_works.step4_title"), description: t("how_it_works.step4_desc") },
   ];
   return (
     <section className="py-24 relative overflow-hidden">
