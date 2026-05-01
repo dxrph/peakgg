@@ -155,3 +155,42 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+function PasswordChecklist({ password }: { password: string }) {
+  const checks = [
+    { label: "At least 8 characters", ok: password.length >= 8 },
+    { label: "An uppercase letter", ok: /[A-Z]/.test(password) },
+    { label: "A number", ok: /[0-9]/.test(password) },
+    { label: "A special character", ok: /[^A-Za-z0-9]/.test(password) },
+  ];
+  const { score, label } = passwordStrength(password);
+  const barColors = ["bg-destructive", "bg-destructive", "bg-warning", "bg-primary", "bg-success"];
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-1">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-colors ${
+              i < score ? barColors[score] : "bg-border"
+            }`}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-body">
+        {checks.map((c) => (
+          <span
+            key={c.label}
+            className={`flex items-center gap-1 ${c.ok ? "text-success" : "text-muted-foreground"}`}
+          >
+            {c.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+            {c.label}
+          </span>
+        ))}
+        {password.length > 0 && (
+          <span className="ml-auto text-muted-foreground">{label}</span>
+        )}
+      </div>
+    </div>
+  );
+}
