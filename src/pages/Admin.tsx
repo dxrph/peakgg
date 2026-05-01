@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/table";
 import {
   Shield, Users, Trophy, Swords, AlertTriangle, Ban, Search, Plus, Eye,
-  CheckCircle2, XCircle, FileText,
+  CheckCircle2, XCircle, FileText, ShieldAlert,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const tabs = [
   { id: "users", label: "Users", icon: Users },
@@ -85,10 +86,16 @@ export default function AdminPage() {
       <div className="container pt-24 pb-16">
         <div className="flex items-center gap-3 mb-8">
           <Shield className="h-8 w-8 text-primary" />
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-display font-bold">Admin Panel</h1>
             <p className="text-muted-foreground font-body text-sm">PeakGG administration — manage users, tournaments, matches, and reports.</p>
           </div>
+          <Link to="/admin/security">
+            <Button variant="neon" size="sm">
+              <ShieldAlert className="h-4 w-4 mr-2" />
+              Security
+            </Button>
+          </Link>
         </div>
 
         <div className="flex gap-1 mb-8 overflow-x-auto border-b border-border pb-px">

@@ -19,6 +19,7 @@ import ScrimsPage from "./pages/Scrims";
 import TournamentDetailPage from "./pages/TournamentDetail";
 import TeamDetailPage from "./pages/TeamDetail";
 import AdminPage from "./pages/Admin";
+import AdminSecurityPage from "./pages/admin/Security";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
@@ -57,6 +58,16 @@ const App = () => (
                   <ProtectedRoute>
                     <RoleGuard allow={["admin"]}>
                       <AdminPage />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/security"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allow={["admin", "moderator"]}>
+                      <AdminSecurityPage />
                     </RoleGuard>
                   </ProtectedRoute>
                 }
