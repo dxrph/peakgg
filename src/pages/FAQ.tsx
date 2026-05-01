@@ -5,75 +5,56 @@ import SEO from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Search } from "lucide-react";
+import { useI18n } from "@/i18n";
 
 type QA = { q: string; a: string };
 type Section = { title: string; items: QA[] };
 
-const SECTIONS: Section[] = [
-  {
-    title: "Getting Started",
-    items: [
-      { q: "What is PeakGG?", a: "PeakGG is a free competitive gaming platform for Valorant, CS2 and Rainbow Six Siege. Ranked matchmaking, tournaments, team management and community — all in one place." },
-      { q: "Is PeakGG free?", a: "Yes, completely free. Register at peakgg.net and start competing immediately. No subscription required." },
-      { q: "What games are supported?", a: "Valorant is live now. CS2 and Rainbow Six Siege are coming soon — leave your email on those pages to be notified first." },
-      { q: "How do I create an account?", a: "Click \"Start Playing\" on the homepage, fill in your username and email, and you're in. Takes 30 seconds." },
-    ],
-  },
-  {
-    title: "Ranks & Matchmaking",
-    items: [
-      { q: "How does the rank system work?", a: "PeakGG uses an ELO-based system. Win matches to gain ELO, lose matches to lose ELO. Your rank updates automatically after every match." },
-      { q: "What are the ranks?", a: "Rookie (0–499) → Contender (500–999) → Rival (1000–1499) → Expert (1500–1999) → Elite (2000–2499) → Master (2500–2999) → Apex (3000+)." },
-      { q: "What is the anti-smurf system?", a: "PeakGG detects accounts that perform significantly above their rank and adjusts their ELO faster to place them correctly." },
-      { q: "How much ELO do I gain or lose?", a: "Win: +25 ELO. Loss: −20 ELO. Minimum ELO is 0." },
-    ],
-  },
-  {
-    title: "Tournaments",
-    items: [
-      { q: "How do I join a tournament?", a: "Go to /tournaments, find an open tournament and click Register. Make sure you meet the rank requirement if any." },
-      { q: "Are tournaments free?", a: "Open Cup tournaments are completely free. Future premium tiers may have entry fees paid with PeakCoins." },
-      { q: "What are the tournament tiers?", a: "Open Cup (free, anyone) → Challenger Series (Contender rank required) → Peak Championship (Elite rank required, invite only)." },
-      { q: "What are the prizes?", a: "Currently top 3 players receive exclusive rank badges and recognition. Prize pools with real value are coming in future seasons." },
-    ],
-  },
-  {
-    title: "Teams",
-    items: [
-      { q: "How do I create a team?", a: "Go to /teams and click \"Create Team\". Choose a name, tag (3 letters) and game." },
-      { q: "How do I invite players?", a: "From your team page, click \"Invite Player\" and search by username." },
-      { q: "What is team ELO?", a: "Separate from your personal ELO — it reflects your team's performance in team tournaments." },
-    ],
-  },
-  {
-    title: "Technical",
-    items: [
-      { q: "What regions are supported?", a: "Currently Europe. More regions coming soon." },
-      { q: "Is there a mobile app?", a: "Not yet. The website is fully mobile responsive. A dedicated app is on the roadmap." },
-      { q: "How do I report a bug?", a: "Use the form at /contact or post in #bug-report on our Discord." },
-    ],
-  },
-  {
-    title: "Account & Safety",
-    items: [
-      { q: "How do I delete my account?", a: "Go to Settings → Account → Delete Account. Your data will be permanently deleted within 30 days." },
-      { q: "How do I report a player?", a: "Click the flag icon on any player's profile or match result." },
-      { q: "What happens if I get banned?", a: "You will receive an email explaining the reason. You can appeal at /contact with subject \"Ban Appeal\"." },
-    ],
-  },
-  {
-    title: "Legal & Privacy",
-    items: [
-      { q: "Is PeakGG GDPR compliant?", a: "Yes. PeakGG is based in Belgium and fully compliant with EU GDPR regulations." },
-      { q: "What data do you collect?", a: "Email, username, game stats, IP address for security, and usage data. Full details at /privacy." },
-      { q: "How do I request my data?", a: "Email peakgg.official@gmail.com with subject \"Data Request\". We respond within 48 hours." },
-      { q: "How do I request data deletion?", a: "Email peakgg.official@gmail.com with subject \"Data Deletion\". Completed within 30 days." },
-    ],
-  },
-];
-
 export default function FAQPage() {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
+
+  const SECTIONS: Section[] = [
+    { title: t("faq.section_getting_started"), items: [
+      { q: t("faq.q_what_is_q"), a: t("faq.q_what_is_a") },
+      { q: t("faq.q_free_q"), a: t("faq.q_free_a") },
+      { q: t("faq.q_games_q"), a: t("faq.q_games_a") },
+      { q: t("faq.q_register_q"), a: t("faq.q_register_a") },
+    ]},
+    { title: t("faq.section_ranks"), items: [
+      { q: t("faq.q_rank_works_q"), a: t("faq.q_rank_works_a") },
+      { q: t("faq.q_ranks_list_q"), a: t("faq.q_ranks_list_a") },
+      { q: t("faq.q_smurf_q"), a: t("faq.q_smurf_a") },
+      { q: t("faq.q_elo_amount_q"), a: t("faq.q_elo_amount_a") },
+    ]},
+    { title: t("faq.section_tournaments"), items: [
+      { q: t("faq.q_join_tournament_q"), a: t("faq.q_join_tournament_a") },
+      { q: t("faq.q_tournament_free_q"), a: t("faq.q_tournament_free_a") },
+      { q: t("faq.q_tournament_tiers_q"), a: t("faq.q_tournament_tiers_a") },
+      { q: t("faq.q_prizes_q"), a: t("faq.q_prizes_a") },
+    ]},
+    { title: t("faq.section_teams"), items: [
+      { q: t("faq.q_create_team_q"), a: t("faq.q_create_team_a") },
+      { q: t("faq.q_invite_players_q"), a: t("faq.q_invite_players_a") },
+      { q: t("faq.q_team_elo_q"), a: t("faq.q_team_elo_a") },
+    ]},
+    { title: t("faq.section_technical"), items: [
+      { q: t("faq.q_regions_q"), a: t("faq.q_regions_a") },
+      { q: t("faq.q_mobile_q"), a: t("faq.q_mobile_a") },
+      { q: t("faq.q_bug_q"), a: t("faq.q_bug_a") },
+    ]},
+    { title: t("faq.section_account"), items: [
+      { q: t("faq.q_delete_acc_q"), a: t("faq.q_delete_acc_a") },
+      { q: t("faq.q_report_player_q"), a: t("faq.q_report_player_a") },
+      { q: t("faq.q_banned_q"), a: t("faq.q_banned_a") },
+    ]},
+    { title: t("faq.section_legal"), items: [
+      { q: t("faq.q_gdpr_q"), a: t("faq.q_gdpr_a") },
+      { q: t("faq.q_data_q"), a: t("faq.q_data_a") },
+      { q: t("faq.q_data_request_q"), a: t("faq.q_data_request_a") },
+      { q: t("faq.q_data_delete_q"), a: t("faq.q_data_delete_a") },
+    ]},
+  ];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -81,7 +62,7 @@ export default function FAQPage() {
     return SECTIONS
       .map((s) => ({ ...s, items: s.items.filter((it) => it.q.toLowerCase().includes(q) || it.a.toLowerCase().includes(q)) }))
       .filter((s) => s.items.length > 0);
-  }, [query]);
+  }, [query, SECTIONS]);
 
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -105,10 +86,10 @@ export default function FAQPage() {
       <main className="pt-24 pb-20">
         <section className="container max-w-3xl">
           <h1 className="font-display font-black text-5xl md:text-6xl uppercase tracking-tight text-center">
-            Frequently Asked <span className="text-primary">Questions</span>
+            {t("faq.title_pre")} <span className="text-primary">{t("faq.title_accent")}</span>
           </h1>
           <p className="text-center text-muted-foreground font-body mt-4">
-            Search or browse by category.
+            {t("faq.subtitle")}
           </p>
 
           <div className="relative mt-8">
@@ -116,15 +97,15 @@ export default function FAQPage() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value.slice(0, 200))}
-              placeholder="Search a question..."
+              placeholder={t("faq.search_placeholder")}
               className="pl-9 h-12 bg-card/60"
-              aria-label="Search questions"
+              aria-label={t("faq.search_placeholder")}
             />
           </div>
 
           <div className="mt-12 space-y-10">
             {filtered.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">No question matches your search.</p>
+              <p className="text-center text-muted-foreground py-8">{t("faq.no_results")}</p>
             )}
             {filtered.map((section) => (
               <div key={section.title}>
