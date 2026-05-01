@@ -31,19 +31,30 @@ export default function Navbar() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${
       scrolled
-        ? "border-border/60 bg-background/80 shadow-[0_1px_0_0_hsl(var(--primary)/0.08),0_8px_30px_-10px_rgba(0,0,0,0.5)]"
-        : "border-border/30 bg-background/40"
+        ? "bg-background/70 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.6)]"
+        : "bg-background/40"
     }`}>
-      <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-            <Mountain className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight">PEAKGG</span>
-        </Link>
+      {/* Custom thin bottom border in dark red */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-[#1e1e1e]" />
 
-        <div className="hidden md:flex items-center gap-6">
-          <GameSwitcher />
+      <div className="container grid grid-cols-[auto_1fr_auto] items-center h-16 gap-6">
+        {/* LEFT — Logo + Game Selector */}
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center gap-2.5 mr-8">
+            <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
+              <Mountain className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="font-display font-bold text-xl tracking-tight">PEAKGG</span>
+          </Link>
+
+          <div className="hidden md:flex items-center">
+            <div className="h-6 w-px bg-border/60 mr-4" />
+            <GameSwitcher />
+          </div>
+        </div>
+
+        {/* CENTER — Nav links */}
+        <div className="hidden md:flex items-center justify-center gap-8">
           {([
             ["/play", t("nav.play")],
             ["/tournaments", t("nav.tournaments")],
@@ -51,13 +62,19 @@ export default function Navbar() {
             ["/teams", t("nav.teams")],
             ["/scrims", t("nav.scrims")],
           ] as const).map(([href, label]) => (
-            <Link key={href} to={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold uppercase tracking-wider">
+            <Link
+              key={href}
+              to={href}
+              className="group relative text-[13px] text-muted-foreground hover:text-foreground transition-colors font-display font-medium uppercase tracking-[0.12em]"
+            >
               {label}
+              <span className="absolute left-0 right-0 -bottom-1.5 h-px scale-x-0 bg-primary group-hover:scale-x-100 transition-transform origin-center" />
             </Link>
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        {/* RIGHT — Lang | Notifications | Avatar */}
+        <div className="hidden md:flex items-center gap-5">
           <LanguageSwitcher />
           {loading ? null : user ? (
             <>
@@ -81,7 +98,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className="md:hidden p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button className="md:hidden p-2 text-foreground col-start-3 justify-self-end" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
