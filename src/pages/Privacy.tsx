@@ -2,7 +2,6 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
 import { useI18n } from "@/i18n";
-import { Trans } from "react-i18next";
 
 export default function PrivacyPage() {
   const { t } = useI18n();
