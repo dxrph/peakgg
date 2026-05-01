@@ -18,7 +18,7 @@
     <meta name="twitter:site" content="@PeakGG" />
     <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/901cf59c-da09-4f37-8dbc-53bc196fc923">
     <!-- Content Security Policy: SPA meta tag form (other security headers must be set at the host layer) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://ai.gateway.lovable.dev https://api.lovable.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com; media-src 'self' blob: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://ai.gateway.lovable.dev https://api.lovable.dev https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta property="og:title" content="PeakGG - Compete. Rise. Dominate.">
@@ -26,6 +26,33 @@
   <meta property="og:description" content="PeakGG — The ultimate competitive gaming platform for Valorant, CS2 and Rainbow Six Siege. Ranked matchmaking, tournaments, team management and community.">
   <meta name="twitter:description" content="PeakGG — The ultimate competitive gaming platform for Valorant, CS2 and Rainbow Six Siege. Ranked matchmaking, tournaments, team management and community.">
   <!-- Add Google Search Console verification meta when ready: <meta name="google-site-verification" content="..." /> -->
+  <!-- Google Analytics 4 — PeakGG (loaded only after cookie consent) -->
+  <script>
+    (function () {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.__GA_ID__ = 'G-4L1FCGHB5Z';
+      window.loadGA = function () {
+        if (window.__gaLoaded) return;
+        window.__gaLoaded = true;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.__GA_ID__;
+        document.head.appendChild(s);
+        window.gtag('js', new Date());
+        window.gtag('config', window.__GA_ID__, {
+          page_title: document.title,
+          page_location: window.location.href,
+          send_page_view: true
+        });
+      };
+      try {
+        if (localStorage.getItem('cookieConsent') === 'accepted') {
+          window.loadGA();
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
   <body>
     <div id="root"></div>

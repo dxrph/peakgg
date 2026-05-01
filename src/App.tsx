@@ -26,6 +26,7 @@ import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
 import EloExplainedPage from "./pages/EloExplained";
 import ChatWidget from "./components/chat/ChatWidget";
+import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
@@ -42,6 +43,7 @@ const App = () => (
           <GameProvider>
             <Toaster />
             <Sonner />
+            <Analytics />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
