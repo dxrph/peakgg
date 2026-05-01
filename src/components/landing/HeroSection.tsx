@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mountain, ArrowRight, Gift, Clock, ShieldCheck } from "lucide-react";
+import { Swords, ArrowRight, Trophy, ShieldCheck, Server } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -41,37 +41,36 @@ export default function HeroSection() {
       <div className="container relative z-10 pt-28 pb-20">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0)}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-8"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-primary/40 bg-primary/5 mb-8 uppercase"
           >
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse-neon" />
-            <span className="text-sm text-primary font-display font-semibold tracking-wide">{t("hero.season_badge")}</span>
+            <span className="text-xs md:text-sm text-primary font-display font-semibold tracking-[0.2em]">{t("hero.season_badge")}</span>
           </motion.div>
 
           <motion.h1 initial="hidden" animate="visible" variants={fadeUp(0.15)}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-[0.9] mb-6 tracking-tight"
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-bold leading-[0.85] mb-6 tracking-tight uppercase"
           >
-            <span className="text-foreground">{t("hero.headline_pre")}</span>{" "}
-            <span className="text-primary text-glow-red">{t("hero.headline_accent")}</span>
-            <br />
-            <span className="text-foreground">{t("hero.headline_post")}</span>
+            <span className="block text-foreground">{t("hero.line1")}</span>
+            <span className="block text-foreground">{t("hero.line2")}</span>
+            <span className="block text-primary text-glow-red">{t("hero.line3")}</span>
           </motion.h1>
 
           <motion.p initial="hidden" animate="visible" variants={fadeUp(0.3)}
-            className="text-base md:text-xl text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed font-body"
+            className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-body"
           >
             {t("hero.subtitle")}
           </motion.p>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
-            className="flex flex-col sm:flex-row gap-3 mb-6 justify-center w-full sm:w-auto"
+            className="flex flex-col sm:flex-row gap-3 mb-10 justify-center w-full sm:w-auto"
           >
             <Link to={startHref} className="w-full sm:w-auto">
               <Button
                 variant="neon"
                 size="xl"
-                className="w-full sm:w-auto rounded-md hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
+                className="w-full sm:w-auto rounded-sm uppercase tracking-wider hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
               >
-                <Mountain className="mr-2 h-5 w-5" />
+                <Swords className="mr-2 h-5 w-5" />
                 {t("hero.cta_play")}
                 <ArrowRight className="ml-1 h-5 w-5" />
               </Button>
@@ -79,28 +78,28 @@ export default function HeroSection() {
             <Button
               variant="neonOutline"
               size="xl"
-              className="w-full sm:w-auto rounded-md"
+              className="w-full sm:w-auto rounded-sm uppercase tracking-wider"
               onClick={scrollHowItWorks}
             >
               {t("hero.cta_secondary")}
             </Button>
           </motion.div>
 
-          {/* Trust strip — replaces fake stat counters */}
+          {/* Competitive trust strip */}
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.55)}
-            className="flex flex-wrap gap-x-6 gap-y-3 justify-center text-xs md:text-sm text-muted-foreground font-body"
+            className="flex flex-wrap gap-x-8 gap-y-3 justify-center text-xs md:text-sm text-muted-foreground font-body uppercase tracking-wider"
           >
-            <div className="flex items-center gap-1.5">
-              <Gift className="h-4 w-4 text-primary" />
-              <span>{t("hero.trust_free")}</span>
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-primary" />
+              <span>{t("hero.trust_ranked")}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-primary" />
-              <span>{t("hero.trust_fast")}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span>{t("hero.trust_safe")}</span>
+              <span>{t("hero.trust_anticheat")}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Server className="h-4 w-4 text-primary" />
+              <span>{t("hero.trust_eu")}</span>
             </div>
           </motion.div>
         </div>

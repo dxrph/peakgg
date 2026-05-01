@@ -137,12 +137,16 @@
     "line1": "COMPÉTIS.",
     "line2": "ÉLÈVE-TOI.",
     "line3": "DOMINE.",
-    "subtitle": "La plateforme compétitive multi-jeux ultime. Matchmaking classé, tournois et gestion d'équipes pour VALORANT, CS2 et Rainbow Six Siege.",
-    "cta_play": "Commencer à jouer",
-    "cta_leaderboard": "Voir le classement",
+    "subtitle": "Le ladder compétitif européen pour VALORANT. Matchmaking par niveau, tournois classés et stats pro. Conçu pour ceux qui jouent pour gagner.",
+    "cta_play": "Entrer dans l'Arène",
+    "cta_leaderboard": "Voir le Classement",
     "stat_players_online": "Joueurs en ligne",
     "stat_matches_today": "Matchs aujourd'hui",
-    "stat_tournaments_live": "Tournois en cours"
+    "stat_tournaments_live": "Tournois en cours",
+    "cta_secondary": "Comment ça marche",
+    "trust_ranked": "Matchmaking par niveau",
+    "trust_anticheat": "Anti-triche activé",
+    "trust_eu": "Serveurs EU faible ping"
   },
   "stats": {
     "players_registered": "Joueurs inscrits",
