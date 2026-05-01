@@ -466,6 +466,13 @@
     "file_too_large_simple": "Fichier trop volumineux. Max 5 Mo.",
     "offline": "Tu es hors ligne — vérifie ta connexion et réessaie.",
     "network_error": "Erreur réseau pendant l'envoi. Réessaie.",
-    "upload_failed": "Échec de l'envoi. Réessaie."
+    "upload_failed": "Échec de l'envoi. Réessaie.",
+    "banner_unsupported": "Format non supporté. Utilise JPG, PNG ou WebP.",
+    "banner_empty": "Le fichier est vide ou corrompu.",
+    "banner_perm_denied": "Permission refusée. Reconnecte-toi et réessaie.",
+    "banner_unsupported_mime": "Format non supporté. Utilise JPG, PNG ou WebP.",
+    "banner_storage_missing": "Stockage non configuré (bucket manquant). Contacte un administrateur.",
+    "change_banner": "Changer la bannière",
+    "banner_updated": "Bannière mise à jour"
   }
 }
