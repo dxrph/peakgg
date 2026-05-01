@@ -475,5 +475,29 @@
     "banner_storage_missing": "Storage non configurato (bucket mancante). Contatta l'amministratore.",
     "change_banner": "Cambia banner",
     "banner_updated": "Banner aggiornato"
+  },
+  "leaderboard_page": {
+    "title": "Classifica",
+    "subtitle": "I migliori giocatori di PeakGG, ordinati per ELO.",
+    "your_position": "La tua posizione:",
+    "loading": "Caricamento classifica…",
+    "empty": "Nessun giocatore trovato.",
+    "previous": "Precedente",
+    "next": "Successiva"
+  },
+  "profile_page_extra": {
+    "not_found": "Profilo non trovato",
+    "browse_leaderboard": "Vedi la classifica",
+    "edit_profile": "Modifica profilo",
+    "avg_rank": "Rank medio",
+    "go_to_team": "Vai al team",
+    "no_team": "Nessun team — questo giocatore non è in alcun team.",
+    "search_team": "Cerca un team",
+    "no_trophies": "Nessun trofeo ancora.",
+    "no_matches": "Nessuna partita ancora.",
+    "join_tournament": "Iscriviti a un torneo",
+    "preferred": "Preferito",
+    "file_hint": "JPG, PNG o WebP — max 5 MB",
+    "preferred_game": "Gioco preferito"
   }
 }
