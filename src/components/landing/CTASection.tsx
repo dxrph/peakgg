@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mountain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/i18n";
 
 export default function CTASection() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const href = user ? "/play" : "/register";
-  const label = user ? "Start Playing" : "Create Your Account";
+  const label = user ? t("cta_section.cta_logged_in") : t("cta_section.cta_guest");
   return (
     <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 gradient-hero" />
@@ -16,10 +18,10 @@ export default function CTASection() {
       <div className="container relative z-10 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-5xl md:text-7xl font-display font-bold mb-6">
-            READY TO <span className="text-primary text-glow-red">COMPETE</span>?
+            {t("cta_section.title_pre")} <span className="text-primary text-glow-red">{t("cta_section.title_accent")}</span>?
           </h2>
           <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto font-body">
-            Join thousands of players on the most advanced multi-game competitive platform.
+            {t("cta_section.subtitle")}
           </p>
           <Link to={href}>
             <Button variant="neon" size="xl">
