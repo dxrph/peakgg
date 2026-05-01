@@ -159,7 +159,9 @@
     "step2_title": "Choose Your Game",
     "step2_desc": "Pick Valorant, CS2 or Rainbow Six Siege and queue up.",
     "step3_title": "Compete & Rise",
-    "step3_desc": "Win matches, climb the ranks, join tournaments."
+    "step3_desc": "Win matches, climb the ranks, join tournaments.",
+    "step4_title": "Climb the Ranks",
+    "step4_desc": "Win matches, earn ELO, unlock tournament tiers, reach Apex."
   },
   "features": {
     "title_pre": "BUILT FOR",
