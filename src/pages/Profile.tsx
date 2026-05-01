@@ -125,6 +125,7 @@ export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
   const { user, profile: myProfile } = useAuth();
+  const { t } = useI18n();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [team, setTeam] = useState<TeamRow["team"] | null>(null);
@@ -254,9 +255,9 @@ export default function ProfilePage() {
 
   const handleBannerUpload = async (file: File): Promise<UploadResult> => {
     if (!isOwnProfile) {
-      return { ok: false, error: "Non sei il proprietario di questo profilo." };
+      return { ok: false, error: t("profile_page.not_owner") };
     }
-    const validationError = validateBannerFile(file);
+    const validationError = validateBannerFile(file, t);
     if (validationError) {
       toast.error(validationError);
       return { ok: false, error: validationError };
@@ -272,10 +273,10 @@ export default function ProfilePage() {
       const { error: updErr } = await supabase.from("profiles").update({ banner_url: pub.publicUrl }).eq("id", profile.id);
       if (updErr) throw updErr;
       setProfile({ ...profile, banner_url: pub.publicUrl });
-      toast.success("Banner aggiornato");
+      toast.success(t("profile_page.banner_updated"));
       return { ok: true, url: pub.publicUrl };
     } catch (err) {
-      const message = friendlyBannerError(err);
+      const message = friendlyBannerError(err, t);
       toast.error(message);
       return { ok: false, error: message };
     }
