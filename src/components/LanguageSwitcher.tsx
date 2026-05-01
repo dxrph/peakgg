@@ -7,6 +7,7 @@ import {
 import { LOCALES, useI18n, type Locale, LOCALE_META } from "@/i18n";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import FlagIcon from "@/components/FlagIcon";
 
 interface Props {
   className?: string;
@@ -32,9 +33,7 @@ export default function LanguageSwitcher({ className }: Props) {
             className,
           )}
         >
-          <span className="text-lg leading-none" aria-hidden>
-            {current.flag}
-          </span>
+          <FlagIcon code={current.code} className="h-3.5 w-5" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -58,9 +57,7 @@ export default function LanguageSwitcher({ className }: Props) {
                 active && "bg-primary/10",
               )}
             >
-              <span className="text-lg leading-none" aria-hidden>
-                {l.flag}
-              </span>
+              <FlagIcon code={l.code} className="h-4 w-6" />
               <span
                 className={cn(
                   "flex-1 font-display text-sm font-semibold tracking-wide",
