@@ -25,6 +25,7 @@ export default function Footer() {
               <li><Link to="/leaderboard" className="hover:text-primary transition-colors">Leaderboard</Link></li>
               <li><Link to="/teams" className="hover:text-primary transition-colors">Teams</Link></li>
               <li><Link to="/scrims" className="hover:text-primary transition-colors">Scrims</Link></li>
+              <li><Link to="/elo" className="hover:text-primary transition-colors">How ELO works</Link></li>
             </ul>
           </div>
           <div>

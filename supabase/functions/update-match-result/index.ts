@@ -156,6 +156,17 @@ Deno.serve(async (req) => {
         if (error) return json({ error: error.message }, 500);
       }
 
+      // Log the ELO change for transparency
+      await admin.from("elo_history").insert({
+        user_id: p.userId,
+        game,
+        match_id: match.id,
+        elo_before: baseElo,
+        elo_after: newElo,
+        delta: newElo - baseElo,
+        reason: p.won ? "match_win" : "match_loss",
+      });
+
       updated.push({ user_id: p.userId, won: p.won, elo: newElo });
     }
 

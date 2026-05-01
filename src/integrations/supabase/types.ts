@@ -161,6 +161,42 @@ export type Database = {
         }
         Relationships: []
       }
+      elo_history: {
+        Row: {
+          created_at: string
+          delta: number
+          elo_after: number
+          elo_before: number
+          game: string
+          id: string
+          match_id: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          elo_after: number
+          elo_before: number
+          game: string
+          id?: string
+          match_id?: string | null
+          reason?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          elo_after?: number
+          elo_before?: number
+          game?: string
+          id?: string
+          match_id?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
