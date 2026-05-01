@@ -20,7 +20,6 @@ import TournamentDetailPage from "./pages/TournamentDetail";
 import TeamDetailPage from "./pages/TeamDetail";
 import AdminPage from "./pages/Admin";
 import AimGuidePage from "./pages/AimGuide";
-import ChatPage from "./pages/Chat";
 import NotificationsPage from "./pages/Notifications";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -52,7 +51,6 @@ const App = () => (
               <Route path="/teams/:teamId" element={<TeamDetailPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/aim-guide" element={<AimGuidePage />} />
-              <Route path="/chat" element={<ChatPage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
