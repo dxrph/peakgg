@@ -16,8 +16,8 @@ import type { Locale } from "date-fns";
 
 export default function NotificationsPage() {
   const { user } = useAuth();
-  const { t, lang } = useI18n();
-  const dateLocale = dateLocaleMap[lang] ?? enUS;
+  const { t, locale } = useI18n();
+  const dateLocale = dateLocaleMap[locale] ?? enUS;
   const { unreadCount, markAllAsRead, markAsRead } = useNotifications(10);
   const [all, setAll] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
