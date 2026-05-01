@@ -571,6 +571,7 @@ function PerGameCard({
   preferred: boolean;
   onClick: () => void;
 }) {
+  const { t } = useI18n();
   const info = getGameById(game);
   const elo = stat?.elo ?? 1000;
   const wins = stat?.wins ?? 0;
