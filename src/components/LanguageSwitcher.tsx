@@ -22,12 +22,11 @@ export default function LanguageSwitcher({ className }: Props) {
         <Button
           variant="ghost"
           size="sm"
-          className={`gap-1.5 font-display font-semibold border border-border/40 hover:border-border ${className ?? ""}`}
+          className={`gap-1.5 font-display font-semibold px-2 hover:bg-secondary/60 ${className ?? ""}`}
           aria-label={t("ui.language")}
         >
           <span className="text-base leading-none" aria-hidden>{current.flag}</span>
           <span className="text-xs tracking-wider">{current.label}</span>
-          <ChevronDown className="h-3 w-3 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[10rem]">
