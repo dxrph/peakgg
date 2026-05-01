@@ -137,9 +137,16 @@
     "line1": "COMPETE.",
     "line2": "RISE.",
     "line3": "DOMINATE.",
-    "subtitle": "The ultimate multi-game competitive platform. Ranked matchmaking, tournaments, and team management for VALORANT, CS2, and Rainbow Six Siege.",
-    "cta_play": "Start Playing",
+    "headline_pre": "Free",
+    "headline_accent": "VALORANT",
+    "headline_post": "tournaments. Every night.",
+    "subtitle": "Sign up, play against players at your level, win prizes. No subscription, no hassle.",
+    "cta_play": "Play Free",
+    "cta_secondary": "How it works",
     "cta_leaderboard": "View Leaderboard",
+    "trust_free": "100% free",
+    "trust_fast": "30 sec to start",
+    "trust_safe": "Anti-cheat & fair play",
     "stat_players_online": "Players Online",
     "stat_matches_today": "Matches Today",
     "stat_tournaments_live": "Tournaments Live"
@@ -153,13 +160,13 @@
   "how_it_works": {
     "title_pre": "HOW IT",
     "title_accent": "WORKS",
-    "subtitle": "Three steps to start your climb.",
-    "step1_title": "Create Your Account",
-    "step1_desc": "Sign up in 30 seconds, link your game account.",
-    "step2_title": "Choose Your Game",
-    "step2_desc": "Pick Valorant, CS2 or Rainbow Six Siege and queue up.",
-    "step3_title": "Compete & Rise",
-    "step3_desc": "Win matches, climb the ranks, join tournaments.",
+    "subtitle": "Three steps. That's it.",
+    "step1_title": "Sign up",
+    "step1_desc": "Takes 30 seconds. Just an email and a username.",
+    "step2_title": "Find a match",
+    "step2_desc": "We match you with players at your level. Average wait: 2 minutes.",
+    "step3_title": "Win prizes",
+    "step3_desc": "Climb the ranks, join tournaments, earn rewards.",
     "step4_title": "Climb the Ranks",
     "step4_desc": "Win matches, earn ELO, unlock tournament tiers, reach Apex."
   },
@@ -206,9 +213,10 @@
   "cta_section": {
     "title_pre": "READY TO",
     "title_accent": "COMPETE",
-    "subtitle": "Join thousands of players on the most advanced multi-game competitive platform.",
+    "subtitle": "Create your account and play your first match in under a minute.",
     "cta_logged_in": "Start Playing",
-    "cta_guest": "Create Your Account"
+    "cta_guest": "Create Your Account",
+    "reassurance": "Free. No credit card. 30 seconds to start."
   },
   "footer": {
     "tagline": "The ultimate multi-game competitive platform for VALORANT, CS2, and Rainbow Six Siege.",
