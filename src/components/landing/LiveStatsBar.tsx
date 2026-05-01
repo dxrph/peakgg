@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Gamepad2, Swords, Trophy, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/i18n";
 
 function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -24,6 +25,7 @@ function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
 }
 
 export default function LiveStatsBar() {
+  const { t } = useI18n();
   const [stats, setStats] = useState({ players: 0, matches: 0, tournaments: 0, teams: 0 });
 
   useEffect(() => {
@@ -48,10 +50,10 @@ export default function LiveStatsBar() {
   }, []);
 
   const STATS = [
-    { icon: Gamepad2, value: stats.players,     label: "Players Registered", color: "text-primary" },
-    { icon: Swords,   value: stats.matches,     label: "Matches Played",     color: "text-accent" },
-    { icon: Trophy,   value: stats.tournaments, label: "Tournaments Live",   color: "text-primary" },
-    { icon: Users,    value: stats.teams,       label: "Active Teams",       color: "text-accent" },
+    { icon: Gamepad2, value: stats.players,     label: t("stats.players_registered"), color: "text-primary" },
+    { icon: Swords,   value: stats.matches,     label: t("stats.matches_played"),     color: "text-accent" },
+    { icon: Trophy,   value: stats.tournaments, label: t("stats.tournaments_live"),   color: "text-primary" },
+    { icon: Users,    value: stats.teams,       label: t("stats.active_teams"),       color: "text-accent" },
   ];
 
   return (
