@@ -137,9 +137,16 @@
     "line1": "COMPETI.",
     "line2": "CRESCI.",
     "line3": "DOMINA.",
-    "subtitle": "La piattaforma competitiva multi-gioco definitiva. Matchmaking ranked, tornei e gestione team per VALORANT, CS2 e Rainbow Six Siege.",
-    "cta_play": "Inizia a giocare",
+    "headline_pre": "Tornei",
+    "headline_accent": "VALORANT",
+    "headline_post": "gratis. Tutte le sere.",
+    "subtitle": "Iscriviti, gioca contro player del tuo livello, vinci premi. Niente abbonamenti, niente complicazioni.",
+    "cta_play": "Gioca gratis",
+    "cta_secondary": "Come funziona",
     "cta_leaderboard": "Vedi la classifica",
+    "trust_free": "100% gratis",
+    "trust_fast": "30 secondi per iniziare",
+    "trust_safe": "Anti-cheat & fair play",
     "stat_players_online": "Giocatori online",
     "stat_matches_today": "Partite oggi",
     "stat_tournaments_live": "Tornei attivi"
@@ -153,13 +160,13 @@
   "how_it_works": {
     "title_pre": "COME",
     "title_accent": "FUNZIONA",
-    "subtitle": "Tre passi per iniziare la tua scalata.",
-    "step1_title": "Crea il tuo account",
-    "step1_desc": "Registrati in 30 secondi, collega il tuo account di gioco.",
-    "step2_title": "Scegli il tuo gioco",
-    "step2_desc": "Valorant, CS2 o Rainbow Six Siege — entra in coda.",
-    "step3_title": "Competi e sali",
-    "step3_desc": "Vinci partite, scala i rank, partecipa ai tornei.",
+    "subtitle": "Tre passi. Nient'altro.",
+    "step1_title": "Iscriviti",
+    "step1_desc": "Bastano 30 secondi. Solo email e username.",
+    "step2_title": "Trova partita",
+    "step2_desc": "Ti accoppiamo con player del tuo livello. Attesa media: 2 minuti.",
+    "step3_title": "Vinci premi",
+    "step3_desc": "Scala i rank, entra nei tornei, guadagna ricompense.",
     "step4_title": "Scala i Rank",
     "step4_desc": "Vinci partite, guadagna ELO, sblocca tornei, raggiungi Apex."
   },
@@ -206,9 +213,10 @@
   "cta_section": {
     "title_pre": "PRONTO A",
     "title_accent": "COMPETERE",
-    "subtitle": "Unisciti a migliaia di giocatori sulla piattaforma competitiva multi-gioco più avanzata.",
+    "subtitle": "Crea il tuo account e gioca la prima partita in meno di un minuto.",
     "cta_logged_in": "Inizia a giocare",
-    "cta_guest": "Crea il tuo account"
+    "cta_guest": "Crea il tuo account",
+    "reassurance": "Gratis. Niente carta. 30 secondi per iniziare."
   },
   "footer": {
     "tagline": "La piattaforma competitiva multi-gioco definitiva per VALORANT, CS2 e Rainbow Six Siege.",
