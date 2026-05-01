@@ -5,8 +5,6 @@ import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
 import RankShowcase from "@/components/landing/RankShowcase";
 import TopPlayersWeek from "@/components/landing/TopPlayersWeek";
-import ClipOfTheWeek from "@/components/landing/ClipOfTheWeek";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import WaitlistSection from "@/components/landing/WaitlistSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
@@ -22,8 +20,6 @@ const Index = () => {
         <HowItWorksSteps />
         <RankShowcase />
         <TopPlayersWeek />
-        <ClipOfTheWeek />
-        <TestimonialsSection />
         <WaitlistSection />
         <CTASection />
       </main>
