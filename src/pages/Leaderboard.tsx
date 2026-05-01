@@ -11,17 +11,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Crown, Search, Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/i18n";
 
 import { type GameId } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
 type GameFilter = GameId;
-
-const GAME_TABS: { id: GameFilter; label: string }[] = [
-  { id: "valorant", label: "Valorant" },
-  { id: "cs2", label: "CS2" },
-  { id: "r6s", label: "Rainbow Six" },
-];
 
 const PAGE_SIZE = 25;
 
