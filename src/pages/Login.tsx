@@ -19,7 +19,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
-  const from = (location.state as { from?: string } | null)?.from || "/dashboard";
+  const from = (location.state as { from?: string } | null)?.from || "/play";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
