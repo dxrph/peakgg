@@ -1,9 +1,13 @@
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
+import LiveStatsBar from "@/components/landing/LiveStatsBar";
 import FeaturesSection from "@/components/landing/FeaturesSection";
-import HowItWorksSection from "@/components/landing/HowItWorksSection";
-import LeaderboardPreview from "@/components/landing/LeaderboardPreview";
+import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
+import RankShowcase from "@/components/landing/RankShowcase";
+import TopPlayersWeek from "@/components/landing/TopPlayersWeek";
+import ClipOfTheWeek from "@/components/landing/ClipOfTheWeek";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import WaitlistSection from "@/components/landing/WaitlistSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
 
@@ -13,10 +17,14 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
+        <LiveStatsBar />
         <FeaturesSection />
-        <HowItWorksSection />
-        <LeaderboardPreview />
+        <HowItWorksSteps />
+        <RankShowcase />
+        <TopPlayersWeek />
+        <ClipOfTheWeek />
         <TestimonialsSection />
+        <WaitlistSection />
         <CTASection />
       </main>
       <Footer />
