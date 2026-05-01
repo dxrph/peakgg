@@ -12,16 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mail, MessageSquare, Clock, MapPin, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
-const SUBJECTS = [
-  { value: "general", label: "General Question" },
-  { value: "bug", label: "Bug Report" },
-  { value: "partnership", label: "Partnership" },
-  { value: "press", label: "Press" },
-  { value: "ban_appeal", label: "Ban Appeal" },
-  { value: "legal", label: "Legal" },
-  { value: "other", label: "Other" },
-] as const;
+import { useI18n } from "@/i18n";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -31,6 +22,7 @@ const schema = z.object({
 });
 
 export default function ContactPage() {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState<string>("general");
@@ -38,13 +30,23 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const SUBJECTS = [
+    { value: "general", label: t("contact.subj_general") },
+    { value: "bug", label: t("contact.subj_bug") },
+    { value: "partnership", label: t("contact.subj_partnership") },
+    { value: "press", label: t("contact.subj_press") },
+    { value: "ban_appeal", label: t("contact.subj_ban_appeal") },
+    { value: "legal", label: t("contact.subj_legal") },
+    { value: "other", label: t("contact.subj_other") },
+  ];
+
   const remaining = 1000 - message.length;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse({ name, email, subject, message });
     if (!parsed.success) {
-      toast({ title: "Check your inputs", description: parsed.error.issues[0]?.message ?? "Invalid form", variant: "destructive" });
+      toast({ title: t("contact.error_check"), description: parsed.error.issues[0]?.message ?? t("contact.error_invalid"), variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -56,7 +58,7 @@ export default function ContactPage() {
     });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Could not send message", description: error.message, variant: "destructive" });
+      toast({ title: t("contact.error_send_title"), description: error.message, variant: "destructive" });
       return;
     }
     setSuccess(true);
@@ -75,9 +77,9 @@ export default function ContactPage() {
         <section className="container max-w-5xl">
           <div className="text-center mb-12">
             <h1 className="font-display font-black text-5xl md:text-6xl uppercase tracking-tight">
-              Get In <span className="text-primary">Touch</span>
+              {t("contact.title_pre")} <span className="text-primary">{t("contact.title_accent")}</span>
             </h1>
-            <p className="mt-4 text-muted-foreground font-body">We respond within 48 hours.</p>
+            <p className="mt-4 text-muted-foreground font-body">{t("contact.subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -86,22 +88,22 @@ export default function ContactPage() {
               {success ? (
                 <div className="text-center py-12">
                   <CheckCircle2 className="h-14 w-14 text-primary mx-auto mb-4" />
-                  <h2 className="font-display font-bold text-2xl uppercase mb-2">Message sent!</h2>
-                  <p className="text-muted-foreground">We'll get back to you within 48 hours.</p>
-                  <Button onClick={() => setSuccess(false)} variant="outline" className="mt-6">Send another</Button>
+                  <h2 className="font-display font-bold text-2xl uppercase mb-2">{t("contact.success_title")}</h2>
+                  <p className="text-muted-foreground">{t("contact.success_body")}</p>
+                  <Button onClick={() => setSuccess(false)} variant="outline" className="mt-6">{t("contact.send_another")}</Button>
                 </div>
               ) : (
                 <form onSubmit={onSubmit} className="space-y-5">
                   <div>
-                    <Label htmlFor="name">Name *</Label>
+                    <Label htmlFor="name">{t("contact.name")} *</Label>
                     <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 100))} required maxLength={100} />
                   </div>
                   <div>
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t("contact.email")} *</Label>
                     <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value.slice(0, 255))} required maxLength={255} />
                   </div>
                   <div>
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject">{t("contact.subject")}</Label>
                     <Select value={subject} onValueChange={setSubject}>
                       <SelectTrigger id="subject"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -111,13 +113,13 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <div className="flex justify-between items-center">
-                      <Label htmlFor="message">Message *</Label>
-                      <span className={`text-xs ${remaining < 50 ? "text-primary" : "text-muted-foreground"}`}>{remaining} characters left</span>
+                      <Label htmlFor="message">{t("contact.message")} *</Label>
+                      <span className={`text-xs ${remaining < 50 ? "text-primary" : "text-muted-foreground"}`}>{t("contact.characters_left", { n: remaining })}</span>
                     </div>
                     <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value.slice(0, 1000))} rows={6} required maxLength={1000} />
                   </div>
                   <Button type="submit" disabled={submitting} size="lg" className="font-display uppercase tracking-wider w-full md:w-auto">
-                    {submitting ? "Sending..." : "Send Message"}
+                    {submitting ? t("contact.sending") : t("contact.send")}
                   </Button>
                 </form>
               )}
@@ -127,23 +129,23 @@ export default function ContactPage() {
             <div className="space-y-4">
               <Card className="p-5 bg-card/60 border-border">
                 <Mail className="h-5 w-5 text-primary mb-2" />
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">Email</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">{t("contact.info_email")}</p>
                 <a href="mailto:peakgg.official@gmail.com" className="text-sm font-body hover:text-primary break-all">peakgg.official@gmail.com</a>
               </Card>
               <Card className="p-5 bg-card/60 border-border">
                 <MessageSquare className="h-5 w-5 text-primary mb-2" />
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">Discord</p>
-                <a href="https://discord.gg/peakgg" target="_blank" rel="noopener noreferrer" className="text-sm font-body hover:text-primary">Join our Discord for fastest response</a>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">{t("contact.info_discord")}</p>
+                <a href="https://discord.gg/peakgg" target="_blank" rel="noopener noreferrer" className="text-sm font-body hover:text-primary">{t("contact.info_discord_text")}</a>
               </Card>
               <Card className="p-5 bg-card/60 border-border">
                 <Clock className="h-5 w-5 text-primary mb-2" />
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">Response time</p>
-                <p className="text-sm font-body">Within 48 hours</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">{t("contact.info_response")}</p>
+                <p className="text-sm font-body">{t("contact.info_response_text")}</p>
               </Card>
               <Card className="p-5 bg-card/60 border-border">
                 <MapPin className="h-5 w-5 text-primary mb-2" />
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">Location</p>
-                <p className="text-sm font-body">Brussels, Belgium</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">{t("contact.info_location")}</p>
+                <p className="text-sm font-body">{t("contact.info_location_text")}</p>
               </Card>
             </div>
           </div>

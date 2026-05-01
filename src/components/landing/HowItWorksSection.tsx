@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
 import { UserPlus, Gamepad2, Swords, Trophy } from "lucide-react";
-
-const steps = [
-  { icon: UserPlus, step: "01", title: "Create Account", description: "Sign up and verify your email to access the platform." },
-  { icon: Gamepad2, step: "02", title: "Pick Your Game", description: "Choose VALORANT, CS2, or Rainbow Six Siege and link your account." },
-  { icon: Swords, step: "03", title: "Find a Match", description: "Join SoloQ or TeamQ. The system balances ELO and roles." },
-  { icon: Trophy, step: "04", title: "Climb the Ranks", description: "Win matches, earn ELO, unlock tournament tiers, reach Apex." },
-];
+import { useI18n } from "@/i18n";
 
 export default function HowItWorksSection() {
+  const { t } = useI18n();
+  const steps = [
+    { icon: UserPlus, step: "01", title: t("how_it_works.step1_title"), description: t("how_it_works.step1_desc") },
+    { icon: Gamepad2, step: "02", title: t("how_it_works.step2_title"), description: t("how_it_works.step2_desc") },
+    { icon: Swords, step: "03", title: t("how_it_works.step3_title"), description: t("how_it_works.step3_desc") },
+    { icon: Trophy, step: "04", title: t("how_it_works.step4_title"), description: t("how_it_works.step4_desc") },
+  ];
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-card/30" />
@@ -17,7 +18,7 @@ export default function HowItWorksSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            HOW IT <span className="text-accent">WORKS</span>
+            {t("how_it_works.title_pre")} <span className="text-accent">{t("how_it_works.title_accent")}</span>
           </h2>
         </motion.div>
 

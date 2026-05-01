@@ -159,7 +159,9 @@
     "step2_title": "Choisis ton jeu",
     "step2_desc": "Valorant, CS2 ou Rainbow Six Siege — entre dans la file.",
     "step3_title": "Compétis et monte",
-    "step3_desc": "Gagne des matchs, grimpe les rangs, rejoins des tournois."
+    "step3_desc": "Gagne des matchs, grimpe les rangs, rejoins des tournois.",
+    "step4_title": "Grimpez les rangs",
+    "step4_desc": "Gagnez des matchs, gagnez de l'ELO, débloquez les tournois, atteignez Apex."
   },
   "features": {
     "title_pre": "CONÇU POUR LES",

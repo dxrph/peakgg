@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import { Trophy, ChevronRight, Lock, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/i18n";
 
 type TopPlayer = {
   user_id: string;
@@ -23,6 +24,7 @@ function rankColor(r: number) {
 }
 
 export default function TopPlayersWeek() {
+  const { t } = useI18n();
   const [players, setPlayers] = useState<TopPlayer[] | null>(null);
 
   useEffect(() => {
@@ -74,10 +76,10 @@ export default function TopPlayersWeek() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight">
-            TOP PLAYERS <span className="text-primary text-glow-red">THIS WEEK</span>
+            {t("top_players.title_pre")} <span className="text-primary text-glow-red">{t("top_players.title_accent")}</span>
           </h2>
           <p className="mt-3 text-muted-foreground font-body">
-            {showList ? "The five climbing the fastest right now." : "Be among the first to claim a spot on the leaderboard."}
+            {showList ? t("top_players.subtitle_with_data") : t("top_players.subtitle_empty")}
           </p>
         </motion.div>
 
@@ -90,10 +92,10 @@ export default function TopPlayersWeek() {
           >
             <div className="grid grid-cols-[3rem_1fr_auto_4rem_5rem] gap-3 px-5 py-3 bg-secondary/40 text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-display">
               <span>#</span>
-              <span>Player</span>
-              <span className="text-right pr-2">Rank</span>
-              <span className="text-right">Wins</span>
-              <span className="text-right">ELO</span>
+              <span>{t("top_players.header_player")}</span>
+              <span className="text-right pr-2">{t("top_players.header_rank")}</span>
+              <span className="text-right">{t("top_players.header_wins")}</span>
+              <span className="text-right">{t("top_players.header_elo")}</span>
             </div>
             {players!.map((p, i) => {
               const rank = i + 1;
@@ -149,15 +151,14 @@ export default function TopPlayersWeek() {
               </div>
               <div>
                 <h3 className="text-2xl font-display font-bold tracking-tight">
-                  THE LEADERBOARD IS WAITING
+                  {t("top_players.empty_title")}
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground font-body max-w-md">
-                  No matches have been played yet. Register, queue up, and become the first
-                  name on the global ranking.
+                  {t("top_players.empty_desc")}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-[0.18em] mt-2">
-                <Lock className="h-3 w-3" /> Top 5 unlocks after the first ranked matches
+                <Lock className="h-3 w-3" /> {t("top_players.empty_lock")}
               </div>
             </div>
           </motion.div>
@@ -165,11 +166,11 @@ export default function TopPlayersWeek() {
 
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground mb-4 font-body italic">
-            Want to be on top? — <Link to="/register" className="text-primary hover:underline">Start playing</Link>
+            {t("top_players.want_to_be_top")} <Link to="/register" className="text-primary hover:underline">{t("top_players.start_playing")}</Link>
           </p>
           <Link to="/leaderboard">
             <Button variant="neonOutline" size="lg" className="rounded-md">
-              View Full Leaderboard <ChevronRight className="ml-1 h-4 w-4" />
+              {t("top_players.view_full")} <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
         </div>

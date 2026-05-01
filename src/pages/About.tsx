@@ -5,15 +5,16 @@ import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Target, Zap, Users, Lock, ArrowRight } from "lucide-react";
-
-const values = [
-  { icon: Target, title: "Fair Play", body: "Every match is fair. Anti-smurf, ELO-based, no pay-to-win." },
-  { icon: Zap, title: "Competition", body: "From Open Cup to Peak Championship. Real stakes, real growth." },
-  { icon: Users, title: "Community", body: "Discord, chat, LFT board. Your squad is here." },
-  { icon: Lock, title: "Safety", body: "GDPR compliant. Your data is yours. Always." },
-];
+import { useI18n } from "@/i18n";
 
 export default function AboutPage() {
+  const { t } = useI18n();
+  const values = [
+    { icon: Target, title: t("about.value_fair_title"), body: t("about.value_fair_desc") },
+    { icon: Zap, title: t("about.value_competition_title"), body: t("about.value_competition_desc") },
+    { icon: Users, title: t("about.value_community_title"), body: t("about.value_community_desc") },
+    { icon: Lock, title: t("about.value_safety_title"), body: t("about.value_safety_desc") },
+  ];
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO
@@ -26,20 +27,19 @@ export default function AboutPage() {
         {/* Hero */}
         <section className="container py-20 text-center animate-in fade-in duration-700">
           <h1 className="font-display font-black text-5xl md:text-7xl tracking-tight uppercase">
-            We are <span className="text-primary">PeakGG</span>
+            {t("about.hero_title_pre")} <span className="text-primary">{t("about.hero_title_accent")}</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-body">
-            Built by gamers. For gamers who want more.
+            {t("about.hero_subtitle")}
           </p>
         </section>
 
         {/* Mission */}
         <section className="container py-12">
           <Card className="p-8 md:p-12 bg-card/50 border-border">
-            <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-4 text-primary">Our Mission</h2>
+            <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-4 text-primary">{t("about.mission_title")}</h2>
             <p className="text-base md:text-lg text-foreground/90 leading-relaxed font-body">
-              PeakGG exists because competitive gaming deserves a better home. Fair matchmaking, real
-              tournaments, a community that pushes you to your peak. We built what we wanted to play on.
+              {t("about.mission_body")}
             </p>
           </Card>
         </section>
@@ -47,18 +47,16 @@ export default function AboutPage() {
         {/* Story */}
         <section className="container py-12">
           <Card className="p-8 md:p-12 bg-card/50 border-border">
-            <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-4 text-primary">Our Story</h2>
+            <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-4 text-primary">{t("about.story_title")}</h2>
             <p className="text-base md:text-lg text-foreground/90 leading-relaxed font-body">
-              Started in 2026 in Brussels, Belgium. PeakGG was born from frustration with existing
-              platforms — laggy, unfair, soulless. Two people, one vision: build the platform serious FPS
-              players actually deserve.
+              {t("about.story_body")}
             </p>
           </Card>
         </section>
 
         {/* Values */}
         <section className="container py-16">
-          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">Our Values</h2>
+          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">{t("about.values_title")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map(({ icon: Icon, title, body }) => (
               <Card key={title} className="p-6 bg-card/60 border-border hover:border-primary/60 transition-colors">
@@ -74,16 +72,16 @@ export default function AboutPage() {
 
         {/* Team */}
         <section className="container py-16">
-          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground font-display mb-3">Founding Team</p>
-          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">The People Behind PeakGG</h2>
+          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground font-display mb-3">{t("about.team_eyebrow")}</p>
+          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">{t("about.team_title")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {[1, 2].map((i) => (
               <Card key={i} className="p-8 bg-card/60 border-border text-center">
                 <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center border border-border">
                   <Users className="h-10 w-10 text-muted-foreground" />
                 </div>
-                <h3 className="font-display font-bold text-xl uppercase">Founder #{i}</h3>
-                <p className="text-sm text-muted-foreground font-body mt-2">Building PeakGG from Brussels.</p>
+                <h3 className="font-display font-bold text-xl uppercase">{t("about.team_member", { n: i })}</h3>
+                <p className="text-sm text-muted-foreground font-body mt-2">{t("about.team_member_sub")}</p>
               </Card>
             ))}
           </div>
@@ -91,10 +89,10 @@ export default function AboutPage() {
 
         {/* CTA */}
         <section className="container py-20 text-center">
-          <h2 className="font-display font-black text-4xl md:text-5xl uppercase mb-6">Ready to compete?</h2>
+          <h2 className="font-display font-black text-4xl md:text-5xl uppercase mb-6">{t("about.cta_title")}</h2>
           <Link to="/register">
             <Button size="lg" className="font-display uppercase tracking-wider">
-              Start Playing <ArrowRight className="ml-2 h-4 w-4" />
+              {t("about.cta_button")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </section>

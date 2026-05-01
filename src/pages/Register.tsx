@@ -16,6 +16,7 @@ import {
   isDisposableEmail,
 } from "@/lib/security";
 import { containsProfanity } from "@/lib/profanity";
+import { useI18n } from "@/i18n";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +26,12 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !email || !password) {
-      toast.error("Please fill in all fields");
+      toast.error(t("auth.fill_all_fields"));
       return;
     }
 
@@ -39,7 +41,7 @@ export default function RegisterPage() {
       return;
     }
     if (containsProfanity(usernameCheck.data)) {
-      toast.error("Please choose a different username.");
+      toast.error(t("auth.username_taken_check"));
       return;
     }
 
@@ -58,7 +60,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     if (await isDisposableEmail(emailCheck.data)) {
       setIsLoading(false);
-      toast.error("Disposable email addresses are not allowed.");
+      toast.error(t("auth.disposable_not_allowed"));
       return;
     }
 
@@ -67,7 +69,7 @@ export default function RegisterPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! Check your email to verify your account.");
+      toast.success(t("auth.account_created"));
       navigate("/login");
     }
   };
@@ -82,7 +84,7 @@ export default function RegisterPage() {
             <Mountain className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-5xl font-display font-bold mb-4">PEAKGG</h1>
-          <p className="text-muted-foreground text-lg font-body">Join the competitive community</p>
+          <p className="text-muted-foreground text-lg font-body">{t("auth.join_community")}</p>
         </div>
       </div>
 
@@ -95,33 +97,33 @@ export default function RegisterPage() {
             <span className="font-display font-bold text-xl">PEAKGG</span>
           </div>
 
-          <h2 className="text-3xl font-display font-bold mb-2">Create Account</h2>
-          <p className="text-muted-foreground mb-8 font-body">Start your competitive journey</p>
+          <h2 className="text-3xl font-display font-bold mb-2">{t("auth.create_account")}</h2>
+          <p className="text-muted-foreground mb-8 font-body">{t("auth.create_account_sub")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username" className="font-body">Username</Label>
+              <Label htmlFor="username" className="font-body">{t("auth.username")}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="username" placeholder="Your gamer tag" value={username}
+                <Input id="username" placeholder={t("auth.username_placeholder")} value={username}
                   onChange={(e) => setUsername(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-body">Email</Label>
+              <Label htmlFor="email" className="font-body">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="player@example.com" value={email}
+                <Input id="email" type="email" placeholder={t("auth.email_placeholder")} value={email}
                   onChange={(e) => setEmail(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-body">Password</Label>
+              <Label htmlFor="password" className="font-body">{t("auth.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="At least 8 characters"
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder={t("auth.password_hint")}
                   value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-card border-border" disabled={isLoading} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -132,24 +134,24 @@ export default function RegisterPage() {
             </div>
 
             <Button variant="neon" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create Account"}
+              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("auth.creating_account")}</> : t("auth.create_account")}
             </Button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground font-body">oppure</span>
+            <span className="text-xs text-muted-foreground font-body">{t("auth.or")}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <GoogleButton label="Registrati con Google" />
+          <GoogleButton label={t("auth.signup_google")} />
 
           <p className="text-sm text-muted-foreground text-center mt-4 font-body">
-            By signing up you agree to our <Link to="/terms" className="text-primary hover:underline">Terms</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+            {t("auth.agree_terms")} <Link to="/terms" className="text-primary hover:underline">{t("auth.terms_link")}</Link> {t("auth.and")} <Link to="/privacy" className="text-primary hover:underline">{t("auth.privacy_link")}</Link>
           </p>
 
           <p className="text-center text-sm text-muted-foreground mt-6 font-body">
-            Already have an account? <Link to="/login" className="text-primary hover:underline font-medium">Sign In</Link>
+            {t("auth.have_account")} <Link to="/login" className="text-primary hover:underline font-medium">{t("auth.sign_in")}</Link>
           </p>
         </div>
       </div>
@@ -158,11 +160,12 @@ export default function RegisterPage() {
 }
 
 function PasswordChecklist({ password }: { password: string }) {
+  const { t } = useI18n();
   const checks = [
-    { label: "At least 8 characters", ok: password.length >= 8 },
-    { label: "An uppercase letter", ok: /[A-Z]/.test(password) },
-    { label: "A number", ok: /[0-9]/.test(password) },
-    { label: "A special character", ok: /[^A-Za-z0-9]/.test(password) },
+    { label: t("auth.pw_check_8"), ok: password.length >= 8 },
+    { label: t("auth.pw_check_upper"), ok: /[A-Z]/.test(password) },
+    { label: t("auth.pw_check_number"), ok: /[0-9]/.test(password) },
+    { label: t("auth.pw_check_special"), ok: /[^A-Za-z0-9]/.test(password) },
   ];
   const { score, label } = passwordStrength(password);
   const barColors = ["bg-destructive", "bg-destructive", "bg-warning", "bg-primary", "bg-success"];
