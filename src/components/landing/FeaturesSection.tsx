@@ -1,40 +1,17 @@
 import { Shield, Swords, Trophy, Users, Zap, Eye, Gamepad2, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const features = [
-  {
-    icon: Swords,
-    title: "Ranked Matchmaking",
-    description: "5v5 competitive queue with ELO-based matching, role preferences, and anti-smurf verification levels.",
-  },
-  {
-    icon: Trophy,
-    title: "Tournaments",
-    description: "Daily, weekly, and monthly competitions. Single & double elimination brackets with automated seeding.",
-  },
-  {
-    icon: Users,
-    title: "Team System",
-    description: "Create your team, manage roster & roles. Separate team ELO with dedicated team queue.",
-  },
-  {
-    icon: Shield,
-    title: "Anti-Smurf",
-    description: "Multi-layer smurf detection: risk scoring, account verification, performance anomaly analysis.",
-  },
-  {
-    icon: BarChart3,
-    title: "Player Profiles",
-    description: "Detailed stats, match history, rank progression, achievements, and reputation tracking.",
-  },
-  {
-    icon: Gamepad2,
-    title: "Live Match Rooms",
-    description: "Real-time lobbies, map veto, ready checks, score confirmation, and dispute resolution.",
-  },
-];
+import { useI18n } from "@/i18n";
 
 export default function FeaturesSection() {
+  const { t } = useI18n();
+  const features = [
+    { icon: Swords,    title: t("features.f1_title"), description: t("features.f1_desc") },
+    { icon: Trophy,    title: t("features.f2_title"), description: t("features.f2_desc") },
+    { icon: Users,     title: t("features.f3_title"), description: t("features.f3_desc") },
+    { icon: Shield,    title: t("features.f4_title"), description: t("features.f4_desc") },
+    { icon: BarChart3, title: t("features.f5_title"), description: t("features.f5_desc") },
+    { icon: Gamepad2,  title: t("features.f6_title"), description: t("features.f6_desc") },
+  ];
   return (
     <section className="py-24 bg-background relative">
       <div className="container">
@@ -42,13 +19,13 @@ export default function FeaturesSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            BUILT FOR{" "}
+            {t("features.title_pre")}{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              COMPETITORS
+              {t("features.title_accent")}
             </span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-body">
-            Everything you need for a serious, fair, and thrilling competitive experience.
+            {t("features.subtitle")}
           </p>
         </motion.div>
 
