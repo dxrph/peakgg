@@ -133,23 +133,26 @@
     "Apex": "Apex"
   },
   "hero": {
-    "season_badge": "SEASON 1 — NOW LIVE",
+    "season_badge": "SEASON 1 — LIVE",
     "line1": "COMPETE.",
     "line2": "RISE.",
     "line3": "DOMINATE.",
     "headline_pre": "Free",
     "headline_accent": "VALORANT",
     "headline_post": "tournaments. Every night.",
-    "subtitle": "Sign up, play against players at your level, win prizes. No subscription, no hassle.",
-    "cta_play": "Play Free",
+    "subtitle": "The European competitive ladder for VALORANT. Skill-based matchmaking, ranked tournaments and pro-grade stats. Built for players who play to win.",
+    "cta_play": "Enter the Arena",
     "cta_secondary": "How it works",
-    "cta_leaderboard": "View Leaderboard",
+    "cta_leaderboard": "View Ladder",
     "trust_free": "100% free",
     "trust_fast": "30 sec to start",
     "trust_safe": "Anti-cheat & fair play",
     "stat_players_online": "Players Online",
     "stat_matches_today": "Matches Today",
-    "stat_tournaments_live": "Tournaments Live"
+    "stat_tournaments_live": "Tournaments Live",
+    "trust_ranked": "Skill-based matchmaking",
+    "trust_anticheat": "Anti-cheat protected",
+    "trust_eu": "Low-ping EU servers"
   },
   "stats": {
     "players_registered": "Players Registered",
