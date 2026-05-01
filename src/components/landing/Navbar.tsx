@@ -29,8 +29,10 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
-      scrolled ? "border-border/60 bg-background/90 backdrop-blur-xl" : "border-transparent bg-transparent"
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${
+      scrolled
+        ? "border-border/60 bg-background/80 shadow-[0_1px_0_0_hsl(var(--primary)/0.08),0_8px_30px_-10px_rgba(0,0,0,0.5)]"
+        : "border-border/30 bg-background/40"
     }`}>
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
