@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      clips: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string | null
+          title: string
+          video_url: string | null
+          votes: number
+          week: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id?: string | null
+          title: string
+          video_url?: string | null
+          votes?: number
+          week?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string | null
+          title?: string
+          video_url?: string | null
+          votes?: number
+          week?: string | null
+        }
+        Relationships: []
+      }
       global_messages: {
         Row: {
           content: string
@@ -733,6 +763,27 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          position?: number
         }
         Relationships: []
       }
