@@ -649,6 +649,7 @@ function SectionCard({
 function ProfileBanner({
   url, isOwn, onUpload,
 }: { url: string | null; isOwn: boolean; onUpload: (f: File) => Promise<UploadResult> }) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
@@ -714,7 +715,7 @@ function ProfileBanner({
             />
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-              {busy ? "Caricamento…" : "Cambia banner"}
+              {busy ? t("profile_page.loading") : t("profile_page.change_banner")}
             </span>
           </Label>
 
@@ -957,7 +958,7 @@ function EditProfileDialog({
                 />
                 <span className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-background/80 backdrop-blur border border-border rounded-md text-xs">
                   {bannerUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                  {bannerUploading ? "Caricamento…" : "Cambia banner"}
+                  {bannerUploading ? t("profile_page.loading") : t("profile_page.change_banner")}
                 </span>
               </Label>
             </div>
