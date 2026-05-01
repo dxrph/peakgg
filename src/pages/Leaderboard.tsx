@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
+import SEO from "@/components/SEO";
 import Footer from "@/components/landing/Footer";
 import RankBadge from "@/components/RankBadge";
 import { Input } from "@/components/ui/input";
@@ -143,6 +144,12 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Leaderboard — PeakGG | Top Ranked Players Season 1"
+        description="See the top ranked competitive players on PeakGG. Season 1 leaderboard for Valorant, CS2 and Rainbow Six Siege with live ELO and rank tiers."
+        keywords="Valorant leaderboard, ranked matchmaking FPS, Valorant ELO system, competitive gaming community, PeakGG ranking"
+        path="/leaderboard"
+      />
       <Navbar />
       <div className="container pt-24 pb-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
