@@ -475,5 +475,37 @@
     "banner_storage_missing": "Storage not configured (missing bucket). Contact the administrator.",
     "change_banner": "Change banner",
     "banner_updated": "Banner updated"
+  },
+  "leaderboard_page": {
+    "title": "Leaderboard",
+    "subtitle": "The best PeakGG players, ranked by ELO.",
+    "your_position": "Your position:",
+    "loading": "Loading leaderboard…",
+    "empty": "No players found.",
+    "previous": "Previous",
+    "next": "Next",
+    "search_placeholder": "Search by username…",
+    "you": "(You)",
+    "page_info": "Page {{page}} of {{total}} — {{count}} players",
+    "col_player": "Player",
+    "col_rank": "Rank",
+    "col_elo": "ELO",
+    "col_winrate": "Win Rate",
+    "col_team": "Team"
+  },
+  "profile_page_extra": {
+    "not_found": "Profile not found",
+    "browse_leaderboard": "Browse leaderboard",
+    "edit_profile": "Edit profile",
+    "avg_rank": "Avg rank",
+    "go_to_team": "Go to team",
+    "no_team": "No team — this player isn't part of any team.",
+    "search_team": "Search a team",
+    "no_trophies": "No trophies yet.",
+    "no_matches": "No matches yet.",
+    "join_tournament": "Join a tournament",
+    "preferred": "Preferred",
+    "file_hint": "JPG, PNG or WebP — max 5 MB",
+    "preferred_game": "Preferred game"
   }
 }
