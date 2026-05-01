@@ -29,11 +29,12 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-display font-bold mb-4 uppercase tracking-wider text-sm">Support</h4>
+            <h4 className="font-display font-bold mb-4 uppercase tracking-wider text-sm">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
-              <li><Link to="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
-              <li><a href="https://discord.gg" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Discord</a></li>
-              <li><Link to="/report" className="hover:text-primary transition-colors">Report</Link></li>
+              <li><Link to="/about" className="hover:text-primary transition-colors">About</Link></li>
+              <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              <li><a href="https://discord.gg/peakgg" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Discord</a></li>
             </ul>
           </div>
           <div>
@@ -41,7 +42,6 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
               <li><Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link to="/cookies" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
