@@ -640,11 +640,16 @@ export type Database = {
           discord_username: string | null
           display_name: string | null
           email: string | null
+          game: string | null
           id: string
           language: string
+          looking_for_team: boolean
           peak_coins: number
           preferred_game: string | null
+          rank: string | null
           region: string | null
+          role: string | null
+          trophies: number
           updated_at: string
           username: string
         }
@@ -656,11 +661,16 @@ export type Database = {
           discord_username?: string | null
           display_name?: string | null
           email?: string | null
+          game?: string | null
           id: string
           language?: string
+          looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
+          rank?: string | null
           region?: string | null
+          role?: string | null
+          trophies?: number
           updated_at?: string
           username: string
         }
@@ -672,19 +682,53 @@ export type Database = {
           discord_username?: string | null
           display_name?: string | null
           email?: string | null
+          game?: string | null
           id?: string
           language?: string
+          looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
+          rank?: string | null
           region?: string | null
+          role?: string | null
+          trophies?: number
           updated_at?: string
           username?: string
+        }
+        Relationships: []
+      }
+      recruitment_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
       scrims: {
         Row: {
           accepted_by_team_id: string | null
+          accepted_team_id: string | null
+          challenger_team_id: string | null
           contact_info: string | null
           created_at: string
           format: string
@@ -697,10 +741,13 @@ export type Database = {
           scheduled_date: string
           scheduled_time: string
           status: string
+          target_team_id: string | null
           team_id: string
         }
         Insert: {
           accepted_by_team_id?: string | null
+          accepted_team_id?: string | null
+          challenger_team_id?: string | null
           contact_info?: string | null
           created_at?: string
           format?: string
@@ -713,10 +760,13 @@ export type Database = {
           scheduled_date: string
           scheduled_time: string
           status?: string
+          target_team_id?: string | null
           team_id: string
         }
         Update: {
           accepted_by_team_id?: string | null
+          accepted_team_id?: string | null
+          challenger_team_id?: string | null
           contact_info?: string | null
           created_at?: string
           format?: string
@@ -729,6 +779,7 @@ export type Database = {
           scheduled_date?: string
           scheduled_time?: string
           status?: string
+          target_team_id?: string | null
           team_id?: string
         }
         Relationships: [
@@ -778,6 +829,44 @@ export type Database = {
           reason?: string
         }
         Relationships: []
+      }
+      team_join_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          role: string | null
+          status: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          role?: string | null
+          status?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          role?: string | null
+          status?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_join_requests_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -855,35 +944,53 @@ export type Database = {
         Row: {
           avatar_url: string | null
           avg_elo: number
+          color: string
           created_at: string
           description: string | null
           game: string
           id: string
+          looking_for_players: boolean
           name: string
           owner_id: string
+          rank: string | null
+          region: string | null
+          slots: number
           tag: string
+          trophies: number
         }
         Insert: {
           avatar_url?: string | null
           avg_elo?: number
+          color?: string
           created_at?: string
           description?: string | null
           game?: string
           id?: string
+          looking_for_players?: boolean
           name: string
           owner_id: string
+          rank?: string | null
+          region?: string | null
+          slots?: number
           tag: string
+          trophies?: number
         }
         Update: {
           avatar_url?: string | null
           avg_elo?: number
+          color?: string
           created_at?: string
           description?: string | null
           game?: string
           id?: string
+          looking_for_players?: boolean
           name?: string
           owner_id?: string
+          rank?: string | null
+          region?: string | null
+          slots?: number
           tag?: string
+          trophies?: number
         }
         Relationships: [
           {
