@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // and TOKEN_REFRESHED with a null session when the refresh chain is broken.
           if (
             wasSignedIn &&
-            (_event === "TOKEN_REFRESHED" || _event === "SIGNED_OUT" || _event === "USER_DELETED")
+            (_event === "TOKEN_REFRESHED" || _event === "SIGNED_OUT")
           ) {
             (window as any).__peakgg_was_signed_in = false;
             if (!window.location.pathname.startsWith("/login")) {
