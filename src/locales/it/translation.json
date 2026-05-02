@@ -566,5 +566,7 @@
     "open_slots": "Slot disponibili",
     "public_team": "Team pubblico",
     "public_team_hint": "Chiunque può trovare e visualizzare il team."
+    ,"pick_role_send": "Scegli il tuo ruolo e invia la richiesta al capitano."
+    ,"message_placeholder": "Spiega al capitano perché saresti perfetto per il team..."
   }
 }
