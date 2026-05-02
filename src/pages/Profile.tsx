@@ -589,6 +589,152 @@ function StatCard({ icon: Icon, label, value, color = "text-foreground", sub }: 
   );
 }
 
+/* ───────────────── New profile sub-components ───────────────── */
+
+function HeroStat({
+  label, value, valueClassName = "text-foreground", icon,
+}: { label: string; value: string | number; valueClassName?: string; icon?: React.ReactNode }) {
+  return (
+    <div className="text-center">
+      <div className={`text-xl md:text-2xl font-display font-bold flex items-center gap-1.5 justify-center ${valueClassName}`}>
+        {icon}
+        {value}
+      </div>
+      <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
+
+function InlineStat({
+  label, value, valueClassName = "text-foreground",
+}: { label: string; value: string | number; valueClassName?: string }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className={`text-base md:text-lg font-display font-bold ${valueClassName}`}>{value}</span>
+      <span className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">{label}</span>
+    </div>
+  );
+}
+
+function ProfileBannerChip({ onUpload }: { onUpload: (f: File) => Promise<UploadResult> }) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    await onUpload(file);
+    setBusy(false);
+  };
+  return (
+    <Label className="cursor-pointer">
+      <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handle} disabled={busy} />
+      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider bg-background/70 backdrop-blur border border-border hover:bg-background/90 transition-colors">
+        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+        {busy ? t("profile_page.loading") : t("profile_page.change_banner")}
+      </span>
+    </Label>
+  );
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "ora";
+  if (m < 60) return `${m} min fa`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} ${h === 1 ? "ora" : "ore"} fa`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d} ${d === 1 ? "giorno" : "giorni"} fa`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `${w} sett. fa`;
+  const mo = Math.floor(d / 30);
+  return `${mo} ${mo === 1 ? "mese" : "mesi"} fa`;
+}
+
+function RecentMatchesList({ matches, profileId }: { matches: MatchRow[]; profileId: string }) {
+  if (matches.length === 0) {
+    return (
+      <div className="text-center py-10 px-4">
+        <Swords className="h-8 w-8 mx-auto mb-3 text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground font-body mb-3">Nessuna partita recente.</p>
+        <Link to="/play">
+          <Button size="sm" variant="outline">Trova match</Button>
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <div className="divide-y divide-border">
+      {matches.map((m) => {
+        const isA = m.player_a_id === profileId;
+        const myScore = isA ? m.score_a : m.score_b;
+        const oppScore = isA ? m.score_b : m.score_a;
+        const won = m.winner_id ? (isA ? m.winner_id === m.player_a_id : m.winner_id === m.player_b_id) : null;
+        const result: "W" | "L" | "—" =
+          m.status !== "completed" || won === null ? "—" : won ? "W" : "L";
+        const dateIso = m.played_at ?? m.created_at;
+        return (
+          <div key={m.id} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/20 transition-colors">
+            <span
+              className={`inline-flex items-center justify-center w-7 h-7 rounded font-display font-bold text-xs shrink-0 ${
+                result === "W" ? "bg-success/20 text-success border border-success/40" :
+                result === "L" ? "bg-destructive/20 text-destructive border border-destructive/40" :
+                "bg-secondary text-muted-foreground border border-border"
+              }`}
+            >
+              {result}
+            </span>
+            <span className="font-display font-semibold truncate flex-1 min-w-0">{m.map ?? "Unknown Map"}</span>
+            <span className="font-mono text-foreground hidden sm:inline shrink-0">
+              {myScore ?? "-"} : {oppScore ?? "-"}
+            </span>
+            <span className="text-xs text-muted-foreground inline-flex items-center gap-1 shrink-0">
+              <Clock className="h-3 w-3" /> {relativeTime(dateIso)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BadgeStrip({
+  stats, matchStats, trophiesCount,
+}: { stats: Record<GameId, PlayerStat | null>; matchStats: ReturnType<typeof computeStats>; trophiesCount: number }) {
+  const earned: { label: string; color: string; icon: React.ReactNode }[] = [];
+  if (matchStats.played >= 1) earned.push({ label: "First Blood", color: "#ef4444", icon: <Swords className="h-4 w-4" /> });
+  if (matchStats.wins >= 10) earned.push({ label: "10 Wins", color: "#22c55e", icon: <Trophy className="h-4 w-4" /> });
+  if (matchStats.streak >= 3) earned.push({ label: `${matchStats.streak}× Streak`, color: "#f59e0b", icon: <Award className="h-4 w-4" /> });
+  if (trophiesCount >= 1) earned.push({ label: "Tournament", color: "#facc15", icon: <Trophy className="h-4 w-4" /> });
+  const bestElo = Math.max(...Object.values(stats).map((s) => s?.elo ?? 0), 0);
+  if (bestElo >= 1500) earned.push({ label: "Gold+", color: getRankByElo(bestElo).hex, icon: <Award className="h-4 w-4" /> });
+
+  if (earned.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground font-body text-center py-3">
+        Nessun badge ancora. Gioca per sbloccarli.
+      </p>
+    );
+  }
+  return (
+    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      {earned.map((b, i) => (
+        <div
+          key={i}
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-display font-bold"
+          style={{ borderColor: `${b.color}66`, background: `${b.color}1a`, color: b.color }}
+          title={b.label}
+        >
+          {b.icon}
+          {b.label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PerGameCard({
   game, stat, preferred, onClick,
 }: {
