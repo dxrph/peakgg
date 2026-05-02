@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-type Role = "admin" | "moderator";
+type Role = "admin" | "moderator" | "organizer";
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -36,7 +36,8 @@ export default function RoleGuard({ children, allow, fallback = "/" }: RoleGuard
       const ok =
         !error &&
         (roles.includes("admin") ||
-          (allow.includes("moderator") && roles.includes("moderator")));
+          (allow.includes("moderator") && roles.includes("moderator")) ||
+          (allow.includes("organizer") && roles.includes("organizer")));
       setAllowed(ok);
       setChecking(false);
     })();
