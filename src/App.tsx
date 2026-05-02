@@ -19,8 +19,16 @@ import PlayPage from "./pages/Play";
 import ScrimsPage from "./pages/Scrims";
 import TournamentDetailPage from "./pages/TournamentDetail";
 import TeamDetailPage from "./pages/TeamDetail";
-import AdminPage from "./pages/Admin";
 import AdminSecurityPage from "./pages/admin/Security";
+import AdminDashboard from "./pages/admin/sections/AdminDashboard";
+import AdminTournaments from "./pages/admin/sections/AdminTournaments";
+import AdminMatches from "./pages/admin/sections/AdminMatches";
+import AdminTickets from "./pages/admin/sections/AdminTickets";
+import AdminPlayers from "./pages/admin/sections/AdminPlayers";
+import AdminTeams from "./pages/admin/sections/AdminTeams";
+import AdminCommunication from "./pages/admin/sections/AdminCommunication";
+import AdminAnalytics from "./pages/admin/sections/AdminAnalytics";
+import AdminReputation from "./pages/admin/sections/AdminReputation";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
@@ -67,12 +75,20 @@ const App = () => (
                 path="/admin"
                 element={
                   <ProtectedRoute>
-                    <RoleGuard allow={["admin"]}>
-                      <AdminPage />
+                    <RoleGuard allow={["admin", "moderator", "organizer"]}>
+                      <AdminDashboard />
                     </RoleGuard>
                   </ProtectedRoute>
                 }
               />
+              <Route path="/admin/tournaments" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminTournaments /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/matches" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminMatches /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/tickets" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTickets /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/players" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminPlayers /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/teams" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTeams /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/communication" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminCommunication /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminAnalytics /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/reputation" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminReputation /></RoleGuard></ProtectedRoute>} />
               <Route
                 path="/admin/security"
                 element={
