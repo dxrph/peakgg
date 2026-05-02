@@ -158,14 +158,14 @@
     "title_pre": "HOW IT",
     "title_accent": "WORKS",
     "subtitle": "Three steps. That's it.",
-    "step1_title": "Sign up",
-    "step1_desc": "Takes 30 seconds. Just an email and a username.",
-    "step2_title": "Find a match",
-    "step2_desc": "We match you with players at your level. Average wait: 2 minutes.",
-    "step3_title": "Win prizes",
-    "step3_desc": "Climb the ranks, join tournaments, earn rewards.",
-    "step4_title": "Climb the Ranks",
-    "step4_desc": "Win matches, earn ELO, unlock tournament tiers, reach Apex."
+    "step1_title": "Sign up & pick your game",
+    "step1_desc": "Create your account in 30 seconds and choose Valorant, CS2 or R6.",
+    "step2_title": "Find matches or join a team",
+    "step2_desc": "Queue solo, build a roster or jump into the team finder.",
+    "step3_title": "Play & confirm the result",
+    "step3_desc": "Compete in fair lobbies, then confirm the score with your captain.",
+    "step4_title": "Climb the ladder & win tournaments",
+    "step4_desc": "Earn ELO, rank up tiers and unlock Open Cup, Challenger and Peak Championship."
   },
   "features": {
     "title_pre": "BUILT FOR",

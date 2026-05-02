@@ -158,14 +158,14 @@
     "title_pre": "COMMENT ÇA",
     "title_accent": "MARCHE",
     "subtitle": "Trois étapes pour commencer ton ascension.",
-    "step1_title": "Crée ton compte",
-    "step1_desc": "Inscris-toi en 30 secondes, lie ton compte de jeu.",
-    "step2_title": "Choisis ton jeu",
-    "step2_desc": "Valorant, CS2 ou Rainbow Six Siege — entre dans la file.",
-    "step3_title": "Compétis et monte",
-    "step3_desc": "Gagne des matchs, grimpe les rangs, rejoins des tournois.",
-    "step4_title": "Grimpez les rangs",
-    "step4_desc": "Gagnez des matchs, gagnez de l'ELO, débloquez les tournois, atteignez Apex."
+    "step1_title": "Inscris-toi et choisis ton jeu",
+    "step1_desc": "Crée ton compte en 30 secondes et choisis Valorant, CS2 ou R6.",
+    "step2_title": "Trouve des matchs ou rejoins un team",
+    "step2_desc": "Joue en solo, monte un roster ou utilise le team finder.",
+    "step3_title": "Joue et confirme le résultat",
+    "step3_desc": "Affronte des lobbies équilibrés, puis confirme le score avec ton capitaine.",
+    "step4_title": "Grimpe la ladder et gagne des tournois",
+    "step4_desc": "Gagne de l'ELO, monte les tiers et débloque Open Cup, Challenger et Peak Championship."
   },
   "features": {
     "title_pre": "CONÇU POUR LES",
