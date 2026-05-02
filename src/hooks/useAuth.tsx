@@ -31,6 +31,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data);
   };
 
+  // Detect Supabase refresh-token errors and purge corrupted local session
+  const isRefreshTokenError = (err: any) => {
+    const msg = (err?.message || err?.error_description || err?.name || "").toString().toLowerCase();
+    const code = (err?.code || err?.error || "").toString().toLowerCase();
+    return (
+      msg.includes("refresh_token_not_found") ||
+      msg.includes("invalid refresh token") ||
+      msg.includes("refresh token not found") ||
+      msg.includes("refresh token already used") ||
+      code === "refresh_token_not_found" ||
+      code === "invalid_grant"
+    );
+  };
+
+  const handleInvalidRefresh = async () => {
+    const wasSignedIn = Boolean((window as any).__peakgg_was_signed_in);
+    try {
+      // Local-only sign out: clears the corrupted token from storage without
+      // hitting the network (which would fail again with the bad token).
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      // ignore
+    }
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+    (window as any).__peakgg_was_signed_in = false;
+    if (wasSignedIn && !window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login?expired=1";
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -42,8 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => fetchProfile(session.user.id), 500);
         } else {
           setProfile(null);
-          if (wasSignedIn && _event === "TOKEN_REFRESHED") {
-            // refresh failed → effectively expired
+          // Supabase emits SIGNED_OUT when a refresh fails with an invalid token,
+          // and TOKEN_REFRESHED with a null session when the refresh chain is broken.
+          if (
+            wasSignedIn &&
+            (_event === "TOKEN_REFRESHED" || _event === "SIGNED_OUT")
+          ) {
             (window as any).__peakgg_was_signed_in = false;
             if (!window.location.pathname.startsWith("/login")) {
               window.location.href = "/login?expired=1";
@@ -54,16 +90,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session }, error }) => {
+        if (error && isRefreshTokenError(error)) {
+          handleInvalidRefresh().finally(() => setLoading(false));
+          return;
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          (window as any).__peakgg_was_signed_in = true;
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (isRefreshTokenError(err)) {
+          handleInvalidRefresh().finally(() => setLoading(false));
+        } else {
+          setLoading(false);
+        }
+      });
 
-    return () => subscription.unsubscribe();
+    // Global safety net: catch refresh errors thrown by background auto-refresh
+    const onUnhandled = (e: PromiseRejectionEvent) => {
+      if (isRefreshTokenError(e.reason)) {
+        e.preventDefault();
+        handleInvalidRefresh();
+      }
+    };
+    window.addEventListener("unhandledrejection", onUnhandled);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("unhandledrejection", onUnhandled);
+    };
   }, []);
 
   const signUp = async (email: string, password: string, username: string) => {
