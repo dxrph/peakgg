@@ -566,5 +566,7 @@
     "open_slots": "Open slots",
     "public_team": "Public team",
     "public_team_hint": "Anyone can find and view this team."
+    ,"pick_role_send": "Pick your role and send a request to the captain."
+    ,"message_placeholder": "Tell the captain why you'd be a great fit..."
   }
 }
