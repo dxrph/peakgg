@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound,
-  Megaphone, BarChart3, Star, ShieldAlert,
+  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -21,6 +21,9 @@ const SECTIONS: Section[] = [
   { id: "tournaments",   label: "Tornei",        icon: Trophy,          to: "/admin/tournaments",    allow: ["admin", "organizer"] },
   { id: "matches",       label: "Partite",       icon: Swords,          to: "/admin/matches",        allow: ["admin", "organizer"] },
   { id: "tickets",       label: "Ticket",        icon: AlertTriangle,   to: "/admin/tickets",        allow: ["admin", "moderator"] },
+  { id: "disputes",      label: "Dispute",       icon: Gavel,           to: "/admin/disputes",       allow: ["admin", "moderator"] },
+  { id: "scrims",        label: "Scrims",        icon: Target,          to: "/admin/scrims",         allow: ["admin", "moderator"] },
+  { id: "chat",          label: "Chat",          icon: MessageSquare,   to: "/admin/chat",           allow: ["admin", "moderator"] },
   { id: "players",       label: "Player",        icon: Users,           to: "/admin/players",        allow: ["admin", "moderator"] },
   { id: "teams",         label: "Team",          icon: UsersRound,      to: "/admin/teams",          allow: ["admin", "moderator"] },
   { id: "comms",         label: "Comunicazione", icon: Megaphone,       to: "/admin/communication",  allow: ["admin", "moderator"] },
