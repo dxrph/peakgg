@@ -451,16 +451,16 @@ function TournamentFormDialog({
             </div>
             <div>
               <Label>Badge</Label>
-              <Select value={form.reward_badge ?? ""} onValueChange={(v) => update({ reward_badge: v || null })}>
+              <Select value={form.reward_badge ?? "__none"} onValueChange={(v) => update({ reward_badge: v === "__none" ? null : v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{REWARD_BADGES.map((o) => <SelectItem key={o.value || "none"} value={o.value || "__none"}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>{REWARD_BADGES.map((o) => <SelectItem key={o.value || "none"} value={o.value === "" ? "__none" : o.value}>{o.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
               <Label>Banner</Label>
-              <Select value={form.reward_banner ?? ""} onValueChange={(v) => update({ reward_banner: v || null })}>
+              <Select value={form.reward_banner ?? "__none"} onValueChange={(v) => update({ reward_banner: v === "__none" ? null : v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{REWARD_BANNERS.map((o) => <SelectItem key={o.value || "none"} value={o.value || "__none"}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>{REWARD_BANNERS.map((o) => <SelectItem key={o.value || "none"} value={o.value === "" ? "__none" : o.value}>{o.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
