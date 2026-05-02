@@ -6,10 +6,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 
 export default function CTASection() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useI18n();
-  const href = user ? "/play" : "/register";
-  const label = user ? t("cta_section.cta_logged_in") : t("cta_section.cta_guest");
+  if (loading || user) return null;
+  const href = "/register";
+  const label = t("cta_section.cta_guest");
   return (
     <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 gradient-hero" />
