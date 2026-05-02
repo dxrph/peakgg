@@ -14,7 +14,10 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const __g = globalThis as any;
+const AuthContext: React.Context<AuthContextType | undefined> =
+  __g.__peakgg_AuthContext ??
+  (__g.__peakgg_AuthContext = createContext<AuthContextType | undefined>(undefined));
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
