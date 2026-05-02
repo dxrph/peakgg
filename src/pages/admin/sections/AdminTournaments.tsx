@@ -529,16 +529,24 @@ function ReplaceTeamDialog({
       const [{ data: regs }, { data: wl }] = await Promise.all([
         supabase
           .from("tournament_registrations")
-          .select("team_id, teams!inner(name)")
+          .select("team_id")
           .eq("tournament_id", tournament.id),
         supabase
           .from("tournament_waitlist")
-          .select("team_id, position, teams!inner(name)")
+          .select("team_id, position")
           .eq("tournament_id", tournament.id)
           .order("position", { ascending: true }),
       ]);
-      setRegistered((regs ?? []).map((r: { team_id: string; teams: { name: string } }) => ({ team_id: r.team_id, team_name: r.teams.name })));
-      setWaitlist((wl ?? []).map((r: { team_id: string; position: number; teams: { name: string } }) => ({ team_id: r.team_id, position: r.position, team_name: r.teams.name })));
+      const allIds = Array.from(new Set([
+        ...((regs ?? []).map((r) => r.team_id)),
+        ...((wl ?? []).map((r) => r.team_id)),
+      ]));
+      const { data: teams } = allIds.length
+        ? await supabase.from("teams").select("id, name").in("id", allIds)
+        : { data: [] as { id: string; name: string }[] };
+      const nameOf = new Map((teams ?? []).map((t) => [t.id, t.name]));
+      setRegistered((regs ?? []).map((r) => ({ team_id: r.team_id, team_name: nameOf.get(r.team_id) ?? r.team_id })));
+      setWaitlist((wl ?? []).map((r) => ({ team_id: r.team_id, position: r.position, team_name: nameOf.get(r.team_id) ?? r.team_id })));
       setRemoveId("");
     })();
   }, [tournament]);
