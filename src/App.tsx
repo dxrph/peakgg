@@ -29,6 +29,9 @@ import AdminTeams from "./pages/admin/sections/AdminTeams";
 import AdminCommunication from "./pages/admin/sections/AdminCommunication";
 import AdminAnalytics from "./pages/admin/sections/AdminAnalytics";
 import AdminReputation from "./pages/admin/sections/AdminReputation";
+import AdminDisputes from "./pages/admin/sections/AdminDisputes";
+import AdminScrims from "./pages/admin/sections/AdminScrims";
+import AdminChat from "./pages/admin/sections/AdminChat";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
@@ -84,6 +87,9 @@ const App = () => (
               <Route path="/admin/tournaments" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminTournaments /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/matches" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminMatches /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/tickets" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTickets /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/disputes" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminDisputes /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/scrims" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminScrims /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/chat" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminChat /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/players" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminPlayers /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/teams" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTeams /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/communication" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminCommunication /></RoleGuard></ProtectedRoute>} />

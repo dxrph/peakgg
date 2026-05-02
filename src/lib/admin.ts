@@ -18,7 +18,16 @@ export type AdminAction =
   | "private_message_send"
   | "role_grant"
   | "role_revoke"
-  | "screenshot_view_consumed";
+  | "screenshot_view_consumed"
+  | "dispute_resolve"
+  | "dispute_reject"
+  | "dispute_override_score"
+  | "scrim_delete"
+  | "scrim_update"
+  | "chat_message_delete"
+  | "chat_user_mute"
+  | "chat_user_unmute"
+  | "chat_message_unflag";
 
 export async function logAdminAction(params: {
   action: AdminAction;
