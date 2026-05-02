@@ -558,6 +558,12 @@
     "team": "Équipe",
     "trophy_note": "Les trophées d'équipe sont la somme des trophées de tous ses joueurs.",
     "open": "Ouvert",
-    "accept": "Accepter"
+    "accept": "Accepter",
+    "advanced_settings": "Paramètres avancés",
+    "seeking_players": "Recherche de joueurs",
+    "seeking_players_hint": "Affichez votre équipe sur le tableau de recrutement.",
+    "open_slots": "Slots ouverts",
+    "public_team": "Équipe publique",
+    "public_team_hint": "Tout le monde peut trouver et voir cette équipe."
   }
 }
