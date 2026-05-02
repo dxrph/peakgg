@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import RankProgressionModal from "@/components/RankProgressionModal";
-import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Flame, Award, Users, Search } from "lucide-react";
+import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Award, Users, Search, Clock } from "lucide-react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 /* ------------------------------------------------------------------ */
 /* Banner upload — validation + friendly error mapping                */
 /* ------------------------------------------------------------------ */
