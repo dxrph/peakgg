@@ -724,6 +724,42 @@ export type Database = {
         }
         Relationships: []
       }
+      scrim_requests: {
+        Row: {
+          challenger_team_id: string
+          created_at: string
+          format: string
+          game: string
+          id: string
+          notes: string | null
+          scheduled_date: string
+          status: string
+          target_team_id: string | null
+        }
+        Insert: {
+          challenger_team_id: string
+          created_at?: string
+          format?: string
+          game?: string
+          id?: string
+          notes?: string | null
+          scheduled_date: string
+          status?: string
+          target_team_id?: string | null
+        }
+        Update: {
+          challenger_team_id?: string
+          created_at?: string
+          format?: string
+          game?: string
+          id?: string
+          notes?: string | null
+          scheduled_date?: string
+          status?: string
+          target_team_id?: string | null
+        }
+        Relationships: []
+      }
       scrims: {
         Row: {
           accepted_by_team_id: string | null
