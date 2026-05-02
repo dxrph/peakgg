@@ -50,6 +50,66 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          title: string
+          urgent: boolean
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          created_by: string
+          id?: string
+          title: string
+          urgent?: boolean
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          title?: string
+          urgent?: boolean
+        }
+        Relationships: []
+      }
       banned_users: {
         Row: {
           banned_by: string
@@ -514,6 +574,33 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -581,6 +668,36 @@ export type Database = {
           },
         ]
       }
+      player_reports: {
+        Row: {
+          auto_flagged: boolean
+          created_at: string
+          flag_type: string | null
+          id: string
+          player_id: string
+          reason: string
+          resolved: boolean
+        }
+        Insert: {
+          auto_flagged?: boolean
+          created_at?: string
+          flag_type?: string | null
+          id?: string
+          player_id: string
+          reason: string
+          resolved?: boolean
+        }
+        Update: {
+          auto_flagged?: boolean
+          created_at?: string
+          flag_type?: string | null
+          id?: string
+          player_id?: string
+          reason?: string
+          resolved?: boolean
+        }
+        Relationships: []
+      }
       player_stats: {
         Row: {
           best_win_streak: number
@@ -634,66 +751,90 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          ban_expires_at: string | null
+          ban_reason: string | null
           banner_url: string | null
           bio: string | null
           created_at: string
           discord_username: string | null
           display_name: string | null
           email: string | null
+          fast_track: boolean
+          fast_track_wins: number
           game: string | null
           id: string
+          ip_address: string | null
+          is_banned: boolean
           language: string
           looking_for_team: boolean
           peak_coins: number
           preferred_game: string | null
           rank: string | null
           region: string | null
+          reputation_score: number
           role: string | null
           trophies: number
           updated_at: string
           username: string
+          warn_count: number
         }
         Insert: {
           avatar_url?: string | null
+          ban_expires_at?: string | null
+          ban_reason?: string | null
           banner_url?: string | null
           bio?: string | null
           created_at?: string
           discord_username?: string | null
           display_name?: string | null
           email?: string | null
+          fast_track?: boolean
+          fast_track_wins?: number
           game?: string | null
           id: string
+          ip_address?: string | null
+          is_banned?: boolean
           language?: string
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
           rank?: string | null
           region?: string | null
+          reputation_score?: number
           role?: string | null
           trophies?: number
           updated_at?: string
           username: string
+          warn_count?: number
         }
         Update: {
           avatar_url?: string | null
+          ban_expires_at?: string | null
+          ban_reason?: string | null
           banner_url?: string | null
           bio?: string | null
           created_at?: string
           discord_username?: string | null
           display_name?: string | null
           email?: string | null
+          fast_track?: boolean
+          fast_track_wins?: number
           game?: string | null
           id?: string
+          ip_address?: string | null
+          is_banned?: boolean
           language?: string
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
           rank?: string | null
           region?: string | null
+          reputation_score?: number
           role?: string | null
           trophies?: number
           updated_at?: string
           username?: string
+          warn_count?: number
         }
         Relationships: []
       }
@@ -721,6 +862,39 @@ export type Database = {
           read?: boolean
           receiver_id?: string
           sender_id?: string
+        }
+        Relationships: []
+      }
+      reputation_votes: {
+        Row: {
+          communication: number
+          created_at: string
+          fairplay: number
+          id: string
+          match_id: string
+          player_id: string
+          punctuality: number
+          voter_id: string
+        }
+        Insert: {
+          communication: number
+          created_at?: string
+          fairplay: number
+          id?: string
+          match_id: string
+          player_id: string
+          punctuality: number
+          voter_id: string
+        }
+        Update: {
+          communication?: number
+          created_at?: string
+          fairplay?: number
+          id?: string
+          match_id?: string
+          player_id?: string
+          punctuality?: number
+          voter_id?: string
         }
         Relationships: []
       }
@@ -1038,6 +1212,51 @@ export type Database = {
           },
         ]
       }
+      tickets: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string
+          id: string
+          match_id: string | null
+          reported_player_id: string | null
+          reporter_id: string
+          resolved_by: string | null
+          screenshot_url: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          match_id?: string | null
+          reported_player_id?: string | null
+          reporter_id: string
+          resolved_by?: string | null
+          screenshot_url?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          match_id?: string | null
+          reported_player_id?: string | null
+          reporter_id?: string
+          resolved_by?: string | null
+          screenshot_url?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tournament_entries: {
         Row: {
           id: string
@@ -1129,54 +1348,114 @@ export type Database = {
           },
         ]
       }
+      tournament_waitlist: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          team_id: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position: number
+          team_id: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          team_id?: string
+          tournament_id?: string
+        }
+        Relationships: []
+      }
       tournaments: {
         Row: {
+          bo: string
+          bracket_type: string
           created_at: string
           created_by: string | null
           description: string | null
           end_date: string | null
+          entry_cost_coins: number
+          entry_type: string
+          fixed_map: string | null
           format: string
           game: string
           id: string
+          map_mode: string
+          map_pool: string[] | null
           max_teams: number
           min_elo: number | null
           name: string
           prize_pool: string | null
+          rank_max: number | null
+          reward_badge: string | null
+          reward_banner: string | null
+          reward_trophies: number
           rules: string | null
+          seeding_enabled: boolean
           start_date: string | null
           status: string
           tier: number
         }
         Insert: {
+          bo?: string
+          bracket_type?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          entry_cost_coins?: number
+          entry_type?: string
+          fixed_map?: string | null
           format?: string
           game?: string
           id?: string
+          map_mode?: string
+          map_pool?: string[] | null
           max_teams?: number
           min_elo?: number | null
           name: string
           prize_pool?: string | null
+          rank_max?: number | null
+          reward_badge?: string | null
+          reward_banner?: string | null
+          reward_trophies?: number
           rules?: string | null
+          seeding_enabled?: boolean
           start_date?: string | null
           status?: string
           tier?: number
         }
         Update: {
+          bo?: string
+          bracket_type?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          entry_cost_coins?: number
+          entry_type?: string
+          fixed_map?: string | null
           format?: string
           game?: string
           id?: string
+          map_mode?: string
+          map_pool?: string[] | null
           max_teams?: number
           min_elo?: number | null
           name?: string
           prize_pool?: string | null
+          rank_max?: number | null
+          reward_badge?: string | null
+          reward_banner?: string | null
+          reward_trophies?: number
           rules?: string | null
+          seeding_enabled?: boolean
           start_date?: string | null
           status?: string
           tier?: number
@@ -1282,7 +1561,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "organizer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1410,7 +1689,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "organizer"],
     },
   },
 } as const
