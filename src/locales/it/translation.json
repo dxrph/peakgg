@@ -158,14 +158,14 @@
     "title_pre": "COME",
     "title_accent": "FUNZIONA",
     "subtitle": "Tre passi. Nient'altro.",
-    "step1_title": "Iscriviti",
-    "step1_desc": "Bastano 30 secondi. Solo email e username.",
-    "step2_title": "Trova partita",
-    "step2_desc": "Ti accoppiamo con player del tuo livello. Attesa media: 2 minuti.",
-    "step3_title": "Vinci premi",
-    "step3_desc": "Scala i rank, entra nei tornei, guadagna ricompense.",
-    "step4_title": "Scala i Rank",
-    "step4_desc": "Vinci partite, guadagna ELO, sblocca tornei, raggiungi Apex."
+    "step1_title": "Registrati e scegli il gioco",
+    "step1_desc": "Crea l'account in 30 secondi e scegli Valorant, CS2 o R6.",
+    "step2_title": "Trova partite o unisciti a un team",
+    "step2_desc": "Gioca in solo, crea un roster o entra nel team finder.",
+    "step3_title": "Gioca e conferma il risultato",
+    "step3_desc": "Competi in lobby fair e conferma lo score insieme al captain.",
+    "step4_title": "Scala la ladder e vinci tornei",
+    "step4_desc": "Guadagna ELO, sali di tier e sblocca Open Cup, Challenger e Peak Championship."
   },
   "features": {
     "title_pre": "COSTRUITO PER",
