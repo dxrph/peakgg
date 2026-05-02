@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, type Context } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -15,7 +15,7 @@ interface AuthContextType {
 }
 
 const __g = globalThis as any;
-const AuthContext: React.Context<AuthContextType | undefined> =
+const AuthContext: Context<AuthContextType | undefined> =
   __g.__peakgg_AuthContext ??
   (__g.__peakgg_AuthContext = createContext<AuthContextType | undefined>(undefined));
 
