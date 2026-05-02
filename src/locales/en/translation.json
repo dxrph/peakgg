@@ -559,6 +559,12 @@
     "team": "Team",
     "trophy_note": "Team trophies are the sum of trophies of all its players.",
     "open": "Open",
-    "accept": "Accept"
+    "accept": "Accept",
+    "advanced_settings": "Advanced settings",
+    "seeking_players": "Looking for players",
+    "seeking_players_hint": "Show your team in the recruitment board.",
+    "open_slots": "Open slots",
+    "public_team": "Public team",
+    "public_team_hint": "Anyone can find and view this team."
   }
 }

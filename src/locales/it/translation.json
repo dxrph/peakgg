@@ -559,6 +559,12 @@
     "team": "Team",
     "trophy_note": "I trofei del team sono la somma dei trofei di tutti i suoi player.",
     "open": "Aperto",
-    "accept": "Accetta"
+    "accept": "Accetta",
+    "advanced_settings": "Impostazioni avanzate",
+    "seeking_players": "Cerca player",
+    "seeking_players_hint": "Mostra il tuo team nella bacheca reclutamento.",
+    "open_slots": "Slot disponibili",
+    "public_team": "Team pubblico",
+    "public_team_hint": "Chiunque può trovare e visualizzare il team."
   }
 }
