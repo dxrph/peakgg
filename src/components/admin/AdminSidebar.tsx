@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound,
-  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell,
+  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -30,6 +30,7 @@ const SECTIONS: Section[] = [
   { id: "comms",         label: "Comunicazione", icon: Megaphone,       to: "/admin/communication",  allow: ["admin", "moderator"] },
   { id: "analytics",     label: "Analytics",     icon: BarChart3,       to: "/admin/analytics",      allow: ["admin", "organizer"] },
   { id: "reputation",    label: "Reputazione",   icon: Star,            to: "/admin/reputation",     allow: ["admin", "moderator"] },
+  { id: "economy",       label: "Economia",      icon: Coins,           to: "/admin/economy",        allow: ["admin"] },
   { id: "security",      label: "Sicurezza",     icon: ShieldAlert,     to: "/admin/security",       allow: ["admin"] },
 ];
 
