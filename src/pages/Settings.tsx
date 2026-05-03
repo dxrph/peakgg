@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import MfaSection from "@/components/settings/MfaSection";
 
 type GdprRequest = {
   id: string;
@@ -154,6 +155,9 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* MFA */}
+        {user && <MfaSection />}
 
         {/* Data export */}
         <section className="rounded-lg border border-border bg-card p-6 mb-6">
