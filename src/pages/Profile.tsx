@@ -72,6 +72,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
+import SeasonBadge from "@/components/seasons/SeasonBadge";
 
 type Profile = {
   id: string;
@@ -389,6 +390,9 @@ export default function ProfilePage() {
                 value={`${matchStats.winRate}%`}
                 valueClassName={matchStats.winRate >= 50 ? "text-success" : "text-destructive"}
               />
+            </div>
+            <div className="mt-3">
+              <SeasonBadge userId={profile.id} />
             </div>
 
             {profile.bio && (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trophy, Download, X, Pencil, ArrowRightLeft, Loader2 } from "lucide-react";
+import { Plus, Trophy, Download, X, Pencil, ArrowRightLeft, Loader2, GitBranch } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -288,6 +288,15 @@ export default function AdminTournaments() {
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => exportCSV(t)} title="Esporta CSV">
                       <Download className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={async () => {
+                      if (!confirm(`Generare bracket per "${t.name}"? I match pending verranno sostituiti.`)) return;
+                      const { error } = await supabase.rpc("generate_bracket", { _tournament_id: t.id });
+                      if (error) { toast.error(error.message); return; }
+                      await logAdminAction({ action: "bracket_generate", targetType: "tournament", targetId: t.id });
+                      toast.success("Bracket generato");
+                    }} title="Genera bracket">
+                      <GitBranch className="h-3.5 w-3.5" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)} title="Modifica">
                       <Pencil className="h-3.5 w-3.5" />

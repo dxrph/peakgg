@@ -489,13 +489,18 @@ export type Database = {
       }
       matches: {
         Row: {
+          bracket_position: number | null
+          bracket_side: string | null
           created_at: string
           game: string
           id: string
           map: string | null
+          next_match_id: string | null
+          next_match_slot: string | null
           played_at: string | null
           player_a_id: string | null
           player_b_id: string | null
+          round: number | null
           score_a: number | null
           score_b: number | null
           status: string
@@ -505,13 +510,18 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          bracket_position?: number | null
+          bracket_side?: string | null
           created_at?: string
           game?: string
           id?: string
           map?: string | null
+          next_match_id?: string | null
+          next_match_slot?: string | null
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          round?: number | null
           score_a?: number | null
           score_b?: number | null
           status?: string
@@ -521,13 +531,18 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          bracket_position?: number | null
+          bracket_side?: string | null
           created_at?: string
           game?: string
           id?: string
           map?: string | null
+          next_match_id?: string | null
+          next_match_slot?: string | null
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          round?: number | null
           score_a?: number | null
           score_b?: number | null
           status?: string
@@ -537,6 +552,13 @@ export type Database = {
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matches_player_a_id_fkey"
             columns: ["player_a_id"]
@@ -744,6 +766,41 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_season_badges: {
+        Row: {
+          badge_color: string
+          badge_label: string
+          created_at: string
+          id: string
+          season_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_color?: string
+          badge_label: string
+          created_at?: string
+          id?: string
+          season_id: string
+          user_id: string
+        }
+        Update: {
+          badge_color?: string
+          badge_label?: string
+          created_at?: string
+          id?: string
+          season_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_season_badges_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
             referencedColumns: ["id"]
           },
         ]
@@ -1015,6 +1072,89 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      season_results: {
+        Row: {
+          created_at: string
+          final_elo: number
+          final_rank: string | null
+          game: string
+          id: string
+          peak_coins_awarded: number
+          placement: number
+          season_id: string
+          trophies_awarded: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          final_elo: number
+          final_rank?: string | null
+          game: string
+          id?: string
+          peak_coins_awarded?: number
+          placement: number
+          season_id: string
+          trophies_awarded?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          final_elo?: number
+          final_rank?: string | null
+          game?: string
+          id?: string
+          peak_coins_awarded?: number
+          placement?: number
+          season_id?: string
+          trophies_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_results_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          active: boolean
+          closed_at: string | null
+          created_at: string
+          ends_at: string
+          id: string
+          name: string
+          slug: string
+          soft_reset_factor: number
+          starts_at: string
+        }
+        Insert: {
+          active?: boolean
+          closed_at?: string | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          name: string
+          slug: string
+          soft_reset_factor?: number
+          starts_at: string
+        }
+        Update: {
+          active?: boolean
+          closed_at?: string | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          soft_reset_factor?: number
+          starts_at?: string
+        }
+        Relationships: []
       }
       suppressed_emails: {
         Row: {
@@ -1517,6 +1657,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_tournament_prizes: {
+        Args: { _tournament_id: string }
+        Returns: undefined
+      }
+      close_season: { Args: { _season_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1525,6 +1670,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_bracket: { Args: { _tournament_id: string }; Returns: undefined }
       get_my_email: { Args: never; Returns: string }
       has_role: {
         Args: {
