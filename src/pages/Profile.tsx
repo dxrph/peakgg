@@ -378,11 +378,6 @@ export default function ProfilePage() {
 
             {/* Compact inline stat bar */}
             <div className="mt-5 flex items-center gap-6 md:gap-10 flex-wrap rounded-lg border border-border bg-background/40 backdrop-blur px-4 py-2.5">
-            </div>
-            <div className="mt-3">
-              <SeasonBadge userId={profile.id} />
-            </div>
-            <div className="hidden">
               <InlineStat label="Matches" value={matchStats.played} />
               <span className="h-4 w-px bg-border hidden md:inline-block" />
               <InlineStat label="Wins" value={matchStats.wins} valueClassName="text-success" />
@@ -394,6 +389,9 @@ export default function ProfilePage() {
                 value={`${matchStats.winRate}%`}
                 valueClassName={matchStats.winRate >= 50 ? "text-success" : "text-destructive"}
               />
+            </div>
+            <div className="mt-3">
+              <SeasonBadge userId={profile.id} />
             </div>
 
             {profile.bio && (
