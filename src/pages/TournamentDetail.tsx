@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import { Trophy, Calendar, Users, MapPin, Clock, Shield, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
+import BracketView from "@/components/tournaments/BracketView";
 
 const tournamentData: Record<string, any> = {
   "1": {
@@ -194,6 +195,13 @@ export default function TournamentDetailPage() {
             </div>
           </div>
         </div>
+
+        {id && (
+          <div className="mt-10">
+            <h2 className="font-display text-xl uppercase tracking-widest mb-4">Tabellone</h2>
+            <BracketView tournamentId={id} />
+          </div>
+        )}
       </div>
       <Footer />
     </div>
