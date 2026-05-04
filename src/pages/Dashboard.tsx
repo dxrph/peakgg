@@ -26,6 +26,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="container pt-24 pb-16">
+        <SeasonBanner />
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-display font-bold">Welcome back, <span className="text-primary">PhantomX</span></h1>
