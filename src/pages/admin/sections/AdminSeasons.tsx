@@ -70,7 +70,7 @@ export default function AdminSeasons() {
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
-    await logAdminAction({ action: "season.create", target_resource: "seasons", reason: form.name });
+    await logAdminAction({ action: "season_create", targetType: "seasons", details: { name: form.name } });
     toast.success("Stagione creata");
     setOpen(false);
     setForm({ name: "", slug: "", starts_at: "", ends_at: "", soft_reset_factor: "0.5" });
@@ -81,7 +81,7 @@ export default function AdminSeasons() {
     if (!confirm(`Chiudere "${s.name}"? Verranno distribuiti premi e applicato il soft reset.`)) return;
     const { error } = await supabase.rpc("close_season", { _season_id: s.id });
     if (error) { toast.error(error.message); return; }
-    await logAdminAction({ action: "season.close", target_resource: "seasons", target_id: s.id, reason: s.name });
+    await logAdminAction({ action: "season_close", targetType: "seasons", targetId: s.id, details: { name: s.name } });
     toast.success("Stagione chiusa, premi distribuiti");
     load();
   };
