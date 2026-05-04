@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
+import SeasonBanner from "@/components/seasons/SeasonBanner";
 import SEO from "@/components/SEO";
 import Footer from "@/components/landing/Footer";
 import RankBadge from "@/components/RankBadge";
@@ -155,6 +156,7 @@ export default function LeaderboardPage() {
       />
       <Navbar />
       <div className="container pt-24 pb-16">
+        <SeasonBanner />
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
           <div>
             <h1 className="text-4xl font-display font-bold">
