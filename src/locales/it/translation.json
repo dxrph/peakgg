@@ -565,8 +565,21 @@
     "seeking_players_hint": "Mostra il tuo team nella bacheca reclutamento.",
     "open_slots": "Slot disponibili",
     "public_team": "Team pubblico",
-    "public_team_hint": "Chiunque può trovare e visualizzare il team."
-    ,"pick_role_send": "Scegli il tuo ruolo e invia la richiesta al capitano."
-    ,"message_placeholder": "Spiega al capitano perché saresti perfetto per il team..."
+    "public_team_hint": "Chiunque può trovare e visualizzare il team.",
+    "pick_role_send": "Scegli il tuo ruolo e invia la richiesta al capitano.",
+    "message_placeholder": "Spiega al capitano perché saresti perfetto per il team..."
+  },
+  "season": {
+    "active": "Stagione attiva",
+    "ends_in": "Finisce tra",
+    "ended": "Terminata",
+    "bracket": "Tabellone",
+    "tbd": "Da definire",
+    "final": "Finale",
+    "semis": "Semifinali",
+    "round": "Round",
+    "no_bracket": "Tabellone non ancora generato",
+    "champion": "Campione",
+    "runner_up": "Secondo posto"
   }
 }
