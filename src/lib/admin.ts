@@ -27,7 +27,10 @@ export type AdminAction =
   | "chat_message_delete"
   | "chat_user_mute"
   | "chat_user_unmute"
-  | "chat_message_unflag";
+  | "chat_message_unflag"
+  | "season_create"
+  | "season_close"
+  | "bracket_generate";
 
 export async function logAdminAction(params: {
   action: AdminAction;
