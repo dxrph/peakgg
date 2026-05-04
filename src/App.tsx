@@ -34,6 +34,7 @@ import AdminScrims from "./pages/admin/sections/AdminScrims";
 import AdminChat from "./pages/admin/sections/AdminChat";
 import AdminEconomy from "./pages/admin/sections/AdminEconomy";
 import AdminAnnouncements from "./pages/admin/sections/AdminAnnouncements";
+import AdminSeasons from "./pages/admin/sections/AdminSeasons";
 import AimGuidePage from "./pages/AimGuide";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
@@ -99,6 +100,7 @@ const App = () => (
               <Route path="/admin/reputation" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminReputation /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/economy" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminEconomy /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminAnnouncements /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/seasons" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminSeasons /></RoleGuard></ProtectedRoute>} />
               <Route
                 path="/admin/security"
                 element={
