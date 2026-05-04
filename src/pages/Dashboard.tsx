@@ -1,4 +1,5 @@
 import Navbar from "@/components/landing/Navbar";
+import SeasonBanner from "@/components/seasons/SeasonBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
