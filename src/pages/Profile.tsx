@@ -72,6 +72,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
+import SeasonBadge from "@/components/seasons/SeasonBadge";
 
 type Profile = {
   id: string;
