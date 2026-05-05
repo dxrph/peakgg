@@ -121,6 +121,15 @@ Deno.serve(async (req) => {
     const winnersAvg = await avgEloForUsers(winners);
     const losersAvg  = await avgEloForUsers(losers);
 
+    // Fast track flags
+    const allIds = participants.map(p => p.userId);
+    const { data: profs } = await admin
+      .from("profiles")
+      .select("id, fast_track")
+      .in("id", allIds);
+    const fastTrack = new Map<string, boolean>();
+    (profs ?? []).forEach((p: any) => fastTrack.set(p.id, !!p.fast_track));
+
     for (const p of participants) {
       // Read current per-game stat (auto-create if missing)
       const { data: existing } = await admin
@@ -143,7 +152,11 @@ Deno.serve(async (req) => {
         _opponent_elo: opponentElo,
         _won: p.won,
       });
-      const delta = typeof deltaRows === "number" ? deltaRows : (p.won ? 25 : -15);
+      let delta = typeof deltaRows === "number" ? deltaRows : (p.won ? 25 : -15);
+      // Fast Track: 1.8x ELO gain on wins until reaching Gold (1400)
+      if (fastTrack.get(p.userId) && p.won && baseElo < 1400) {
+        delta = Math.round(delta * 1.8);
+      }
       const newElo = Math.max(0, baseElo + delta);
       const newWins = baseWins + (p.won ? 1 : 0);
       const newLosses = baseLosses + (p.won ? 0 : 1);
