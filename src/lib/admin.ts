@@ -30,7 +30,9 @@ export type AdminAction =
   | "chat_message_unflag"
   | "season_create"
   | "season_close"
-  | "bracket_generate";
+  | "bracket_generate"
+  | "elo_decay"
+  | "smurf_recalc";
 
 export async function logAdminAction(params: {
   action: AdminAction;
