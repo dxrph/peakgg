@@ -12,9 +12,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const ELO_WIN = 25;
-const ELO_LOSS = 15;
-
 type GameId = "valorant" | "cs2" | "r6s";
 function isGameId(g: string | null | undefined): g is GameId {
   return g === "valorant" || g === "cs2" || g === "r6s";
@@ -107,6 +104,23 @@ Deno.serve(async (req) => {
     const game = match.game as GameId;
     const updated: any[] = [];
 
+    // Compute opponent average ELO per side for dynamic delta
+    async function avgEloForUsers(userIds: string[]): Promise<number> {
+      if (userIds.length === 0) return 1000;
+      const { data } = await admin
+        .from("player_stats")
+        .select("elo")
+        .eq("game", game)
+        .in("user_id", userIds);
+      if (!data || data.length === 0) return 1000;
+      return Math.round(data.reduce((s, r: any) => s + (r.elo ?? 1000), 0) / data.length);
+    }
+
+    const winners = participants.filter(p => p.won).map(p => p.userId);
+    const losers  = participants.filter(p => !p.won).map(p => p.userId);
+    const winnersAvg = await avgEloForUsers(winners);
+    const losersAvg  = await avgEloForUsers(losers);
+
     for (const p of participants) {
       // Read current per-game stat (auto-create if missing)
       const { data: existing } = await admin
@@ -123,7 +137,14 @@ Deno.serve(async (req) => {
       const baseStreak = existing?.win_streak ?? 0;
       const baseBest = existing?.best_win_streak ?? 0;
 
-      const newElo = Math.max(0, baseElo + (p.won ? ELO_WIN : -ELO_LOSS));
+      const opponentElo = p.won ? losersAvg : winnersAvg;
+      const { data: deltaRows } = await admin.rpc("calculate_dynamic_elo_delta", {
+        _player_elo: baseElo,
+        _opponent_elo: opponentElo,
+        _won: p.won,
+      });
+      const delta = typeof deltaRows === "number" ? deltaRows : (p.won ? 25 : -15);
+      const newElo = Math.max(0, baseElo + delta);
       const newWins = baseWins + (p.won ? 1 : 0);
       const newLosses = baseLosses + (p.won ? 0 : 1);
       const newStreak = p.won ? baseStreak + 1 : 0;
@@ -168,6 +189,11 @@ Deno.serve(async (req) => {
       });
 
       updated.push({ user_id: p.userId, won: p.won, elo: newElo });
+    }
+
+    // Recalculate smurf risk for all participants (best-effort, non-blocking)
+    for (const p of participants) {
+      await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }).catch(() => {});
     }
 
     return json({ ok: true, game, updated });

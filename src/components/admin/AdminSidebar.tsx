@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound,
-  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange,
+  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -32,6 +32,7 @@ const SECTIONS: Section[] = [
   { id: "reputation",    label: "Reputazione",   icon: Star,            to: "/admin/reputation",     allow: ["admin", "moderator"] },
   { id: "economy",       label: "Economia",      icon: Coins,           to: "/admin/economy",        allow: ["admin"] },
   { id: "seasons",       label: "Stagioni",      icon: CalendarRange,   to: "/admin/seasons",        allow: ["admin"] },
+  { id: "elo",           label: "ELO Tools",     icon: TrendingDown,    to: "/admin/elo",            allow: ["admin"] },
   { id: "security",      label: "Sicurezza",     icon: ShieldAlert,     to: "/admin/security",       allow: ["admin"] },
 ];
 

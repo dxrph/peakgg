@@ -807,6 +807,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_verified: boolean
           avatar_url: string | null
           ban_expires_at: string | null
           ban_reason: string | null
@@ -823,6 +824,7 @@ export type Database = {
           ip_address: string | null
           is_banned: boolean
           language: string
+          last_active_at: string
           looking_for_team: boolean
           peak_coins: number
           preferred_game: string | null
@@ -830,12 +832,14 @@ export type Database = {
           region: string | null
           reputation_score: number
           role: string | null
+          smurf_risk_score: number
           trophies: number
           updated_at: string
           username: string
           warn_count: number
         }
         Insert: {
+          account_verified?: boolean
           avatar_url?: string | null
           ban_expires_at?: string | null
           ban_reason?: string | null
@@ -852,6 +856,7 @@ export type Database = {
           ip_address?: string | null
           is_banned?: boolean
           language?: string
+          last_active_at?: string
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
@@ -859,12 +864,14 @@ export type Database = {
           region?: string | null
           reputation_score?: number
           role?: string | null
+          smurf_risk_score?: number
           trophies?: number
           updated_at?: string
           username: string
           warn_count?: number
         }
         Update: {
+          account_verified?: boolean
           avatar_url?: string | null
           ban_expires_at?: string | null
           ban_reason?: string | null
@@ -881,6 +888,7 @@ export type Database = {
           ip_address?: string | null
           is_banned?: boolean
           language?: string
+          last_active_at?: string
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
@@ -888,6 +896,7 @@ export type Database = {
           region?: string | null
           reputation_score?: number
           role?: string | null
+          smurf_risk_score?: number
           trophies?: number
           updated_at?: string
           username?: string
@@ -1657,9 +1666,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_elo_decay: {
+        Args: never
+        Returns: {
+          affected_users: number
+          total_decay: number
+        }[]
+      }
       award_tournament_prizes: {
         Args: { _tournament_id: string }
         Returns: undefined
+      }
+      calculate_dynamic_elo_delta: {
+        Args: { _opponent_elo: number; _player_elo: number; _won: boolean }
+        Returns: number
       }
       close_season: { Args: { _season_id: string }; Returns: undefined }
       delete_email: {
@@ -1705,6 +1725,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recalculate_smurf_risk: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "organizer"
