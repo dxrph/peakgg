@@ -222,6 +222,12 @@
     "cta_guest": "Crea il tuo account",
     "reassurance": "Gratis. Niente carta. 30 secondi per iniziare."
   },
+  "discord_cta": {
+    "eyebrow": "COMMUNITY PRE-LANCIO",
+    "title": "Entra nel Discord di PeakGG",
+    "subtitle": "Fai parte della prima community competitiva FPS d'Europa prima del lancio. Trova compagni, ricevi annunci sui tornei e aiutaci a costruire la piattaforma.",
+    "button": "Entra nel Discord"
+  },
   "footer": {
     "tagline": "La piattaforma competitiva multi-gioco definitiva per VALORANT, CS2 e Rainbow Six Siege.",
     "platform": "Piattaforma",
