@@ -131,11 +131,13 @@
   },
   "ranks": {
     "Rookie": "Rookie",
+    "Iron": "Iron",
     "Bronze": "Bronze",
     "Silver": "Silver",
     "Gold": "Gold",
     "Platinum": "Platinum",
     "Diamond": "Diamond",
+    "Elite": "Elite",
     "Master": "Master",
     "Apex": "Apex"
   },
