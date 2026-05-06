@@ -37,32 +37,24 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${
-      scrolled
-        ? "bg-background/70 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.6)]"
-        : "bg-background/40"
-    }`}>
-      {/* Custom thin bottom border in dark red */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-[#1e1e1e]" />
-
-      <div className="container grid grid-cols-[auto_1fr_auto] items-center h-16 gap-3 lg:gap-6">
-        {/* LEFT — Logo + Game Selector */}
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2.5 mr-4 lg:mr-6">
-            <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-              <Mountain className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-xl tracking-tight hidden sm:inline">PEAKGG</span>
-          </Link>
-
-          <div className="hidden lg:flex items-center" title={t("nav.game_filter_hint")}>
-            <div className="h-6 w-px bg-border/60 mr-3" />
-            <GameSwitcher />
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-border/40 backdrop-blur-xl transition-all duration-300 ${
+        scrolled
+          ? "bg-background/75 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.7)]"
+          : "bg-background/45"
+      }`}
+    >
+      <div className="container flex items-center justify-between h-14 lg:h-16 gap-4">
+        {/* ZONE 1 — LEFT: Logo only */}
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
+            <Mountain className="h-4 w-4 text-primary-foreground" />
           </div>
-        </div>
+          <span className="font-display font-bold text-lg lg:text-xl tracking-tight hidden sm:inline">PEAKGG</span>
+        </Link>
 
-        {/* CENTER — Nav links */}
-        <div className="hidden md:flex items-center justify-center gap-5 lg:gap-7">
+        {/* ZONE 2 — CENTER: Main nav links only */}
+        <div className="hidden md:flex items-center justify-center flex-1 gap-5 lg:gap-8">
           {([
             ["/tournaments", t("nav.tournaments")],
             ["/teams", t("nav.teams")],
@@ -73,26 +65,40 @@ export default function Navbar() {
             <Link
               key={href}
               to={href}
-              className="group relative text-[12px] lg:text-[13px] text-muted-foreground hover:text-foreground transition-colors font-display font-medium uppercase tracking-[0.12em] whitespace-nowrap"
+              className="group relative text-[12px] lg:text-[13px] text-muted-foreground hover:text-foreground transition-colors font-display font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
               {label}
               <span className="absolute left-0 right-0 -bottom-1.5 h-px scale-x-0 bg-primary group-hover:scale-x-100 transition-transform origin-center" />
             </Link>
           ))}
-          <a
-            href={DISCORD_INVITE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative text-[12px] lg:text-[13px] text-[#8a93f5] hover:text-white transition-colors font-display font-medium uppercase tracking-[0.12em] flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            {t("nav.discord")}
-          </a>
         </div>
 
-        {/* RIGHT — Lang | Notifications | Avatar */}
-        <div className="hidden md:flex items-center gap-2.5 lg:gap-3">
+        {/* ZONE 3 — RIGHT: Utility cluster */}
+        <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
+          {/* Game switcher: full on lg+, compact icons on md */}
+          <div title={t("nav.game_filter_hint")} className="hidden lg:block">
+            <GameSwitcher />
+          </div>
+          <div className="lg:hidden">
+            <GameSwitcher compact />
+          </div>
+
+          <span className="hidden lg:inline-block w-px h-5 bg-border/60" />
+
+          {/* Discord CTA */}
+          <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2.5 lg:px-3 rounded-md border-[#5865F2]/40 bg-[#5865F2]/10 text-[#a8b0f7] hover:bg-[#5865F2]/20 hover:text-white hover:border-[#5865F2]/60 font-display font-semibold uppercase tracking-wider text-[11px]"
+            >
+              <MessageCircle className="h-3.5 w-3.5 lg:mr-1.5" />
+              <span className="hidden lg:inline">{t("nav.discord")}</span>
+            </Button>
+          </a>
+
           <LanguageSwitcher />
+
           {loading ? null : user ? (
             <>
               <NotificationsBell />
@@ -100,14 +106,16 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-2 rounded-md pl-1 pr-1.5 lg:pr-2.5 py-1 hover:bg-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="flex items-center gap-1.5 rounded-md p-1 lg:pr-2 hover:bg-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                     aria-label={profile?.username ?? "Account"}
                   >
                     <Avatar className="h-7 w-7 border border-border">
                       <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
-                      <AvatarFallback className="text-[10px]">{(profile?.username ?? "U").slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="text-[10px]">
+                        {(profile?.username ?? "U").slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
-                    <span className="hidden lg:inline text-[13px] font-display font-semibold max-w-[110px] truncate">
+                    <span className="hidden xl:inline text-[12px] font-display font-semibold max-w-[90px] truncate">
                       {profile?.username ?? "Player"}
                     </span>
                   </button>
@@ -136,14 +144,18 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login"><Button variant="ghost" size="sm">{t("auth.login")}</Button></Link>
-              <Link to="/register"><Button variant="neon" size="sm" className="rounded-sm uppercase tracking-wider">{t("auth.register")}</Button></Link>
+              <Link to="/login"><Button variant="ghost" size="sm" className="h-8">{t("auth.login")}</Button></Link>
+              <Link to="/register">
+                <Button variant="neon" size="sm" className="h-8 rounded-md uppercase tracking-wider text-[11px]">
+                  {t("auth.register")}
+                </Button>
+              </Link>
             </>
           )}
         </div>
 
-        {/* Mobile right cluster: Discord + Hamburger */}
-        <div className="md:hidden col-start-3 justify-self-end flex items-center gap-1">
+        {/* MOBILE right cluster: Discord + Hamburger */}
+        <div className="md:hidden flex items-center gap-1.5">
           <a
             href={DISCORD_INVITE}
             target="_blank"
@@ -153,6 +165,16 @@ export default function Navbar() {
           >
             <MessageCircle className="h-4 w-4" />
           </a>
+          {user && (
+            <Link to={profile?.username ? `/profile/${profile.username}` : "/dashboard"} aria-label="Profile">
+              <Avatar className="h-8 w-8 border border-border">
+                <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
+                <AvatarFallback className="text-[10px]">
+                  {(profile?.username ?? "U").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          )}
           <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
