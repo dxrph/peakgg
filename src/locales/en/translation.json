@@ -222,6 +222,12 @@
     "cta_guest": "Create Your Account",
     "reassurance": "Free. No credit card. 30 seconds to start."
   },
+  "discord_cta": {
+    "eyebrow": "PRE-LAUNCH COMMUNITY",
+    "title": "Join the PeakGG Discord",
+    "subtitle": "Be part of the first competitive FPS community in Europe before launch. Find teammates, get tournament announcements and shape the platform with us.",
+    "button": "Join Discord"
+  },
   "footer": {
     "tagline": "The ultimate multi-game competitive platform for VALORANT, CS2, and Rainbow Six Siege.",
     "platform": "Platform",
