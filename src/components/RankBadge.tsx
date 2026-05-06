@@ -34,7 +34,7 @@ export interface RankBadgeProps {
   elo?: number;
   /** Explicit rank name (used only when `elo` is not provided). */
   rank?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Show rank name next to the icon. */
   showLabel?: boolean;
   /** Legacy: append numeric ELO under the label. */
@@ -43,9 +43,11 @@ export interface RankBadgeProps {
 }
 
 const SIZE_PX: Record<NonNullable<RankBadgeProps["size"]>, number> = {
-  sm: 20,
-  md: 32,
-  lg: 64,
+  xs: 20,
+  sm: 28,
+  md: 40,
+  lg: 72,
+  xl: 96,
 };
 
 export default function RankBadge({
@@ -59,9 +61,20 @@ export default function RankBadge({
   const info: RankInfo =
     typeof elo === "number" ? getRankByElo(elo) : getRankByName(rank ?? "Rookie");
   const px = SIZE_PX[size];
-  const labelSize = size === "sm" ? "text-[10px]" : size === "md" ? "text-xs" : "text-sm";
+  const labelSize =
+    size === "xs" || size === "sm"
+      ? "text-[10px]"
+      : size === "md"
+      ? "text-xs"
+      : "text-sm";
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
+  const isApex = info.name === "Apex";
+  // Frame: subtle dark glass panel — let the emblem dominate.
+  const padPx = Math.max(2, Math.round(px * 0.06));
+  const radius = Math.max(8, Math.round(px * 0.18));
+  const glowStrength = isApex ? 0.55 : 0.28;
+  const innerPx = px - padPx * 2;
 
   return (
     <span
@@ -69,17 +82,22 @@ export default function RankBadge({
       title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
       <span
-        className="rank-badge-icon relative inline-flex items-center justify-center rounded-lg transition-all duration-200"
+        className="rank-badge-icon relative inline-flex items-center justify-center transition-all duration-200"
         style={{
           width: px,
           height: px,
-          background: "rgba(15, 23, 42, 0.55)",
-          border: `1px solid ${info.hex}55`,
-          padding: Math.max(2, Math.floor(px * 0.12)),
+          padding: padPx,
+          borderRadius: radius,
+          background:
+            "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.04), rgba(10,10,12,0.55) 70%)",
+          border: `1px solid ${info.hex}33`,
+          boxShadow: `0 0 ${Math.round(px * 0.25)}px ${info.hex}${isApex ? "55" : "22"}, inset 0 0 ${Math.round(
+            px * 0.18,
+          )}px rgba(0,0,0,0.55)`,
           ["--rank-glow" as any]: info.hex,
         }}
       >
-        <RankIcon rank={info} px={px - Math.max(4, Math.floor(px * 0.24))} />
+        <RankIcon rank={info} px={innerPx} glow={glowStrength} />
       </span>
       {(showLabel || showElo) && (
         <span className={`flex flex-col leading-tight font-display font-bold ${labelSize}`}>
@@ -99,8 +117,10 @@ export { RankBadge };
 /* Inline SVG icons — one per tier. No external assets.               */
 /* ------------------------------------------------------------------ */
 
-function RankIcon({ rank, px }: { rank: RankInfo; px: number }) {
+function RankIcon({ rank, px, glow = 0.3 }: { rank: RankInfo; px: number; glow?: number }) {
   const src = RANK_IMAGES[rank.name];
+  const blur = Math.max(3, Math.round(px * 0.12));
+  const a = Math.round(glow * 255).toString(16).padStart(2, "0");
   return (
     <img
       src={src}
@@ -108,7 +128,11 @@ function RankIcon({ rank, px }: { rank: RankInfo; px: number }) {
       width={px}
       height={px}
       className="object-contain select-none pointer-events-none"
-      style={{ width: px, height: px, filter: `drop-shadow(0 0 6px ${rank.hex}66)` }}
+      style={{
+        width: px,
+        height: px,
+        filter: `drop-shadow(0 0 ${blur}px ${rank.hex}${a})`,
+      }}
       draggable={false}
       loading="lazy"
     />
