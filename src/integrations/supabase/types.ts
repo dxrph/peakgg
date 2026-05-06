@@ -1533,6 +1533,65 @@ export type Database = {
           },
         ]
       }
+      tournament_settings: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          eligibility_settings: Json
+          format_settings: Json
+          id: string
+          map_settings: Json
+          moderation_settings: Json
+          registration_settings: Json
+          reward_settings: Json
+          schedule_settings: Json
+          staff_settings: Json
+          tournament_id: string
+          updated_at: string
+          visibility_settings: Json
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          eligibility_settings?: Json
+          format_settings?: Json
+          id?: string
+          map_settings?: Json
+          moderation_settings?: Json
+          registration_settings?: Json
+          reward_settings?: Json
+          schedule_settings?: Json
+          staff_settings?: Json
+          tournament_id: string
+          updated_at?: string
+          visibility_settings?: Json
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          eligibility_settings?: Json
+          format_settings?: Json
+          id?: string
+          map_settings?: Json
+          moderation_settings?: Json
+          registration_settings?: Json
+          reward_settings?: Json
+          schedule_settings?: Json
+          staff_settings?: Json
+          tournament_id?: string
+          updated_at?: string
+          visibility_settings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_settings_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: true
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_waitlist: {
         Row: {
           created_at: string
@@ -1559,91 +1618,154 @@ export type Database = {
       }
       tournaments: {
         Row: {
+          banner_url: string | null
           bo: string
           bracket_type: string
+          checkin_close_at: string | null
+          checkin_open_at: string | null
           created_at: string
           created_by: string | null
           description: string | null
           end_date: string | null
           entry_cost_coins: number
           entry_type: string
+          featured: boolean
           fixed_map: string | null
           format: string
           game: string
           id: string
+          language: string | null
+          logo_url: string | null
           map_mode: string
           map_pool: string[] | null
           max_teams: number
           min_elo: number | null
+          min_teams: number | null
           name: string
+          organizer_discord: string | null
+          organizer_name: string | null
+          prize_currency: string | null
           prize_pool: string | null
           rank_max: number | null
+          registration_close_at: string | null
+          registration_open_at: string | null
           reward_badge: string | null
           reward_banner: string | null
           reward_trophies: number
           rules: string | null
+          rules_url: string | null
           seeding_enabled: boolean
+          short_description: string | null
+          slug: string | null
           start_date: string | null
           status: string
+          team_size: string | null
           tier: number
+          tier_label: string | null
+          timezone: string | null
+          tournament_type: string | null
+          updated_at: string
+          visibility: string
         }
         Insert: {
+          banner_url?: string | null
           bo?: string
           bracket_type?: string
+          checkin_close_at?: string | null
+          checkin_open_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_date?: string | null
           entry_cost_coins?: number
           entry_type?: string
+          featured?: boolean
           fixed_map?: string | null
           format?: string
           game?: string
           id?: string
+          language?: string | null
+          logo_url?: string | null
           map_mode?: string
           map_pool?: string[] | null
           max_teams?: number
           min_elo?: number | null
+          min_teams?: number | null
           name: string
+          organizer_discord?: string | null
+          organizer_name?: string | null
+          prize_currency?: string | null
           prize_pool?: string | null
           rank_max?: number | null
+          registration_close_at?: string | null
+          registration_open_at?: string | null
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
           rules?: string | null
+          rules_url?: string | null
           seeding_enabled?: boolean
+          short_description?: string | null
+          slug?: string | null
           start_date?: string | null
           status?: string
+          team_size?: string | null
           tier?: number
+          tier_label?: string | null
+          timezone?: string | null
+          tournament_type?: string | null
+          updated_at?: string
+          visibility?: string
         }
         Update: {
+          banner_url?: string | null
           bo?: string
           bracket_type?: string
+          checkin_close_at?: string | null
+          checkin_open_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_date?: string | null
           entry_cost_coins?: number
           entry_type?: string
+          featured?: boolean
           fixed_map?: string | null
           format?: string
           game?: string
           id?: string
+          language?: string | null
+          logo_url?: string | null
           map_mode?: string
           map_pool?: string[] | null
           max_teams?: number
           min_elo?: number | null
+          min_teams?: number | null
           name?: string
+          organizer_discord?: string | null
+          organizer_name?: string | null
+          prize_currency?: string | null
           prize_pool?: string | null
           rank_max?: number | null
+          registration_close_at?: string | null
+          registration_open_at?: string | null
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
           rules?: string | null
+          rules_url?: string | null
           seeding_enabled?: boolean
+          short_description?: string | null
+          slug?: string | null
           start_date?: string | null
           status?: string
+          team_size?: string | null
           tier?: number
+          tier_label?: string | null
+          timezone?: string | null
+          tournament_type?: string | null
+          updated_at?: string
+          visibility?: string
         }
         Relationships: [
           {
