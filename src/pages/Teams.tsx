@@ -18,6 +18,8 @@ import RosterDialog from "@/components/teams/RosterDialog";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import ScrimDialog from "@/components/teams/ScrimDialog";
 import ContactPlayerDialog from "@/components/teams/ContactPlayerDialog";
+import DiscordCTA from "@/components/landing/DiscordCTA";
+import { Trophy as TrophyIcon, Sparkles, BadgeCheck } from "lucide-react";
 
 const GAMES = [
   { value: "all", label: "All games" },
@@ -26,6 +28,18 @@ const GAMES = [
   { value: "r6s", label: "Rainbow Six Siege" },
 ];
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
+
+function getTeamBadges(team: { trophies: number; created_at?: string; looking_for_players: boolean }) {
+  const badges: { label: string; className: string; icon: any }[] = [];
+  if (team.trophies >= 5) {
+    badges.push({ label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon });
+  }
+  if (team.trophies < 2 && team.looking_for_players) {
+    badges.push({ label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles });
+  }
+  badges.push({ label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck });
+  return badges;
+}
 
 interface TeamRow {
   id: string;
