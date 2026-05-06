@@ -368,9 +368,36 @@ export default function ProfilePage() {
                     {profile.display_name || profile.username}
                   </h1>
                   <p className="font-body text-sm text-muted-foreground truncate">@{profile.username}</p>
-                  <div className="mt-3 flex items-center gap-3 flex-wrap text-xs text-muted-foreground font-mono">
+                  <div className="mt-3 flex items-center gap-x-3 gap-y-1.5 flex-wrap text-xs text-muted-foreground font-mono">
                     <span className="inline-flex items-center gap-1"><Globe2 className="h-3 w-3" /> {profile.region || "EU"}</span>
                     <span className="inline-flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {(profile.language || "EN").toUpperCase()}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <GameIcon game={preferredGame} size={12} />
+                      {GAMES.find(g => g.id === preferredGame)?.shortName ?? "—"}
+                    </span>
+                    {profile.role && (
+                      <span className="inline-flex items-center gap-1 text-foreground/80">
+                        <Swords className="h-3 w-3" /> {profile.role}
+                      </span>
+                    )}
+                    {profile.discord_username && (
+                      <span className="inline-flex items-center gap-1 text-[#8a93f5]">
+                        <svg viewBox="0 0 24 24" className="h-3 w-3 fill-current" aria-hidden="true">
+                          <path d="M20.317 4.369a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.078.037c-.211.375-.444.864-.608 1.249a18.27 18.27 0 0 0-5.487 0c-.165-.39-.406-.874-.617-1.249a.077.077 0 0 0-.078-.037 19.736 19.736 0 0 0-4.885 1.515.07.07 0 0 0-.032.027C.533 9.045-.32 13.579.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.027c.462-.63.873-1.295 1.226-1.994a.076.076 0 0 0-.041-.105 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127c-.598.349-1.22.645-1.873.892a.077.077 0 0 0-.041.105c.36.699.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.331c-1.182 0-2.156-1.085-2.156-2.419 0-1.333.956-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.956 2.419-2.156 2.419zm7.974 0c-1.183 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.946 2.419-2.156 2.419z"/>
+                        </svg>
+                        {profile.discord_username}
+                      </span>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] uppercase font-display tracking-wider ${
+                        team
+                          ? "border-success/40 text-success bg-success/10"
+                          : "border-accent/40 text-accent bg-accent/10"
+                      }`}
+                    >
+                      {team ? `In Team · ${team.tag}` : "Free Agent"}
+                    </Badge>
                     <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {t("profile_v2.joined")} {new Date(profile.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
