@@ -10,6 +10,7 @@ export type AdminAction =
   | "ticket_review"
   | "tournament_create"
   | "tournament_update"
+  | "tournament_publish"
   | "tournament_close"
   | "tournament_export_csv"
   | "tournament_replace_team"
