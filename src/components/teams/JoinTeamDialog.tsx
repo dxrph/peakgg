@@ -50,6 +50,31 @@ export default function JoinTeamDialog({ open, onOpenChange, team }: Props) {
       return;
     }
     setLoading(true);
+    // Block applying to your own team
+    const { data: teamRow } = await supabase
+      .from("teams").select("owner_id").eq("id", team.id).maybeSingle();
+    if ((teamRow as any)?.owner_id === user.id) {
+      setLoading(false);
+      toast.error("You cannot apply to your own team");
+      return;
+    }
+    // Already a member?
+    const { data: existingMember } = await supabase
+      .from("team_members").select("id").eq("team_id", team.id).eq("user_id", user.id).maybeSingle();
+    if (existingMember) {
+      setLoading(false);
+      toast.error("You are already a member of this team");
+      return;
+    }
+    // Pending request already?
+    const { data: pending } = await supabase
+      .from("team_join_requests").select("id")
+      .eq("team_id", team.id).eq("user_id", user.id).eq("status", "pending").maybeSingle();
+    if (pending) {
+      setLoading(false);
+      toast.error("Application already pending");
+      return;
+    }
     const { error } = await supabase
       .from("team_join_requests")
       .insert({
