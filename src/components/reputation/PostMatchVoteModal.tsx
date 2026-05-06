@@ -19,15 +19,31 @@ interface Props {
 
 export default function PostMatchVoteModal({ matchId, teammates, open, onClose }: Props) {
   const [idx, setIdx] = useState(0);
+  const [pending, setPending] = useState<Teammate[]>(teammates);
   const [votes, setVotes] = useState<Votes>({ communication: 4, fairplay: 4, punctuality: 4 });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open) { setIdx(0); setVotes({ communication: 4, fairplay: 4, punctuality: 4 }); }
-  }, [open]);
+    if (!open) return;
+    setIdx(0);
+    setVotes({ communication: 4, fairplay: 4, punctuality: 4 });
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user || teammates.length === 0) { setPending(teammates); return; }
+      const { data: existing } = await supabase
+        .from("reputation_votes")
+        .select("player_id")
+        .eq("match_id", matchId)
+        .eq("voter_id", u.user.id);
+      const voted = new Set((existing ?? []).map((r) => r.player_id));
+      const filtered = teammates.filter((t) => t.id !== u.user!.id && !voted.has(t.id));
+      setPending(filtered);
+      if (filtered.length === 0) onClose();
+    })();
+  }, [open, matchId, teammates, onClose]);
 
-  if (!open || teammates.length === 0) return null;
-  const current = teammates[idx];
+  if (!open || pending.length === 0) return null;
+  const current = pending[idx];
   if (!current) return null;
 
   const submit = async (skip = false) => {
@@ -44,9 +60,17 @@ export default function PostMatchVoteModal({ matchId, teammates, open, onClose }
         punctuality: votes.punctuality,
       });
       setSubmitting(false);
-      if (error) { toast.error(error.message); return; }
+      if (error) {
+        // Unique violation → already voted, just skip ahead
+        if ((error as any).code === "23505") {
+          toast.info("Hai già votato questo player");
+        } else {
+          toast.error(error.message);
+          return;
+        }
+      }
     }
-    if (idx + 1 < teammates.length) {
+    if (idx + 1 < pending.length) {
       setIdx(idx + 1);
       setVotes({ communication: 4, fairplay: 4, punctuality: 4 });
     } else {
@@ -60,7 +84,7 @@ export default function PostMatchVoteModal({ matchId, teammates, open, onClose }
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-display uppercase">
-            <Star className="h-4 w-4 text-primary" /> Vota i compagni · {idx + 1}/{teammates.length}
+            <Star className="h-4 w-4 text-primary" /> Vota i compagni · {idx + 1}/{pending.length}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -84,7 +108,7 @@ export default function PostMatchVoteModal({ matchId, teammates, open, onClose }
         <DialogFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => submit(true)}><X className="h-4 w-4 mr-1" /> Salta</Button>
           <Button onClick={() => submit(false)} disabled={submitting}>
-            {idx + 1 === teammates.length ? "Invia e chiudi" : "Avanti"}
+            {idx + 1 === pending.length ? "Invia e chiudi" : "Avanti"}
           </Button>
         </DialogFooter>
       </DialogContent>
