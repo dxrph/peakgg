@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mountain, Menu, X, LogOut } from "lucide-react";
+import { Mountain, Menu, X, LogOut, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import GameSwitcher from "@/components/GameSwitcher";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsBell from "@/components/NotificationsBell";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useI18n } from "@/i18n";
+import { DISCORD_INVITE } from "@/lib/links";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -56,11 +57,11 @@ export default function Navbar() {
         {/* CENTER — Nav links */}
         <div className="hidden md:flex items-center justify-center gap-8">
           {([
-            ["/play", t("nav.play")],
             ["/tournaments", t("nav.tournaments")],
-            ["/leaderboard", t("nav.leaderboard")],
             ["/teams", t("nav.teams")],
-            ["/scrims", t("nav.scrims")],
+            ["/free-agents", t("nav.free_agents")],
+            ["/clips", t("nav.clips")],
+            ["/leaderboard", t("nav.leaderboard")],
           ] as const).map(([href, label]) => (
             <Link
               key={href}
@@ -71,6 +72,15 @@ export default function Navbar() {
               <span className="absolute left-0 right-0 -bottom-1.5 h-px scale-x-0 bg-primary group-hover:scale-x-100 transition-transform origin-center" />
             </Link>
           ))}
+          <a
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative text-[13px] text-[#8a93f5] hover:text-white transition-colors font-display font-medium uppercase tracking-[0.12em] flex items-center gap-1.5"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            {t("nav.discord")}
+          </a>
         </div>
 
         {/* RIGHT — Lang | Notifications | Avatar */}
@@ -110,14 +120,26 @@ export default function Navbar() {
           {([
             ["/play", t("nav.play")],
             ["/tournaments", t("nav.tournaments")],
-            ["/leaderboard", t("nav.leaderboard")],
             ["/teams", t("nav.teams")],
+            ["/free-agents", t("nav.free_agents")],
+            ["/clips", t("nav.clips")],
+            ["/leaderboard", t("nav.leaderboard")],
             ["/scrims", t("nav.scrims")],
           ] as const).map(([href, label]) => (
             <Link key={href} to={href} onClick={() => setMobileOpen(false)} className="block text-sm font-display font-semibold uppercase tracking-wider py-2">
               {label}
             </Link>
           ))}
+          <a
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2 text-sm font-display font-semibold uppercase tracking-wider py-2 text-[#8a93f5]"
+          >
+            <MessageCircle className="h-4 w-4" />
+            {t("nav.discord")}
+          </a>
           <div className="pt-4 border-t border-border flex gap-3">
             {user ? (
               <Button variant="outline" className="w-full" onClick={handleSignOut}>

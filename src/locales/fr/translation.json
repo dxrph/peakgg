@@ -4,7 +4,10 @@
     "tournaments": "Tournois",
     "leaderboard": "Classement",
     "teams": "Équipes",
-    "scrims": "Scrims"
+    "scrims": "Scrims",
+    "free_agents": "Free Agents",
+    "clips": "Clips",
+    "discord": "Discord"
   },
   "auth": {
     "signin_google": "Se connecter avec Google",
@@ -134,11 +137,13 @@
   },
   "hero": {
     "season_badge": "SAISON 1 — EN DIRECT",
-    "line1": "COMPÉTIS.",
-    "line2": "ÉLÈVE-TOI.",
-    "line3": "DOMINE.",
-    "subtitle": "Grimpe le classement européen VALORANT. Matchmaking classé, ELO en direct, tournois hebdo — chaque match compte pour ton rang.",
+    "line1": "LE HUB COMPÉTITIF",
+    "line2": "POUR LES JOUEURS",
+    "line3": "FPS D'EUROPE.",
+    "subtitle": "Participe à des tournois, trouve des coéquipiers, partage tes clips et grimpe les rangs PeakGG sur Valorant, CS2 et Rainbow Six Siege.",
     "cta_play": "Entrer dans l'Arène",
+    "cta_discord": "Rejoindre Discord",
+    "cta_register": "Créer un compte",
     "cta_leaderboard": "Voir le Classement",
     "stat_players_online": "Joueurs en ligne",
     "stat_matches_today": "Matchs aujourd'hui",
@@ -155,17 +160,19 @@
     "active_teams": "Équipes actives"
   },
   "how_it_works": {
-    "title_pre": "COMMENT ÇA",
-    "title_accent": "MARCHE",
-    "subtitle": "Trois étapes pour commencer ton ascension.",
-    "step1_title": "Inscris-toi et choisis ton jeu",
-    "step1_desc": "Crée ton compte en 30 secondes et choisis Valorant, CS2 ou R6.",
-    "step2_title": "Trouve des matchs ou rejoins un team",
-    "step2_desc": "Joue en solo, monte un roster ou utilise le team finder.",
-    "step3_title": "Joue et confirme le résultat",
-    "step3_desc": "Affronte des lobbies équilibrés, puis confirme le score avec ton capitaine.",
-    "step4_title": "Grimpe la ladder et gagne des tournois",
-    "step4_desc": "Gagne de l'ELO, monte les tiers et débloque Open Cup, Challenger et Peak Championship."
+    "title_pre": "COMMENT FONCTIONNE",
+    "title_accent": "PEAKGG",
+    "subtitle": "De free agent à champion de tournoi — en cinq étapes.",
+    "step1_title": "Crée ton profil joueur",
+    "step1_desc": "Inscris-toi en 30 secondes et choisis ton jeu, ton rôle, ton pays et ton rang.",
+    "step2_title": "Trouve des coéquipiers ou crée un team",
+    "step2_desc": "Parcours les free agents ou monte ton propre roster sur VALORANT, CS2 et R6.",
+    "step3_title": "Rejoins tournois et scrims",
+    "step3_desc": "Affronte les autres dans Open Cup, Challenger Series et Peak Championship.",
+    "step4_title": "Partage tes meilleurs clips",
+    "step4_desc": "Upload tes highlights, récolte des votes et vise le Clip of the Week.",
+    "step5_title": "Grimpe les rangs PeakGG",
+    "step5_desc": "Gagne des Peak Points, monte de Rookie à Apex et fais-toi un nom dans les FPS EU."
   },
   "features": {
     "title_pre": "CONÇU POUR LES",
@@ -213,6 +220,12 @@
     "subtitle": "Rejoins des milliers de joueurs sur la plateforme compétitive multi-jeux la plus avancée.",
     "cta_logged_in": "Commencer à jouer",
     "cta_guest": "Crée ton compte"
+  },
+  "discord_cta": {
+    "eyebrow": "COMMUNAUTÉ PRÉ-LANCEMENT",
+    "title": "Rejoins le Discord PeakGG",
+    "subtitle": "Fais partie de la première communauté FPS compétitive d'Europe avant le lancement. Trouve des coéquipiers, reçois les annonces des tournois et aide-nous à façonner la plateforme.",
+    "button": "Rejoindre Discord"
   },
   "footer": {
     "tagline": "La plateforme compétitive multi-jeux ultime pour VALORANT, CS2 et Rainbow Six Siege.",

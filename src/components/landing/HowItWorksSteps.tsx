@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { UserPlus, Users, Swords, Trophy } from "lucide-react";
+import { UserPlus, Users, Swords, Video, Trophy } from "lucide-react";
 import { useI18n } from "@/i18n";
 
 export default function HowItWorksSteps() {
@@ -8,7 +8,8 @@ export default function HowItWorksSteps() {
     { num: "01", icon: UserPlus, title: t("how_it_works.step1_title"), desc: t("how_it_works.step1_desc") },
     { num: "02", icon: Users,    title: t("how_it_works.step2_title"), desc: t("how_it_works.step2_desc") },
     { num: "03", icon: Swords,   title: t("how_it_works.step3_title"), desc: t("how_it_works.step3_desc") },
-    { num: "04", icon: Trophy,   title: t("how_it_works.step4_title"), desc: t("how_it_works.step4_desc") },
+    { num: "04", icon: Video,    title: t("how_it_works.step4_title"), desc: t("how_it_works.step4_desc") },
+    { num: "05", icon: Trophy,   title: t("how_it_works.step5_title"), desc: t("how_it_works.step5_desc") },
   ];
   return (
     <section id="how-it-works" className="py-24 relative overflow-hidden scroll-mt-20">
@@ -26,7 +27,7 @@ export default function HowItWorksSteps() {
           <p className="mt-4 text-muted-foreground font-body">{t("how_it_works.subtitle")}</p>
         </motion.div>
 
-        <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-6">
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10 md:gap-6">
           {/* Connecting line */}
           <div className="hidden md:block absolute top-[3.25rem] left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
