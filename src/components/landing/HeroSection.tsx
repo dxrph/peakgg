@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Swords, ArrowRight, Trophy, ShieldCheck, Server } from "lucide-react";
+import { Swords, ArrowRight, Trophy, ShieldCheck, Server, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { DISCORD_INVITE } from "@/lib/links";
 
 const fadeUp = (delay: number) => ({
   hidden: { opacity: 0, y: 30 },
@@ -13,7 +14,7 @@ const fadeUp = (delay: number) => ({
 export default function HeroSection() {
   const { user } = useAuth();
   const { t } = useI18n();
-  const startHref = user ? "/play" : "/register";
+  const registerHref = user ? "/play" : "/register";
   const scrollHowItWorks = () => {
     const el = document.getElementById("how-it-works");
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -64,21 +65,35 @@ export default function HeroSection() {
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
             className="flex flex-col sm:flex-row gap-3 mb-10 justify-center w-full sm:w-auto"
           >
-            <Link to={startHref} className="w-full sm:w-auto">
+            <a
+              href={DISCORD_INVITE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
               <Button
-                variant="neon"
                 size="xl"
-                className="w-full sm:w-auto rounded-sm uppercase tracking-wider hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
+                className="w-full sm:w-auto rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0 shadow-[0_0_30px_rgba(88,101,242,0.45)] hover:shadow-[0_0_40px_rgba(88,101,242,0.65)] transition-shadow"
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                {t("hero.cta_discord")}
+                <ArrowRight className="ml-1 h-5 w-5" />
+              </Button>
+            </a>
+            <Link to={registerHref} className="w-full sm:w-auto">
+              <Button
+                variant="neonOutline"
+                size="xl"
+                className="w-full sm:w-auto rounded-sm uppercase tracking-wider"
               >
                 <Swords className="mr-2 h-5 w-5" />
-                {t("hero.cta_play")}
-                <ArrowRight className="ml-1 h-5 w-5" />
+                {t("hero.cta_register")}
               </Button>
             </Link>
             <Button
-              variant="neonOutline"
+              variant="ghost"
               size="xl"
-              className="w-full sm:w-auto rounded-sm uppercase tracking-wider"
+              className="w-full sm:w-auto rounded-sm uppercase tracking-wider text-muted-foreground hover:text-foreground"
               onClick={scrollHowItWorks}
             >
               {t("hero.cta_secondary")}
