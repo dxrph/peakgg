@@ -1,43 +1,23 @@
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
-import rookiePng from "@/assets/ranks/rookie.png";
-import bronzePng from "@/assets/ranks/bronze.png";
-import silverPng from "@/assets/ranks/silver.png";
-import goldPng from "@/assets/ranks/gold.png";
-import platinumPng from "@/assets/ranks/platinum.png";
-import diamondPng from "@/assets/ranks/diamond.png";
-import masterPng from "@/assets/ranks/master.png";
-import apexPng from "@/assets/ranks/apex.png";
-
-const RANK_IMAGES: Record<RankTier, string> = {
-  Rookie: rookiePng,
-  Bronze: bronzePng,
-  Silver: silverPng,
-  Gold: goldPng,
-  Platinum: platinumPng,
-  Diamond: diamondPng,
-  Master: masterPng,
-  Apex: apexPng,
-};
 
 /**
- * RankBadge — visual icon + (optional) label for a player or team rank.
+ * RankBadge — premium SVG rank emblem for PeakGG.
  *
- * Two ways to drive it:
+ * All 10 emblems are inline SVG (no raster PNGs) → infinitely scalable,
+ * truly transparent, and impossible to perceive as "pasted square images".
+ *
+ * Drive it by:
  *   <RankBadge elo={1750} />              ← derives rank from ELO (preferred)
- *   <RankBadge rank="Diamond" />          ← uses an explicit rank name
+ *   <RankBadge rank="Diamond" />          ← explicit rank name
  *
- * Sizes:  sm = 20px · md = 32px · lg = 64px
+ * Sizes:  xs 20 · sm 28 · md 44 · lg 80 · xl 104
  */
 export interface RankBadgeProps {
-  /** Live ELO — when provided, rank is always derived from this value. */
   elo?: number;
-  /** Explicit rank name (used only when `elo` is not provided). */
   rank?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  /** Show rank name next to the icon. */
   showLabel?: boolean;
-  /** Legacy: append numeric ELO under the label. */
   showElo?: boolean;
   className?: string;
 }
@@ -45,9 +25,9 @@ export interface RankBadgeProps {
 const SIZE_PX: Record<NonNullable<RankBadgeProps["size"]>, number> = {
   xs: 20,
   sm: 28,
-  md: 40,
-  lg: 72,
-  xl: 96,
+  md: 44,
+  lg: 80,
+  xl: 104,
 };
 
 export default function RankBadge({
@@ -70,15 +50,6 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
-  // Hexagonal emblem slot — kills the "square pasted image" feeling.
-  // Both the frame AND the inner PNG are clipped to the same hex shape
-  // so the raw square paper/foil background of the asset disappears.
-  const HEX_CLIP =
-    "polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)";
-  const glowStrength = isApex ? 0.7 : 0.45;
-  // Tiny inset so the emblem extends almost to the frame edge — no thumbnail feel.
-  const padPx = Math.max(1, Math.round(px * 0.04));
-  const innerPx = px - padPx * 2;
 
   return (
     <span
@@ -86,61 +57,16 @@ export default function RankBadge({
       title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
       <span
-        className="rank-badge-icon relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.04]"
+        className="rank-badge-emblem relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
         style={{
           width: px,
           height: px,
-          // Outer glow only — no boxy border. Glow follows hex silhouette via filter.
-          filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${isApex ? "cc" : "77"}) drop-shadow(0 2px 4px rgba(0,0,0,0.6))`,
-          ["--rank-glow" as any]: info.hex,
+          filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${
+            isApex ? "cc" : "77"
+          }) drop-shadow(0 2px 4px rgba(0,0,0,0.55))`,
         }}
       >
-        {/* Hex frame backdrop — dark glass with rim light in tier color */}
-        <span
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            clipPath: HEX_CLIP,
-            WebkitClipPath: HEX_CLIP,
-            background: `radial-gradient(circle at 50% 30%, ${info.hex}33 0%, rgba(10,10,12,0.92) 55%, rgba(0,0,0,0.95) 100%)`,
-          }}
-        />
-        {/* Tier-color rim — drawn as a slightly larger hex behind the inner one */}
-        <span
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            clipPath: HEX_CLIP,
-            WebkitClipPath: HEX_CLIP,
-            background: info.hex,
-            opacity: isApex ? 0.9 : 0.55,
-            transform: "scale(1.03)",
-            zIndex: -1,
-          }}
-        />
-        {/* Emblem image — clipped to the same hex so its paper square disappears */}
-        <span
-          className="relative inline-flex items-center justify-center"
-          style={{
-            width: innerPx,
-            height: innerPx,
-            clipPath: HEX_CLIP,
-            WebkitClipPath: HEX_CLIP,
-          }}
-        >
-          <RankIcon rank={info} px={innerPx} glow={glowStrength} />
-        </span>
-        {/* Subtle inner highlight for depth */}
-        <span
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            clipPath: HEX_CLIP,
-            WebkitClipPath: HEX_CLIP,
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 35%, rgba(0,0,0,0.25) 100%)",
-          }}
-        />
+        <RankEmblem rank={info} size={px} />
       </span>
       {(showLabel || showElo) && (
         <span className={`flex flex-col leading-tight font-display font-bold ${labelSize}`}>
@@ -157,217 +83,267 @@ export default function RankBadge({
 export { RankBadge };
 
 /* ------------------------------------------------------------------ */
-/* Inline SVG icons — one per tier. No external assets.               */
+/* Reusable size variants (semantic)                                   */
 /* ------------------------------------------------------------------ */
 
-function RankIcon({ rank, px, glow = 0.3 }: { rank: RankInfo; px: number; glow?: number }) {
-  const src = RANK_IMAGES[rank.name];
-  const blur = Math.max(2, Math.round(px * 0.08));
-  const a = Math.round(glow * 255).toString(16).padStart(2, "0");
+export const RankBadgeLarge = (p: Omit<RankBadgeProps, "size">) => (
+  <RankBadge {...p} size="lg" />
+);
+export const RankBadgeMedium = (p: Omit<RankBadgeProps, "size">) => (
+  <RankBadge {...p} size="md" />
+);
+export const RankBadgeCompact = (p: Omit<RankBadgeProps, "size">) => (
+  <RankBadge {...p} size="sm" />
+);
+
+/* ================================================================== */
+/* SVG EMBLEM SYSTEM                                                  */
+/*                                                                     */
+/* All emblems share a hexagonal shield silhouette — same DNA, with    */
+/* progressively richer interior detail as the rank rises.             */
+/* Rendered as inline SVG → transparent, scalable, no pasted-image    */
+/* feel. Each tier introduces a distinctive central glyph.             */
+/* ================================================================== */
+
+const HEX_PATH = "M50 2 L92 26 L92 74 L50 98 L8 74 L8 26 Z";
+const HEX_INNER = "M50 12 L84 31 L84 69 L50 88 L16 69 L16 31 Z";
+
+function darken(hex: string, amt = 0.4): string {
+  const h = hex.replace("#", "");
+  const r = Math.max(0, Math.round(parseInt(h.slice(0, 2), 16) * (1 - amt)));
+  const g = Math.max(0, Math.round(parseInt(h.slice(2, 4), 16) * (1 - amt)));
+  const b = Math.max(0, Math.round(parseInt(h.slice(4, 6), 16) * (1 - amt)));
+  return `rgb(${r},${g},${b})`;
+}
+function lighten(hex: string, amt = 0.3): string {
+  const h = hex.replace("#", "");
+  const r = Math.min(255, Math.round(parseInt(h.slice(0, 2), 16) + (255 - parseInt(h.slice(0, 2), 16)) * amt));
+  const g = Math.min(255, Math.round(parseInt(h.slice(2, 4), 16) + (255 - parseInt(h.slice(2, 4), 16)) * amt));
+  const b = Math.min(255, Math.round(parseInt(h.slice(4, 6), 16) + (255 - parseInt(h.slice(4, 6), 16)) * amt));
+  return `rgb(${r},${g},${b})`;
+}
+
+interface EmblemProps {
+  rank: RankInfo;
+  size: number;
+}
+
+function RankEmblem({ rank, size }: EmblemProps) {
+  const Glyph = GLYPHS[rank.name];
+  const id = `rk-${rank.name.toLowerCase()}`;
+  const c = rank.hex;
+  const dark = darken(c, 0.55);
+  const light = lighten(c, 0.45);
+
   return (
-    <img
-      src={src}
-      alt={`${rank.name} rank`}
-      width={px}
-      height={px}
-      className="object-cover select-none pointer-events-none"
-      style={{
-        width: px,
-        height: px,
-        // object-cover + scale slightly so the hex clip never shows transparent corners
-        // and the paper/foil edges of the source square get clipped away.
-        transform: "scale(1.08)",
-        filter: `drop-shadow(0 0 ${blur}px ${rank.hex}${a}) saturate(1.1) contrast(1.05)`,
-      }}
-      draggable={false}
-      loading="lazy"
-    />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label={`${rank.name} rank emblem`}
+      className="block"
+    >
+      <defs>
+        {/* Outer rim metallic gradient */}
+        <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={light} />
+          <stop offset="50%" stopColor={c} />
+          <stop offset="100%" stopColor={dark} />
+        </linearGradient>
+        {/* Interior dark glass */}
+        <radialGradient id={`${id}-glass`} cx="50%" cy="35%" r="70%">
+          <stop offset="0%" stopColor={c} stopOpacity="0.35" />
+          <stop offset="55%" stopColor="#0b0b0f" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#000" stopOpacity="1" />
+        </radialGradient>
+        {/* Inner chrome highlight */}
+        <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
+          <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Outer hex rim */}
+      <path d={HEX_PATH} fill={`url(#${id}-rim)`} />
+      {/* Dark glass interior */}
+      <path d={HEX_INNER} fill={`url(#${id}-glass)`} />
+      {/* Inner thin accent stroke */}
+      <path
+        d={HEX_INNER}
+        fill="none"
+        stroke={light}
+        strokeOpacity="0.55"
+        strokeWidth="0.6"
+      />
+      {/* Glyph */}
+      <g>{Glyph({ color: c, light, dark })}</g>
+      {/* Top shine sweep */}
+      <path d={HEX_INNER} fill={`url(#${id}-shine)`} />
+    </svg>
   );
 }
 
-interface IconProps {
-  size: number;
-  info: RankInfo;
+/* -------- Per-rank glyphs (centered in 100x100 viewBox) ---------- */
+
+interface GlyphCtx {
+  color: string;
+  light: string;
+  dark: string;
 }
+type GlyphFn = (ctx: GlyphCtx) => JSX.Element;
 
-const RookieIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z"
-      fill={`${info.hex}33`}
-      stroke={info.hex}
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    />
-  </svg>
+// 1. ROOKIE — single small chevron
+const RookieGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path d="M35 58 L50 44 L65 58" stroke={light} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="50" cy="68" r="2.2" fill={color} />
+  </g>
 );
 
-const BronzeIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z"
-      fill={`${info.hex}55`}
-      stroke={info.hex}
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M12 5 L18 7 V12 C18 15.5 15.3 18.5 12 19.2 C8.7 18.5 6 15.5 6 12 V7 Z"
-      fill="none"
-      stroke={info.hex}
-      strokeWidth="1"
-      strokeLinejoin="round"
-      opacity="0.8"
-    />
-  </svg>
+// 2. IRON — heavy bar with rivets
+const IronGlyph: GlyphFn = ({ color, light, dark }) => (
+  <g>
+    <rect x="30" y="44" width="40" height="14" rx="1.5" fill={color} stroke={dark} strokeWidth="1.2" />
+    <rect x="30" y="44" width="40" height="4" fill={light} opacity="0.4" />
+    <circle cx="36" cy="51" r="1.8" fill={dark} />
+    <circle cx="64" cy="51" r="1.8" fill={dark} />
+    <path d="M28 62 L72 62" stroke={light} strokeWidth="1.2" opacity="0.5" />
+  </g>
 );
 
-const SilverIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="silver-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#E5E7EB" />
-        <stop offset="100%" stopColor={info.hex} />
-      </linearGradient>
-    </defs>
-    <path
-      d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5 Z"
-      fill="url(#silver-grad)"
-      fillOpacity="0.45"
-      stroke={info.hex}
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M12 7.5 L13.4 10.7 L16.8 11 L14.2 13.2 L15 16.5 L12 14.8 L9 16.5 L9.8 13.2 L7.2 11 L10.6 10.7 Z"
-      fill="#F8FAFC"
-      stroke={info.hex}
-      strokeWidth="0.6"
-      strokeLinejoin="round"
-    />
-  </svg>
+// 3. BRONZE — two stacked chevrons
+const BronzeGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path d="M30 56 L50 40 L70 56" stroke={light} strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M34 66 L50 52 L66 66" stroke={color} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+  </g>
 );
 
-const GoldIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="gold-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FCD34D" />
-        <stop offset="100%" stopColor={info.hex} />
-      </linearGradient>
-    </defs>
-    <path
-      d="M12 4 L20.5 6.5 V12 C20.5 16.6 17 20.4 12 21.5 C7 20.4 3.5 16.6 3.5 12 V6.5 Z"
-      fill="url(#gold-grad)"
-      fillOpacity="0.55"
-      stroke={info.hex}
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M7 10 L9 13 L12 9 L15 13 L17 10 V14 H7 Z"
-      fill={info.hex}
-      stroke="#92400E"
-      strokeWidth="0.6"
-      strokeLinejoin="round"
-    />
-    <circle cx="7" cy="10" r="1" fill="#FCD34D" />
-    <circle cx="12" cy="9" r="1" fill="#FCD34D" />
-    <circle cx="17" cy="10" r="1" fill="#FCD34D" />
-  </svg>
+// 4. SILVER — three chevrons
+const SilverGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path d="M30 50 L50 36 L70 50" stroke={light} strokeWidth="3.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M32 60 L50 46 L68 60" stroke={light} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+    <path d="M34 70 L50 56 L66 70" stroke={color} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+  </g>
 );
 
-const PlatinumIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="plat-grad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#67E8F9" />
-        <stop offset="100%" stopColor={info.hex} />
-      </linearGradient>
-    </defs>
-    <path d="M12 2 L20 9 L12 22 L4 9 Z" fill="url(#plat-grad)" stroke={info.hex} strokeWidth="1.4" strokeLinejoin="round" />
-    <path d="M12 2 L12 22" stroke="#ECFEFF" strokeWidth="0.8" opacity="0.7" />
-    <path d="M4 9 L20 9" stroke="#ECFEFF" strokeWidth="0.8" opacity="0.7" />
-    <path d="M8 5 L12 9 L16 5" stroke="#ECFEFF" strokeWidth="0.6" opacity="0.6" fill="none" />
-  </svg>
-);
-
-const DiamondIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="diam-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#93C5FD" />
-        <stop offset="100%" stopColor={info.hex} />
-      </linearGradient>
-    </defs>
-    <path d="M6 4 H18 L22 9 L12 22 L2 9 Z" fill="url(#diam-grad)" stroke={info.hex} strokeWidth="1.4" strokeLinejoin="round" />
-    <path d="M2 9 H22" stroke="#DBEAFE" strokeWidth="0.8" opacity="0.85" />
-    <path d="M6 4 L12 22 L18 4" stroke="#DBEAFE" strokeWidth="0.6" opacity="0.7" fill="none" />
-    <path d="M9 4 L12 9 L15 4" stroke="#DBEAFE" strokeWidth="0.5" opacity="0.6" fill="none" />
-  </svg>
-);
-
-const MasterIcon = ({ size, info }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="master-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#C4B5FD" />
-        <stop offset="100%" stopColor={info.hex} />
-      </linearGradient>
-    </defs>
+// 5. GOLD — laurel star / sunburst
+const GoldGlyph: GlyphFn = ({ color, light }) => (
+  <g>
     <path
-      d="M3 9 L6 14 L9 6 L12 13 L15 6 L18 14 L21 9 L20 19 H4 Z"
-      fill="url(#master-grad)"
-      stroke={info.hex}
-      strokeWidth="1.4"
-      strokeLinejoin="round"
-    />
-    <rect x="4" y="18" width="16" height="2" rx="0.5" fill={info.hex} />
-    <circle cx="6" cy="14" r="1.1" fill="#F5F3FF" />
-    <circle cx="12" cy="13" r="1.3" fill="#FCD34D" />
-    <circle cx="18" cy="14" r="1.1" fill="#F5F3FF" />
-  </svg>
-);
-
-const ApexIcon = ({ size }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <defs>
-      <linearGradient id="apex-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#F97316" />
-        <stop offset="100%" stopColor="#EF4444" />
-      </linearGradient>
-      <linearGradient id="apex-flame" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FCD34D" />
-        <stop offset="60%" stopColor="#F97316" />
-        <stop offset="100%" stopColor="#EF4444" />
-      </linearGradient>
-    </defs>
-    <path
-      d="M12 2 C13 5 16 6 16 10 C16 12 14.5 13 12 13 C9.5 13 8 12 8 10 C8 7 10 6 12 2 Z"
-      fill="url(#apex-flame)"
-      stroke="#EF4444"
-      strokeWidth="0.8"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M3 13 L6 18 L9 12 L12 17 L15 12 L18 18 L21 13 L20 22 H4 Z"
-      fill="url(#apex-grad)"
-      stroke="#EF4444"
+      d="M50 28 L55 44 L72 44 L58 54 L63 70 L50 60 L37 70 L42 54 L28 44 L45 44 Z"
+      fill={color}
+      stroke={light}
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
-    <rect x="4" y="20.5" width="16" height="1.5" rx="0.5" fill="#EF4444" />
-    <circle cx="12" cy="17" r="1.2" fill="#FCD34D" />
-  </svg>
+    <path
+      d="M50 36 L52.5 46 L62 46 L54.5 52 L57 62 L50 56 L43 62 L45.5 52 L38 46 L47.5 46 Z"
+      fill={light}
+      opacity="0.55"
+    />
+  </g>
 );
 
-const ICONS: Record<RankTier, (p: IconProps) => JSX.Element> = {
-  Rookie: RookieIcon,
-  Bronze: BronzeIcon,
-  Silver: SilverIcon,
-  Gold: GoldIcon,
-  Platinum: PlatinumIcon,
-  Diamond: DiamondIcon,
-  Master: MasterIcon,
-  Apex: ApexIcon,
+// 6. PLATINUM — angular tech crystal
+const PlatinumGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path d="M50 28 L70 50 L50 72 L30 50 Z" fill={color} stroke={light} strokeWidth="1.4" />
+    <path d="M50 28 L50 72" stroke={light} strokeWidth="1" opacity="0.7" />
+    <path d="M30 50 L70 50" stroke={light} strokeWidth="1" opacity="0.7" />
+    <path d="M40 40 L60 60" stroke={light} strokeWidth="0.6" opacity="0.45" />
+    <path d="M60 40 L40 60" stroke={light} strokeWidth="0.6" opacity="0.45" />
+    <circle cx="50" cy="50" r="3" fill={light} />
+  </g>
+);
+
+// 7. DIAMOND — gem facets
+const DiamondGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path d="M34 38 L66 38 L74 50 L50 76 L26 50 Z" fill={color} stroke={light} strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M26 50 L74 50" stroke={light} strokeWidth="1" opacity="0.85" />
+    <path d="M34 38 L42 50 L50 76" stroke={light} strokeWidth="0.8" fill="none" opacity="0.7" />
+    <path d="M66 38 L58 50 L50 76" stroke={light} strokeWidth="0.8" fill="none" opacity="0.7" />
+    <path d="M42 50 L58 50" stroke={light} strokeWidth="0.6" opacity="0.5" />
+  </g>
+);
+
+// 8. ELITE — winged shield
+const EliteGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    {/* wings */}
+    <path d="M22 46 L34 44 L30 52 L20 50 Z" fill={color} opacity="0.85" />
+    <path d="M78 46 L66 44 L70 52 L80 50 Z" fill={color} opacity="0.85" />
+    {/* shield */}
+    <path
+      d="M50 32 L66 40 L66 56 C66 66 58 72 50 76 C42 72 34 66 34 56 L34 40 Z"
+      fill={color}
+      stroke={light}
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+    />
+    <path d="M50 40 L50 70" stroke={light} strokeWidth="1" opacity="0.7" />
+    <path d="M40 52 L60 52" stroke={light} strokeWidth="1" opacity="0.7" />
+  </g>
+);
+
+// 9. MASTER — royal crown
+const MasterGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    <path
+      d="M28 60 L34 38 L44 52 L50 32 L56 52 L66 38 L72 60 Z"
+      fill={color}
+      stroke={light}
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+    />
+    <rect x="28" y="62" width="44" height="6" rx="1" fill={color} stroke={light} strokeWidth="1.2" />
+    <circle cx="50" cy="32" r="3" fill={light} />
+    <circle cx="34" cy="38" r="2.2" fill={light} opacity="0.85" />
+    <circle cx="66" cy="38" r="2.2" fill={light} opacity="0.85" />
+  </g>
+);
+
+// 10. APEX — flame triangle peak
+const ApexGlyph: GlyphFn = ({ color, light }) => (
+  <g>
+    {/* outer triangle */}
+    <path
+      d="M50 22 L78 76 L22 76 Z"
+      fill={color}
+      stroke={light}
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+    />
+    {/* inner inverted notch */}
+    <path
+      d="M50 50 L66 76 L34 76 Z"
+      fill="#0a0a0c"
+      stroke={light}
+      strokeWidth="1"
+      strokeLinejoin="round"
+    />
+    {/* flame highlight */}
+    <path
+      d="M50 30 L60 56 L50 50 L40 56 Z"
+      fill={light}
+      opacity="0.85"
+    />
+    <circle cx="50" cy="42" r="2.2" fill="#fff" />
+  </g>
+);
+
+const GLYPHS: Record<RankTier, GlyphFn> = {
+  Rookie: RookieGlyph,
+  Iron: IronGlyph,
+  Bronze: BronzeGlyph,
+  Silver: SilverGlyph,
+  Gold: GoldGlyph,
+  Platinum: PlatinumGlyph,
+  Diamond: DiamondGlyph,
+  Elite: EliteGlyph,
+  Master: MasterGlyph,
+  Apex: ApexGlyph,
 };
