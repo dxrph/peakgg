@@ -686,6 +686,19 @@ function HeroStat({
   );
 }
 
+function StripStat({
+  icon, label, value, valueClass = "text-foreground",
+}: { icon?: React.ReactNode; label: string; value: React.ReactNode; valueClass?: string }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-center gap-1.5 text-[10px] font-display uppercase tracking-widest text-muted-foreground">
+        {icon}{label}
+      </div>
+      <div className={`text-lg md:text-xl font-display font-bold ${valueClass}`}>{value}</div>
+    </div>
+  );
+}
+
 function InlineStat({
   label, value, valueClassName = "text-foreground",
 }: { label: string; value: string | number; valueClassName?: string }) {
