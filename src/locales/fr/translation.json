@@ -221,6 +221,12 @@
     "cta_logged_in": "Commencer à jouer",
     "cta_guest": "Crée ton compte"
   },
+  "discord_cta": {
+    "eyebrow": "COMMUNAUTÉ PRÉ-LANCEMENT",
+    "title": "Rejoins le Discord PeakGG",
+    "subtitle": "Fais partie de la première communauté FPS compétitive d'Europe avant le lancement. Trouve des coéquipiers, reçois les annonces des tournois et aide-nous à façonner la plateforme.",
+    "button": "Rejoindre Discord"
+  },
   "footer": {
     "tagline": "La plateforme compétitive multi-jeux ultime pour VALORANT, CS2 et Rainbow Six Siege.",
     "platform": "Plateforme",
