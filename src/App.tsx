@@ -37,6 +37,7 @@ import AdminAnnouncements from "./pages/admin/sections/AdminAnnouncements";
 import AdminSeasons from "./pages/admin/sections/AdminSeasons";
 import AdminElo from "./pages/admin/sections/AdminElo";
 import AimGuidePage from "./pages/AimGuide";
+import FreeAgentsPage from "./pages/FreeAgents";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
 import EloExplainedPage from "./pages/EloExplained";
@@ -114,6 +115,7 @@ const App = () => (
                 }
               />
               <Route path="/aim-guide" element={<AimGuidePage />} />
+              <Route path="/free-agents" element={<ProtectedRoute><FreeAgentsPage /></ProtectedRoute>} />
               <Route path="/elo" element={<EloExplainedPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/faq" element={<FAQPage />} />
