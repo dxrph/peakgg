@@ -6,7 +6,14 @@ import RankBadge from "@/components/RankBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export default function GameSwitcher({ className = "" }: { className?: string }) {
+export default function GameSwitcher({
+  className = "",
+  compact = false,
+}: {
+  className?: string;
+  /** Icon-only mode for tight navbar widths */
+  compact?: boolean;
+}) {
   const { selectedGame, setSelectedGame } = useGame();
   const { user } = useAuth();
   const [elos, setElos] = useState<Record<GameId, number>>({
@@ -38,7 +45,7 @@ export default function GameSwitcher({ className = "" }: { className?: string })
   }, [user]);
 
   return (
-    <div className={`flex items-center gap-0.5 rounded-md border border-border/60 bg-background/30 p-0.5 ${className}`}>
+    <div className={`flex items-center gap-0.5 rounded-md border border-border/60 bg-background/40 p-0.5 ${className}`}>
       {GAMES.map((game) => {
         const elo = elos[game.id];
         const rank = getRankByElo(elo);
@@ -48,14 +55,17 @@ export default function GameSwitcher({ className = "" }: { className?: string })
             key={game.id}
             onClick={() => setSelectedGame(game.id)}
             title={user ? `${game.name} — ${rank.name} (${elo} ELO)` : game.name}
-            className={`relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[11px] font-display font-semibold uppercase tracking-wider transition-all duration-200 ${
+            aria-label={game.name}
+            className={`relative inline-flex items-center justify-center gap-1.5 ${
+              compact ? "px-1.5 py-1.5" : "px-2.5 py-1.5"
+            } rounded text-[11px] font-display font-semibold uppercase tracking-wider transition-all duration-200 ${
               isActive
-                ? "bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]"
+                ? "bg-primary/15 text-primary shadow-[0_0_10px_hsl(var(--primary)/0.25)]"
                 : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
             }`}
           >
             <GameIcon game={game.id} size={16} />
-            <span>{game.shortName}</span>
+            {!compact && <span>{game.shortName}</span>}
           </button>
         );
       })}
