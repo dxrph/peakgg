@@ -1,5 +1,24 @@
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
+import rookiePng from "@/assets/ranks/rookie.png";
+import bronzePng from "@/assets/ranks/bronze.png";
+import silverPng from "@/assets/ranks/silver.png";
+import goldPng from "@/assets/ranks/gold.png";
+import platinumPng from "@/assets/ranks/platinum.png";
+import diamondPng from "@/assets/ranks/diamond.png";
+import masterPng from "@/assets/ranks/master.png";
+import apexPng from "@/assets/ranks/apex.png";
+
+const RANK_IMAGES: Record<RankTier, string> = {
+  Rookie: rookiePng,
+  Bronze: bronzePng,
+  Silver: silverPng,
+  Gold: goldPng,
+  Platinum: platinumPng,
+  Diamond: diamondPng,
+  Master: masterPng,
+  Apex: apexPng,
+};
 
 /**
  * RankBadge — visual icon + (optional) label for a player or team rank.
@@ -81,8 +100,19 @@ export { RankBadge };
 /* ------------------------------------------------------------------ */
 
 function RankIcon({ rank, px }: { rank: RankInfo; px: number }) {
-  const Comp = ICONS[rank.name];
-  return <Comp size={px} info={rank} />;
+  const src = RANK_IMAGES[rank.name];
+  return (
+    <img
+      src={src}
+      alt={`${rank.name} rank`}
+      width={px}
+      height={px}
+      className="object-contain select-none pointer-events-none"
+      style={{ width: px, height: px, filter: `drop-shadow(0 0 6px ${rank.hex}66)` }}
+      draggable={false}
+      loading="lazy"
+    />
+  );
 }
 
 interface IconProps {
