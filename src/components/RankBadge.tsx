@@ -70,10 +70,14 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
-  // Frame: subtle dark glass panel — let the emblem dominate.
-  const padPx = Math.max(2, Math.round(px * 0.06));
-  const radius = Math.max(8, Math.round(px * 0.18));
-  const glowStrength = isApex ? 0.55 : 0.28;
+  // Hexagonal emblem slot — kills the "square pasted image" feeling.
+  // Both the frame AND the inner PNG are clipped to the same hex shape
+  // so the raw square paper/foil background of the asset disappears.
+  const HEX_CLIP =
+    "polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)";
+  const glowStrength = isApex ? 0.7 : 0.45;
+  // Tiny inset so the emblem extends almost to the frame edge — no thumbnail feel.
+  const padPx = Math.max(1, Math.round(px * 0.04));
   const innerPx = px - padPx * 2;
 
   return (
@@ -82,22 +86,61 @@ export default function RankBadge({
       title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
       <span
-        className="rank-badge-icon relative inline-flex items-center justify-center transition-all duration-200"
+        className="rank-badge-icon relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.04]"
         style={{
           width: px,
           height: px,
-          padding: padPx,
-          borderRadius: radius,
-          background:
-            "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.04), rgba(10,10,12,0.55) 70%)",
-          border: `1px solid ${info.hex}33`,
-          boxShadow: `0 0 ${Math.round(px * 0.25)}px ${info.hex}${isApex ? "55" : "22"}, inset 0 0 ${Math.round(
-            px * 0.18,
-          )}px rgba(0,0,0,0.55)`,
+          // Outer glow only — no boxy border. Glow follows hex silhouette via filter.
+          filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${isApex ? "cc" : "77"}) drop-shadow(0 2px 4px rgba(0,0,0,0.6))`,
           ["--rank-glow" as any]: info.hex,
         }}
       >
-        <RankIcon rank={info} px={innerPx} glow={glowStrength} />
+        {/* Hex frame backdrop — dark glass with rim light in tier color */}
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            clipPath: HEX_CLIP,
+            WebkitClipPath: HEX_CLIP,
+            background: `radial-gradient(circle at 50% 30%, ${info.hex}33 0%, rgba(10,10,12,0.92) 55%, rgba(0,0,0,0.95) 100%)`,
+          }}
+        />
+        {/* Tier-color rim — drawn as a slightly larger hex behind the inner one */}
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            clipPath: HEX_CLIP,
+            WebkitClipPath: HEX_CLIP,
+            background: info.hex,
+            opacity: isApex ? 0.9 : 0.55,
+            transform: "scale(1.03)",
+            zIndex: -1,
+          }}
+        />
+        {/* Emblem image — clipped to the same hex so its paper square disappears */}
+        <span
+          className="relative inline-flex items-center justify-center"
+          style={{
+            width: innerPx,
+            height: innerPx,
+            clipPath: HEX_CLIP,
+            WebkitClipPath: HEX_CLIP,
+          }}
+        >
+          <RankIcon rank={info} px={innerPx} glow={glowStrength} />
+        </span>
+        {/* Subtle inner highlight for depth */}
+        <span
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            clipPath: HEX_CLIP,
+            WebkitClipPath: HEX_CLIP,
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 35%, rgba(0,0,0,0.25) 100%)",
+          }}
+        />
       </span>
       {(showLabel || showElo) && (
         <span className={`flex flex-col leading-tight font-display font-bold ${labelSize}`}>
@@ -119,7 +162,7 @@ export { RankBadge };
 
 function RankIcon({ rank, px, glow = 0.3 }: { rank: RankInfo; px: number; glow?: number }) {
   const src = RANK_IMAGES[rank.name];
-  const blur = Math.max(3, Math.round(px * 0.12));
+  const blur = Math.max(2, Math.round(px * 0.08));
   const a = Math.round(glow * 255).toString(16).padStart(2, "0");
   return (
     <img
@@ -127,11 +170,14 @@ function RankIcon({ rank, px, glow = 0.3 }: { rank: RankInfo; px: number; glow?:
       alt={`${rank.name} rank`}
       width={px}
       height={px}
-      className="object-contain select-none pointer-events-none"
+      className="object-cover select-none pointer-events-none"
       style={{
         width: px,
         height: px,
-        filter: `drop-shadow(0 0 ${blur}px ${rank.hex}${a})`,
+        // object-cover + scale slightly so the hex clip never shows transparent corners
+        // and the paper/foil edges of the source square get clipped away.
+        transform: "scale(1.08)",
+        filter: `drop-shadow(0 0 ${blur}px ${rank.hex}${a}) saturate(1.1) contrast(1.05)`,
       }}
       draggable={false}
       loading="lazy"
