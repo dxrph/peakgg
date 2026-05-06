@@ -547,6 +547,66 @@ export default function ProfilePage() {
             <SectionCard title={t("profile_v2.achievements")} icon={Award}>
               <BadgeStrip stats={stats} matchStats={matchStats} trophiesCount={trophies.length} />
             </SectionCard>
+
+            {/* Favorite Clips placeholder */}
+            <SectionCard title="Favorite Clips" icon={ImagePlus}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="group relative aspect-video rounded-md border border-dashed border-border bg-secondary/20 overflow-hidden flex items-center justify-center"
+                  >
+                    <div
+                      className="absolute inset-0 opacity-30"
+                      style={{ background: `linear-gradient(135deg, ${rankInfo.hex}33 0%, transparent 70%)` }}
+                    />
+                    <div className="relative text-center px-3">
+                      <ImagePlus className="h-5 w-5 mx-auto text-muted-foreground/50 mb-1" />
+                      <p className="text-[11px] text-muted-foreground font-display uppercase tracking-wider">
+                        {isOwnProfile ? "Add a clip" : "Coming soon"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+
+            {/* Tournament history placeholder */}
+            <SectionCard title="Tournament History" icon={Trophy}>
+              {trophies.length === 0 ? (
+                <div className="text-center py-6">
+                  <Trophy className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+                  <p className="text-sm text-muted-foreground font-body">
+                    {t("profile_page_extra.no_trophies")}
+                  </p>
+                  <Link to="/tournaments">
+                    <Button size="sm" variant="outline" className="mt-3">
+                      <Trophy className="h-4 w-4 mr-2" /> Browse Tournaments
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {trophies.slice(0, 5).map((tr) => (
+                    <div
+                      key={tr.id}
+                      className="flex items-center gap-3 border border-border rounded-md p-3 bg-secondary/20"
+                    >
+                      <Trophy className="h-5 w-5 text-accent shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display font-bold truncate">{tr.tournament?.name}</div>
+                        <div className="text-[11px] text-muted-foreground font-mono uppercase">
+                          {tr.tournament?.game} · #{tr.placement} · +{tr.points_earned ?? 0} TP
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {tr.tournament?.end_date ? new Date(tr.tournament.end_date).toLocaleDateString() : "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
           </TabsContent>
 
           {/* STATS */}
