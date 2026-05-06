@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          code: string
+          color: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          label: string
+          rarity: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          color?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          label: string
+          rarity?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          color?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          label?: string
+          rarity?: string
+        }
+        Relationships: []
+      }
       admin_actions: {
         Row: {
           action: string
@@ -1615,6 +1651,35 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
         ]
