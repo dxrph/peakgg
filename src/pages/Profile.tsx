@@ -162,7 +162,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, avatar_url, banner_url, bio, peak_coins, preferred_game")
+        .select("id, username, display_name, avatar_url, banner_url, bio, peak_coins, preferred_game, region, language, reputation_score, account_verified, fast_track, looking_for_team, last_active_at, created_at")
         .eq("username", username!)
         .maybeSingle();
 
