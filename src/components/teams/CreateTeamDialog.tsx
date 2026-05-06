@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ const REGIONS = [
 export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Props) {
   const { user } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
@@ -97,6 +99,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     reset();
     onOpenChange(false);
     onCreated?.();
+    navigate(`/teams/${(team as any).id}`);
   };
 
   return (
