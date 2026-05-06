@@ -7,7 +7,11 @@
     "scrims": "Scrims",
     "free_agents": "Free Agents",
     "clips": "Clips",
-    "discord": "Discord"
+    "discord": "Discord",
+    "menu": "Menu",
+    "menu_profile": "Profil",
+    "menu_settings": "Paramètres",
+    "game_filter_hint": "Filtre jeu actif — le contenu s'adapte au jeu sélectionné"
   },
   "auth": {
     "signin_google": "Se connecter avec Google",
@@ -226,6 +230,27 @@
     "title": "Rejoins le Discord PeakGG",
     "subtitle": "Fais partie de la première communauté FPS compétitive d'Europe avant le lancement. Trouve des coéquipiers, reçois les annonces des tournois et aide-nous à façonner la plateforme.",
     "button": "Rejoindre Discord"
+  },
+  "start_competing": {
+    "eyebrow": "AVANT LE LANCEMENT",
+    "title_pre": "COMMENCE À",
+    "title_accent": "COMPÉTIR",
+    "subtitle": "Trois manières de rejoindre la communauté PeakGG dès maintenant.",
+    "card1_title": "Trouve des Coéquipiers",
+    "card1_desc": "Crée ton profil, indique ton rôle et connecte-toi avec des joueurs FPS européens à la recherche d'une équipe.",
+    "card1_cta": "Voir les Free Agents",
+    "card2_title": "Rejoins des Tournois",
+    "card2_desc": "Inscris-toi aux Open Cups, grimpe les Challenger Series et vise le Peak Championship.",
+    "card2_cta": "Voir les Tournois",
+    "card3_title": "Partage tes Clips",
+    "card3_desc": "Upload tes meilleures actions, récolte des votes et vise le Clip of the Week.",
+    "card3_cta": "Explorer les Clips"
+  },
+  "platform_stats": {
+    "games": "Jeux Supportés",
+    "ranks": "Rangs PeakGG",
+    "tiers": "Niveaux de Tournoi",
+    "region": "Communauté Européenne"
   },
   "footer": {
     "tagline": "La plateforme compétitive multi-jeux ultime pour VALORANT, CS2 et Rainbow Six Siege.",

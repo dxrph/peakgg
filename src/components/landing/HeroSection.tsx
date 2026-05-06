@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Swords, ArrowRight, Trophy, ShieldCheck, Server, MessageCircle } from "lucide-react";
+import { Swords, ArrowRight, Trophy, ShieldCheck, Server, MessageCircle, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -20,7 +20,7 @@ export default function HeroSection() {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <section className="relative min-h-screen flex items-center gradient-hero overflow-hidden">
+    <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-center gradient-hero overflow-hidden">
       {/* Diagonal lines + grid texture */}
       <div
         className="absolute inset-0 opacity-[0.05] pointer-events-none"
@@ -39,17 +39,20 @@ export default function HeroSection() {
         }}
       />
 
-      <div className="container relative z-10 pt-28 pb-20">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
+      <div className="container relative z-10 pt-24 pb-16 md:pt-28 md:pb-20">
+        <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0)}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-primary/40 bg-primary/5 mb-8 uppercase"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-sm border border-primary/40 bg-primary/5 mb-6 md:mb-7 uppercase"
           >
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse-neon" />
-            <span className="text-xs md:text-sm text-primary font-display font-semibold tracking-[0.2em]">{t("hero.season_badge")}</span>
+            <span className="relative inline-flex h-2 w-2">
+              <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <span className="text-[11px] md:text-xs text-primary font-display font-semibold tracking-[0.22em]">{t("hero.season_badge")}</span>
           </motion.div>
 
           <motion.h1 initial="hidden" animate="visible" variants={fadeUp(0.15)}
-            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-bold leading-[0.85] mb-6 tracking-tight uppercase"
+            className="text-[2.75rem] xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] xl:text-8xl font-display font-bold leading-[0.9] md:leading-[0.88] mb-5 md:mb-6 tracking-tight uppercase"
           >
             <span className="block text-foreground">{t("hero.line1")}</span>
             <span className="block text-foreground">{t("hero.line2")}</span>
@@ -57,13 +60,13 @@ export default function HeroSection() {
           </motion.h1>
 
           <motion.p initial="hidden" animate="visible" variants={fadeUp(0.3)}
-            className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-body"
+            className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl md:max-w-2xl mx-auto mb-7 md:mb-9 leading-relaxed font-body"
           >
             {t("hero.subtitle")}
           </motion.p>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
-            className="flex flex-col sm:flex-row gap-3 mb-10 justify-center w-full sm:w-auto"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 justify-center w-full max-w-md sm:max-w-none sm:w-auto"
           >
             <a
               href={DISCORD_INVITE}
@@ -72,8 +75,8 @@ export default function HeroSection() {
               className="w-full sm:w-auto"
             >
               <Button
-                size="xl"
-                className="w-full sm:w-auto rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0 shadow-[0_0_30px_rgba(88,101,242,0.45)] hover:shadow-[0_0_40px_rgba(88,101,242,0.65)] transition-shadow"
+                size="lg"
+                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0 shadow-[0_0_24px_rgba(88,101,242,0.4)] hover:shadow-[0_0_36px_rgba(88,101,242,0.6)] hover:-translate-y-0.5 transition-all duration-200"
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
                 {t("hero.cta_discord")}
@@ -83,37 +86,40 @@ export default function HeroSection() {
             <Link to={registerHref} className="w-full sm:w-auto">
               <Button
                 variant="neonOutline"
-                size="xl"
-                className="w-full sm:w-auto rounded-sm uppercase tracking-wider"
+                size="lg"
+                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider hover:-translate-y-0.5 transition-transform duration-200"
               >
                 <Swords className="mr-2 h-5 w-5" />
                 {t("hero.cta_register")}
               </Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="xl"
-              className="w-full sm:w-auto rounded-sm uppercase tracking-wider text-muted-foreground hover:text-foreground"
-              onClick={scrollHowItWorks}
-            >
-              {t("hero.cta_secondary")}
-            </Button>
           </motion.div>
+
+          <motion.button
+            initial="hidden" animate="visible" variants={fadeUp(0.5)}
+            onClick={scrollHowItWorks}
+            className="group inline-flex items-center gap-1.5 mb-9 md:mb-10 text-[11px] md:text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors font-display font-semibold"
+          >
+            {t("hero.cta_secondary")}
+            <ChevronDown className="h-3.5 w-3.5 group-hover:translate-y-0.5 transition-transform" />
+          </motion.button>
 
           {/* Competitive trust strip */}
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.55)}
-            className="flex flex-wrap gap-x-8 gap-y-3 justify-center text-xs md:text-sm text-muted-foreground font-body uppercase tracking-wider"
+            className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-y-2 text-[11px] md:text-xs text-muted-foreground font-body uppercase tracking-[0.14em]"
           >
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 px-4">
+              <Trophy className="h-3.5 w-3.5 text-primary shrink-0" />
               <span>{t("hero.trust_ranked")}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" />
+            <span className="hidden sm:inline-block w-px h-3 bg-border" />
+            <div className="flex items-center gap-2 px-4">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
               <span>{t("hero.trust_anticheat")}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Server className="h-4 w-4 text-primary" />
+            <span className="hidden sm:inline-block w-px h-3 bg-border" />
+            <div className="flex items-center gap-2 px-4">
+              <Server className="h-3.5 w-3.5 text-primary shrink-0" />
               <span>{t("hero.trust_eu")}</span>
             </div>
           </motion.div>
