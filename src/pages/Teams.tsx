@@ -18,6 +18,8 @@ import RosterDialog from "@/components/teams/RosterDialog";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import ScrimDialog from "@/components/teams/ScrimDialog";
 import ContactPlayerDialog from "@/components/teams/ContactPlayerDialog";
+import DiscordCTA from "@/components/landing/DiscordCTA";
+import { Trophy as TrophyIcon, Sparkles, BadgeCheck } from "lucide-react";
 
 const GAMES = [
   { value: "all", label: "All games" },
@@ -26,6 +28,19 @@ const GAMES = [
   { value: "r6s", label: "Rainbow Six Siege" },
 ];
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
+
+function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) {
+  if (team.trophies >= 5) {
+    return { label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon };
+  }
+  if (team.trophies >= 1) {
+    return { label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck };
+  }
+  if (team.looking_for_players) {
+    return { label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
+  }
+  return null;
+}
 
 interface TeamRow {
   id: string;
@@ -257,6 +272,16 @@ export default function TeamsPage() {
                   <div className="flex flex-wrap gap-1 mb-3">
                     <Badge variant="secondary" className="text-xs font-display uppercase">{tt.game}</Badge>
                     {tt.rank && <Badge variant="outline" className="text-xs font-display">{tt.rank}</Badge>}
+                    {(() => {
+                      const b = getTeamBadge(tt);
+                      if (!b) return null;
+                      const Icon = b.icon;
+                      return (
+                        <Badge variant="outline" className={`text-[10px] font-display uppercase tracking-wider ${b.className}`}>
+                          <Icon className="h-3 w-3 mr-1" />{b.label}
+                        </Badge>
+                      );
+                    })()}
                   </div>
                   <div className="flex items-center justify-between text-sm font-body mb-3">
                     <span className="flex items-center gap-1 text-primary font-display">
@@ -270,14 +295,18 @@ export default function TeamsPage() {
                     </div>
                   )}
                   <div className="grid grid-cols-3 gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => openRoster(tt)}><Users className="h-4 w-4" /></Button>
-                    <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)} disabled={!tt.looking_for_players}>
+                    <Button variant="ghost" size="sm" onClick={() => openRoster(tt)} title="View Team"><Users className="h-4 w-4" /></Button>
+                    <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)} disabled={!tt.looking_for_players} title="Join">
                       <Plus className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openScrim(tt)}><Swords className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => openScrim(tt)} title="Challenge"><Swords className="h-4 w-4" /></Button>
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-10">
+              <DiscordCTA variant="inline" />
             </div>
           </TabsContent>
 
