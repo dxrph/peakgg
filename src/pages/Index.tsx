@@ -1,7 +1,8 @@
 import Navbar from "@/components/landing/Navbar";
 import SEO from "@/components/SEO";
 import HeroSection from "@/components/landing/HeroSection";
-import LiveStatsBar from "@/components/landing/LiveStatsBar";
+import PlatformStatsStrip from "@/components/landing/PlatformStatsStrip";
+import StartCompetingSection from "@/components/landing/StartCompetingSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
 import RankShowcase from "@/components/landing/RankShowcase";
@@ -47,7 +48,8 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <LiveStatsBar />
+        <StartCompetingSection />
+        <PlatformStatsStrip />
         <FeaturesSection />
         <HowItWorksSteps />
         <RankShowcase />
