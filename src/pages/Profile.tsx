@@ -87,6 +87,8 @@ type Profile = {
   preferred_game: string | null;
   region: string | null;
   language: string | null;
+  role: string | null;
+  discord_username: string | null;
   reputation_score: number;
   account_verified: boolean;
   fast_track: boolean;
