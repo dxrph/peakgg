@@ -4,7 +4,6 @@ import { Mountain, Menu, X, LogOut, MessageCircle, User as UserIcon, Settings } 
 import { useState, useEffect } from "react";
 import GameSwitcher from "@/components/GameSwitcher";
 import { useAuth } from "@/hooks/useAuth";
-import GoogleButton from "@/components/GoogleButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsBell from "@/components/NotificationsBell";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
