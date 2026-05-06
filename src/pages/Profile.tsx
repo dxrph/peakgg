@@ -296,19 +296,23 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{`${profile.display_name || profile.username} — PeakGG Profile`}</title>
+        <meta name="description" content={`${profile.display_name || profile.username}'s competitive profile on PeakGG. ELO ${headerElo}, ${rankInfo.name}.`} />
+      </Helmet>
       <Navbar />
-      {/* ───────────────── HERO BANNER ───────────────── */}
+      {/* ───────────────── HERO BANNER (v2) ───────────────── */}
       <div className="relative w-full pt-16">
         <div
-          className="relative w-full overflow-hidden border-b border-border"
+          className="relative w-full overflow-hidden border-b border-border min-h-[280px] md:min-h-[340px]"
           style={{
             background: profile.banner_url
-              ? `linear-gradient(180deg, hsl(var(--background)/0.55) 0%, hsl(var(--background)) 100%), url(${profile.banner_url}) center/cover no-repeat`
-              : `linear-gradient(135deg, ${rankInfo.hex}33 0%, hsl(var(--background)) 65%), radial-gradient(circle at top right, ${rankInfo.hex}55, transparent 60%)`,
+              ? `linear-gradient(180deg, hsl(var(--background)/0.35) 0%, hsl(var(--background)/0.75) 60%, hsl(var(--background)) 100%), url(${profile.banner_url}) center/cover no-repeat`
+              : `linear-gradient(135deg, ${rankInfo.hex}40 0%, hsl(var(--background)) 65%), radial-gradient(circle at 80% 20%, ${rankInfo.hex}66, transparent 55%)`,
           }}
         >
           <div
-            className="absolute inset-0 pointer-events-none opacity-[0.18]"
+            className="absolute inset-0 pointer-events-none opacity-[0.15]"
             style={{
               backgroundImage:
                 "linear-gradient(hsl(var(--primary)/0.25) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.25) 1px, transparent 1px)",
@@ -322,102 +326,204 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <div className="container relative z-[1] py-8 md:py-10">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+          <div className="container relative z-[1] py-10 md:py-14">
+            <Badge variant="outline" className="mb-3 border-primary/40 text-primary uppercase font-display tracking-widest text-[10px]">
+              {t("profile_v2.hero_eyebrow")}
+            </Badge>
+            <div className="flex flex-col lg:flex-row lg:items-end gap-6">
               {/* Avatar + identity */}
-              <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
+              <div className="flex items-end gap-5 flex-1 min-w-0">
                 <div
-                  className="rounded-full p-[3px] shrink-0"
-                  style={{ background: rankInfo.gradient ?? rankInfo.hex, boxShadow: `0 0 22px ${rankInfo.hex}66` }}
+                  className="rounded-full p-[3px] shrink-0 relative"
+                  style={{ background: rankInfo.gradient ?? rankInfo.hex, boxShadow: `0 0 32px ${rankInfo.hex}88` }}
                 >
-                  <Avatar className="w-20 h-20 md:w-24 md:h-24 border-4 border-background">
+                  <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background">
                     <AvatarImage src={profile.avatar_url ?? undefined} alt={profile.username} />
-                    <AvatarFallback className="gradient-primary text-primary-foreground font-display font-bold text-2xl">
+                    <AvatarFallback className="gradient-primary text-primary-foreground font-display font-bold text-3xl">
                       {profile.username.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
+                  {profile.account_verified && (
+                    <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1 border-2 border-background" title={t("profile_v2.verified")}>
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                  )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="font-display font-bold text-2xl md:text-3xl leading-tight truncate">
+                <div className="min-w-0 flex-1 pb-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    {profile.fast_track && (
+                      <Badge className="bg-accent/15 text-accent border-accent/40 text-[10px] uppercase font-display">
+                        <Sparkles className="h-3 w-3 mr-1" /> {t("profile_v2.fast_track")}
+                      </Badge>
+                    )}
+                    {profile.looking_for_team && (
+                      <Badge variant="outline" className="text-[10px] uppercase font-display border-primary/40 text-primary">
+                        <Search className="h-3 w-3 mr-1" /> {t("profile_v2.looking_for_team")}
+                      </Badge>
+                    )}
+                  </div>
+                  <h1 className="font-display font-bold text-3xl md:text-4xl leading-tight truncate">
                     {profile.display_name || profile.username}
                   </h1>
                   <p className="font-body text-sm text-muted-foreground truncate">@{profile.username}</p>
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setRankModalOpen(true)}
-                      className="rounded-md transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      aria-label="Mostra progressione ranghi"
-                    >
-                      <RankBadge elo={headerElo} size="md" showLabel />
-                    </button>
-                    {team && (
-                      <Link to={`/teams/${team.id}`} className="text-xs font-mono text-primary hover:underline">
-                        [{team.tag}]
-                      </Link>
-                    )}
+                  <div className="mt-3 flex items-center gap-3 flex-wrap text-xs text-muted-foreground font-mono">
+                    <span className="inline-flex items-center gap-1"><Globe2 className="h-3 w-3" /> {profile.region || "EU"}</span>
+                    <span className="inline-flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {(profile.language || "EN").toUpperCase()}</span>
+                    <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {t("profile_v2.joined")} {new Date(profile.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
 
-              {/* ELO / Coins / Trophies / Edit */}
-              <div className="flex items-center gap-4 md:gap-6 flex-wrap">
-                <HeroStat label={`ELO ${getGameById(preferredGame).shortName}`} value={headerElo} valueClassName="text-primary" />
-                <HeroStat
-                  label="Trofei"
-                  value={trophies.length}
-                  icon={<Trophy className="h-4 w-4 text-yellow-400" />}
-                />
-                <HeroStat
-                  label="Coins"
-                  value={profile.peak_coins}
-                  icon={<Coins className="h-4 w-4 text-yellow-400" />}
-                />
+              {/* Action cluster */}
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
                 {isOwnProfile ? (
                   <Button onClick={() => setEditOpen(true)} size="sm" variant="outline">
                     <Pencil className="h-4 w-4 mr-2" /> {t("profile_page_extra.edit_profile")}
                   </Button>
                 ) : (
-                  ownsTeam && (
-                    <Button onClick={handleInvite} size="sm">
-                      <UserPlus className="h-4 w-4 mr-2" /> Invite to {ownsTeam.name}
+                  <>
+                    {ownsTeam && (
+                      <Button onClick={handleInvite} size="sm">
+                        <UserPlus className="h-4 w-4 mr-2" /> {t("profile_v2.invite_to_team")}
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline">
+                      <MessageSquare className="h-4 w-4 mr-2" /> {t("profile_v2.send_message")}
                     </Button>
-                  )
+                  </>
                 )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(window.location.href);
+                    toast.success(t("profile_v2.share"));
+                  }}
+                  aria-label={t("profile_v2.share")}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
-            {/* Compact inline stat bar */}
-            <div className="mt-5 flex items-center gap-6 md:gap-10 flex-wrap rounded-lg border border-border bg-background/40 backdrop-blur px-4 py-2.5">
-              <InlineStat label="Matches" value={matchStats.played} />
-              <span className="h-4 w-px bg-border hidden md:inline-block" />
-              <InlineStat label="Wins" value={matchStats.wins} valueClassName="text-success" />
-              <span className="h-4 w-px bg-border hidden md:inline-block" />
-              <InlineStat label="Losses" value={matchStats.losses} valueClassName="text-destructive" />
-              <span className="h-4 w-px bg-border hidden md:inline-block" />
-              <InlineStat
-                label="Win Rate"
-                value={`${matchStats.winRate}%`}
-                valueClassName={matchStats.winRate >= 50 ? "text-success" : "text-destructive"}
-              />
-            </div>
-            <div className="mt-3">
-              <SeasonBadge userId={profile.id} />
-            </div>
-
             {profile.bio && (
-              <p className="text-sm mt-4 font-body max-w-prose text-muted-foreground">{profile.bio}</p>
+              <p className="text-sm mt-5 font-body max-w-prose text-muted-foreground border-l-2 border-primary/40 pl-3">
+                {profile.bio}
+              </p>
             )}
+          </div>
+        </div>
+
+        {/* Top stat strip */}
+        <div className="border-b border-border bg-card/40 backdrop-blur">
+          <div className="container py-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+            <StripStat icon={<TrendingUp className="h-4 w-4" />} label={t("profile_v2.best_rank")} value={
+              <span className="inline-flex items-center gap-1.5">
+                <RankBadge elo={headerElo} size="sm" />
+                <span style={{ color: rankInfo.hex }}>{rankInfo.name}</span>
+              </span>
+            } />
+            <StripStat icon={<Swords className="h-4 w-4 text-primary" />} label={t("profile_v2.total_matches")} value={matchStats.played} />
+            <StripStat
+              icon={<Trophy className="h-4 w-4 text-yellow-400" />}
+              label={t("profile_v2.win_rate")}
+              value={`${matchStats.winRate}%`}
+              valueClass={matchStats.winRate >= 50 ? "text-success" : "text-destructive"}
+            />
+            <StripStat icon={<Flame className="h-4 w-4 text-accent" />} label={t("profile_v2.current_streak")} value={matchStats.streak} />
+            <StripStat
+              icon={<Star className="h-4 w-4 text-yellow-400 fill-yellow-400/40" />}
+              label={t("profile_v2.reputation")}
+              value={Number(profile.reputation_score ?? 5).toFixed(1)}
+            />
           </div>
         </div>
       </div>
 
-      {/* ───────────────── TWO-COL BODY ───────────────── */}
-      <div className="container py-8 grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6">
-        {/* LEFT — game tabs + matches */}
-        <div className="space-y-5 min-w-0">
-          <Tabs defaultValue={preferredGame} className="w-full">
-            <TabsList className="w-full justify-start overflow-x-auto no-scrollbar bg-card border border-border h-auto p-1">
+      {/* ───────────────── TABS ───────────────── */}
+      <div className="container py-8">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full justify-start overflow-x-auto no-scrollbar bg-card border border-border h-auto p-1 mb-6">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary border border-transparent gap-2 font-display uppercase tracking-wider text-xs">
+              <Award className="h-3.5 w-3.5" /> {t("profile_v2.overview")}
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary border border-transparent gap-2 font-display uppercase tracking-wider text-xs">
+              <TrendingUp className="h-3.5 w-3.5" /> {t("profile_v2.stats")}
+            </TabsTrigger>
+            <TabsTrigger value="matches" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary border border-transparent gap-2 font-display uppercase tracking-wider text-xs">
+              <Swords className="h-3.5 w-3.5" /> {t("profile_v2.matches")}
+            </TabsTrigger>
+            <TabsTrigger value="trophies" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary border border-transparent gap-2 font-display uppercase tracking-wider text-xs">
+              <Trophy className="h-3.5 w-3.5" /> {t("profile_v2.trophies")}
+            </TabsTrigger>
+            <TabsTrigger value="teams" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary border border-transparent gap-2 font-display uppercase tracking-wider text-xs">
+              <Users className="h-3.5 w-3.5" /> {t("profile_v2.teams")}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* OVERVIEW */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {GAMES.map((g) => (
+                <PerGameCard
+                  key={g.id}
+                  game={g.id}
+                  stat={stats[g.id]}
+                  preferred={g.id === preferredGame}
+                  onClick={() => { setRankModalGame(g.id); setRankModalOpen(true); }}
+                />
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <SectionCard title={t("profile_v2.activity")} icon={Swords} className="lg:col-span-2">
+                <RecentMatchesList matches={matches.slice(0, 8)} profileId={profile.id} />
+              </SectionCard>
+              <div className="space-y-5">
+                <SectionCard title={t("profile_v2.teams")} icon={Users}>
+                  {team ? (
+                    <Link to={`/teams/${team.id}`} className="flex items-center gap-3 hover:bg-secondary/30 -m-2 p-2 rounded-md transition-colors">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={team.avatar_url ?? undefined} alt={team.name} />
+                        <AvatarFallback className="bg-secondary font-display font-bold text-sm">{team.tag.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display font-bold truncate text-sm">
+                          {team.name} <span className="text-muted-foreground font-mono text-xs">[{team.tag}]</span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground font-display uppercase tracking-wider mt-0.5">
+                          ELO {team.avg_elo}
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="text-center py-2">
+                      <p className="text-xs text-muted-foreground font-body mb-3">{t("profile_page_extra.no_team")}</p>
+                      <Link to="/teams"><Button size="sm" variant="outline" className="w-full"><Search className="h-4 w-4 mr-2" />{t("profile_page_extra.search_team")}</Button></Link>
+                    </div>
+                  )}
+                </SectionCard>
+                <SectionCard title="Wallet" icon={Coins}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-display font-bold text-yellow-400 flex items-center gap-2">
+                      <Coins className="h-5 w-5" /> {profile.peak_coins}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground font-display uppercase tracking-wider">Peak Coins</div>
+                  </div>
+                </SectionCard>
+                <div><SeasonBadge userId={profile.id} /></div>
+              </div>
+            </div>
+
+            <SectionCard title={t("profile_v2.achievements")} icon={Award}>
+              <BadgeStrip stats={stats} matchStats={matchStats} trophiesCount={trophies.length} />
+            </SectionCard>
+          </TabsContent>
+
+          {/* STATS */}
+          <TabsContent value="stats">
+            <Tabs defaultValue={preferredGame}>
+              <TabsList className="w-full justify-start overflow-x-auto no-scrollbar bg-card border border-border h-auto p-1">
               {GAMES.map((g) => (
                 <TabsTrigger
                   key={g.id}
@@ -481,93 +587,53 @@ export default function ProfilePage() {
                 </TabsContent>
               );
             })}
-          </Tabs>
-        </div>
+            </Tabs>
+          </TabsContent>
 
-        {/* RIGHT — team / tournaments / badges */}
-        <aside className="space-y-5 min-w-0">
-          {/* Team card */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-4 py-2.5 bg-secondary/40 border-b border-border flex items-center gap-2 text-[11px] font-display uppercase tracking-widest text-muted-foreground">
-              <Users className="h-3.5 w-3.5" /> Team
-            </div>
-            <div className="p-4">
+          {/* MATCHES */}
+          <TabsContent value="matches">
+            <SectionCard title={t("profile_v2.matches")} icon={Swords}>
+              <RecentMatchesList matches={matches} profileId={profile.id} />
+            </SectionCard>
+          </TabsContent>
+
+          {/* TROPHIES */}
+          <TabsContent value="trophies">
+            {trophies.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
+                <Trophy className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+                <p className="text-sm text-muted-foreground font-body">{t("profile_page_extra.no_trophies")}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {trophies.map((tr) => <TrophyCard key={tr.id} row={tr} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* TEAMS */}
+          <TabsContent value="teams">
+            <SectionCard title={t("profile_v2.teams")} icon={Users}>
               {team ? (
-                <Link to={`/teams/${team.id}`} className="flex items-center gap-3 hover:bg-secondary/30 -m-2 p-2 rounded-md transition-colors">
-                  <Avatar className="h-12 w-12">
+                <Link to={`/teams/${team.id}`} className="flex items-center gap-4 hover:bg-secondary/30 -m-2 p-3 rounded-md transition-colors">
+                  <Avatar className="h-16 w-16">
                     <AvatarImage src={team.avatar_url ?? undefined} alt={team.name} />
-                    <AvatarFallback className="bg-secondary font-display font-bold text-sm">{team.tag.slice(0, 2)}</AvatarFallback>
+                    <AvatarFallback className="bg-secondary font-display font-bold">{team.tag.slice(0, 2)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="font-display font-bold truncate text-sm">
-                      {team.name} <span className="text-muted-foreground font-mono text-xs">[{team.tag}]</span>
-                    </div>
-                    <div className="text-[11px] text-muted-foreground font-display uppercase tracking-wider mt-0.5">
-                      Captain · <Trophy className="h-3 w-3 inline -mt-0.5 text-yellow-400" /> 0
-                    </div>
+                    <div className="font-display font-bold text-lg">{team.name} <span className="text-muted-foreground font-mono text-sm">[{team.tag}]</span></div>
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5">ELO {team.avg_elo} · {team.game.toUpperCase()}</div>
                   </div>
                 </Link>
               ) : (
-                <div className="text-center py-2">
-                  <p className="text-xs text-muted-foreground font-body mb-3">{t("profile_page_extra.no_team")}</p>
-                  <Link to="/teams">
-                    <Button size="sm" variant="outline" className="w-full">
-                      <Search className="h-4 w-4 mr-2" /> {t("profile_page_extra.search_team")}
-                    </Button>
-                  </Link>
+                <div className="text-center py-6">
+                  <p className="text-sm text-muted-foreground font-body mb-3">{t("profile_page_extra.no_team")}</p>
+                  <Link to="/teams"><Button size="sm" variant="outline"><Search className="h-4 w-4 mr-2" />{t("profile_page_extra.search_team")}</Button></Link>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Tournaments card */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-4 py-2.5 bg-secondary/40 border-b border-border flex items-center gap-2 text-[11px] font-display uppercase tracking-widest text-muted-foreground">
-              <Trophy className="h-3.5 w-3.5" /> Tornei
-            </div>
-            <div className="p-3">
-              {trophies.length === 0 ? (
-                <p className="text-xs text-muted-foreground font-body text-center py-3">
-                  {t("profile_page_extra.no_trophies")}
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {trophies.slice(0, 3).map((tr) => {
-                    const tt = tr.tournament!;
-                    const placement = tr.placement ?? 0;
-                    const placementColor =
-                      placement === 1 ? "text-yellow-400" :
-                      placement === 2 ? "text-slate-300" :
-                      placement === 3 ? "text-amber-700" :
-                      "text-muted-foreground";
-                    return (
-                      <div key={tr.id} className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-secondary/30 transition-colors">
-                        <Trophy className={`h-5 w-5 shrink-0 ${placementColor}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-display font-bold text-xs truncate">{tt.name}</div>
-                          <div className="text-[10px] text-muted-foreground font-display uppercase tracking-wider">
-                            {tt.tier === 3 ? "Peak Championship" : tt.tier === 2 ? "Challenger" : "Open Cup"}
-                          </div>
-                        </div>
-                        <span className={`font-display font-bold text-sm ${placementColor}`}>#{placement}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Badges card */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="px-4 py-2.5 bg-secondary/40 border-b border-border flex items-center gap-2 text-[11px] font-display uppercase tracking-widest text-muted-foreground">
-              <Award className="h-3.5 w-3.5" /> Badge
-            </div>
-            <div className="p-3">
-              <BadgeStrip stats={stats} matchStats={matchStats} trophiesCount={trophies.length} />
-            </div>
-          </div>
-        </aside>
+            </SectionCard>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {isOwnProfile && (
@@ -588,6 +654,7 @@ export default function ProfilePage() {
         username={profile.display_name || profile.username}
         isOwn={isOwnProfile}
       />
+      <Footer />
     </div>
   );
 }
