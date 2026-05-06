@@ -447,9 +447,9 @@ export default function ProfilePage() {
         <div className="border-b border-border bg-card/40 backdrop-blur">
           <div className="container py-4 grid grid-cols-2 md:grid-cols-5 gap-4">
             <StripStat icon={<TrendingUp className="h-4 w-4" />} label={t("profile_v2.best_rank")} value={
-              <span className="inline-flex items-center gap-1.5">
-                <RankBadge elo={headerElo} size="sm" />
-                <span style={{ color: rankInfo.hex }}>{rankInfo.name}</span>
+              <span className="inline-flex items-center gap-2">
+                <RankBadge elo={headerElo} size="md" />
+                <span className="font-display font-bold" style={{ color: rankInfo.hex }}>{rankInfo.name}</span>
               </span>
             } />
             <StripStat icon={<Swords className="h-4 w-4 text-primary" />} label={t("profile_v2.total_matches")} value={matchStats.played} />
