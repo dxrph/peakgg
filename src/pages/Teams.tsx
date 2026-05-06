@@ -29,16 +29,17 @@ const GAMES = [
 ];
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
 
-function getTeamBadges(team: { trophies: number; created_at?: string; looking_for_players: boolean }) {
-  const badges: { label: string; className: string; icon: any }[] = [];
+function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) {
   if (team.trophies >= 5) {
-    badges.push({ label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon });
+    return { label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon };
   }
-  if (team.trophies < 2 && team.looking_for_players) {
-    badges.push({ label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles });
+  if (team.trophies >= 1) {
+    return { label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck };
   }
-  badges.push({ label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck });
-  return badges;
+  if (team.looking_for_players) {
+    return { label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
+  }
+  return null;
 }
 
 interface TeamRow {
@@ -271,6 +272,16 @@ export default function TeamsPage() {
                   <div className="flex flex-wrap gap-1 mb-3">
                     <Badge variant="secondary" className="text-xs font-display uppercase">{tt.game}</Badge>
                     {tt.rank && <Badge variant="outline" className="text-xs font-display">{tt.rank}</Badge>}
+                    {(() => {
+                      const b = getTeamBadge(tt);
+                      if (!b) return null;
+                      const Icon = b.icon;
+                      return (
+                        <Badge variant="outline" className={`text-[10px] font-display uppercase tracking-wider ${b.className}`}>
+                          <Icon className="h-3 w-3 mr-1" />{b.label}
+                        </Badge>
+                      );
+                    })()}
                   </div>
                   <div className="flex items-center justify-between text-sm font-body mb-3">
                     <span className="flex items-center gap-1 text-primary font-display">
@@ -284,14 +295,18 @@ export default function TeamsPage() {
                     </div>
                   )}
                   <div className="grid grid-cols-3 gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => openRoster(tt)}><Users className="h-4 w-4" /></Button>
-                    <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)} disabled={!tt.looking_for_players}>
+                    <Button variant="ghost" size="sm" onClick={() => openRoster(tt)} title="View Team"><Users className="h-4 w-4" /></Button>
+                    <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)} disabled={!tt.looking_for_players} title="Join">
                       <Plus className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openScrim(tt)}><Swords className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => openScrim(tt)} title="Challenge"><Swords className="h-4 w-4" /></Button>
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-10">
+              <DiscordCTA variant="inline" />
             </div>
           </TabsContent>
 
