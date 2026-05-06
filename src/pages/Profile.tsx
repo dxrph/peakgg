@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import RankProgressionModal from "@/components/RankProgressionModal";
-import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Award, Users, Search, Clock } from "lucide-react";
+import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Award, Users, Search, Clock, Star, ShieldCheck, Sparkles, Globe2, Share2, MessageSquare, Calendar, TrendingUp, Flame } from "lucide-react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -83,6 +85,14 @@ type Profile = {
   bio: string | null;
   peak_coins: number;
   preferred_game: string | null;
+  region: string | null;
+  language: string | null;
+  reputation_score: number;
+  account_verified: boolean;
+  fast_track: boolean;
+  looking_for_team: boolean;
+  last_active_at: string;
+  created_at: string;
 };
 
 type PlayerStat = {
