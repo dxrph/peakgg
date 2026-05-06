@@ -3,9 +3,12 @@ import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
-import { Trophy, Calendar, Users, MapPin, Clock, Shield, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Trophy, Calendar, Users, MapPin, Clock, Shield, ChevronRight, CheckCircle2, Globe, User2 } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import BracketView from "@/components/tournaments/BracketView";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format as fmtDate } from "date-fns";
 
 const tournamentData: Record<string, any> = {
   "1": {
@@ -64,13 +67,60 @@ const tournamentData: Record<string, any> = {
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
-  const tournament = tournamentData[id || "1"] || tournamentData["1"];
+  const isUuid = !!id && /^[0-9a-f-]{36}$/i.test(id);
+
+  const { data: dbTournament } = useQuery({
+    queryKey: ["tournament-public", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const query = supabase.from("tournaments").select("*").limit(1);
+      const { data, error } = isUuid
+        ? await query.eq("id", id!).maybeSingle()
+        : await query.eq("slug", id!).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const fallback = tournamentData[id || "1"] || tournamentData["1"];
+
+  const tournament = dbTournament
+    ? {
+        name: dbTournament.name,
+        format: `${dbTournament.team_size || dbTournament.format} ${dbTournament.bracket_type?.replace("_", " ") || ""}`.trim(),
+        date: dbTournament.start_date
+          ? fmtDate(new Date(dbTournament.start_date), "MMM d, yyyy — HH:mm") + " " + (dbTournament.timezone || "")
+          : "TBD",
+        prize: dbTournament.prize_pool || `${dbTournament.reward_trophies || 0} trophies`,
+        slots: `0/${dbTournament.max_teams}`,
+        status: dbTournament.status,
+        tier: dbTournament.tier,
+        tierLabel: dbTournament.tier_label,
+        region: dbTournament.timezone || "EU",
+        description: dbTournament.description || dbTournament.short_description || "",
+        bannerUrl: dbTournament.banner_url,
+        logoUrl: dbTournament.logo_url,
+        organizerName: dbTournament.organizer_name,
+        organizerDiscord: dbTournament.organizer_discord,
+        rulesUrl: dbTournament.rules_url,
+        rules: (dbTournament.rules || "").split("\n").filter(Boolean),
+        prizeBreakdown: fallback.prizeBreakdown,
+        participants: [],
+        bracket: [],
+      }
+    : fallback;
 
   const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
+      {tournament.bannerUrl && (
+        <div className="w-full h-48 md:h-64 relative overflow-hidden mt-16">
+          <img src={tournament.bannerUrl} alt={tournament.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+        </div>
+      )}
       <div className="container pt-24 pb-16">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
           <Link to="/tournaments" className="hover:text-foreground transition-colors">Tournaments</Link>
@@ -85,7 +135,7 @@ export default function TournamentDetailPage() {
                 <Badge variant="outline" className="border-primary text-primary font-display">{tournament.status}</Badge>
                 <Badge variant="secondary" className="font-display">{tournament.format}</Badge>
                 <Badge variant="outline" className={`font-display ${tierColors[tournament.tier]}`}>
-                  Tier {tournament.tier}
+                  {tournament.tierLabel || `Tier ${tournament.tier}`}
                 </Badge>
               </div>
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{tournament.name}</h1>
@@ -95,6 +145,9 @@ export default function TournamentDetailPage() {
                 <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{tournament.region}</span>
                 <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{tournament.slots} teams</span>
                 <span className="flex items-center gap-1.5"><Trophy className="h-4 w-4 text-accent" /><span className="text-accent font-semibold">{tournament.prize}</span></span>
+                {tournament.organizerName && (
+                  <span className="flex items-center gap-1.5"><User2 className="h-4 w-4" />{tournament.organizerName}</span>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-3 md:items-end">
