@@ -4,7 +4,10 @@
     "tournaments": "Tournaments",
     "leaderboard": "Leaderboard",
     "teams": "Teams",
-    "scrims": "Scrims"
+    "scrims": "Scrims",
+    "free_agents": "Free Agents",
+    "clips": "Clips",
+    "discord": "Discord"
   },
   "auth": {
     "signin_google": "Sign in with Google",
@@ -134,11 +137,13 @@
   },
   "hero": {
     "season_badge": "SEASON 1 — LIVE",
-    "line1": "COMPETE.",
-    "line2": "RISE.",
-    "line3": "DOMINATE.",
-    "subtitle": "Climb the European VALORANT ladder. Ranked matchmaking, live ELO, weekly tournaments — every match counts toward your rank.",
+    "line1": "THE COMPETITIVE",
+    "line2": "HUB FOR EU",
+    "line3": "FPS PLAYERS.",
+    "subtitle": "Join tournaments, find teammates, share clips and climb the PeakGG ranks across Valorant, CS2 and Rainbow Six Siege.",
     "cta_play": "Enter the Arena",
+    "cta_discord": "Join Discord",
+    "cta_register": "Create Account",
     "cta_secondary": "How it works",
     "cta_leaderboard": "View Ladder",
     "stat_players_online": "Players Online",
@@ -155,17 +160,19 @@
     "active_teams": "Active Teams"
   },
   "how_it_works": {
-    "title_pre": "HOW IT",
+    "title_pre": "HOW PEAKGG",
     "title_accent": "WORKS",
-    "subtitle": "Three steps. That's it.",
-    "step1_title": "Sign up & pick your game",
-    "step1_desc": "Create your account in 30 seconds and choose Valorant, CS2 or R6.",
-    "step2_title": "Find matches or join a team",
-    "step2_desc": "Queue solo, build a roster or jump into the team finder.",
-    "step3_title": "Play & confirm the result",
-    "step3_desc": "Compete in fair lobbies, then confirm the score with your captain.",
-    "step4_title": "Climb the ladder & win tournaments",
-    "step4_desc": "Earn ELO, rank up tiers and unlock Open Cup, Challenger and Peak Championship."
+    "subtitle": "From free agent to tournament champion — five steps.",
+    "step1_title": "Create your player profile",
+    "step1_desc": "Sign up in 30 seconds and set your game, role, country and rank.",
+    "step2_title": "Find teammates or create a team",
+    "step2_desc": "Browse free agents or build your own roster across VALORANT, CS2 and R6.",
+    "step3_title": "Join tournaments and scrims",
+    "step3_desc": "Compete in Open Cups, Challenger Series and Peak Championships.",
+    "step4_title": "Share your best clips",
+    "step4_desc": "Upload highlights, get votes from the community and chase Clip of the Week.",
+    "step5_title": "Climb the PeakGG ranks",
+    "step5_desc": "Earn Peak Points, rank up from Rookie to Apex and become an EU FPS name."
   },
   "features": {
     "title_pre": "BUILT FOR",
