@@ -21,6 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { downloadCSV, formatRelative, logAdminAction, toCSV } from "@/lib/admin";
 import { sanitizeText } from "@/lib/security";
+import TournamentWizardDialog from "@/components/admin/tournament-wizard/TournamentWizardDialog";
+import type { WizardForm } from "@/components/admin/tournament-wizard/types";
 
 const VALORANT_MAPS = ["Ascent", "Breeze", "Fracture", "Haven", "Lotus", "Pearl", "Split"] as const;
 
@@ -129,6 +131,8 @@ export default function AdminTournaments() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [replaceFor, setReplaceFor] = useState<Tournament | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardInitial, setWizardInitial] = useState<(Partial<WizardForm> & { id?: string }) | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -230,9 +234,14 @@ export default function AdminTournaments() {
       title="Tornei"
       description="Crea, modifica e gestisci i tornei della piattaforma."
       actions={
-        <Button variant="default" size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" /> Nuovo torneo
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" /> Quick create
+          </Button>
+          <Button variant="default" size="sm" onClick={() => { setWizardInitial(null); setWizardOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Advanced wizard
+          </Button>
+        </div>
       }
     >
       <div className="flex gap-2 mb-4">
@@ -301,6 +310,9 @@ export default function AdminTournaments() {
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)} title="Modifica">
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setWizardInitial({ id: t.id, name: t.name, game: (t.game as any) ?? "valorant", description: t.description ?? "", max_teams: t.max_teams, status: t.status }); setWizardOpen(true); }} title="Edit advanced">
+                      <Pencil className="h-3.5 w-3.5 text-primary" />
+                    </Button>
                     {t.status !== "completed" && (
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => closeTournament(t)} title="Chiudi torneo">
                         <X className="h-3.5 w-3.5" />
@@ -327,6 +339,13 @@ export default function AdminTournaments() {
         tournament={replaceFor}
         onClose={() => setReplaceFor(null)}
         onDone={load}
+      />
+
+      <TournamentWizardDialog
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        initial={wizardInitial ?? undefined}
+        onSaved={load}
       />
     </AdminLayout>
   );
