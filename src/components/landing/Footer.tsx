@@ -27,6 +27,7 @@ export default function Footer() {
               <li><Link to="/leaderboard" className="hover:text-primary transition-colors">{t("footer.leaderboard")}</Link></li>
               <li><Link to="/teams" className="hover:text-primary transition-colors">{t("footer.teams")}</Link></li>
               <li><Link to="/scrims" className="hover:text-primary transition-colors">{t("footer.scrims")}</Link></li>
+              <li><Link to="/free-agents" className="hover:text-primary transition-colors">Free Agents</Link></li>
               <li><Link to="/elo" className="hover:text-primary transition-colors">{t("footer.elo_explained")}</Link></li>
             </ul>
           </div>
