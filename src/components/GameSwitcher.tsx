@@ -38,7 +38,7 @@ export default function GameSwitcher({ className = "" }: { className?: string })
   }, [user]);
 
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
+    <div className={`flex items-center gap-0.5 rounded-md border border-border/60 bg-background/30 p-0.5 ${className}`}>
       {GAMES.map((game) => {
         const elo = elos[game.id];
         const rank = getRankByElo(elo);
@@ -48,15 +48,14 @@ export default function GameSwitcher({ className = "" }: { className?: string })
             key={game.id}
             onClick={() => setSelectedGame(game.id)}
             title={user ? `${game.name} — ${rank.name} (${elo} ELO)` : game.name}
-            className={`relative inline-flex items-center gap-1.5 px-3 py-2 text-xs font-display font-semibold uppercase tracking-wider transition-colors duration-200 ${
-              isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[11px] font-display font-semibold uppercase tracking-wider transition-all duration-200 ${
+              isActive
+                ? "bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]"
+                : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
             }`}
           >
             <GameIcon game={game.id} size={16} />
             <span>{game.shortName}</span>
-            {isActive && (
-              <span className="absolute left-2 right-2 -bottom-0.5 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
-            )}
           </button>
         );
       })}
