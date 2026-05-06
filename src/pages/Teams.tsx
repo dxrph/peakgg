@@ -180,6 +180,10 @@ export default function TeamsPage() {
   };
 
   const openJoin = (team: TeamRow) => {
+    if (user && team.owner_id === user.id) {
+      toast.error("You cannot apply to your own team");
+      return;
+    }
     setJoinTeam({ id: team.id, name: team.name, game: team.game });
     setJoinOpen(true);
   };
