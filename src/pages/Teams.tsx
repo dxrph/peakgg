@@ -359,12 +359,12 @@ export default function TeamsPage() {
                         </div>
                       )}
                       <div className="mt-auto flex flex-col gap-2">
-                        <Button variant="neonOutline" size="sm" onClick={() => openRoster(tt)}>
+                        <Button variant="neonOutline" size="sm" onClick={() => navigate(`/teams/${tt.id}`)}>
                           <Eye className="h-4 w-4 mr-1.5" /> {t("teams_page.view_team", { defaultValue: "View Team" })}
                         </Button>
                         <div className="grid grid-cols-2 gap-2">
                           {isOwner ? (
-                            <Button variant="neon" size="sm" className="col-span-2" onClick={() => openRoster(tt)}>
+                            <Button variant="neon" size="sm" className="col-span-2" onClick={() => navigate(`/teams/${tt.id}/manage`)}>
                               <Settings className="h-4 w-4 mr-1.5" /> {t("teams_page.manage_team", { defaultValue: "Manage Team" })}
                             </Button>
                           ) : (
