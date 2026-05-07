@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import {
   Users, Globe, Shield, Trophy, ChevronRight, UserPlus, Crown,
   Settings, Inbox, Pencil, Check, X, Loader2, LogOut, Trash2,
+  Award, Swords,
 } from "lucide-react";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 
@@ -346,20 +347,68 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="mb-6 flex-wrap">
-            <TabsTrigger value="overview"><Shield className="h-4 w-4 mr-1" />Overview</TabsTrigger>
-            <TabsTrigger value="roster"><Users className="h-4 w-4 mr-1" />Roster</TabsTrigger>
-            {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
-            {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Manage</TabsTrigger>}
-          </TabsList>
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
+            <TabsList className="mb-6 inline-flex">
+              <TabsTrigger value="overview"><Shield className="h-4 w-4 mr-1" />Overview</TabsTrigger>
+              <TabsTrigger value="roster"><Users className="h-4 w-4 mr-1" />Roster</TabsTrigger>
+              <TabsTrigger value="recruitment"><UserPlus className="h-4 w-4 mr-1" />Recruitment</TabsTrigger>
+              <TabsTrigger value="achievements"><Award className="h-4 w-4 mr-1" />Achievements</TabsTrigger>
+              <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Scrims</TabsTrigger>
+              {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
+              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Manage</TabsTrigger>}
+            </TabsList>
+          </div>
 
           {/* OVERVIEW */}
           <TabsContent value="overview">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <StatCard label="Members" value={members.length} />
               <StatCard label="Trophies" value={team.trophies} />
               <StatCard label="Open slots" value={Math.max(0, team.slots)} />
               <StatCard label="Region" value={team.region ?? "—"} />
+              <StatCard label="Avg rank" value={team.rank ?? "—"} />
+            </div>
+          </TabsContent>
+
+          {/* RECRUITMENT (public) */}
+          <TabsContent value="recruitment">
+            <div className="rounded-lg border border-border bg-card p-6 text-center">
+              <Badge variant="outline" className={`font-display ${team.looking_for_players ? "border-success text-success" : "border-muted text-muted-foreground"}`}>
+                {team.looking_for_players ? "Open recruitment" : "Recruitment closed"}
+              </Badge>
+              <p className="text-sm text-muted-foreground font-body mt-3 max-w-md mx-auto">
+                {team.looking_for_players
+                  ? `${team.name} is currently recruiting. ${Math.max(0, team.slots)} open slot${team.slots === 1 ? "" : "s"}.`
+                  : `${team.name} is not currently looking for new players.`}
+              </p>
+              {!isCaptain && !isMember && team.looking_for_players && user && (
+                <Button variant="neon" className="mt-4" onClick={() => setJoinOpen(true)}>
+                  <UserPlus className="h-4 w-4 mr-2" />Apply to Team
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ACHIEVEMENTS (public) */}
+          <TabsContent value="achievements">
+            <div className="rounded-lg border border-border bg-card p-10 text-center">
+              <Award className="h-10 w-10 text-primary mx-auto mb-3" />
+              <h3 className="font-display font-bold text-lg uppercase">No achievements yet</h3>
+              <p className="text-sm text-muted-foreground font-body mt-1">
+                Trophies won in tournaments and seasons will appear here.
+              </p>
+            </div>
+          </TabsContent>
+
+          {/* SCRIMS (public) */}
+          <TabsContent value="scrims">
+            <div className="rounded-lg border border-border bg-card p-10 text-center">
+              <Swords className="h-10 w-10 text-primary mx-auto mb-3" />
+              <h3 className="font-display font-bold text-lg uppercase">No scrims posted yet</h3>
+              <p className="text-sm text-muted-foreground font-body mt-1 mb-4">
+                When this team posts scrims, you'll find them here.
+              </p>
+              <Link to="/scrims"><Button variant="neonOutline">Find Scrims</Button></Link>
             </div>
           </TabsContent>
 
@@ -404,7 +453,12 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
             <TabsContent value="applications">
               <div className="rounded-lg border border-border bg-card p-6">
                 {requests.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8 font-body">No pending applications.</div>
+                  <div className="text-center py-10 font-body">
+                    <Inbox className="h-10 w-10 text-primary mx-auto mb-3" />
+                    <h3 className="font-display font-bold text-lg uppercase">No applications yet</h3>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">Open recruitment or browse Free Agents.</p>
+                    <Link to="/free-agents"><Button variant="neonOutline">Browse Free Agents</Button></Link>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {requests.map((r) => (
