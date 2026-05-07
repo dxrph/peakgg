@@ -142,7 +142,9 @@ function RankEmblem({ rank, size }: EmblemProps) {
   const id = `rk-${rank.name.toLowerCase()}`;
   const c = rank.hex;
   const dark = darken(c, 0.55);
+  const deep = darken(c, 0.78);
   const light = lighten(c, 0.45);
+  const isApex = rank.name === "Apex";
 
   return (
     <svg
@@ -154,41 +156,62 @@ function RankEmblem({ rank, size }: EmblemProps) {
       className="block"
     >
       <defs>
-        {/* Outer rim metallic gradient */}
+        {/* Outer metallic rim */}
         <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={light} />
-          <stop offset="50%" stopColor={c} />
-          <stop offset="100%" stopColor={dark} />
+          <stop offset="45%" stopColor={c} />
+          <stop offset="100%" stopColor={deep} />
+        </linearGradient>
+        {/* Inner bevel ring */}
+        <linearGradient id={`${id}-bevel`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={dark} />
+          <stop offset="100%" stopColor="#000" />
         </linearGradient>
         {/* Interior dark glass */}
-        <radialGradient id={`${id}-glass`} cx="50%" cy="35%" r="70%">
-          <stop offset="0%" stopColor={c} stopOpacity="0.35" />
-          <stop offset="55%" stopColor="#0b0b0f" stopOpacity="0.95" />
+        <radialGradient id={`${id}-glass`} cx="50%" cy="32%" r="78%">
+          <stop offset="0%" stopColor={c} stopOpacity="0.45" />
+          <stop offset="55%" stopColor="#0b0b0f" stopOpacity="0.96" />
           <stop offset="100%" stopColor="#000" stopOpacity="1" />
         </radialGradient>
-        {/* Inner chrome highlight */}
+        {/* Top shine sweep */}
         <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
-          <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.42" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
+        {/* Clip mask so shine respects shield silhouette */}
+        <clipPath id={`${id}-clip`}>
+          <path d={SHIELD_INNER} />
+        </clipPath>
       </defs>
 
-      {/* Outer hex rim */}
-      <path d={HEX_PATH} fill={`url(#${id}-rim)`} />
+      {/* Outer shield rim */}
+      <path d={SHIELD_OUTER} fill={`url(#${id}-rim)`} />
+      {/* Bevel band */}
+      <path d={SHIELD_RIM} fill={`url(#${id}-bevel)`} />
       {/* Dark glass interior */}
-      <path d={HEX_INNER} fill={`url(#${id}-glass)`} />
+      <path d={SHIELD_INNER} fill={`url(#${id}-glass)`} />
       {/* Inner thin accent stroke */}
       <path
-        d={HEX_INNER}
+        d={SHIELD_INNER}
         fill="none"
         stroke={light}
-        strokeOpacity="0.55"
-        strokeWidth="0.6"
+        strokeOpacity="0.6"
+        strokeWidth="0.7"
       />
-      {/* Glyph */}
-      <g>{Glyph({ color: c, light, dark })}</g>
+      {/* Glyph (clipped to shield silhouette) */}
+      <g clipPath={`url(#${id}-clip)`}>{Glyph({ color: c, light, dark })}</g>
       {/* Top shine sweep */}
-      <path d={HEX_INNER} fill={`url(#${id}-shine)`} />
+      <path d={SHIELD_INNER} fill={`url(#${id}-shine)`} />
+      {/* Apex extra: subtle gold corona */}
+      {isApex && (
+        <path
+          d={SHIELD_OUTER}
+          fill="none"
+          stroke="#FCD34D"
+          strokeOpacity="0.5"
+          strokeWidth="1.2"
+        />
+      )}
     </svg>
   );
 }
