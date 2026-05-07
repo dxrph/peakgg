@@ -419,6 +419,13 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                 {members.length === 0 && (
                   <div className="text-center text-muted-foreground py-8 font-body">No members yet.</div>
                 )}
+                {members.length === 1 && isCaptain && (
+                  <div className="text-center py-6 font-body border-b border-border mb-3">
+                    <h3 className="font-display font-bold text-base uppercase">Your squad is just getting started</h3>
+                    <p className="text-sm text-muted-foreground mt-1 mb-3">Invite players to fill your roster.</p>
+                    <Link to="/free-agents"><Button variant="neonOutline" size="sm"><UserPlus className="h-4 w-4 mr-1.5" />Invite Players</Button></Link>
+                  </div>
+                )}
                 {members.map((m) => {
                   const captain = m.user_id === team.owner_id;
                   return (
