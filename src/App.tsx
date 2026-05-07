@@ -46,6 +46,7 @@ import FAQPage from "./pages/FAQ";
 import ContactPage from "./pages/Contact";
 import PrivacyPage from "./pages/Privacy";
 import TermsPage from "./pages/Terms";
+import ComingSoonPage from "./pages/ComingSoon";
 import ChatWidget from "./components/chat/ChatWidget";
 import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
@@ -122,6 +123,7 @@ const App = () => (
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
+              <Route path="/coming-soon" element={<ComingSoonPage />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
