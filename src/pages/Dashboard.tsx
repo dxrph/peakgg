@@ -6,6 +6,10 @@ import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import { Bell, Mountain, Shield, Swords, Trophy, TrendingUp, Users, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import { dashboardCards, dashboardAdmin, resolvePath, type NavItem } from "@/config/navigation";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/i18n";
 
 const recentMatches = [
   { map: "Ascent", result: "WIN", score: "13-9", elo: "+25", time: "2h ago" },
@@ -21,6 +25,13 @@ const notifications = [
 
 export default function DashboardPage() {
   const userElo = 2547;
+  const { isAdmin } = useUserRoles();
+  const { profile } = useAuth();
+  const { t } = useI18n();
+  const tr = (item: NavItem) => t(item.labelKey, { defaultValue: item.label });
+  const profilePath = profile?.username ? `/profile/${profile.username}` : "/dashboard";
+  const cards = dashboardCards();
+  const adminCards = dashboardAdmin();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -111,26 +122,51 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link to="/teams">
-            <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/30 transition-all cursor-pointer neon-border text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <span className="font-display font-bold">Create Team</span>
-            </div>
-          </Link>
-          <Link to="/tournaments">
-            <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/30 transition-all cursor-pointer neon-border text-center">
-              <Trophy className="h-8 w-8 mx-auto mb-2 text-accent" />
-              <span className="font-display font-bold">Join Tournament</span>
-            </div>
-          </Link>
-          <Link to="/scrims">
-            <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/30 transition-all cursor-pointer neon-border text-center">
-              <Swords className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
-              <span className="font-display font-bold">Find Scrims</span>
-            </div>
-          </Link>
+        <div className="mt-10">
+          <h2 className="font-display font-bold uppercase tracking-wider text-sm text-muted-foreground mb-4">
+            {t("dashboard.shortcuts", { defaultValue: "Shortcuts" })}
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {cards.map((item) => {
+              const Icon = item.icon ?? Mountain;
+              const path = item.key === "my_profile" ? profilePath : resolvePath(item);
+              return (
+                <Link key={item.key} to={path}>
+                  <div className="group relative rounded-lg border border-border bg-card p-4 hover:border-primary/40 hover:bg-card/80 transition-all cursor-pointer neon-border h-full flex flex-col items-center justify-center text-center min-h-[110px]">
+                    <Icon className="h-7 w-7 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="font-display font-bold text-sm leading-tight">{tr(item)}</span>
+                    {item.comingSoon && (
+                      <span className="absolute top-2 right-2 text-[8px] uppercase tracking-wider text-accent border border-accent/40 rounded-sm px-1">
+                        Soon
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
+
+        {isAdmin && adminCards.length > 0 && (
+          <div className="mt-10">
+            <h2 className="font-display font-bold uppercase tracking-wider text-sm text-accent mb-4 flex items-center gap-2">
+              <Shield className="h-4 w-4" /> {t("dashboard.admin_shortcuts", { defaultValue: "Admin Shortcuts" })}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {adminCards.map((item) => {
+                const Icon = item.icon ?? Shield;
+                return (
+                  <Link key={item.key} to={item.path}>
+                    <div className="rounded-lg border border-accent/30 bg-card p-4 hover:border-accent transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center min-h-[110px]">
+                      <Icon className="h-7 w-7 mb-2 text-accent" />
+                      <span className="font-display font-bold text-sm leading-tight">{tr(item)}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
