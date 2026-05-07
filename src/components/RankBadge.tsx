@@ -1,5 +1,11 @@
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
+import rookieEmblem from "@/assets/ranks/rookie.png";
+
+/** Map of ranks that use a custom uploaded PNG asset instead of the procedural SVG emblem. */
+const CUSTOM_EMBLEMS: Partial<Record<RankTier, string>> = {
+  Rookie: rookieEmblem,
+};
 
 /**
  * RankBadge — premium SVG rank emblem for PeakGG.
@@ -50,24 +56,41 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
+  const customSrc = CUSTOM_EMBLEMS[info.name];
 
   return (
     <span
       className={`inline-flex items-center gap-2 ${className}`}
       title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
-      <span
-        className="rank-badge-emblem relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
-        style={{
-          width: px,
-          height: px,
-          filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${
-            isApex ? "cc" : "77"
-          }) drop-shadow(0 2px 4px rgba(0,0,0,0.55))`,
-        }}
-      >
-        <RankEmblem rank={info} size={px} />
-      </span>
+      {customSrc ? (
+        // Custom official emblem — no frame, no glow, no background.
+        // Square container, object-contain, fully transparent, with breathing space.
+        <span
+          className="relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
+          style={{ width: px, height: px, padding: Math.max(2, Math.round(px * 0.06)) }}
+        >
+          <img
+            src={customSrc}
+            alt={`${localizedName} rank emblem`}
+            className="w-full h-full object-contain select-none pointer-events-none"
+            draggable={false}
+          />
+        </span>
+      ) : (
+        <span
+          className="rank-badge-emblem relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
+          style={{
+            width: px,
+            height: px,
+            filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${
+              isApex ? "cc" : "77"
+            }) drop-shadow(0 2px 4px rgba(0,0,0,0.55))`,
+          }}
+        >
+          <RankEmblem rank={info} size={px} />
+        </span>
+      )}
       {(showLabel || showElo) && (
         <span className={`flex flex-col leading-tight font-display font-bold ${labelSize}`}>
           <span style={{ color: info.hex }}>{localizedName}</span>
