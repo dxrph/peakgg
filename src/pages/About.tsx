@@ -70,20 +70,33 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Team */}
+        {/* Founder */}
         <section className="container py-16">
-          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground font-display mb-3">{t("about.team_eyebrow")}</p>
-          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">{t("about.team_title")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {[1, 2].map((i) => (
-              <Card key={i} className="p-8 bg-card/60 border-border text-center">
-                <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center border border-border">
-                  <Users className="h-10 w-10 text-muted-foreground" />
+          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground font-display mb-3">
+            Founder
+          </p>
+          <h2 className="font-display font-bold text-3xl md:text-4xl uppercase mb-10 text-center">
+            The Person Behind PeakGG
+          </h2>
+          <div className="max-w-md mx-auto">
+            <Card className="p-8 md:p-10 bg-card/60 border-border text-center relative overflow-hidden">
+              {/* Subtle gradient aura behind avatar */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{
+                  background: "radial-gradient(circle at 50% 25%, hsl(var(--primary)), transparent 70%)"
+                }}
+              />
+              <div className="relative">
+                <div className="w-28 h-28 rounded-full mx-auto mb-5 flex items-center justify-center border-2 border-primary/30 bg-gradient-to-br from-primary/20 to-accent/10 shadow-lg shadow-primary/10">
+                  <span className="font-display font-bold text-4xl text-primary">O</span>
                 </div>
-                <h3 className="font-display font-bold text-xl uppercase">{t("about.team_member", { n: i })}</h3>
-                <p className="text-sm text-muted-foreground font-body mt-2">{t("about.team_member_sub")}</p>
-              </Card>
-            ))}
+                <h3 className="font-display font-bold text-2xl uppercase tracking-wide">Onyzuka</h3>
+                <div className="w-12 h-0.5 gradient-primary mx-auto my-4 rounded-full opacity-60" />
+                <p className="text-sm md:text-base text-muted-foreground font-body leading-relaxed">
+                  "Building PeakGG for competitive FPS players who want to improve, compete, and find their squad."
+                </p>
+              </div>
+            </Card>
           </div>
         </section>
 
