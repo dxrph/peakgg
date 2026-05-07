@@ -3,6 +3,7 @@ import SEO from "@/components/SEO";
 import HeroSection from "@/components/landing/HeroSection";
 import PlatformStatsStrip from "@/components/landing/PlatformStatsStrip";
 import StartCompetingSection from "@/components/landing/StartCompetingSection";
+import PreLaunchCTA from "@/components/landing/PreLaunchCTA";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
 import RankShowcase from "@/components/landing/RankShowcase";
@@ -48,6 +49,7 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
+        <PreLaunchCTA />
         <StartCompetingSection />
         <PlatformStatsStrip />
         <FeaturesSection />
