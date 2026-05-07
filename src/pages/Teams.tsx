@@ -390,7 +390,7 @@ export default function TeamsPage() {
             )}
 
             <div className="mt-10">
-              <DiscordCTA variant="inline" compact />
+              <DiscordCTA variant="inline" />
             </div>
           </TabsContent>
 
