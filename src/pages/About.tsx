@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Target, Zap, Users, Lock, ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
+import onyzukaAvatar from "@/assets/onyzuka.jpg";
 
 export default function AboutPage() {
   const { t } = useI18n();
@@ -87,8 +88,13 @@ export default function AboutPage() {
                 }}
               />
               <div className="relative">
-                <div className="w-28 h-28 rounded-full mx-auto mb-5 flex items-center justify-center border-2 border-primary/30 bg-gradient-to-br from-primary/20 to-accent/10 shadow-lg shadow-primary/10">
-                  <span className="font-display font-bold text-4xl text-primary">O</span>
+                <div className="w-28 h-28 rounded-full mx-auto mb-5 overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20">
+                  <img
+                    src={onyzukaAvatar}
+                    alt="Onyzuka — Founder of PeakGG"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
                 <h3 className="font-display font-bold text-2xl uppercase tracking-wide">Onyzuka</h3>
                 <div className="w-12 h-0.5 gradient-primary mx-auto my-4 rounded-full opacity-60" />
