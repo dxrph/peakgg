@@ -20,6 +20,11 @@ import {
   Award, Swords,
 } from "lucide-react";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TeamRow {
   id: string;
@@ -74,6 +79,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const [editDesc, setEditDesc] = useState("");
   const [editRegion, setEditRegion] = useState("");
   const [editLfp, setEditLfp] = useState(true);
+  const [editRecruitStatus, setEditRecruitStatus] = useState<"open" | "invite" | "closed">("open");
   const [editSlots, setEditSlots] = useState(2);
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -105,6 +111,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
     setEditDesc((t as any).description ?? "");
     setEditRegion((t as any).region ?? "");
     setEditLfp((t as any).looking_for_players);
+    setEditRecruitStatus((t as any).looking_for_players ? "open" : "closed");
     setEditSlots((t as any).slots ?? 2);
 
     const { data: ms } = await supabase
@@ -205,6 +212,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const handleSaveEdit = async () => {
     if (!team) return;
     setSavingEdit(true);
+    const lfp = editRecruitStatus === "open";
     const { error } = await supabase
       .from("teams")
       .update({
@@ -212,19 +220,19 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
         tag: editTag.trim().toUpperCase().slice(0, 4),
         description: editDesc.trim() || null,
         region: editRegion.trim() || null,
-        looking_for_players: editLfp,
-        slots: editSlots,
+        looking_for_players: lfp,
+        slots: Math.max(0, Math.min(7, editSlots)),
       } as any)
       .eq("id", team.id);
     setSavingEdit(false);
     if (error) { toast.error(error.message); return; }
+    setEditLfp(lfp);
     toast.success("Team updated");
     load();
   };
 
   const handleDeleteTeam = async () => {
     if (!team) return;
-    if (!confirm(`Delete team ${team.name}? This cannot be undone.`)) return;
     const { error } = await supabase.from("teams").delete().eq("id", team.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Team deleted");
@@ -355,7 +363,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               <TabsTrigger value="achievements"><Award className="h-4 w-4 mr-1" />Achievements</TabsTrigger>
               <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Scrims</TabsTrigger>
               {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
-              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Manage</TabsTrigger>}
+              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Settings</TabsTrigger>}
             </TabsList>
           </div>
 
