@@ -54,7 +54,7 @@ interface JoinReqRow {
   profile?: { username: string; display_name: string | null; avatar_url: string | null } | null;
 }
 
-export default function TeamDetailPage() {
+export default function TeamDetailPage({ manageMode = false }: { manageMode?: boolean } = {}) {
   const { teamId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -64,7 +64,7 @@ export default function TeamDetailPage() {
   const [requests, setRequests] = useState<JoinReqRow[]>([]);
   const [myRequest, setMyRequest] = useState<JoinReqRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(manageMode ? "manage" : "overview");
   const [joinOpen, setJoinOpen] = useState(false);
 
   // Edit form state
@@ -79,6 +79,14 @@ export default function TeamDetailPage() {
   const isCaptain = !!(user && team && user.id === team.owner_id);
   const isMember = !!(user && members.some((m) => m.user_id === user.id));
   const hasPending = !!(myRequest && myRequest.status === "pending");
+
+  // Manage mode protection: if route is /manage but viewer is not captain, redirect to public view.
+  useEffect(() => {
+    if (!loading && manageMode && team && user && !isCaptain) {
+      toast.error("Only the team captain can manage this team");
+      navigate(`/teams/${team.id}`, { replace: true });
+    }
+  }, [loading, manageMode, team, user, isCaptain, navigate]);
 
   const load = async () => {
     if (!teamId) return;
@@ -299,9 +307,19 @@ export default function TeamDetailPage() {
               )}
               {user && isCaptain && (
                 <>
-                  <Button variant="neon" onClick={() => setTab("manage")}>
-                    <Settings className="mr-2 h-4 w-4" />Manage Team
-                  </Button>
+                  {manageMode ? (
+                    <Link to={`/teams/${team.id}`}>
+                      <Button variant="neonOutline" className="w-full">
+                        <Shield className="mr-2 h-4 w-4" />View Public Page
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to={`/teams/${team.id}/manage`}>
+                      <Button variant="neon" className="w-full">
+                        <Settings className="mr-2 h-4 w-4" />Manage Team
+                      </Button>
+                    </Link>
+                  )}
                   {pendingCount > 0 && (
                     <Button variant="neonOutline" onClick={() => setTab("applications")}>
                       <Inbox className="mr-2 h-4 w-4" />Applications ({pendingCount})
