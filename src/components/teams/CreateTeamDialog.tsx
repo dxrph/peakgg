@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -43,17 +44,24 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const [game, setGame] = useState<typeof GAMES[number]["value"]>("valorant");
   const [region, setRegion] = useState<typeof REGIONS[number]["value"]>("EU");
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [seekingPlayers, setSeekingPlayers] = useState(true);
+  const [recruitment, setRecruitment] = useState<"open" | "invite" | "closed">("open");
+  const [description, setDescription] = useState("");
+  const [discord, setDiscord] = useState("");
   const [slots, setSlots] = useState(2);
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const reset = () => {
     setName(""); setTag(""); setGame("valorant"); setRegion("EU");
-    setAdvancedOpen(false); setSeekingPlayers(true); setSlots(2); setIsPublic(true);
+    setAdvancedOpen(false); setRecruitment("open"); setDescription(""); setDiscord("");
+    setSlots(2); setIsPublic(true);
   };
 
-  const isValid = name.trim().length > 0 && tag.trim().length > 0;
+  const isValid =
+    name.trim().length > 0 &&
+    tag.trim().length > 0 &&
+    !!game &&
+    !!region;
   const selectedGame = GAMES.find((g) => g.value === game)!;
 
   const submit = async () => {
@@ -74,8 +82,9 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
         game,
         region,
         owner_id: user.id,
-        looking_for_players: true,
-        slots: 2,
+        looking_for_players: recruitment === "open",
+        slots,
+        description: description.trim() || null,
         trophies: 0,
         color: selectedGame.color,
       } as any)
@@ -95,11 +104,11 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     setLoading(false);
     if (memErr) { toast.error(memErr.message); return; }
 
-    toast.success(t("teams_page.team_created", { defaultValue: "Team created!" }));
+    toast.success(t("teams_page.team_created_captain", { defaultValue: "Team created. You are now the captain." }));
     reset();
     onOpenChange(false);
     onCreated?.();
-    navigate(`/teams/${(team as any).id}`);
+    navigate(`/teams/${(team as any).id}/manage`);
   };
 
   return (
@@ -238,21 +247,54 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
             </CollapsibleTrigger>
             <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
               <div className="pt-3 space-y-4">
-                {/* Seeking players */}
-                <div className="flex items-start justify-between gap-3 p-3 rounded-md border border-border bg-background/40">
-                  <div className="min-w-0">
-                    <div className="font-display uppercase text-sm tracking-wide flex items-center gap-1.5">
-                      <Users className="h-4 w-4 text-primary" />
-                      {t("teams_page.seeking_players", { defaultValue: "Looking for players" })}
-                    </div>
-                    <p className="text-xs text-muted-foreground font-body mt-0.5">
-                      {t("teams_page.seeking_players_hint", { defaultValue: "Show your team in the recruitment board." })}
-                    </p>
-                  </div>
-                  <Switch checked={seekingPlayers} onCheckedChange={setSeekingPlayers} />
+                {/* Description */}
+                <div className="space-y-1.5">
+                  <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
+                    {t("teams_page.description", { defaultValue: "Team description" })}
+                  </Label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    maxLength={300}
+                    placeholder="What is your team about?"
+                    className="font-body bg-background/60 resize-none"
+                  />
                 </div>
 
-                {seekingPlayers && (
+                {/* Recruitment status */}
+                <div className="space-y-2">
+                  <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Users className="h-4 w-4 text-primary" />
+                    {t("teams_page.recruitment_status", { defaultValue: "Recruitment status" })}
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { v: "open",   label: t("teams_page.rec_open",   { defaultValue: "Open" }) },
+                      { v: "invite", label: t("teams_page.rec_invite", { defaultValue: "Invite Only" }) },
+                      { v: "closed", label: t("teams_page.rec_closed", { defaultValue: "Closed" }) },
+                    ] as const).map((opt) => {
+                      const active = recruitment === opt.v;
+                      return (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setRecruitment(opt.v)}
+                          className={cn(
+                            "py-2 rounded-md border-2 font-display uppercase text-xs tracking-wider transition-all bg-background/60",
+                            active
+                              ? "border-primary text-primary shadow-[0_0_14px_hsl(var(--primary)/0.4)]"
+                              : "border-border opacity-70 hover:opacity-100"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {recruitment === "open" && (
                   <div className="p-3 rounded-md border border-border bg-background/40 animate-fade-in">
                     <div className="flex items-center justify-between mb-2">
                       <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
@@ -273,6 +315,20 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                   </div>
                 )}
 
+                {/* Discord contact */}
+                <div className="space-y-1.5">
+                  <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
+                    {t("teams_page.discord_contact", { defaultValue: "Discord contact (optional)" })}
+                  </Label>
+                  <Input
+                    value={discord}
+                    onChange={(e) => setDiscord(e.target.value)}
+                    maxLength={100}
+                    placeholder="captain#0001 or invite link"
+                    className="font-body bg-background/60"
+                  />
+                </div>
+
                 {/* Public team */}
                 <div className="flex items-start justify-between gap-3 p-3 rounded-md border border-border bg-background/40">
                   <div className="min-w-0">
@@ -291,7 +347,13 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
         </div>
 
         {/* FOOTER */}
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-border bg-background/40 mt-2">
+        <div className="flex flex-col gap-2 px-6 py-4 border-t border-border bg-background/40 mt-2">
+          {!isValid && (
+            <p className="text-[11px] text-muted-foreground font-body text-right">
+              {t("teams_page.create_helper", { defaultValue: "Add a team name, tag, game and region to create your team." })}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
@@ -304,14 +366,17 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
             disabled={loading || !isValid}
             className={cn(
               "font-display uppercase tracking-wider min-w-36 text-white border-0",
-              "bg-gradient-to-r from-[#7C3AED] via-[#9333EA] to-[#A855F7]",
-              "hover:from-[#8B5CF6] hover:via-[#A855F7] hover:to-[#C084FC]",
-              "shadow-[0_0_18px_rgba(147,51,234,0.5)] hover:shadow-[0_0_24px_rgba(168,85,247,0.7)]",
+              "bg-gradient-to-r from-primary via-primary to-accent",
+              "hover:brightness-110",
+              "shadow-[0_0_18px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_24px_hsl(var(--primary)/0.7)]",
               "disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
             )}
           >
-            {loading ? "..." : t("teams_page.create", { defaultValue: "Create Team" })}
+            {loading
+              ? t("teams_page.creating", { defaultValue: "Creating…" })
+              : t("teams_page.create", { defaultValue: "Create Team" })}
           </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
