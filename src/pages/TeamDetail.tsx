@@ -20,6 +20,11 @@ import {
   Award, Swords,
 } from "lucide-react";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TeamRow {
   id: string;
@@ -74,6 +79,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const [editDesc, setEditDesc] = useState("");
   const [editRegion, setEditRegion] = useState("");
   const [editLfp, setEditLfp] = useState(true);
+  const [editRecruitStatus, setEditRecruitStatus] = useState<"open" | "invite" | "closed">("open");
   const [editSlots, setEditSlots] = useState(2);
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -105,6 +111,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
     setEditDesc((t as any).description ?? "");
     setEditRegion((t as any).region ?? "");
     setEditLfp((t as any).looking_for_players);
+    setEditRecruitStatus((t as any).looking_for_players ? "open" : "closed");
     setEditSlots((t as any).slots ?? 2);
 
     const { data: ms } = await supabase
@@ -205,6 +212,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const handleSaveEdit = async () => {
     if (!team) return;
     setSavingEdit(true);
+    const lfp = editRecruitStatus === "open";
     const { error } = await supabase
       .from("teams")
       .update({
@@ -212,19 +220,19 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
         tag: editTag.trim().toUpperCase().slice(0, 4),
         description: editDesc.trim() || null,
         region: editRegion.trim() || null,
-        looking_for_players: editLfp,
-        slots: editSlots,
+        looking_for_players: lfp,
+        slots: Math.max(0, Math.min(7, editSlots)),
       } as any)
       .eq("id", team.id);
     setSavingEdit(false);
     if (error) { toast.error(error.message); return; }
+    setEditLfp(lfp);
     toast.success("Team updated");
     load();
   };
 
   const handleDeleteTeam = async () => {
     if (!team) return;
-    if (!confirm(`Delete team ${team.name}? This cannot be undone.`)) return;
     const { error } = await supabase.from("teams").delete().eq("id", team.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Team deleted");
@@ -355,7 +363,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               <TabsTrigger value="achievements"><Award className="h-4 w-4 mr-1" />Achievements</TabsTrigger>
               <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Scrims</TabsTrigger>
               {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
-              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Manage</TabsTrigger>}
+              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Settings</TabsTrigger>}
             </TabsList>
           </div>
 
@@ -500,43 +508,169 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
           {/* MANAGE */}
           {isCaptain && (
             <TabsContent value="manage">
-              <div className="rounded-lg border border-border bg-card p-6 space-y-5 max-w-2xl">
-                <h3 className="font-display text-lg flex items-center gap-2"><Pencil className="h-4 w-4" />Edit Team</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="font-display text-xs uppercase">Name</Label>
-                    <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={50} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* LEFT: Edit form sections */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Basic Info */}
+                  <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg uppercase tracking-wider flex items-center gap-2"><Pencil className="h-4 w-4 text-primary" />Basic Info</h3>
+                      <p className="text-xs text-muted-foreground font-body mt-1">Identity of your team across PeakGG.</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2 space-y-1.5">
+                        <Label className="font-display text-xs uppercase">Team name</Label>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={50} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="font-display text-xs uppercase">Tag</Label>
+                        <Input value={editTag} onChange={(e) => setEditTag(e.target.value.toUpperCase())} maxLength={4} />
+                        <p className="text-[11px] text-muted-foreground font-body">Up to 4 characters.</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="font-display text-xs uppercase">Region</Label>
+                      <Input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} maxLength={20} placeholder="EU, NA, Italy…" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="font-display text-xs uppercase">Description</Label>
+                      <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={4} maxLength={500} placeholder="Tell players what your team is about." />
+                      <p className="text-[11px] text-muted-foreground font-body text-right">{editDesc.length}/500</p>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="font-display text-xs uppercase">Tag</Label>
-                    <Input value={editTag} onChange={(e) => setEditTag(e.target.value.toUpperCase())} maxLength={4} />
+
+                  {/* Recruitment */}
+                  <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg uppercase tracking-wider flex items-center gap-2"><UserPlus className="h-4 w-4 text-primary" />Recruitment</h3>
+                      <p className="text-xs text-muted-foreground font-body mt-1">Control how players can join your roster.</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="font-display text-xs uppercase">Recruitment status</Label>
+                        <Select value={editRecruitStatus} onValueChange={(v) => setEditRecruitStatus(v as any)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="open">Open — accepting applications</SelectItem>
+                            <SelectItem value="invite">Invite only</SelectItem>
+                            <SelectItem value="closed">Closed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="font-display text-xs uppercase">Open slots</Label>
+                        <Select value={String(editSlots)} onValueChange={(v) => setEditSlots(parseInt(v, 10))}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[0,1,2,3,4,5,6,7].map((n) => (
+                              <SelectItem key={n} value={String(n)}>{n} slot{n === 1 ? "" : "s"}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-muted-foreground font-body">How many players are you currently looking for?</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Save bar */}
+                  <div className="flex flex-wrap gap-2 justify-end">
+                    <Button variant="ghost" onClick={() => load()}>Cancel</Button>
+                    <Button variant="neon" onClick={handleSaveEdit} disabled={savingEdit}>
+                      {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
+                    </Button>
+                  </div>
+
+                  {/* Danger Zone */}
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 space-y-3">
+                    <div>
+                      <h3 className="font-display text-lg uppercase tracking-wider text-destructive flex items-center gap-2"><Trash2 className="h-4 w-4" />Danger Zone</h3>
+                      <p className="text-xs text-muted-foreground font-body mt-1">Irreversible actions. Proceed with caution.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded border border-destructive/30 bg-background/40 p-4">
+                      <div>
+                        <div className="font-display font-semibold">Delete this team</div>
+                        <p className="text-xs text-muted-foreground font-body">This action cannot be undone. All members and applications will be removed.</p>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4" />Delete Team</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete {team.name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete the team, its roster, and pending applications. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteTeam} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Delete permanently
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="font-display text-xs uppercase">Region</Label>
-                  <Input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} maxLength={20} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="font-display text-xs uppercase">Description</Label>
-                  <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} maxLength={500} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="flex items-center gap-2 text-sm font-body">
-                    <input type="checkbox" checked={editLfp} onChange={(e) => setEditLfp(e.target.checked)} />
-                    Recruiting
-                  </label>
-                  <div className="space-y-1.5">
-                    <Label className="font-display text-xs uppercase">Open slots</Label>
-                    <Input type="number" min={0} max={10} value={editSlots} onChange={(e) => setEditSlots(parseInt(e.target.value || "0", 10))} />
+
+                {/* RIGHT: Summary + live preview */}
+                <div className="space-y-6">
+                  <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-xs font-display uppercase tracking-wider text-muted-foreground mb-3">Team Summary</div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-lg flex items-center justify-center font-display font-bold text-white text-lg shrink-0" style={{ background: team.color }}>
+                        {team.tag}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-display font-bold truncate">{team.name}</div>
+                        <div className="text-xs text-muted-foreground font-body uppercase">{team.game} · {team.region ?? "—"}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+                      <div className="rounded border border-border bg-secondary/30 p-3">
+                        <div className="text-[10px] uppercase text-muted-foreground font-display">Members</div>
+                        <div className="font-display font-bold text-lg">{members.length}</div>
+                      </div>
+                      <div className="rounded border border-border bg-secondary/30 p-3">
+                        <div className="text-[10px] uppercase text-muted-foreground font-display">Open slots</div>
+                        <div className="font-display font-bold text-lg">{Math.max(0, editSlots)}</div>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <Badge variant="outline" className={`font-display w-full justify-center py-1.5 ${editRecruitStatus === "open" ? "border-success text-success" : editRecruitStatus === "invite" ? "border-accent text-accent" : "border-muted text-muted-foreground"}`}>
+                        {editRecruitStatus === "open" ? "Open recruitment" : editRecruitStatus === "invite" ? "Invite only" : "Recruitment closed"}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button variant="neon" onClick={handleSaveEdit} disabled={savingEdit}>
-                    {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
-                  </Button>
-                  <Button variant="ghost" onClick={handleDeleteTeam} className="text-destructive hover:text-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />Delete Team
-                  </Button>
+
+                  {/* Live preview */}
+                  <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-xs font-display uppercase tracking-wider text-muted-foreground mb-3">Public preview</div>
+                    <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-lg flex items-center justify-center font-display font-bold text-white" style={{ background: team.color }}>
+                          {(editTag || team.tag).slice(0, 4)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-display font-bold truncate">{editName || team.name}</div>
+                          <div className="text-[11px] text-muted-foreground font-body uppercase">{team.game} · {editRegion || "—"}</div>
+                        </div>
+                      </div>
+                      {editDesc && <p className="text-xs text-muted-foreground font-body line-clamp-3 mb-3">{editDesc}</p>}
+                      <div className="flex flex-wrap gap-1.5">
+                        {editRecruitStatus === "open" && (
+                          <Badge variant="outline" className="border-success text-success font-display text-[10px]">Recruiting · {editSlots} slot{editSlots === 1 ? "" : "s"}</Badge>
+                        )}
+                        {editRecruitStatus === "invite" && (
+                          <Badge variant="outline" className="border-accent text-accent font-display text-[10px]">Invite only</Badge>
+                        )}
+                        {editRecruitStatus === "closed" && (
+                          <Badge variant="outline" className="font-display text-[10px]">Closed</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>
