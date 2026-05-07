@@ -26,6 +26,9 @@ export interface RankBadgeProps {
   showLabel?: boolean;
   showElo?: boolean;
   className?: string;
+  /** Force the procedural SVG emblem even for ranks that have a custom uploaded asset.
+   *  Useful where we need a perfectly consistent set (e.g. the rank progression showcase). */
+  forceProcedural?: boolean;
 }
 
 const SIZE_PX: Record<NonNullable<RankBadgeProps["size"]>, number> = {
@@ -43,6 +46,7 @@ export default function RankBadge({
   showLabel = false,
   showElo = false,
   className = "",
+  forceProcedural = false,
 }: RankBadgeProps) {
   const info: RankInfo =
     typeof elo === "number" ? getRankByElo(elo) : getRankByName(rank ?? "Rookie");
@@ -56,7 +60,7 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
-  const customSrc = CUSTOM_EMBLEMS[info.name];
+  const customSrc = forceProcedural ? undefined : CUSTOM_EMBLEMS[info.name];
 
   return (
     <span

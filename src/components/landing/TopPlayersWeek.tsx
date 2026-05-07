@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
-import { Trophy, ChevronRight, Lock, Crown } from "lucide-react";
+import { Trophy, ChevronRight, Lock, Crown, MessageCircle, Swords } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { DISCORD_INVITE } from "@/lib/links";
 
 type TopPlayer = {
   user_id: string;
@@ -25,6 +27,7 @@ function rankColor(r: number) {
 
 export default function TopPlayersWeek() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [players, setPlayers] = useState<TopPlayer[] | null>(null);
 
   useEffect(() => {
@@ -157,7 +160,24 @@ export default function TopPlayersWeek() {
                   {t("top_players.empty_desc")}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-[0.18em] mt-2">
+              <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-md sm:max-w-none sm:w-auto">
+                <Link to={user ? "/dashboard" : "/register"} className="w-full sm:w-auto">
+                  <Button variant="neon" size="lg" className="w-full sm:w-auto rounded-sm uppercase tracking-wider">
+                    <Swords className="mr-2 h-4 w-4" />
+                    {t("top_players.empty_cta_register")}
+                  </Button>
+                </Link>
+                <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0"
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    {t("top_players.empty_cta_discord")}
+                  </Button>
+                </a>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-display uppercase tracking-[0.18em]">
                 <Lock className="h-3 w-3" /> {t("top_players.empty_lock")}
               </div>
             </div>

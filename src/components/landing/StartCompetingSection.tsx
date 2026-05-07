@@ -13,6 +13,7 @@ export default function StartCompetingSection() {
       desc: t("start_competing.card1_desc"),
       cta: t("start_competing.card1_cta"),
       href: "/free-agents",
+      comingSoon: false,
     },
     {
       icon: Trophy,
@@ -20,6 +21,7 @@ export default function StartCompetingSection() {
       desc: t("start_competing.card2_desc"),
       cta: t("start_competing.card2_cta"),
       href: "/tournaments",
+      comingSoon: false,
     },
     {
       icon: Video,
@@ -27,6 +29,7 @@ export default function StartCompetingSection() {
       desc: t("start_competing.card3_desc"),
       cta: t("start_competing.card3_cta"),
       href: "/clips",
+      comingSoon: true,
     },
   ];
 
@@ -70,8 +73,15 @@ export default function StartCompetingSection() {
                   }}
                 />
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-md border border-primary/30 bg-primary/5 flex items-center justify-center mb-5 group-hover:border-primary/60 group-hover:bg-primary/10 transition-colors">
-                    <c.icon className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-11 h-11 rounded-md border border-primary/30 bg-primary/5 flex items-center justify-center group-hover:border-primary/60 group-hover:bg-primary/10 transition-colors">
+                      <c.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    {c.comingSoon && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-display font-bold tracking-[0.18em] uppercase rounded-sm border border-primary/40 text-primary bg-primary/10">
+                        {t("start_competing.coming_soon")}
+                      </span>
+                    )}
                   </div>
                   <h3 className="text-xl md:text-2xl font-display font-bold uppercase tracking-tight mb-2">
                     {c.title}

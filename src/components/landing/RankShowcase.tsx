@@ -37,51 +37,49 @@ export default function RankShowcase() {
         </motion.div>
 
         <div className="relative max-w-6xl mx-auto">
-          {/* Connecting progression line — sits behind badges, aligned to badge centers */}
-          <div className="hidden md:block absolute top-[44px] left-[6%] right-[6%] h-px bg-gradient-to-r from-transparent via-primary/30 to-accent/40" />
+          {/* Horizontal scroll container — keeps all 10 ranks on a single line, no awkward wrap. */}
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+            <div className="relative min-w-[760px] lg:min-w-0">
+              {/* Connecting progression line — sits behind badges, aligned to badge centers */}
+              <div className="absolute top-[44px] left-[3%] right-[3%] h-px bg-gradient-to-r from-transparent via-primary/30 to-accent/40" />
 
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-y-8 gap-x-3 md:gap-x-4">
-            {RANKS.map((r, i) => {
-              const isApex = r.name === "Apex";
-              return (
-                <motion.div
-                  key={r.name}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
-                  className="relative flex flex-col items-center text-center px-1"
-                >
-                  {isApex && (
-                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-widest text-accent uppercase bg-[#0a0a0a] px-2 py-0.5 rounded-full border border-accent/40 z-10">
-                      {t("rank_showcase.goal_label")}
-                    </span>
-                  )}
-                  <div
-                    className={`relative ${isApex ? "rank-shimmer" : ""}`}
-                    style={isApex ? { borderRadius: 12 } : undefined}
-                  >
-                    {/* Mobile size */}
-                    <span className="md:hidden">
-                      <RankBadge rank={r.name} size={isApex ? "lg" : "md"} />
-                    </span>
-                    {/* Desktop size */}
-                    <span className="hidden md:inline-flex">
-                      <RankBadge rank={r.name} size={isApex ? "xl" : "lg"} />
-                    </span>
-                  </div>
-                  <div
-                    className="mt-3 font-display font-bold text-sm md:text-base tracking-wide"
-                    style={{ color: r.hex }}
-                  >
-                    {tRank(r.name)}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground font-mono mt-0.5">
-                    {r.minElo}{r.maxElo < 99999 ? `–${r.maxElo}` : "+"}
-                  </div>
-                </motion.div>
-              );
-            })}
+              <div className="grid grid-cols-10 gap-x-2 lg:gap-x-3 gap-y-6">
+                {RANKS.map((r, i) => {
+                  const isApex = r.name === "Apex";
+                  return (
+                    <motion.div
+                      key={r.name}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.05 }}
+                      className="relative flex flex-col items-center text-center px-1 pt-4"
+                    >
+                      {isApex && (
+                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-widest text-accent uppercase bg-[#0a0a0a] px-2 py-0.5 rounded-full border border-accent/40 z-10 whitespace-nowrap">
+                          {t("rank_showcase.goal_label")}
+                        </span>
+                      )}
+                      <div
+                        className={`relative ${isApex ? "rank-shimmer" : ""}`}
+                        style={isApex ? { borderRadius: 12 } : undefined}
+                      >
+                        <RankBadge rank={r.name} size={isApex ? "lg" : "md"} forceProcedural />
+                      </div>
+                      <div
+                        className="mt-3 font-display font-bold text-[11px] lg:text-sm tracking-wide whitespace-nowrap"
+                        style={{ color: r.hex }}
+                      >
+                        {tRank(r.name)}
+                      </div>
+                      <div className="text-[9px] lg:text-[11px] text-muted-foreground font-mono mt-0.5 whitespace-nowrap">
+                        {r.minElo}{r.maxElo < 99999 ? `–${r.maxElo}` : "+"}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
