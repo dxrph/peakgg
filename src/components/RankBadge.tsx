@@ -105,8 +105,17 @@ export const RankBadgeCompact = (p: Omit<RankBadgeProps, "size">) => (
 /* feel. Each tier introduces a distinctive central glyph.             */
 /* ================================================================== */
 
-const HEX_PATH = "M50 2 L92 26 L92 74 L50 98 L8 74 L8 26 Z";
-const HEX_INNER = "M50 12 L84 31 L84 69 L50 88 L16 69 L16 31 Z";
+/**
+ * Premium "aegis shield" silhouette — a hex-shield hybrid with
+ * subtly arched flanks and a pointed crest, instantly readable as
+ * a competitive rank emblem (not a hexagon, not a generic pill).
+ */
+const SHIELD_OUTER =
+  "M50 3 C66 3 84 8 92 14 C92 36 92 56 86 70 C78 86 64 94 50 99 C36 94 22 86 14 70 C8 56 8 36 8 14 C16 8 34 3 50 3 Z";
+const SHIELD_RIM =
+  "M50 9 C64 9 80 13 87 18 C87 38 87 56 82 68 C75 82 63 89 50 94 C37 89 25 82 18 68 C13 56 13 38 13 18 C20 13 36 9 50 9 Z";
+const SHIELD_INNER =
+  "M50 16 C62 16 76 19 82 24 C82 40 82 56 78 66 C72 78 62 85 50 89 C38 85 28 78 22 66 C18 56 18 40 18 24 C24 19 38 16 50 16 Z";
 
 function darken(hex: string, amt = 0.4): string {
   const h = hex.replace("#", "");
