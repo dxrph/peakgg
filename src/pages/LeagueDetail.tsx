@@ -213,6 +213,13 @@ export default function LeagueDetailPage() {
               </div>
             </div>
 
+            {myPendingOrApproved.length > 0 && (
+              <Card className="mt-6 p-4 border-success/40 bg-success/5">
+                <p className="text-sm">
+                  ✓ {myPendingOrApproved.map(t => t.name).join(", ")} {myPendingOrApproved.length === 1 ? "is" : "are"} already registered for {season?.name}.
+                </p>
+              </Card>
+            )}
             {canRegister && eligible.length > 0 && (
               <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -228,6 +235,11 @@ export default function LeagueDetailPage() {
                     ))}
                   </div>
                 </div>
+              </Card>
+            )}
+            {canRegister && eligible.length === 0 && wrongGameTeams.length > 0 && (
+              <Card className="mt-6 p-4 border-amber-500/40 bg-amber-500/5">
+                <p className="text-sm">Your team's game doesn't match this league ({league.game}). Create a {league.game} team to register.</p>
               </Card>
             )}
             {!user && season?.status === "registration_open" && (
