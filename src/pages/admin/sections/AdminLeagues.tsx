@@ -139,29 +139,59 @@ export default function AdminLeagues() {
 
   const seedDemo = async () => {
     setBusy(true);
-    const { data: l, error: le } = await supabase.from("leagues").insert({
-      name: "Peak League", slug: `peak-league-${Date.now().toString(36)}`, game: "valorant",
-      description: "The flagship competitive league of PeakGG. Climb the standings, fight for playoffs, lift the trophy.",
-      reward_text: "€2,000 prize pool · Champion trophy · Peak Coins",
-      max_teams: 8, min_roster_size: 5, status: "registration_open", is_demo: true,
-    }).select().single();
-    if (le || !l) { setBusy(false); return toast.error(le?.message || "Failed"); }
-    const { data: s } = await supabase.from("league_seasons").insert({
-      league_id: l.id, name: "Season 0 Beta", season_number: 0, format: "round_robin",
-      playoff_size: 4, status: "registration_open", is_demo: true,
-      registration_deadline: new Date(Date.now() + 14 * 86400000).toISOString(),
-    }).select().single();
-    if (s) await supabase.from("league_divisions").insert({ season_id: s.id, name: "Premier", tier: 1, capacity: 8 });
+    // Idempotent: reuse the first existing demo Peak League if present.
+    let { data: existing } = await supabase
+      .from("leagues").select("*")
+      .eq("is_demo", true).eq("name", "Peak League")
+      .order("created_at", { ascending: true }).limit(1).maybeSingle();
+    let l: any = existing;
+    if (!l) {
+      const { data, error } = await supabase.from("leagues").insert({
+        name: "Peak League", slug: `peak-league-${Date.now().toString(36)}`, game: "valorant",
+        description: "The flagship competitive league of PeakGG. Climb the standings, fight for playoffs, lift the trophy.",
+        reward_text: "€2,000 prize pool · Champion trophy · Peak Coins",
+        max_teams: 8, min_roster_size: 5, status: "registration_open", is_demo: true,
+      }).select().single();
+      if (error || !data) { setBusy(false); return toast.error(error?.message || "Failed"); }
+      l = data;
+    }
+    let { data: s } = await supabase.from("league_seasons").select("*").eq("league_id", l.id).order("season_number", { ascending: false }).limit(1).maybeSingle();
+    if (!s) {
+      const { data: ns } = await supabase.from("league_seasons").insert({
+        league_id: l.id, name: "Season 0 Beta", season_number: 0, format: "round_robin",
+        playoff_size: 4, status: "registration_open", is_demo: true,
+        registration_deadline: new Date(Date.now() + 14 * 86400000).toISOString(),
+      }).select().single();
+      s = ns;
+    }
+    if (s) {
+      const { data: div } = await supabase.from("league_divisions").select("id").eq("season_id", s.id).limit(1).maybeSingle();
+      if (!div) await supabase.from("league_divisions").insert({ season_id: s.id, name: "Premier", tier: 1, capacity: 8 });
+    }
     setBusy(false);
-    toast.success("Peak League Season 0 Beta seeded");
+    toast.success("Peak League Season 0 Beta ready");
     setSeedOpen(false); loadLeagues();
+    setActiveLeague(l);
+  };
+
+  const seedDemoTeams = async () => {
+    if (!activeLeague) return toast.error("Select a league first");
+    setBusy(true);
+    const { data, error } = await supabase.rpc("seed_demo_teams_for_league", { _league_id: activeLeague.id, _count: 8 });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Created ${data ?? 0} demo teams (approved)`);
+    if (activeSeason) loadRegs(activeSeason.id);
   };
 
   const wipeDemo = async () => {
-    if (!confirm("Delete all demo leagues? This cannot be undone.")) return;
+    if (!confirm("Delete all demo leagues AND your [DEMO] teams? This cannot be undone.")) return;
+    const { error: tErr } = await supabase.rpc("wipe_demo_teams");
+    if (tErr) return toast.error(tErr.message);
     const { error } = await supabase.from("leagues").delete().eq("is_demo", true);
     if (error) return toast.error(error.message);
     toast.success("Demo data wiped"); loadLeagues();
+    setActiveLeague(null);
   };
 
   return (
@@ -174,7 +204,7 @@ export default function AdminLeagues() {
             <DialogTrigger asChild><Button size="sm" variant="outline"><Sparkles className="h-4 w-4 mr-1" /> Seed demo</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Seed Peak League Season 0 Beta</DialogTitle></DialogHeader>
-              <p className="text-sm text-muted-foreground">Creates the flagship league with an open Season 0. You can wipe demo data later.</p>
+              <p className="text-sm text-muted-foreground">Creates (or reuses) the flagship demo league with an open Season 0. Idempotent — running twice will not duplicate it. Use "Seed 8 demo teams" inside the league to populate standings for QA.</p>
               <DialogFooter>
                 <Button variant="outline" onClick={wipeDemo}><Trash className="h-4 w-4 mr-1" /> Wipe demo</Button>
                 <Button onClick={seedDemo} disabled={busy}>Seed</Button>
