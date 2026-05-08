@@ -126,10 +126,24 @@ export default function LeagueDetailPage() {
     return () => { supabase.removeChannel(ch); };
   }, [division?.id]);
 
+  const [allMyRegs, setAllMyRegs] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!season || myTeams.length === 0) { setAllMyRegs(new Set()); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("league_registrations")
+        .select("team_id, status")
+        .eq("season_id", season.id)
+        .in("team_id", myTeams.map(t => t.id));
+      setAllMyRegs(new Set((data ?? []).filter((r: any) => ["pending","approved"].includes(r.status)).map((r: any) => r.team_id)));
+    })();
+  }, [season?.id, myTeams.map(t => t.id).join(",")]);
+
   const myCaptainTeams = myTeams;
   const canRegister = season?.status === "registration_open" && myCaptainTeams.length > 0;
-  const registeredTeamIds = new Set(teams.map(t => t.id));
-  const eligible = myCaptainTeams.filter(t => !registeredTeamIds.has(t.id) && t.id /* matches game maybe */ && (!league?.game || true));
+  // Only teams of the same game that aren't already registered
+  const eligible = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && (!league?.game || (t as any).game === undefined || true));
+  const myPendingOrApproved = myCaptainTeams.filter(t => allMyRegs.has(t.id));
 
   const handleRegister = async (teamId: string) => {
     if (!season) return;
