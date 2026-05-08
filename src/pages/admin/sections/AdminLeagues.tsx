@@ -283,6 +283,11 @@ export default function AdminLeagues() {
                     </SelectContent>
                   </Select>
                   <Button asChild size="sm" variant="outline"><Link to={`/leagues/${activeLeague.id}`}>View public</Link></Button>
+                  {activeLeague.status === "registration_open" && (
+                    <Button size="sm" variant="outline" onClick={seedDemoTeams} disabled={busy}>
+                      <Sparkles className="h-3 w-3 mr-1" /> Seed 8 demo teams
+                    </Button>
+                  )}
                 </div>
               </div>
 
