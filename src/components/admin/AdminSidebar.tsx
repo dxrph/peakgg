@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound,
+  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound, Mountain,
   Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ interface Section {
 const SECTIONS: Section[] = [
   { id: "dashboard",     label: "Dashboard",     icon: LayoutDashboard, to: "/admin",                allow: ["admin", "moderator", "organizer"] },
   { id: "tournaments",   label: "Tornei",        icon: Trophy,          to: "/admin/tournaments",    allow: ["admin", "organizer"] },
+  { id: "leagues",       label: "Peak League",   icon: Mountain,        to: "/admin/leagues",        allow: ["admin"] },
   { id: "matches",       label: "Partite",       icon: Swords,          to: "/admin/matches",        allow: ["admin", "organizer"] },
   { id: "tickets",       label: "Ticket",        icon: AlertTriangle,   to: "/admin/tickets",        allow: ["admin", "moderator"] },
   { id: "disputes",      label: "Dispute",       icon: Gavel,           to: "/admin/disputes",       allow: ["admin", "moderator"] },

@@ -242,6 +242,47 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_notes: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          id: string
+          match_id: string | null
+          team_id: string
+          title: string
+          visibility: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          team_id: string
+          title: string
+          visibility?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          team_id?: string
+          title?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_notes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -482,6 +523,252 @@ export type Database = {
         }
         Relationships: []
       }
+      league_divisions: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          name: string
+          season_id: string
+          tier: number
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          name: string
+          season_id: string
+          tier?: number
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          name?: string
+          season_id?: string
+          tier?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_divisions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "league_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      league_registrations: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          division_id: string | null
+          id: string
+          season_id: string
+          status: string
+          submitted_by: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          division_id?: string | null
+          id?: string
+          season_id: string
+          status?: string
+          submitted_by: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          division_id?: string | null
+          id?: string
+          season_id?: string
+          status?: string
+          submitted_by?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_registrations_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "league_divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "league_registrations_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "league_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      league_seasons: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          format: string
+          id: string
+          is_demo: boolean
+          league_id: string
+          name: string
+          playoff_size: number
+          registration_deadline: string | null
+          season_number: number
+          starts_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          format?: string
+          id?: string
+          is_demo?: boolean
+          league_id: string
+          name: string
+          playoff_size?: number
+          registration_deadline?: string | null
+          season_number?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          format?: string
+          id?: string
+          is_demo?: boolean
+          league_id?: string
+          name?: string
+          playoff_size?: number
+          registration_deadline?: string | null
+          season_number?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_seasons_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      league_standings: {
+        Row: {
+          division_id: string
+          draws: number
+          form: string[]
+          id: string
+          losses: number
+          played: number
+          points: number
+          position: number | null
+          round_diff: number
+          team_id: string
+          updated_at: string
+          wins: number
+        }
+        Insert: {
+          division_id: string
+          draws?: number
+          form?: string[]
+          id?: string
+          losses?: number
+          played?: number
+          points?: number
+          position?: number | null
+          round_diff?: number
+          team_id: string
+          updated_at?: string
+          wins?: number
+        }
+        Update: {
+          division_id?: string
+          draws?: number
+          form?: string[]
+          id?: string
+          losses?: number
+          played?: number
+          points?: number
+          position?: number | null
+          round_diff?: number
+          team_id?: string
+          updated_at?: string
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_standings_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "league_divisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leagues: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          description: string | null
+          game: string
+          id: string
+          is_demo: boolean
+          max_teams: number
+          min_roster_size: number
+          name: string
+          reward_text: string | null
+          rules_md: string | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          game?: string
+          id?: string
+          is_demo?: boolean
+          max_teams?: number
+          min_roster_size?: number
+          name: string
+          reward_text?: string | null
+          rules_md?: string | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          game?: string
+          id?: string
+          is_demo?: boolean
+          max_teams?: number
+          min_roster_size?: number
+          name?: string
+          reward_text?: string | null
+          rules_md?: string | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lfp_board: {
         Row: {
           created_at: string
@@ -523,23 +810,165 @@ export type Database = {
           },
         ]
       }
+      match_disputes: {
+        Row: {
+          created_at: string
+          evidence_url: string | null
+          id: string
+          match_id: string
+          opened_by: string
+          opened_by_team_id: string
+          reason: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          match_id: string
+          opened_by: string
+          opened_by_team_id: string
+          reason: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          match_id?: string
+          opened_by?: string
+          opened_by_team_id?: string
+          reason?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_disputes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_results: {
+        Row: {
+          created_at: string
+          id: string
+          map: string | null
+          match_id: string
+          notes: string | null
+          score_a: number
+          score_b: number
+          screenshot_url: string | null
+          submitted_by: string
+          submitted_by_team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          map?: string | null
+          match_id: string
+          notes?: string | null
+          score_a: number
+          score_b: number
+          screenshot_url?: string | null
+          submitted_by: string
+          submitted_by_team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          map?: string | null
+          match_id?: string
+          notes?: string | null
+          score_a?: number
+          score_b?: number
+          screenshot_url?: string | null
+          submitted_by?: string
+          submitted_by_team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_results_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_rosters: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          role?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_rosters_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           bracket_position: number | null
           bracket_side: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
+          division_id: string | null
           game: string
           id: string
+          is_demo: boolean
           map: string | null
+          matchday: number | null
           next_match_id: string | null
           next_match_slot: string | null
           played_at: string | null
           player_a_id: string | null
           player_b_id: string | null
+          result_status: string | null
           round: number | null
+          scheduled_at: string | null
           score_a: number | null
           score_b: number | null
+          season_id: string | null
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           team_a_id: string | null
           team_b_id: string | null
           tournament_id: string | null
@@ -548,19 +977,29 @@ export type Database = {
         Insert: {
           bracket_position?: number | null
           bracket_side?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
+          division_id?: string | null
           game?: string
           id?: string
+          is_demo?: boolean
           map?: string | null
+          matchday?: number | null
           next_match_id?: string | null
           next_match_slot?: string | null
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          result_status?: string | null
           round?: number | null
+          scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
+          season_id?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           team_a_id?: string | null
           team_b_id?: string | null
           tournament_id?: string | null
@@ -569,25 +1008,42 @@ export type Database = {
         Update: {
           bracket_position?: number | null
           bracket_side?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
+          division_id?: string | null
           game?: string
           id?: string
+          is_demo?: boolean
           map?: string | null
+          matchday?: number | null
           next_match_id?: string | null
           next_match_slot?: string | null
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          result_status?: string | null
           round?: number | null
+          scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
+          season_id?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           team_a_id?: string | null
           team_b_id?: string | null
           tournament_id?: string | null
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matches_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "league_divisions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matches_next_match_id_fkey"
             columns: ["next_match_id"]
@@ -607,6 +1063,13 @@ export type Database = {
             columns: ["player_b_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "league_seasons"
             referencedColumns: ["id"]
           },
           {
@@ -1777,6 +2240,41 @@ export type Database = {
           },
         ]
       }
+      trophies: {
+        Row: {
+          awarded_at: string
+          id: string
+          kind: string
+          label: string | null
+          season_id: string | null
+          team_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          id?: string
+          kind: string
+          label?: string | null
+          season_id?: string | null
+          team_id: string
+        }
+        Update: {
+          awarded_at?: string
+          id?: string
+          kind?: string
+          label?: string | null
+          season_id?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trophies_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "league_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -1853,12 +2351,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_resolve_match: {
+        Args: { _match_id: string; _score_a: number; _score_b: number }
+        Returns: undefined
+      }
       apply_elo_decay: {
         Args: never
         Returns: {
           affected_users: number
           total_decay: number
         }[]
+      }
+      approve_league_registration: {
+        Args: { _registration_id: string }
+        Returns: undefined
+      }
+      award_season_trophies: {
+        Args: { _season_id: string }
+        Returns: undefined
       }
       award_tournament_prizes: {
         Args: { _tournament_id: string }
@@ -1869,15 +2379,28 @@ export type Database = {
         Returns: number
       }
       close_season: { Args: { _season_id: string }; Returns: undefined }
+      confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      dispute_match_result: {
+        Args: { _evidence?: string; _match_id: string; _reason: string }
+        Returns: undefined
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
       generate_bracket: { Args: { _tournament_id: string }; Returns: undefined }
+      generate_round_robin_fixtures: {
+        Args: {
+          _days_between?: number
+          _season_id: string
+          _start_date: string
+        }
+        Returns: number
+      }
       get_my_email: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1889,6 +2412,10 @@ export type Database = {
       is_disposable_email: { Args: { _email: string }; Returns: boolean }
       is_muted: {
         Args: { _scope: string; _team_id?: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_captain: {
+        Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
       is_team_member: {
@@ -1913,6 +2440,29 @@ export type Database = {
         }[]
       }
       recalculate_smurf_risk: { Args: { _user_id: string }; Returns: number }
+      recompute_standings_for_division: {
+        Args: { _division_id: string }
+        Returns: undefined
+      }
+      register_team_for_season: {
+        Args: { _season_id: string; _team_id: string }
+        Returns: string
+      }
+      reject_league_registration: {
+        Args: { _registration_id: string }
+        Returns: undefined
+      }
+      submit_match_result: {
+        Args: {
+          _map?: string
+          _match_id: string
+          _notes?: string
+          _score_a: number
+          _score_b: number
+          _screenshot?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "organizer"
