@@ -18,7 +18,7 @@ import { toast } from "sonner";
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
-interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; }
+interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; }
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
@@ -110,7 +110,7 @@ export default function LeagueDetailPage() {
     (async () => {
       const { data } = await supabase
         .from("teams")
-        .select("id, name, tag, avatar_url, owner_id")
+        .select("id, name, tag, avatar_url, owner_id, game")
         .eq("owner_id", user.id);
       setMyTeams((data ?? []) as TeamLite[]);
     })();
@@ -142,8 +142,9 @@ export default function LeagueDetailPage() {
   const myCaptainTeams = myTeams;
   const canRegister = season?.status === "registration_open" && myCaptainTeams.length > 0;
   // Only teams of the same game that aren't already registered
-  const eligible = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && (!league?.game || (t as any).game === undefined || true));
+  const eligible = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && (!league?.game || !t.game || t.game === league.game));
   const myPendingOrApproved = myCaptainTeams.filter(t => allMyRegs.has(t.id));
+  const wrongGameTeams = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && league?.game && t.game && t.game !== league.game);
 
   const handleRegister = async (teamId: string) => {
     if (!season) return;
