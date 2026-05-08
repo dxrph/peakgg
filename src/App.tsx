@@ -36,6 +36,10 @@ import AdminEconomy from "./pages/admin/sections/AdminEconomy";
 import AdminAnnouncements from "./pages/admin/sections/AdminAnnouncements";
 import AdminSeasons from "./pages/admin/sections/AdminSeasons";
 import AdminElo from "./pages/admin/sections/AdminElo";
+import AdminLeagues from "./pages/admin/sections/AdminLeagues";
+import LeaguesPage from "./pages/Leagues";
+import LeagueDetailPage from "./pages/LeagueDetail";
+import MatchDetailPage from "./pages/MatchDetail";
 import AimGuidePage from "./pages/AimGuide";
 import FreeAgentsPage from "./pages/FreeAgents";
 import NotificationsPage from "./pages/Notifications";
@@ -106,6 +110,10 @@ const App = () => (
               <Route path="/admin/announcements" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminAnnouncements /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/seasons" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminSeasons /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/elo" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminElo /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/leagues" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminLeagues /></RoleGuard></ProtectedRoute>} />
+              <Route path="/leagues" element={<LeaguesPage />} />
+              <Route path="/leagues/:leagueId" element={<LeaguesPage />} />
+              <Route path="/matches/:matchId" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
               <Route
                 path="/admin/security"
                 element={
