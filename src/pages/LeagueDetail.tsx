@@ -18,7 +18,7 @@ import { toast } from "sonner";
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
-interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; }
+interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; }
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
@@ -110,7 +110,7 @@ export default function LeagueDetailPage() {
     (async () => {
       const { data } = await supabase
         .from("teams")
-        .select("id, name, tag, avatar_url, owner_id")
+        .select("id, name, tag, avatar_url, owner_id, game")
         .eq("owner_id", user.id);
       setMyTeams((data ?? []) as TeamLite[]);
     })();
@@ -126,10 +126,25 @@ export default function LeagueDetailPage() {
     return () => { supabase.removeChannel(ch); };
   }, [division?.id]);
 
+  const [allMyRegs, setAllMyRegs] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!season || myTeams.length === 0) { setAllMyRegs(new Set()); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("league_registrations")
+        .select("team_id, status")
+        .eq("season_id", season.id)
+        .in("team_id", myTeams.map(t => t.id));
+      setAllMyRegs(new Set((data ?? []).filter((r: any) => ["pending","approved"].includes(r.status)).map((r: any) => r.team_id)));
+    })();
+  }, [season?.id, myTeams.map(t => t.id).join(",")]);
+
   const myCaptainTeams = myTeams;
   const canRegister = season?.status === "registration_open" && myCaptainTeams.length > 0;
-  const registeredTeamIds = new Set(teams.map(t => t.id));
-  const eligible = myCaptainTeams.filter(t => !registeredTeamIds.has(t.id) && t.id /* matches game maybe */ && (!league?.game || true));
+  // Only teams of the same game that aren't already registered
+  const eligible = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && (!league?.game || !t.game || t.game === league.game));
+  const myPendingOrApproved = myCaptainTeams.filter(t => allMyRegs.has(t.id));
+  const wrongGameTeams = myCaptainTeams.filter(t => !allMyRegs.has(t.id) && league?.game && t.game && t.game !== league.game);
 
   const handleRegister = async (teamId: string) => {
     if (!season) return;
@@ -198,6 +213,13 @@ export default function LeagueDetailPage() {
               </div>
             </div>
 
+            {myPendingOrApproved.length > 0 && (
+              <Card className="mt-6 p-4 border-success/40 bg-success/5">
+                <p className="text-sm">
+                  ✓ {myPendingOrApproved.map(t => t.name).join(", ")} {myPendingOrApproved.length === 1 ? "is" : "are"} already registered for {season?.name}.
+                </p>
+              </Card>
+            )}
             {canRegister && eligible.length > 0 && (
               <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -213,6 +235,11 @@ export default function LeagueDetailPage() {
                     ))}
                   </div>
                 </div>
+              </Card>
+            )}
+            {canRegister && eligible.length === 0 && wrongGameTeams.length > 0 && (
+              <Card className="mt-6 p-4 border-amber-500/40 bg-amber-500/5">
+                <p className="text-sm">Your team's game doesn't match this league ({league.game}). Create a {league.game} team to register.</p>
               </Card>
             )}
             {!user && season?.status === "registration_open" && (
