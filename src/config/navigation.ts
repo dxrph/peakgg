@@ -61,6 +61,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   // ───────── PLATFORM (main navbar) ─────────
   { key: "tournaments", labelKey: "navmap.tournaments", label: "Tournaments", path: "/tournaments", icon: Trophy, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
+  { key: "leagues",     labelKey: "navmap.leagues",     label: "Peak League", path: "/leagues",     icon: Mountain, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "teams",       labelKey: "navmap.teams",       label: "Teams",       path: "/teams",       icon: Users,  category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "free_agents", labelKey: "navmap.free_agents", label: "Free Agents", path: "/free-agents", icon: UserPlus, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "clips",       labelKey: "navmap.clips",       label: "Clips",       path: "/clips",       icon: Film,   category: "platform", showInNavbar: true, showInFooter: true, comingSoon: true },

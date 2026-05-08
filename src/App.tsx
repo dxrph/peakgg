@@ -112,7 +112,7 @@ const App = () => (
               <Route path="/admin/elo" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminElo /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/leagues" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminLeagues /></RoleGuard></ProtectedRoute>} />
               <Route path="/leagues" element={<LeaguesPage />} />
-              <Route path="/leagues/:leagueId" element={<LeaguesPage />} />
+              <Route path="/leagues/:leagueId" element={<LeagueDetailPage />} />
               <Route path="/matches/:matchId" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
               <Route
                 path="/admin/security"
