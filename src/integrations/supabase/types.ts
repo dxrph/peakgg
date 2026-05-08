@@ -2452,6 +2452,10 @@ export type Database = {
         Args: { _registration_id: string }
         Returns: undefined
       }
+      seed_demo_teams_for_league: {
+        Args: { _count?: number; _league_id: string }
+        Returns: number
+      }
       submit_match_result: {
         Args: {
           _map?: string
@@ -2463,6 +2467,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      wipe_demo_teams: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "organizer"
