@@ -2,74 +2,23 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import RankBadge from "@/components/RankBadge";
-import { Trophy, Calendar, Users, MapPin, Clock, Shield, ChevronRight, CheckCircle2, Globe, User2 } from "lucide-react";
+import EmptyState from "@/components/ui/empty-state";
+import {
+  Trophy, Calendar, Users, MapPin, Shield, ChevronRight, Globe, User2, ArrowLeft,
+} from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import BracketView from "@/components/tournaments/BracketView";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
-
-const tournamentData: Record<string, any> = {
-  "1": {
-    name: "PeakGG Weekly #12",
-    format: "5v5 Single Elimination",
-    date: "March 8, 2026 — 19:00 CET",
-    prize: "€500",
-    slots: "12/16",
-    status: "Open",
-    tier: 1,
-    region: "EU-West",
-    description: "Weekly competitive tournament open to all players. Single elimination bracket with best-of-1 matches until semifinals, then best-of-3.",
-    rules: [
-      "Open to all PeakGG players (Tier 1 — Open Cup)",
-      "Check-in opens 30 minutes before start",
-      "No-show after 5 minutes = automatic forfeit",
-      "Standard competitive rules apply",
-      "Tournament Points awarded: +10 per win, +50 top 4, +100 champion",
-    ],
-    prizeBreakdown: [
-      { place: "1st", amount: "€300" },
-      { place: "2nd", amount: "€125" },
-      { place: "3rd-4th", amount: "€37.50" },
-    ],
-    participants: [
-      { name: "Peak Kings", tag: "PK", elo: 2650, checkedIn: true },
-      { name: "Void Reapers", tag: "VR", elo: 2580, checkedIn: true },
-      { name: "Storm Elite", tag: "SE", elo: 2490, checkedIn: false },
-      { name: "Shadow Corp", tag: "SC", elo: 2420, checkedIn: true },
-      { name: "Ice Protocol", tag: "IP", elo: 2380, checkedIn: false },
-      { name: "Phoenix Rise", tag: "PR", elo: 2340, checkedIn: true },
-      { name: "Nova Strike", tag: "NS", elo: 2300, checkedIn: false },
-      { name: "Lunar Vanguard", tag: "LV", elo: 1850, checkedIn: false },
-      { name: "Apex Predators", tag: "AP", elo: 1600, checkedIn: true },
-      { name: "Crimson Wolves", tag: "CW", elo: 1180, checkedIn: false },
-      { name: "Eclipse Gaming", tag: "EG", elo: 950, checkedIn: true },
-      { name: "Zenith Esports", tag: "ZE", elo: 720, checkedIn: false },
-    ],
-    bracket: [
-      { round: "Quarterfinals", matches: [
-        { team1: "Peak Kings", team2: "Zenith Esports", score1: 13, score2: 7, status: "completed" },
-        { team1: "Void Reapers", team2: "Eclipse Gaming", score1: null, score2: null, status: "upcoming" },
-        { team1: "Storm Elite", team2: "Crimson Wolves", score1: null, score2: null, status: "upcoming" },
-        { team1: "Shadow Corp", team2: "Apex Predators", score1: null, score2: null, status: "upcoming" },
-      ]},
-      { round: "Semifinals", matches: [
-        { team1: "Peak Kings", team2: "TBD", score1: null, score2: null, status: "upcoming" },
-        { team1: "TBD", team2: "TBD", score1: null, score2: null, status: "upcoming" },
-      ]},
-      { round: "Grand Final", matches: [
-        { team1: "TBD", team2: "TBD", score1: null, score2: null, status: "upcoming" },
-      ]},
-    ],
-  },
-};
+import { Skeleton } from "@/components/ui/skeleton";
+import { DISCORD_INVITE } from "@/lib/links";
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
   const isUuid = !!id && /^[0-9a-f-]{36}$/i.test(id);
 
-  const { data: dbTournament } = useQuery({
+  const { data: t, isLoading } = useQuery({
     queryKey: ["tournament-public", id],
     enabled: !!id,
     queryFn: async () => {
@@ -82,179 +31,208 @@ export default function TournamentDetailPage() {
     },
   });
 
-  const fallback = tournamentData[id || "1"] || tournamentData["1"];
+  const { data: realParticipantsCount = 0 } = useQuery({
+    queryKey: ["tournament-participants-count", t?.id],
+    enabled: !!t?.id,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("tournament_registrations" as never)
+        .select("*", { count: "exact", head: true })
+        .eq("tournament_id", t!.id)
+        .eq("status", "confirmed");
+      return count ?? 0;
+    },
+  });
 
-  const tournament = dbTournament
-    ? {
-        name: dbTournament.name,
-        format: `${dbTournament.team_size || dbTournament.format} ${dbTournament.bracket_type?.replace("_", " ") || ""}`.trim(),
-        date: dbTournament.start_date
-          ? fmtDate(new Date(dbTournament.start_date), "MMM d, yyyy — HH:mm") + " " + (dbTournament.timezone || "")
-          : "TBD",
-        prize: dbTournament.prize_pool || `${dbTournament.reward_trophies || 0} trophies`,
-        slots: `0/${dbTournament.max_teams}`,
-        status: dbTournament.status,
-        tier: dbTournament.tier,
-        tierLabel: dbTournament.tier_label,
-        region: dbTournament.timezone || "EU",
-        description: dbTournament.description || dbTournament.short_description || "",
-        bannerUrl: dbTournament.banner_url,
-        logoUrl: dbTournament.logo_url,
-        organizerName: dbTournament.organizer_name,
-        organizerDiscord: dbTournament.organizer_discord,
-        rulesUrl: dbTournament.rules_url,
-        rules: (dbTournament.rules || "").split("\n").filter(Boolean),
-        prizeBreakdown: fallback.prizeBreakdown,
-        participants: [],
-        bracket: [],
-      }
-    : fallback;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <Navbar />
+        <div className="container pt-24 pb-16 flex-1 space-y-4">
+          <Skeleton className="h-10 w-1/2" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!t) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <Navbar />
+        <div className="container pt-24 pb-16 flex-1">
+          <EmptyState
+            icon={Trophy}
+            title="Tournament not found"
+            description="This tournament does not exist or is not public yet."
+            ctaLabel="Back to Tournaments"
+            ctaTo="/tournaments"
+            secondaryLabel="Join Discord"
+            secondaryOnClick={() => window.open(DISCORD_INVITE, "_blank")}
+          />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
+  const isTeamTournament = (t.tournament_type ?? "team_bracket") !== "solo_queue";
+  const startDate = t.start_date ? fmtDate(new Date(t.start_date), "MMM d, yyyy — HH:mm") + " " + (t.timezone || "") : "TBD";
+  const rules = (t.rules || "").split("\n").map(s => s.trim()).filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Navbar />
-      {tournament.bannerUrl && (
+
+      {t.banner_url && (
         <div className="w-full h-48 md:h-64 relative overflow-hidden mt-16">
-          <img src={tournament.bannerUrl} alt={tournament.name} className="w-full h-full object-cover" />
+          <img src={t.banner_url} alt={t.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         </div>
       )}
-      <div className="container pt-24 pb-16">
+
+      <div className="container pt-24 pb-16 flex-1">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
-          <Link to="/tournaments" className="hover:text-foreground transition-colors">Tournaments</Link>
+          <Link to="/tournaments" className="hover:text-foreground transition-colors flex items-center gap-1">
+            <ArrowLeft className="h-3 w-3" />Tournaments
+          </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground">{tournament.name}</span>
+          <span className="text-foreground">{t.name}</span>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-6 md:p-8 neon-border mb-8">
           <div className="flex flex-col md:flex-row justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <Badge variant="outline" className="border-primary text-primary font-display">{tournament.status}</Badge>
-                <Badge variant="secondary" className="font-display">{tournament.format}</Badge>
-                <Badge variant="outline" className={`font-display ${tierColors[tournament.tier]}`}>
-                  {tournament.tierLabel || `Tier ${tournament.tier}`}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-3">
+                <Badge variant="outline" className="border-primary text-primary font-display uppercase">{t.status}</Badge>
+                <Badge variant="secondary" className="font-display">
+                  {isTeamTournament ? "Team Tournament" : "Solo Queue Cup"}
+                </Badge>
+                {t.format && <Badge variant="secondary" className="font-display">{t.format}</Badge>}
+                <Badge variant="outline" className={`font-display ${tierColors[t.tier] ?? "text-muted-foreground"}`}>
+                  {t.tier_label || `Tier ${t.tier}`}
                 </Badge>
               </div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{tournament.name}</h1>
-              <p className="text-muted-foreground font-body max-w-2xl">{tournament.description}</p>
+              <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{t.name}</h1>
+              {(t.description || t.short_description) && (
+                <p className="text-muted-foreground font-body max-w-2xl">{t.description || t.short_description}</p>
+              )}
               <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground font-body">
-                <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{tournament.date}</span>
-                <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{tournament.region}</span>
-                <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{tournament.slots} teams</span>
-                <span className="flex items-center gap-1.5"><Trophy className="h-4 w-4 text-accent" /><span className="text-accent font-semibold">{tournament.prize}</span></span>
-                {tournament.organizerName && (
-                  <span className="flex items-center gap-1.5"><User2 className="h-4 w-4" />{tournament.organizerName}</span>
+                <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{startDate}</span>
+                <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{t.timezone || "EU"}</span>
+                <span className="flex items-center gap-1.5">
+                  <Users className="h-4 w-4" />{realParticipantsCount}/{t.max_teams} {isTeamTournament ? "teams" : "players"}
+                </span>
+                {t.prize_pool && (
+                  <span className="flex items-center gap-1.5">
+                    <Trophy className="h-4 w-4 text-accent" />
+                    <span className="text-accent font-semibold">{t.prize_pool}</span>
+                  </span>
+                )}
+                {t.organizer_name && (
+                  <span className="flex items-center gap-1.5"><User2 className="h-4 w-4" />{t.organizer_name}</span>
+                )}
+                {t.language && (
+                  <span className="flex items-center gap-1.5"><Globe className="h-4 w-4" />{t.language}</span>
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-3 md:items-end">
-              <Button variant="neon" size="lg">Register Team</Button>
-              <Button variant="neonOutline" size="sm"><Clock className="mr-2 h-4 w-4" />Check-in (opens 30m before)</Button>
+            <div className="flex flex-col gap-3 md:items-end shrink-0">
+              {isTeamTournament ? (
+                <Link to="/teams"><Button variant="neon" size="lg" className="uppercase tracking-wider">Register Team</Button></Link>
+              ) : (
+                <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                  <Button variant="neon" size="lg" className="uppercase tracking-wider">Join via Discord</Button>
+                </a>
+              )}
+              {t.rules_url && (
+                <a href={t.rules_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="neonOutline" size="sm"><Shield className="mr-2 h-4 w-4" />Full Rules</Button>
+                </a>
+              )}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-lg border border-border bg-card p-6 neon-border">
-              <h2 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />Bracket
               </h2>
-              <div className="space-y-8 overflow-x-auto">
-                {tournament.bracket.map((round: any) => (
-                  <div key={round.round}>
-                    <h3 className="font-display font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">{round.round}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {round.matches.map((match: any, i: number) => (
-                        <div key={i} className={`rounded border p-3 ${match.status === "completed" ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/30"}`}>
-                          <div className="flex justify-between items-center">
-                            <div className="space-y-1.5">
-                              <div className={`text-sm font-display font-semibold ${match.status === "completed" && match.score1 > match.score2 ? "text-primary" : ""}`}>
-                                {match.team1}
-                              </div>
-                              <div className={`text-sm font-display font-semibold ${match.status === "completed" && match.score2 > match.score1 ? "text-primary" : ""}`}>
-                                {match.team2}
-                              </div>
-                            </div>
-                            <div className="text-right space-y-1.5">
-                              {match.status === "completed" ? (
-                                <>
-                                  <div className={`text-sm font-mono font-bold ${match.score1 > match.score2 ? "text-primary" : "text-muted-foreground"}`}>{match.score1}</div>
-                                  <div className={`text-sm font-mono font-bold ${match.score2 > match.score1 ? "text-primary" : "text-muted-foreground"}`}>{match.score2}</div>
-                                </>
-                              ) : (
-                                <Badge variant="secondary" className="text-xs font-display">Upcoming</Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {realParticipantsCount > 0 ? (
+                <BracketView tournamentId={t.id} />
+              ) : (
+                <p className="text-sm text-muted-foreground font-body py-8 text-center">
+                  Bracket will appear once the tournament starts.
+                </p>
+              )}
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-6 neon-border">
+            <div className="rounded-lg border border-border bg-card p-6">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />Participants ({tournament.participants.length})
+                <Users className="h-5 w-5 text-primary" />Participants
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {tournament.participants.map((p: any) => (
-                  <div key={p.tag} className="flex items-center justify-between rounded border border-border bg-secondary/30 p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded gradient-primary flex items-center justify-center font-display font-bold text-primary-foreground text-xs">{p.tag}</div>
-                      <div>
-                        <span className="font-display font-semibold text-sm">{p.name}</span>
-                        <div className="mt-0.5"><RankBadge elo={p.elo} size="sm" /></div>
-                      </div>
-                    </div>
-                    {p.checkedIn && <CheckCircle2 className="h-4 w-4 text-success" />}
-                  </div>
-                ))}
-              </div>
+              {realParticipantsCount > 0 ? (
+                <p className="text-sm text-muted-foreground font-body">
+                  {realParticipantsCount} confirmed {isTeamTournament ? "teams" : "players"}.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground font-body py-6 text-center">
+                  No participants registered yet. Be the first to {isTeamTournament ? "register your team" : "sign up"}.
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-lg border border-border bg-card p-6 neon-border">
+            <div className="rounded-lg border border-border bg-card p-6">
               <h3 className="font-display font-bold mb-4 flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-accent" />Prize Breakdown
+                <Trophy className="h-5 w-5 text-accent" />Rewards
               </h3>
-              <div className="space-y-3">
-                {tournament.prizeBreakdown.map((p: any) => (
-                  <div key={p.place} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-                    <span className="font-display font-semibold text-sm">{p.place}</span>
-                    <span className="text-accent font-mono font-bold">{p.amount}</span>
+              <div className="space-y-2 text-sm font-body">
+                {t.prize_pool && (
+                  <div className="flex justify-between border-b border-border pb-2">
+                    <span className="text-muted-foreground">Prize Pool</span>
+                    <span className="text-accent font-semibold">{t.prize_pool}</span>
                   </div>
-                ))}
+                )}
+                {t.reward_trophies > 0 && (
+                  <div className="flex justify-between border-b border-border pb-2">
+                    <span className="text-muted-foreground">Trophies</span>
+                    <span className="font-semibold">{t.reward_trophies}</span>
+                  </div>
+                )}
+                {t.reward_badge && (
+                  <div className="flex justify-between border-b border-border pb-2">
+                    <span className="text-muted-foreground">Badge</span>
+                    <span className="font-semibold">{t.reward_badge}</span>
+                  </div>
+                )}
+                {!t.prize_pool && !t.reward_trophies && !t.reward_badge && (
+                  <p className="text-muted-foreground">Tournament Points and recognition.</p>
+                )}
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-6 neon-border">
-              <h3 className="font-display font-bold mb-4 flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />Rules
-              </h3>
-              <ul className="space-y-2">
-                {tournament.rules.map((r: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground font-body">
-                    <span className="text-primary mt-0.5">•</span>{r}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {rules.length > 0 && (
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />Rules
+                </h3>
+                <ul className="space-y-2">
+                  {rules.map((r, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground font-body">
+                      <span className="text-primary mt-0.5">•</span>{r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
-
-        {id && (
-          <div className="mt-10">
-            <h2 className="font-display text-xl uppercase tracking-widest mb-4">Tabellone</h2>
-            <BracketView tournamentId={id} />
-          </div>
-        )}
       </div>
       <Footer />
     </div>
