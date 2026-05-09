@@ -121,6 +121,7 @@ export default function TeamsPage() {
     const { data } = await supabase
       .from("teams")
       .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding, avatar_url")
+      .eq("is_demo", false)
       .order("trophies", { ascending: false });
     setTeams((data as any) ?? []);
   };
