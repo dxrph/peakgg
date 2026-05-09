@@ -235,6 +235,14 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     );
                   })}
+                  {myTeamId && (
+                    <DropdownMenuItem asChild>
+                      <Link to={`/teams/${myTeamId}/dashboard`} className="cursor-pointer flex items-center gap-2">
+                        <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                        My Team Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
