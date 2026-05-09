@@ -20,7 +20,7 @@ import { DISCORD_INVITE } from "@/lib/links";
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
-interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; }
+interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; }
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
@@ -66,7 +66,7 @@ export default function LeagueDetailPage() {
       if (teamIds.length) {
         const { data: tdata } = await supabase
           .from("teams")
-          .select("id, name, tag, avatar_url, owner_id")
+          .select("id, name, tag, avatar_url, owner_id, is_founding")
           .in("id", teamIds);
         teamRows = (tdata ?? []) as TeamLite[];
       }
@@ -341,7 +341,10 @@ export default function LeagueDetailPage() {
                       {t.avatar_url ? <img src={t.avatar_url} alt="" className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-muted border border-border" />}
                       <div className="min-w-0">
                         <div className="font-display font-bold uppercase truncate">{t.name}</div>
-                        {t.tag && <div className="text-[10px] text-muted-foreground">[{t.tag}]</div>}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {t.tag && <span className="text-[10px] text-muted-foreground">[{t.tag}]</span>}
+                          {t.is_founding && <span className="text-[9px] uppercase tracking-wider text-accent border border-accent/40 rounded-sm px-1">Founding</span>}
+                        </div>
                       </div>
                     </Link>
                 ))}
