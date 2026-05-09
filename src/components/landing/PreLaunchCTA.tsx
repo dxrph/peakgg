@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { MessageCircle, Swords, Sparkles } from "lucide-react";
+import { MessageCircle, Swords, Sparkles, Mountain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -47,13 +47,19 @@ export default function PreLaunchCTA() {
                   {t("pre_launch_cta.cta_register")}
                 </Button>
               </Link>
+              <Link to="/leagues" className="w-full sm:w-auto">
+                <Button size="lg" variant="neonOutline" className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider">
+                  <Mountain className="mr-2 h-5 w-5" />
+                  Peak League S0
+                </Button>
+              </Link>
               <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0"
                 >
                   <MessageCircle className="mr-2 h-5 w-5" />
-                  {t("pre_launch_cta.cta_discord")}
+                  Join Discord — Season 0 Beta
                 </Button>
               </a>
             </div>

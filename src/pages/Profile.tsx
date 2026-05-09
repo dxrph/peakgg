@@ -469,6 +469,26 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {isOwnProfile && team && (
+        <div className="container mt-6">
+          <Link
+            to={`/teams/${team.id}/dashboard`}
+            className="flex items-center justify-between gap-4 rounded-md border border-primary/40 bg-primary/5 hover:bg-primary/10 transition-colors p-4"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Users className="h-5 w-5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="font-display uppercase tracking-wider text-sm truncate">
+                  You are part of {team.name}
+                </p>
+                <p className="text-xs text-muted-foreground">Open your Team Dashboard to manage roster, league, and chat.</p>
+              </div>
+            </div>
+            <Button size="sm" variant="neon" className="shrink-0">Open Dashboard</Button>
+          </Link>
+        </div>
+      )}
+
       {/* ───────────────── TABS ───────────────── */}
       <div className="container py-8">
         <Tabs defaultValue="overview" className="w-full">
