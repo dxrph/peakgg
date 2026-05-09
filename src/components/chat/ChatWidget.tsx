@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Globe2, Users, Send, Flag, Trash2, Crown, Shield, BadgeCheck } from "lucide-react";
+import { MessageSquare, X, Globe2, Users, Send, Flag, Trash2, Crown, Shield, BadgeCheck, Pin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
@@ -159,10 +159,12 @@ function ChannelView({ kind, teamId, teamName }: { kind: Tab; teamId: string | n
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-6 gap-3">
         <Users className="h-10 w-10 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Join or create a team to access Team Chat.</p>
-        <Link to="/teams">
-          <Button size="sm" variant="neon">Browse teams</Button>
-        </Link>
+        <p className="text-sm font-display uppercase tracking-wider">Team Chat locked</p>
+        <p className="text-xs text-muted-foreground -mt-2">Join or create a team to unlock Team Chat.</p>
+        <div className="flex gap-2">
+          <Link to="/teams"><Button size="sm" variant="neon"><Plus className="h-3.5 w-3.5 mr-1" />Create Team</Button></Link>
+          <Link to="/teams"><Button size="sm" variant="outline">Find Teams</Button></Link>
+        </div>
       </div>
     );
   }
@@ -170,8 +172,16 @@ function ChannelView({ kind, teamId, teamName }: { kind: Tab; teamId: string | n
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {kind === "team" && teamName && (
-        <div className="px-3 py-2 border-b border-border/60 text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground bg-[#0a0a0a]">
-          {teamName}
+        <div className="px-3 py-2 border-b border-border/60 text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground bg-[#0a0a0a] flex items-center gap-1.5">
+          <Users className="h-3 w-3" /> {teamName} · Private
+        </div>
+      )}
+      {kind === "global" && (
+        <div className="px-3 py-2 border-b border-border/60 bg-primary/5 flex items-start gap-2">
+          <Pin className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+          <p className="text-[11px] text-muted-foreground leading-snug">
+            Welcome to <span className="text-primary font-semibold">PeakGG Season 0 Beta</span>. Find teams, ask questions and join the Discord.
+          </p>
         </div>
       )}
 
@@ -179,7 +189,7 @@ function ChannelView({ kind, teamId, teamName }: { kind: Tab; teamId: string | n
         {chat.loading ? (
           <p className="text-xs text-muted-foreground text-center py-8">Loading…</p>
         ) : chat.messages.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-8">No messages yet. Say hi!</p>
+          <p className="text-xs text-muted-foreground text-center py-8">No messages yet. Start the conversation.</p>
         ) : (
           chat.messages.map((m) => (
             <MessageRow
@@ -206,7 +216,7 @@ function ChannelView({ kind, teamId, teamName }: { kind: Tab; teamId: string | n
               value={input}
               onChange={(e) => setInput(e.target.value.slice(0, 200))}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Type a message…"
+              placeholder="Message PeakGG…"
               maxLength={200}
               className="flex-1 bg-secondary/60 border border-border/60 rounded-md px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
             />
