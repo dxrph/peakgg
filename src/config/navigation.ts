@@ -86,11 +86,11 @@ export const NAV_ITEMS: NavItem[] = [
   // ───────── ACCOUNT (user dropdown + dashboard) ─────────
   { key: "dashboard",      labelKey: "navmap.dashboard",      label: "Dashboard",        path: "/dashboard",     icon: LayoutDashboard, category: "account", requiresAuth: true, showInUserDropdown: true },
   { key: "my_profile",     labelKey: "navmap.my_profile",     label: "My Profile",       path: "/profile/me",    icon: UserIcon,        category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
-  { key: "edit_profile",   labelKey: "navmap.edit_profile",   label: "Edit Profile",     path: "/settings",      icon: Settings,        category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
+  { key: "edit_profile",   labelKey: "navmap.edit_profile",   label: "Edit Profile",     path: "/settings",      icon: Settings,        category: "account", requiresAuth: true, showInDashboard: true },
   { key: "my_team",        labelKey: "navmap.my_team",        label: "My Team",          path: "/teams",         icon: Users,           category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
   { key: "my_tournaments", labelKey: "navmap.my_tournaments", label: "My Tournaments",   path: "/tournaments",   icon: Trophy,          category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
   { key: "my_clips",       labelKey: "navmap.my_clips",       label: "My Clips",         path: "/clips",         icon: Film,            category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true, comingSoon: true },
-  { key: "notifications",  labelKey: "navmap.notifications",  label: "Notifications",    path: "/notifications", icon: Bell,            category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
+  { key: "notifications",  labelKey: "navmap.notifications",  label: "Notifications",    path: "/notifications", icon: Bell,            category: "account", requiresAuth: true, showInDashboard: true },
   { key: "settings",       labelKey: "navmap.settings",       label: "Settings",         path: "/settings",      icon: Settings,        category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
 
   // ───────── ADMIN ─────────
