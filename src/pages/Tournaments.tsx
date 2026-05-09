@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { openCupPublicQueueEnabled } from "@/lib/feature-flags";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
@@ -42,20 +44,20 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "open",
     name: "Open Cup",
-    tagline: "Free entry · Solo queue · Temporary teams · Affects ELO",
+    tagline: "Solo queue · Temporary teams · Affects ELO · Closed Beta",
     status: "Opening Soon",
-    unlock: "Anyone can join. No team required.",
+    unlock: "Open Cup matchmaking is being tested with early players. Once enabled, players will join solo, get matched into temporary teams and gain or lose ELO based on confirmed results.",
     rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
-    cta: { label: "Join Open Cup", href: "#open-cup-queue" },
+    cta: { label: "Join Discord for Open Cup Beta", href: DISCORD_INVITE, external: true },
     accent: "border-success/40 text-success",
     icon: Trophy,
   },
   {
     id: "challenger",
     name: "Challenger Series",
-    tagline: "Unlocks at Silver / 1200 ELO",
+    tagline: "Locked until Open Cup is live",
     status: "Locked",
-    unlock: "Reach 1200 ELO (Silver rank) in Open Cup matches.",
+    unlock: "Unlocks once Open Cup matchmaking exits closed beta and ELO thresholds are active.",
     rewards: ["Challenger badge", "Higher-stake matches", "Path to Championship"],
     cta: { label: "View Requirements", href: "#solo-path" },
     accent: "border-accent/40 text-accent",
@@ -65,9 +67,9 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "championship",
     name: "Peak Championship",
-    tagline: "Elite tier · Invite or qualification",
+    tagline: "Invite-only · Coming later",
     status: "Final Tier",
-    unlock: "Reach Diamond rank (1800 ELO) or admin invite.",
+    unlock: "Invite-only for now. Future qualification path will open after Challenger Series goes live.",
     rewards: ["Season badge", "Championship recognition", "Leaderboard glory"],
     cta: { label: "View Path", href: "#solo-path" },
     accent: "border-primary/40 text-primary",
@@ -99,6 +101,10 @@ export default function TournamentsPage() {
   const qc = useQueryClient();
   const [joining, setJoining] = useState(false);
   const [teamSize, setTeamSize] = useState<1 | 2 | 5>(1);
+  const { isAdmin } = useUserRoles();
+  // Public queue is gated behind a feature flag. Admins always retain access
+  // for end-to-end testing of matchmaking + ELO.
+  const queueEnabled = openCupPublicQueueEnabled || isAdmin;
 
   // Player ELO for current game
   const { data: myStats } = useQuery({
@@ -244,10 +250,11 @@ export default function TournamentsPage() {
               Tournaments
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground font-body mt-4">
-              Compete solo. Win matches. <span className="text-foreground">Increase your ELO.</span> Unlock higher cups.
+              Compete solo. <span className="text-foreground">Increase your ELO.</span> Unlock higher cups.
             </p>
 
             {/* Open Cup Queue widget */}
+            {queueEnabled ? (
             <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
               {activeMatch ? (
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -273,7 +280,9 @@ export default function TournamentsPage() {
               ) : (
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Solo Queue · Open Cup</div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">
+                      Solo Queue · Open Cup {isAdmin && !openCupPublicQueueEnabled && <span className="text-accent ml-1">· Admin Test</span>}
+                    </div>
                     <div className="text-sm font-body">
                       {user ? <>Your ELO: <span className="text-foreground font-medium">{myElo}</span> · Rank: <span style={{color: myRank.hex}}>{myRank.name}</span></> : "Sign in to play your first Open Cup match"}
                     </div>
@@ -291,6 +300,23 @@ export default function TournamentsPage() {
                 </div>
               )}
             </div>
+            ) : (
+              <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-accent">Closed Beta</div>
+                    <div className="text-sm font-body text-muted-foreground">
+                      Open Cup matchmaking is in closed beta. Join Discord to access early tests.
+                    </div>
+                  </div>
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <Button variant="neon" size="sm" className="uppercase tracking-wider">
+                      <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord for Open Cup Beta
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -385,9 +411,17 @@ export default function TournamentsPage() {
 
                   <div className="mt-5">
                     {isOpen ? (
-                      <Button variant="neon" className="w-full uppercase tracking-wider" onClick={joinQueue} disabled={joining || !!queueEntry || !!activeMatch}>
-                        {activeMatch ? "Match in progress" : queueEntry ? "In queue…" : "Join Open Cup"}<ArrowRight className="ml-2 h-3 w-3" />
-                      </Button>
+                      queueEnabled ? (
+                        <Button variant="neon" className="w-full uppercase tracking-wider" onClick={joinQueue} disabled={joining || !!queueEntry || !!activeMatch}>
+                          {activeMatch ? "Match in progress" : queueEntry ? "In queue…" : (isAdmin && !openCupPublicQueueEnabled ? "Join Open Cup (Admin Test)" : "Join Open Cup")}<ArrowRight className="ml-2 h-3 w-3" />
+                        </Button>
+                      ) : (
+                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
+                          <Button variant="neon" className="w-full uppercase tracking-wider">
+                            <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord for Open Cup Beta
+                          </Button>
+                        </a>
+                      )
                     ) : unlocked ? (
                       <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
                         Coming Soon
