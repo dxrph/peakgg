@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,16 +7,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNotifications } from "@/hooks/useNotifications";
-import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import NotificationCard from "@/components/notifications/NotificationCard";
 
 export default function NotificationsBell() {
-  const { notifications, unreadCount, markAsRead } = useNotifications(10);
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    resolveNotification,
+    dismissNotification,
+  } = useNotifications(10);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifiche">
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold font-display flex items-center justify-center border border-background">
@@ -25,44 +31,38 @@ export default function NotificationsBell() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0">
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-          <span className="font-display font-bold">Notifiche</span>
-          {unreadCount > 0 && (
-            <span className="text-xs text-muted-foreground">{unreadCount} non lette</span>
-          )}
+      <DropdownMenuContent align="end" className="w-[22rem] max-w-[95vw] p-0">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
+          <span className="font-display font-bold">Notifications</span>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <span className="text-xs text-muted-foreground">{unreadCount} unread</span>
+            )}
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
+                <CheckCheck className="h-3 w-3" /> Mark all
+              </button>
+            )}
+          </div>
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-[28rem] overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              Nessuna notifica
+              No notifications yet
             </div>
           ) : (
             notifications.map((n) => (
-              <button
+              <NotificationCard
                 key={n.id}
-                onClick={() => !n.is_read && markAsRead(n.id)}
-                className={`w-full text-left px-4 py-3 border-b border-border last:border-0 hover:bg-secondary/40 transition-colors ${
-                  !n.is_read ? "bg-primary/5" : ""
-                }`}
-              >
-                <div className="flex items-start gap-2">
-                  {!n.is_read && (
-                    <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-display font-semibold text-sm">{n.title}</div>
-                    {n.message && (
-                      <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {n.message}
-                      </div>
-                    )}
-                    <div className="text-[10px] text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: it })}
-                    </div>
-                  </div>
-                </div>
-              </button>
+                n={n}
+                compact
+                onMarkRead={markAsRead}
+                onResolve={resolveNotification}
+                onDismiss={dismissNotification}
+              />
             ))
           )}
         </div>
@@ -70,7 +70,7 @@ export default function NotificationsBell() {
           to="/notifications"
           className="block px-4 py-2.5 text-center text-sm font-display font-semibold border-t border-border hover:bg-secondary/40 transition-colors"
         >
-          Vedi tutte
+          View all
         </Link>
       </DropdownMenuContent>
     </DropdownMenu>
