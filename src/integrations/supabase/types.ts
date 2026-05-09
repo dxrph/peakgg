@@ -558,6 +558,36 @@ export type Database = {
           },
         ]
       }
+      league_not_found_events: {
+        Row: {
+          created_at: string
+          id: string
+          param: string
+          param_type: string
+          path: string | null
+          referrer: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          param: string
+          param_type: string
+          path?: string | null
+          referrer?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          param?: string
+          param_type?: string
+          path?: string | null
+          referrer?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       league_registrations: {
         Row: {
           created_at: string
