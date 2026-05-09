@@ -29,12 +29,9 @@ interface MockTournament {
 }
 
 const tournaments: MockTournament[] = [
-  { id: 1, name: "PeakGG Open Cup #1", format: "5v5 BO1", date: "May 18, 2026", prize: "€500",   slots: "12/16", status: "Open",        tier: 1, game: "valorant", entry: "Free" },
-  { id: 2, name: "EU Challenger Series",format: "5v5 BO3", date: "May 25, 2026", prize: "€2,000", slots: "28/32", status: "Open",        tier: 2, game: "valorant", entry: "Free" },
-  { id: 3, name: "1v1 Aim Challenge",   format: "1v1",     date: "May 20, 2026", prize: "€100",   slots: "48/64", status: "Coming Soon", tier: 1, game: "cs2",      entry: "Free" },
-  { id: 4, name: "Peak Championship S1",format: "5v5 BO5", date: "Jun 14, 2026", prize: "€5,000", slots: "10/16", status: "Open",        tier: 3, game: "valorant", entry: "Paid" },
-  { id: 5, name: "Community Cup",       format: "5v5 BO1", date: "May 10, 2026", prize: "€250",   slots: "8/8",   status: "Live",        tier: 1, game: "r6",       entry: "Free" },
-  { id: 6, name: "Newcomers Tournament",format: "5v5 BO1", date: "May 22, 2026", prize: "€200",   slots: "6/16",  status: "Open",        tier: 1, game: "cs2",      entry: "Free" },
+  { id: 1, name: "Peak Open Cup #1",     format: "5v5 BO1", date: "Season 0 Beta", prize: "Founding badge", slots: "Open", status: "Open",        tier: 1, game: "valorant", entry: "Free" },
+  { id: 2, name: "Peak Community Cup",   format: "5v5 BO1", date: "Season 0 Beta", prize: "Community badge", slots: "Open", status: "Open",        tier: 1, game: "valorant", entry: "Free" },
+  { id: 3, name: "Peak Championship S1", format: "5v5 BO3", date: "Coming soon",   prize: "Season 1 invite", slots: "—",    status: "Coming Soon", tier: 3, game: "valorant", entry: "Free" },
 ];
 
 const tierColors: Record<number, string> = {
