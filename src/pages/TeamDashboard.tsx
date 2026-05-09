@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import StatusPill from "@/components/leagues/StatusPill";
 import MatchCard, { MatchCardData } from "@/components/leagues/MatchCard";
 import TeamChatPanel from "@/components/team-dashboard/TeamChatPanel";
+import TeamLogo from "@/components/teams/TeamLogo";
 
 interface Team {
   id: string; name: string; tag: string; game: string; description: string | null;
@@ -195,9 +196,7 @@ export default function TeamDashboard() {
 
         <Card className="p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start">
-            <div className="w-16 h-16 rounded-lg flex items-center justify-center font-display font-bold text-white text-xl shrink-0" style={{ background: team.color }}>
-              {team.tag}
-            </div>
+            <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={64} rounded="lg" />
             <div className="flex-1">
               <h1 className="font-display font-bold text-3xl uppercase">{team.name}</h1>
               <p className="text-xs text-muted-foreground uppercase tracking-widest">{team.game} · {team.region ?? "—"}</p>
