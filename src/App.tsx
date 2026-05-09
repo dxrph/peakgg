@@ -40,6 +40,7 @@ import AdminLeagues from "./pages/admin/sections/AdminLeagues";
 import LeaguesPage from "./pages/Leagues";
 import LeagueDetailPage from "./pages/LeagueDetail";
 import MatchDetailPage from "./pages/MatchDetail";
+import TeamDashboardPage from "./pages/TeamDashboard";
 import AimGuidePage from "./pages/AimGuide";
 import FreeAgentsPage from "./pages/FreeAgents";
 import NotificationsPage from "./pages/Notifications";
@@ -85,6 +86,8 @@ const App = () => (
               <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetailPage /></ProtectedRoute>} />
               <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
               <Route path="/teams/:teamId/manage" element={<ProtectedRoute><TeamDetailPage manageMode /></ProtectedRoute>} />
+              <Route path="/teams/:teamId/dashboard" element={<ProtectedRoute><TeamDashboardPage /></ProtectedRoute>} />
+              <Route path="/team-dashboard" element={<ProtectedRoute><TeamDashboardPage /></ProtectedRoute>} />
               <Route
                 path="/admin"
                 element={
