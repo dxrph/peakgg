@@ -42,21 +42,21 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "open",
     name: "Open Cup",
-    tagline: "Free entry · Solo queue · Temporary teams",
+    tagline: "Free entry · Solo queue · Temporary teams · Affects ELO",
     status: "Opening Soon",
     unlock: "Anyone can join. No team required.",
-    rewards: ["Tournament Points", "Founder badge", "Open Cup badge"],
-    cta: { label: "Join Discord for Open Cup", href: DISCORD_INVITE, external: true },
+    rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
+    cta: { label: "Join Open Cup", href: "#open-cup-queue" },
     accent: "border-success/40 text-success",
     icon: Trophy,
   },
   {
     id: "challenger",
     name: "Challenger Series",
-    tagline: "Unlocked through Open Cup performance",
+    tagline: "Unlocks at Silver / 1200 ELO",
     status: "Locked",
-    unlock: "Earn 50 Tournament Points or 5 Open Cup wins.",
-    rewards: ["Challenger badge", "Higher TP rewards", "Path to Championship"],
+    unlock: "Reach 1200 ELO (Silver rank) in Open Cup matches.",
+    rewards: ["Challenger badge", "Higher-stake matches", "Path to Championship"],
     cta: { label: "View Requirements", href: "#solo-path" },
     accent: "border-accent/40 text-accent",
     icon: Award,
@@ -65,9 +65,9 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "championship",
     name: "Peak Championship",
-    tagline: "Elite final tier · Invite or qualification",
+    tagline: "Elite tier · Invite or qualification",
     status: "Final Tier",
-    unlock: "Top Challenger players or admin invitation.",
+    unlock: "Reach Diamond rank (1800 ELO) or admin invite.",
     rewards: ["Season badge", "Championship recognition", "Leaderboard glory"],
     cta: { label: "View Path", href: "#solo-path" },
     accent: "border-primary/40 text-primary",
@@ -80,15 +80,15 @@ const HOW_IT_WORKS = [
   { icon: User, title: "Join as a player", text: "Sign up solo — no permanent team needed." },
   { icon: Users, title: "Get matched", text: "We build a temporary team for the cup." },
   { icon: Swords, title: "Play the cup", text: "Compete in a single-elimination bracket." },
-  { icon: Target, title: "Earn Tournament Points", text: "Points stay on your profile forever." },
-  { icon: Award, title: "Unlock higher tiers", text: "Climb from Open Cup to Peak Championship." },
+  { icon: Target, title: "Confirm result", text: "Both sides confirm; admin resolves disputes." },
+  { icon: Award, title: "Gain ELO & rank up", text: "ELO updates instantly. Higher cups unlock at thresholds." },
 ];
 
 const FAQ = [
-  { q: "Do I need a team for the Open Cup?", a: "No. Solo Queue Cups create a temporary team for the duration of the cup, then dissolve." },
-  { q: "What happens to my Tournament Points?", a: "Points stay on your player profile and count toward unlocking higher tiers." },
+  { q: "Do I need a team for the Open Cup?", a: "No. Open Cup creates a temporary team for that match only — it does not appear on the public Teams page." },
+  { q: "How does my ELO change?", a: "Open Cup matches use the same ELO system as ranked matches: about +25 for a win and −15 for a loss, adjusted for opponent strength." },
   { q: "How are Team Tournaments different?", a: "Team Tournaments require a captain to register a full permanent roster. Results count for the team, not individuals." },
-  { q: "Can I do both?", a: "Yes. You can solo queue into Open Cup and also join Team Tournaments with your roster." },
+  { q: "When does ELO update?", a: "Only after both sides confirm the result (or an admin resolves a dispute). Cancelled or unconfirmed matches do not affect ELO." },
 ];
 
 export default function TournamentsPage() {
