@@ -200,7 +200,7 @@ export default function LeaguesPage() {
 
           <div className="flex flex-col sm:flex-row gap-2">
             <Button asChild variant={isFeatured ? "neon" : "default"} className="flex-1 uppercase tracking-wider">
-              <Link to={`/leagues/${l.slug || l.id}`}>
+              <Link to={`/leagues/${l.id}`}>
                 View League<ArrowRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
