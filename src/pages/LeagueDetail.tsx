@@ -53,7 +53,20 @@ export default function LeagueDetailPage() {
       l = data;
     }
     setLeague(l as League);
-    if (!l) { setLoading(false); return; }
+    if (!l) {
+      try {
+        const paramType = !leagueId ? "empty" : (isUuid ? "uuid" : "slug");
+        await supabase.from("league_not_found_events").insert({
+          param: leagueId ?? "",
+          param_type: paramType,
+          referrer: typeof document !== "undefined" ? document.referrer || null : null,
+          path: typeof window !== "undefined" ? window.location.pathname : null,
+          user_id: user?.id ?? null,
+        });
+      } catch (_) { /* swallow logging errors */ }
+      setLoading(false);
+      return;
+    }
     const resolvedId = l.id;
     const { data: ss } = await supabase
       .from("league_seasons")
