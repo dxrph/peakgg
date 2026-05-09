@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle } from "lucide-react";
+import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle, ShieldCheck, CheckCircle2, ListChecks, Clock, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ import { DISCORD_INVITE } from "@/lib/links";
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
-interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; }
+interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; color?: string | null; }
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
@@ -129,11 +129,22 @@ export default function LeagueDetailPage() {
     (async () => {
       const { data } = await supabase
         .from("teams")
-        .select("id, name, tag, avatar_url, owner_id, game")
-        .eq("owner_id", user.id);
+        .select("id, name, tag, avatar_url, owner_id, game, color, is_demo")
+        .eq("owner_id", user.id)
+        .eq("is_demo", false);
       setMyTeams((data ?? []) as TeamLite[]);
     })();
   }, [user]);
+  // Realtime registrations -> refresh team list & counts
+  useEffect(() => {
+    if (!season) return;
+    const ch = supabase
+      .channel(`regs-${season.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "league_registrations", filter: `season_id=eq.${season.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [season?.id]);
+
 
   // Realtime standings
   useEffect(() => {
