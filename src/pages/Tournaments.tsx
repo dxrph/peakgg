@@ -244,19 +244,52 @@ export default function TournamentsPage() {
               Tournaments
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground font-body mt-4">
-              Compete solo, earn points and climb from <span className="text-foreground">Open Cup</span> to <span className="text-primary">Peak Championship</span>.
+              Compete solo. Win matches. <span className="text-foreground">Increase your ELO.</span> Unlock higher cups.
             </p>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                <Button variant="neon" size="lg" className="uppercase tracking-wider">
-                  <Trophy className="mr-2 h-4 w-4" />Join Open Cup
-                </Button>
-              </a>
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                <Button variant="neonOutline" size="lg" className="uppercase tracking-wider">
-                  <MessageCircle className="mr-2 h-4 w-4" />Join Discord
-                </Button>
-              </a>
+
+            {/* Open Cup Queue widget */}
+            <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
+              {activeMatch ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-success">Active Open Cup match</div>
+                    <div className="text-sm font-body text-muted-foreground">Status: {activeMatch.result_status}</div>
+                  </div>
+                  <Link to={`/matches/${activeMatch.id}`}>
+                    <Button variant="neon" size="sm" className="uppercase tracking-wider">Open Match<ArrowRight className="ml-2 h-3 w-3" /></Button>
+                  </Link>
+                </div>
+              ) : queueEntry ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div>
+                      <div className="text-[10px] font-display uppercase tracking-widest text-primary">Searching for opponents</div>
+                      <div className="text-sm font-body text-muted-foreground">{queueEntry.team_size}v{queueEntry.team_size} · {queueEntry.game}</div>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={cancelQueue}><X className="h-3 w-3 mr-1.5" />Cancel</Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Solo Queue · Open Cup</div>
+                    <div className="text-sm font-body">
+                      {user ? <>Your ELO: <span className="text-foreground font-medium">{myElo}</span> · Rank: <span style={{color: myRank.hex}}>{myRank.name}</span></> : "Sign in to play your first Open Cup match"}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex rounded-md border border-border overflow-hidden">
+                      {([1,2,5] as const).map(s => (
+                        <button key={s} onClick={() => setTeamSize(s)} className={`px-2.5 py-1 text-xs font-display uppercase ${teamSize===s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{s}v{s}</button>
+                      ))}
+                    </div>
+                    <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
+                      <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
