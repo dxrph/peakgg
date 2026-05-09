@@ -10,12 +10,12 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash } from "lucide-react";
+import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash, Swords } from "lucide-react";
 import { toast } from "sonner";
 import StatusPill from "@/components/leagues/StatusPill";
 
 interface League { id: string; name: string; slug: string; game: string; status: string; max_teams: number; min_roster_size: number; description: string | null; reward_text: string | null; }
-interface Season { id: string; league_id: string; name: string; status: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; season_number: number; }
+interface Season { id: string; league_id: string; name: string; status: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; season_number: number; playoffs_started_at: string | null; }
 interface Registration { id: string; team_id: string; status: string; created_at: string; }
 
 export default function AdminLeagues() {
@@ -134,6 +134,30 @@ export default function AdminLeagues() {
     const { error } = await supabase.rpc("award_season_trophies", { _season_id: activeSeason.id });
     if (error) return toast.error(error.message);
     toast.success("Season closed, trophies awarded");
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
+
+  const startPlayoffs = async () => {
+    if (!activeSeason) return;
+    if (activeSeason.playoffs_started_at) return toast.error("Playoffs already started");
+    // Sanity: require >= 4 teams in standings
+    const { data: divs } = await supabase.from("league_divisions").select("id").eq("season_id", activeSeason.id);
+    if (!divs?.length) return toast.error("No division for this season");
+    const { count } = await supabase.from("league_standings").select("*", { count: "exact", head: true }).eq("division_id", divs[0].id);
+    if ((count ?? 0) < 4) return toast.error(`Need at least 4 teams in standings (have ${count ?? 0})`);
+    const pendingMatches = await supabase
+      .from("matches").select("id", { count: "exact", head: true })
+      .eq("season_id", activeSeason.id).lt("matchday", 999).neq("result_status", "confirmed").neq("result_status", "admin_resolved");
+    if ((pendingMatches.count ?? 0) > 0) {
+      if (!confirm(`Regular season has ${pendingMatches.count} unfinished matches. Start playoffs anyway?`)) return;
+    } else {
+      if (!confirm("Start playoffs? Top 4 teams will be seeded into semifinals.")) return;
+    }
+    setBusy(true);
+    const { error } = await supabase.rpc("start_playoffs", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Playoffs started — bracket generated");
     if (activeLeague) loadSeasons(activeLeague.id);
   };
 
@@ -346,6 +370,9 @@ export default function AdminLeagues() {
                             </SelectContent>
                           </Select>
                           <Button size="sm" variant="outline" onClick={recompute}><RefreshCw className="h-3 w-3 mr-1" /> Recompute standings</Button>
+                          <Button size="sm" variant="outline" onClick={startPlayoffs} disabled={busy || !!s.playoffs_started_at}>
+                            <Swords className="h-3 w-3 mr-1" /> {s.playoffs_started_at ? "Playoffs started" : "Start playoffs"}
+                          </Button>
                           <Button size="sm" variant="destructive" onClick={closeSeason}><Trophy className="h-3 w-3 mr-1" /> Close & award trophies</Button>
                         </div>
                       )}

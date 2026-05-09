@@ -4,6 +4,8 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
 import StatusPill from "@/components/leagues/StatusPill";
+import ReadyCheck from "@/components/matches/ReadyCheck";
+import MatchChat from "@/components/matches/MatchChat";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,7 @@ interface MatchRow {
   matchday: number | null; scheduled_at: string | null;
   season_id: string | null; division_id: string | null;
   submitted_by: string | null; confirmed_by: string | null;
+  lobby_code: string | null; server_info: string | null;
 }
 interface TeamRow { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; }
 
@@ -51,7 +54,7 @@ export default function MatchDetailPage() {
     if (!matchId) return;
     const { data: m } = await supabase
       .from("matches")
-      .select("id, game, map, team_a_id, team_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by")
+      .select("id, game, map, team_a_id, team_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info")
       .eq("id", matchId)
       .maybeSingle();
     if (!m) { setLoading(false); return; }
@@ -190,6 +193,36 @@ export default function MatchDetailPage() {
           <Card className="p-4 mb-6 border-destructive/40 bg-destructive/5">
             <p className="text-sm">This match is disputed. Standings are frozen until admin resolution.</p>
           </Card>
+        )}
+
+        {match.season_id && (
+          <div className="grid lg:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-4">
+              <ReadyCheck
+                matchId={match.id}
+                teamAId={match.team_a_id}
+                teamBId={match.team_b_id}
+                teamAName={teamA?.name ?? "Team A"}
+                teamBName={teamB?.name ?? "Team B"}
+                isCaptainA={isCaptainA}
+                isCaptainB={isCaptainB}
+                resultStatus={match.result_status}
+                onChanged={load}
+              />
+              {(match.lobby_code || match.server_info) && (
+                <Card className="p-4">
+                  <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-2">Lobby Info</h3>
+                  {match.lobby_code && <div className="text-sm"><span className="text-muted-foreground">Code:</span> <span className="font-mono">{match.lobby_code}</span></div>}
+                  {match.server_info && <div className="text-sm"><span className="text-muted-foreground">Server:</span> {match.server_info}</div>}
+                </Card>
+              )}
+            </div>
+            {user ? (
+              <MatchChat matchId={match.id} />
+            ) : (
+              <Card className="p-6 text-center text-sm text-muted-foreground">Sign in to access match chat.</Card>
+            )}
+          </div>
         )}
       </main>
       <Footer />
