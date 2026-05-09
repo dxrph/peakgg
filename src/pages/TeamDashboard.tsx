@@ -178,7 +178,7 @@ export default function TeamDashboard() {
         <div className="container py-20 text-center">
           <h1 className="font-display text-3xl uppercase">Members only</h1>
           <p className="text-muted-foreground mt-2">You must be a member of this team to view its dashboard.</p>
-          <Button asChild variant="outline" className="mt-4"><Link to={`/teams/${team.id}`}>View public page</Link></Button>
+          <Button variant="outline" className="mt-4" onClick={() => navigate(`/teams/${team.id}`)}>View public page</Button>
         </div>
       </div>
     );
@@ -189,8 +189,8 @@ export default function TeamDashboard() {
       <SEO title={`${team.name} — Team Dashboard | PeakGG`} description="Operational HQ for your team" />
       <Navbar />
       <main className="flex-1 container py-6">
-        <Button asChild variant="ghost" size="sm" className="-ml-2 mb-4">
-          <Link to={`/teams/${team.id}`}><ChevronLeft className="h-4 w-4" /> Public team page</Link>
+        <Button variant="ghost" size="sm" className="-ml-2 mb-4" onClick={() => navigate(`/teams/${team.id}`)}>
+          <ChevronLeft className="h-4 w-4" /> Public team page
         </Button>
 
         <Card className="p-6 mb-6">
