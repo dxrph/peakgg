@@ -35,8 +35,8 @@ const SIZE_PX: Record<NonNullable<RankBadgeProps["size"]>, number> = {
   xs: 20,
   sm: 28,
   md: 44,
-  lg: 80,
-  xl: 104,
+  lg: 88,
+  xl: 120,
 };
 
 export default function RankBadge({
@@ -87,9 +87,9 @@ export default function RankBadge({
           style={{
             width: px,
             height: px,
-            filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${
-              isApex ? "cc" : "77"
-            }) drop-shadow(0 2px 4px rgba(0,0,0,0.55))`,
+            filter: `drop-shadow(0 0 ${Math.round(px * 0.22)}px ${info.hex}${
+              isApex ? "dd" : "66"
+            }) drop-shadow(0 ${Math.max(2, Math.round(px * 0.04))}px ${Math.max(4, Math.round(px * 0.06))}px rgba(0,0,0,0.7))`,
           }}
         >
           <RankEmblem rank={info} size={px} />
