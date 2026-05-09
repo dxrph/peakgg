@@ -361,15 +361,11 @@ export default function LeagueDetailPage() {
                   <p className="text-xs text-muted-foreground mt-2">Top {season?.playoff_size ?? 4} teams qualify after the regular season.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <div className="min-w-[640px]">
-                    <PlayoffBracket
-                      matches={playoffMatches}
-                      teamMap={teamMap as any}
-                      championTeamId={season?.champion_team_id ?? null}
-                    />
-                  </div>
-                </div>
+                <PlayoffBracket
+                  matches={playoffMatches}
+                  teamMap={teamMap as any}
+                  championTeamId={season?.champion_team_id ?? null}
+                />
               )}
             </TabsContent>
 
