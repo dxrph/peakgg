@@ -106,6 +106,8 @@ type PlayerStat = {
   losses: number;
   win_streak: number;
   best_win_streak: number;
+  peak_elo?: number;
+  peak_rank?: string;
 };
 
 type TeamRow = {
