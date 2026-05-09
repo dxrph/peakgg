@@ -1900,6 +1900,8 @@ export type Database = {
           description: string | null
           game: string
           id: string
+          is_demo: boolean
+          is_founding: boolean
           looking_for_players: boolean
           name: string
           owner_id: string
@@ -1917,6 +1919,8 @@ export type Database = {
           description?: string | null
           game?: string
           id?: string
+          is_demo?: boolean
+          is_founding?: boolean
           looking_for_players?: boolean
           name: string
           owner_id: string
@@ -1934,6 +1938,8 @@ export type Database = {
           description?: string | null
           game?: string
           id?: string
+          is_demo?: boolean
+          is_founding?: boolean
           looking_for_players?: boolean
           name?: string
           owner_id?: string
