@@ -35,7 +35,7 @@ export default function LiveStatsBar() {
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("matches").select("*", { count: "exact", head: true }),
         supabase.from("tournaments").select("*", { count: "exact", head: true }).in("status", ["upcoming", "active", "live"]),
-        supabase.from("teams").select("*", { count: "exact", head: true }),
+        supabase.from("teams").select("*", { count: "exact", head: true }).eq("is_demo", false),
       ]);
       if (cancelled) return;
       setStats({
