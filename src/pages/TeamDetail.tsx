@@ -312,27 +312,27 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
             {/* Actions */}
             <div className="flex flex-col gap-2 w-full md:w-auto">
               {!user && (
-                <Link to="/login"><Button variant="neon" className="w-full">Login to apply</Button></Link>
+                <Button asChild variant="neon" className="w-full"><Link to="/login">Login to apply</Link></Button>
               )}
               {user && isCaptain && (
                 <>
-                  <Link to={`/teams/${team.id}/dashboard`}>
-                    <Button variant="neon" className="w-full">
+                  <Button asChild variant="neon" className="w-full">
+                    <Link to={`/teams/${team.id}/dashboard`}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                   {manageMode ? (
-                    <Link to={`/teams/${team.id}`}>
-                      <Button variant="neonOutline" className="w-full">
+                    <Button asChild variant="neonOutline" className="w-full">
+                      <Link to={`/teams/${team.id}`}>
                         <Shield className="mr-2 h-4 w-4" />View Public Page
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   ) : (
-                    <Link to={`/teams/${team.id}/manage`}>
-                      <Button variant="neonOutline" className="w-full">
+                    <Button asChild variant="neonOutline" className="w-full">
+                      <Link to={`/teams/${team.id}/manage`}>
                         <Settings className="mr-2 h-4 w-4" />Manage Team
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                   {pendingCount > 0 && (
                     <Button variant="neonOutline" onClick={() => setTab("applications")}>
@@ -343,11 +343,11 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               )}
               {user && !isCaptain && isMember && (
                 <>
-                  <Link to={`/teams/${team.id}/dashboard`}>
-                    <Button variant="neonOutline" className="w-full">
+                  <Button asChild variant="neonOutline" className="w-full">
+                    <Link to={`/teams/${team.id}/dashboard`}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                   <Button variant="ghost" onClick={handleLeave}>
                     <LogOut className="mr-2 h-4 w-4" />Leave Team
                   </Button>
