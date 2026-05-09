@@ -375,8 +375,19 @@ export default function LeagueDetailPage() {
             <TabsContent value="overview" className="mt-6 grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card className="p-6">
-                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">About this league</h2>
-                  <p className="text-sm leading-relaxed whitespace-pre-line">{league.description ?? "No description provided."}</p>
+                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">About</h2>
+                  <p className="text-sm leading-relaxed whitespace-pre-line">
+                    {league.description ?? `${league.name} ${season?.name ?? "Season 0 Beta"} is the first official competitive season on PeakGG.`}
+                  </p>
+                </Card>
+                <Card className="p-6">
+                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3 flex items-center gap-2"><ListChecks className="h-4 w-4 text-primary" />How to join</h2>
+                  <ol className="text-sm space-y-2 list-decimal pl-5">
+                    <li>Create a team on PeakGG.</li>
+                    <li>Build a roster of {league.min_roster_size} players.</li>
+                    <li>Register your team for {season?.name ?? "the season"}.</li>
+                    <li>Join Discord for scheduling and updates.</li>
+                  </ol>
                 </Card>
                 {standings.length > 0 && (
                   <Card className="p-4">
@@ -407,7 +418,15 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="standings" className="mt-6">
-              <StandingsTable rows={standings} playoffSize={season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+              {standings.length === 0 ? (
+                <div className="border border-dashed border-border rounded-md p-12 text-center">
+                  <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">No standings yet</p>
+                  <p className="text-xs text-muted-foreground mt-2">Standings will appear once official matches begin.</p>
+                </div>
+              ) : (
+                <StandingsTable rows={standings} playoffSize={season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+              )}
             </TabsContent>
 
             <TabsContent value="schedule" className="mt-6 space-y-6">
@@ -431,6 +450,16 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="teams" className="mt-6">
+              {teams.length === 0 && (
+                <div className="mb-4 border border-dashed border-primary/30 bg-primary/5 rounded-md p-6 text-center">
+                  <p className="font-display uppercase tracking-wider text-sm text-primary">Founding team slots are open</p>
+                  <p className="text-xs text-muted-foreground mt-2">Be among the first {league.max_teams} teams to lock in a Founding Team Badge.</p>
+                  <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                    <Button asChild size="sm"><Link to="/teams">Create Team</Link></Button>
+                    <Button asChild size="sm" variant="outline"><a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1.5" />Join Discord</a></Button>
+                  </div>
+                </div>
+              )}
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {teams.map(t => (
                     <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors flex items-center gap-3">
