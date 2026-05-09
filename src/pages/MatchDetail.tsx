@@ -221,7 +221,7 @@ export default function MatchDetailPage() {
 
         <Card className="p-6 mb-6">
           <div className="flex items-center justify-between mb-4 text-xs font-display uppercase tracking-widest text-muted-foreground">
-            <span>{match.matchday ? `Matchday ${match.matchday}` : "Match"} · {match.game}</span>
+            <span>{isOpenCup ? "Open Cup" : (match.matchday ? `Matchday ${match.matchday}` : "Match")} · {match.game}</span>
             <StatusPill status={match.result_status} />
           </div>
           <div className="grid grid-cols-3 items-center gap-4">
@@ -253,6 +253,30 @@ export default function MatchDetailPage() {
               <TeamLogo name={teamB?.name} tag={teamB?.tag} avatarUrl={teamB?.avatar_url} size={56} rounded="lg" />
             </div>
           </div>
+
+          {isOpenCup && rosters.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              {(["a","b"] as const).map(side => {
+                const sideTeamId = side === "a" ? match.team_a_id : match.team_b_id;
+                const sideRoster = rosters.filter(r => r.team_id === sideTeamId);
+                return (
+                  <div key={side} className="rounded-lg border border-border bg-secondary/30 p-3">
+                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mb-2">Team {side.toUpperCase()}</div>
+                    <ul className="space-y-1.5">
+                      {sideRoster.map(p => (
+                        <li key={p.user_id} className="flex items-center justify-between text-sm">
+                          <Link to={`/u/${p.username ?? p.user_id}`} className="hover:text-primary truncate">
+                            {p.display_name ?? p.username ?? "Player"}
+                          </Link>
+                          {p.elo != null && <span className="text-xs text-muted-foreground tabular-nums">{p.elo} ELO</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-2 mt-6 justify-center">
             {canSubmit && <Button onClick={() => setSubmitOpen(true)}><Send className="h-4 w-4 mr-1.5" /> Submit Result</Button>}
