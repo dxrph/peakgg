@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
@@ -8,15 +9,21 @@ import { Badge } from "@/components/ui/badge";
 import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, User, Lock, Sparkles, ArrowRight, Calendar,
-  Target, Award, Shield, MessageCircle, Swords,
+  Target, Award, Shield, MessageCircle, Swords, Loader2, X, Zap,
 } from "lucide-react";
 import { useGame } from "@/lib/game-context";
-import { GAMES } from "@/lib/ranks";
+import { GAMES, getRankByElo } from "@/lib/ranks";
 import GameComingSoon from "@/components/GameComingSoon";
 import DiscordCTA from "@/components/landing/DiscordCTA";
 import { DISCORD_INVITE } from "@/lib/links";
 import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+
+// Thresholds for cup unlocks (ELO-based)
+const CHALLENGER_ELO = 1200;
+const CHAMPIONSHIP_ELO = 1800;
 
 type SoloTier = {
   id: "open" | "challenger" | "championship";
@@ -87,6 +94,96 @@ const FAQ = [
 export default function TournamentsPage() {
   const { selectedGame } = useGame();
   const game = GAMES.find(g => g.id === selectedGame)!;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [joining, setJoining] = useState(false);
+  const [teamSize, setTeamSize] = useState<1 | 2 | 5>(1);
+
+  // Player ELO for current game
+  const { data: myStats } = useQuery({
+    queryKey: ["my-player-stats", user?.id, selectedGame],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("player_stats").select("elo, wins, losses, matches_played")
+        .eq("user_id", user!.id).eq("game", selectedGame).maybeSingle();
+      return data;
+    },
+  });
+  const myElo = myStats?.elo ?? 1000;
+  const myRank = getRankByElo(myElo);
+
+  // My queue entry
+  const { data: queueEntry, refetch: refetchQueue } = useQuery({
+    queryKey: ["my-open-cup-queue", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("open_cup_queue").select("game, team_size, joined_at")
+        .eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    refetchInterval: 5000,
+  });
+
+  // Active open cup match
+  const { data: activeMatch, refetch: refetchActive } = useQuery({
+    queryKey: ["my-open-cup-match", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: rs } = await supabase
+        .from("match_rosters").select("match_id").eq("user_id", user!.id);
+      const ids = (rs ?? []).map((r: any) => r.match_id);
+      if (!ids.length) return null;
+      const { data: m } = await supabase
+        .from("matches").select("id, status, kind, result_status")
+        .in("id", ids).eq("kind", "open_cup")
+        .not("status", "in", "(completed,cancelled)")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return m;
+    },
+    refetchInterval: 5000,
+  });
+
+  const joinQueue = async () => {
+    if (!user) { navigate("/login?redirect=/tournaments"); return; }
+    setJoining(true);
+    const { data, error } = await supabase.rpc("join_open_cup_queue", { _game: selectedGame, _team_size: teamSize });
+    setJoining(false);
+    if (error) { toast.error(error.message); return; }
+    const result = data as any;
+    if (result?.status === "matched" && result.match_id) {
+      toast.success("Match found!");
+      navigate(`/matches/${result.match_id}`);
+    } else {
+      toast.success("You're in the queue. Waiting for opponents…");
+      refetchQueue();
+    }
+  };
+
+  const cancelQueue = async () => {
+    const { error } = await supabase.rpc("cancel_open_cup_queue");
+    if (error) return toast.error(error.message);
+    toast.success("Queue cancelled");
+    refetchQueue();
+  };
+
+  // Realtime: when a roster row appears for me, navigate to match
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase.channel(`oc-roster-${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "match_rosters", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        const mid = payload.new?.match_id;
+        if (mid) {
+          toast.success("Open Cup match found!");
+          refetchActive();
+          refetchQueue();
+          navigate(`/matches/${mid}`);
+        }
+      }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id]);
 
   const { data: teamTournaments = [] } = useQuery({
     queryKey: ["public-team-tournaments", selectedGame],
@@ -106,7 +203,7 @@ export default function TournamentsPage() {
   const seo = (
     <SEO
       title="Tournaments — PeakGG | Solo Queue Cups & Team Tournaments"
-      description="Compete solo in PeakGG Open Cups or register your team for official tournaments. Earn Tournament Points and climb from Open Cup to Peak Championship."
+      description="Compete solo in PeakGG Open Cups. Win matches, gain ELO and unlock higher cups. Or register your team for official team tournaments."
       keywords="solo queue tournament, Valorant cup, free FPS tournament, PeakGG Open Cup, Peak Championship"
       path="/tournaments"
     />
