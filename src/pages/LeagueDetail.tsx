@@ -42,12 +42,23 @@ export default function LeagueDetailPage() {
 
   const load = async () => {
     if (!leagueId) return;
-    const { data: l } = await supabase.from("leagues").select("*").eq("id", leagueId).maybeSingle();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(leagueId);
+    let l: any = null;
+    if (isUuid) {
+      const { data } = await supabase.from("leagues").select("*").eq("id", leagueId).maybeSingle();
+      l = data;
+    }
+    if (!l) {
+      const { data } = await supabase.from("leagues").select("*").eq("slug", leagueId).maybeSingle();
+      l = data;
+    }
     setLeague(l as League);
+    if (!l) { setLoading(false); return; }
+    const resolvedId = l.id;
     const { data: ss } = await supabase
       .from("league_seasons")
       .select("*")
-      .eq("league_id", leagueId)
+      .eq("league_id", resolvedId)
       .order("season_number", { ascending: false })
       .limit(1);
     const s = (ss?.[0] ?? null) as Season | null;
