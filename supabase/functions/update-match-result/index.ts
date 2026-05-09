@@ -225,6 +225,8 @@ Deno.serve(async (req) => {
       await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }).catch(() => {});
     }
 
+    await admin.from("matches").update({ elo_processed_at: new Date().toISOString() }).eq("id", match.id);
+
     return json({ ok: true, game, updated });
   } catch (err) {
     return json({ error: (err as Error).message ?? "Internal error" }, 500);
