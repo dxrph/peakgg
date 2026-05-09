@@ -55,15 +55,15 @@ export default function PlayoffBracket({
           </Link>
         </div>
       )}
-      <div className="grid md:grid-cols-[1fr_auto_1fr] gap-6 items-center">
-        <div className="space-y-3">
+      <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-4 sm:gap-6 items-center">
+        <div className="space-y-3 min-w-0">
           <h4 className="font-display uppercase tracking-wider text-xs text-muted-foreground">Semifinals</h4>
           {semis.map((m) => (
             <BracketMatch key={m.id} m={m} teamMap={teamMap} />
           ))}
         </div>
-        <div className="hidden md:block text-muted-foreground text-2xl">→</div>
-        <div className="space-y-3">
+        <div className="hidden sm:block text-muted-foreground text-2xl text-center">→</div>
+        <div className="space-y-3 min-w-0">
           <h4 className="font-display uppercase tracking-wider text-xs text-muted-foreground">Grand Final</h4>
           {final && <BracketMatch m={final} teamMap={teamMap} highlight />}
         </div>
