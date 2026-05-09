@@ -118,7 +118,7 @@ export default function TeamsPage() {
   const loadTeams = async () => {
     const { data } = await supabase
       .from("teams")
-      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id")
+      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding")
       .order("trophies", { ascending: false });
     setTeams((data as any) ?? []);
   };
@@ -148,7 +148,7 @@ export default function TeamsPage() {
     if (!user) { setMyTeam(null); return; }
     const { data: tm } = await supabase
       .from("team_members")
-      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id)")
+      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding)")
       .eq("user_id", user.id)
       .limit(1)
       .maybeSingle();
