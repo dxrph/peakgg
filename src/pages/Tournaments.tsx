@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
@@ -8,15 +9,21 @@ import { Badge } from "@/components/ui/badge";
 import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, User, Lock, Sparkles, ArrowRight, Calendar,
-  Target, Award, Shield, MessageCircle, Swords,
+  Target, Award, Shield, MessageCircle, Swords, Loader2, X, Zap,
 } from "lucide-react";
 import { useGame } from "@/lib/game-context";
-import { GAMES } from "@/lib/ranks";
+import { GAMES, getRankByElo } from "@/lib/ranks";
 import GameComingSoon from "@/components/GameComingSoon";
 import DiscordCTA from "@/components/landing/DiscordCTA";
 import { DISCORD_INVITE } from "@/lib/links";
 import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+
+// Thresholds for cup unlocks (ELO-based)
+const CHALLENGER_ELO = 1200;
+const CHAMPIONSHIP_ELO = 1800;
 
 type SoloTier = {
   id: "open" | "challenger" | "championship";
@@ -35,21 +42,21 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "open",
     name: "Open Cup",
-    tagline: "Free entry · Solo queue · Temporary teams",
+    tagline: "Free entry · Solo queue · Temporary teams · Affects ELO",
     status: "Opening Soon",
     unlock: "Anyone can join. No team required.",
-    rewards: ["Tournament Points", "Founder badge", "Open Cup badge"],
-    cta: { label: "Join Discord for Open Cup", href: DISCORD_INVITE, external: true },
+    rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
+    cta: { label: "Join Open Cup", href: "#open-cup-queue" },
     accent: "border-success/40 text-success",
     icon: Trophy,
   },
   {
     id: "challenger",
     name: "Challenger Series",
-    tagline: "Unlocked through Open Cup performance",
+    tagline: "Unlocks at Silver / 1200 ELO",
     status: "Locked",
-    unlock: "Earn 50 Tournament Points or 5 Open Cup wins.",
-    rewards: ["Challenger badge", "Higher TP rewards", "Path to Championship"],
+    unlock: "Reach 1200 ELO (Silver rank) in Open Cup matches.",
+    rewards: ["Challenger badge", "Higher-stake matches", "Path to Championship"],
     cta: { label: "View Requirements", href: "#solo-path" },
     accent: "border-accent/40 text-accent",
     icon: Award,
@@ -58,9 +65,9 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "championship",
     name: "Peak Championship",
-    tagline: "Elite final tier · Invite or qualification",
+    tagline: "Elite tier · Invite or qualification",
     status: "Final Tier",
-    unlock: "Top Challenger players or admin invitation.",
+    unlock: "Reach Diamond rank (1800 ELO) or admin invite.",
     rewards: ["Season badge", "Championship recognition", "Leaderboard glory"],
     cta: { label: "View Path", href: "#solo-path" },
     accent: "border-primary/40 text-primary",
@@ -73,20 +80,110 @@ const HOW_IT_WORKS = [
   { icon: User, title: "Join as a player", text: "Sign up solo — no permanent team needed." },
   { icon: Users, title: "Get matched", text: "We build a temporary team for the cup." },
   { icon: Swords, title: "Play the cup", text: "Compete in a single-elimination bracket." },
-  { icon: Target, title: "Earn Tournament Points", text: "Points stay on your profile forever." },
-  { icon: Award, title: "Unlock higher tiers", text: "Climb from Open Cup to Peak Championship." },
+  { icon: Target, title: "Confirm result", text: "Both sides confirm; admin resolves disputes." },
+  { icon: Award, title: "Gain ELO & rank up", text: "ELO updates instantly. Higher cups unlock at thresholds." },
 ];
 
 const FAQ = [
-  { q: "Do I need a team for the Open Cup?", a: "No. Solo Queue Cups create a temporary team for the duration of the cup, then dissolve." },
-  { q: "What happens to my Tournament Points?", a: "Points stay on your player profile and count toward unlocking higher tiers." },
+  { q: "Do I need a team for the Open Cup?", a: "No. Open Cup creates a temporary team for that match only — it does not appear on the public Teams page." },
+  { q: "How does my ELO change?", a: "Open Cup matches use the same ELO system as ranked matches: about +25 for a win and −15 for a loss, adjusted for opponent strength." },
   { q: "How are Team Tournaments different?", a: "Team Tournaments require a captain to register a full permanent roster. Results count for the team, not individuals." },
-  { q: "Can I do both?", a: "Yes. You can solo queue into Open Cup and also join Team Tournaments with your roster." },
+  { q: "When does ELO update?", a: "Only after both sides confirm the result (or an admin resolves a dispute). Cancelled or unconfirmed matches do not affect ELO." },
 ];
 
 export default function TournamentsPage() {
   const { selectedGame } = useGame();
   const game = GAMES.find(g => g.id === selectedGame)!;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [joining, setJoining] = useState(false);
+  const [teamSize, setTeamSize] = useState<1 | 2 | 5>(1);
+
+  // Player ELO for current game
+  const { data: myStats } = useQuery({
+    queryKey: ["my-player-stats", user?.id, selectedGame],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("player_stats").select("elo, wins, losses, matches_played")
+        .eq("user_id", user!.id).eq("game", selectedGame).maybeSingle();
+      return data;
+    },
+  });
+  const myElo = myStats?.elo ?? 1000;
+  const myRank = getRankByElo(myElo);
+
+  // My queue entry
+  const { data: queueEntry, refetch: refetchQueue } = useQuery({
+    queryKey: ["my-open-cup-queue", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("open_cup_queue").select("game, team_size, joined_at")
+        .eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    refetchInterval: 5000,
+  });
+
+  // Active open cup match
+  const { data: activeMatch, refetch: refetchActive } = useQuery({
+    queryKey: ["my-open-cup-match", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: rs } = await supabase
+        .from("match_rosters").select("match_id").eq("user_id", user!.id);
+      const ids = (rs ?? []).map((r: any) => r.match_id);
+      if (!ids.length) return null;
+      const { data: m } = await supabase
+        .from("matches").select("id, status, kind, result_status")
+        .in("id", ids).eq("kind", "open_cup")
+        .not("status", "in", "(completed,cancelled)")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return m;
+    },
+    refetchInterval: 5000,
+  });
+
+  const joinQueue = async () => {
+    if (!user) { navigate("/login?redirect=/tournaments"); return; }
+    setJoining(true);
+    const { data, error } = await supabase.rpc("join_open_cup_queue", { _game: selectedGame, _team_size: teamSize });
+    setJoining(false);
+    if (error) { toast.error(error.message); return; }
+    const result = data as any;
+    if (result?.status === "matched" && result.match_id) {
+      toast.success("Match found!");
+      navigate(`/matches/${result.match_id}`);
+    } else {
+      toast.success("You're in the queue. Waiting for opponents…");
+      refetchQueue();
+    }
+  };
+
+  const cancelQueue = async () => {
+    const { error } = await supabase.rpc("cancel_open_cup_queue");
+    if (error) return toast.error(error.message);
+    toast.success("Queue cancelled");
+    refetchQueue();
+  };
+
+  // Realtime: when a roster row appears for me, navigate to match
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase.channel(`oc-roster-${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "match_rosters", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        const mid = payload.new?.match_id;
+        if (mid) {
+          toast.success("Open Cup match found!");
+          refetchActive();
+          refetchQueue();
+          navigate(`/matches/${mid}`);
+        }
+      }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id]);
 
   const { data: teamTournaments = [] } = useQuery({
     queryKey: ["public-team-tournaments", selectedGame],
@@ -106,7 +203,7 @@ export default function TournamentsPage() {
   const seo = (
     <SEO
       title="Tournaments — PeakGG | Solo Queue Cups & Team Tournaments"
-      description="Compete solo in PeakGG Open Cups or register your team for official tournaments. Earn Tournament Points and climb from Open Cup to Peak Championship."
+      description="Compete solo in PeakGG Open Cups. Win matches, gain ELO and unlock higher cups. Or register your team for official team tournaments."
       keywords="solo queue tournament, Valorant cup, free FPS tournament, PeakGG Open Cup, Peak Championship"
       path="/tournaments"
     />
@@ -147,19 +244,52 @@ export default function TournamentsPage() {
               Tournaments
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground font-body mt-4">
-              Compete solo, earn points and climb from <span className="text-foreground">Open Cup</span> to <span className="text-primary">Peak Championship</span>.
+              Compete solo. Win matches. <span className="text-foreground">Increase your ELO.</span> Unlock higher cups.
             </p>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                <Button variant="neon" size="lg" className="uppercase tracking-wider">
-                  <Trophy className="mr-2 h-4 w-4" />Join Open Cup
-                </Button>
-              </a>
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                <Button variant="neonOutline" size="lg" className="uppercase tracking-wider">
-                  <MessageCircle className="mr-2 h-4 w-4" />Join Discord
-                </Button>
-              </a>
+
+            {/* Open Cup Queue widget */}
+            <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
+              {activeMatch ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-success">Active Open Cup match</div>
+                    <div className="text-sm font-body text-muted-foreground">Status: {activeMatch.result_status}</div>
+                  </div>
+                  <Link to={`/matches/${activeMatch.id}`}>
+                    <Button variant="neon" size="sm" className="uppercase tracking-wider">Open Match<ArrowRight className="ml-2 h-3 w-3" /></Button>
+                  </Link>
+                </div>
+              ) : queueEntry ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div>
+                      <div className="text-[10px] font-display uppercase tracking-widest text-primary">Searching for opponents</div>
+                      <div className="text-sm font-body text-muted-foreground">{queueEntry.team_size}v{queueEntry.team_size} · {queueEntry.game}</div>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={cancelQueue}><X className="h-3 w-3 mr-1.5" />Cancel</Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Solo Queue · Open Cup</div>
+                    <div className="text-sm font-body">
+                      {user ? <>Your ELO: <span className="text-foreground font-medium">{myElo}</span> · Rank: <span style={{color: myRank.hex}}>{myRank.name}</span></> : "Sign in to play your first Open Cup match"}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex rounded-md border border-border overflow-hidden">
+                      {([1,2,5] as const).map(s => (
+                        <button key={s} onClick={() => setTeamSize(s)} className={`px-2.5 py-1 text-xs font-display uppercase ${teamSize===s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{s}v{s}</button>
+                      ))}
+                    </div>
+                    <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
+                      <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -202,11 +332,17 @@ export default function TournamentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {SOLO_TIERS.map((tier, i) => {
               const Icon = tier.icon;
+              const isOpen = tier.id === "open";
+              const unlocked = tier.id === "open"
+                ? true
+                : tier.id === "challenger" ? myElo >= CHALLENGER_ELO
+                : myElo >= CHAMPIONSHIP_ELO;
+              const progressTo = tier.id === "challenger" ? CHALLENGER_ELO : tier.id === "championship" ? CHAMPIONSHIP_ELO : null;
               return (
                 <div
                   key={tier.id}
                   className={`relative rounded-xl border bg-card p-6 flex flex-col transition-all hover:border-primary/40 ${
-                    tier.locked ? "opacity-90" : ""
+                    !unlocked && !isOpen ? "opacity-90" : ""
                   } ${i === 0 ? "border-success/30" : "border-border"}`}
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -217,8 +353,8 @@ export default function TournamentsPage() {
                       variant="outline"
                       className={`font-display text-[10px] uppercase tracking-wider ${tier.accent}`}
                     >
-                      {tier.locked && <Lock className="h-3 w-3 mr-1" />}
-                      {tier.status}
+                      {!unlocked && !isOpen && <Lock className="h-3 w-3 mr-1" />}
+                      {isOpen ? "Open · Beta" : (unlocked ? "Unlocked" : tier.status)}
                     </Badge>
                   </div>
                   <h3 className="text-xl font-display font-bold uppercase">{tier.name}</h3>
@@ -230,6 +366,9 @@ export default function TournamentsPage() {
                   <div className="mt-4 rounded-md border border-border bg-secondary/30 p-3">
                     <p className="text-[10px] font-display uppercase tracking-wider text-muted-foreground mb-1">Requirement</p>
                     <p className="text-sm font-body">{tier.unlock}</p>
+                    {user && progressTo && !unlocked && (
+                      <p className="text-[11px] mt-1 text-muted-foreground">{myElo} / {progressTo} ELO</p>
+                    )}
                   </div>
 
                   <div className="mt-4 flex-1">
@@ -245,18 +384,18 @@ export default function TournamentsPage() {
                   </div>
 
                   <div className="mt-5">
-                    {tier.cta.external ? (
-                      <a href={tier.cta.href} target="_blank" rel="noopener noreferrer" className="block">
-                        <Button variant={i === 0 ? "neon" : "neonOutline"} className="w-full uppercase tracking-wider">
-                          {tier.cta.label}<ArrowRight className="ml-2 h-3 w-3" />
-                        </Button>
-                      </a>
+                    {isOpen ? (
+                      <Button variant="neon" className="w-full uppercase tracking-wider" onClick={joinQueue} disabled={joining || !!queueEntry || !!activeMatch}>
+                        {activeMatch ? "Match in progress" : queueEntry ? "In queue…" : "Join Open Cup"}<ArrowRight className="ml-2 h-3 w-3" />
+                      </Button>
+                    ) : unlocked ? (
+                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
+                        Coming Soon
+                      </Button>
                     ) : (
-                      <a href={tier.cta.href} className="block">
-                        <Button variant="neonOutline" className="w-full uppercase tracking-wider">
-                          {tier.cta.label}
-                        </Button>
-                      </a>
+                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
+                        <Lock className="h-3 w-3 mr-1.5" />Locked
+                      </Button>
                     )}
                   </div>
                 </div>

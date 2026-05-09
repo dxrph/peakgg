@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
     const { data: match, error: matchErr } = await admin
       .from("matches")
-      .select("id, game, status, player_a_id, player_b_id, team_a_id, team_b_id, winner_id")
+      .select("id, game, status, player_a_id, player_b_id, team_a_id, team_b_id, winner_id, kind, elo_processed_at")
       .eq("id", matchId)
       .maybeSingle();
 
@@ -59,6 +59,9 @@ Deno.serve(async (req) => {
     if (!match) return json({ error: "Match not found" }, 404);
     if (match.status !== "completed" || !match.winner_id) {
       return json({ error: "Match not completed" }, 400);
+    }
+    if (match.elo_processed_at) {
+      return json({ ok: true, already_processed: true });
     }
     if (!isGameId(match.game)) {
       return json({ error: "Unsupported game" }, 400);
@@ -82,19 +85,32 @@ Deno.serve(async (req) => {
         });
       }
     } else if (match.team_a_id || match.team_b_id) {
-      // Team match: derive members
+      // Team match: derive members from team_members, OR fall back to match_rosters
+      // (Open Cup matches use synthetic team UUIDs that don't exist in `teams`).
       const teamIds = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
-      const { data: members } = await admin
-        .from("team_members")
-        .select("team_id, user_id")
-        .in("team_id", teamIds);
-      const winningTeam = match.winner_id; // assumed to be team_id when team match
-      (members ?? []).forEach((m: any) => {
-        participants.push({
-          userId: m.user_id,
-          won: m.team_id === winningTeam,
+      const winningTeam = match.winner_id;
+      let resolved = false;
+      if (match.kind !== "open_cup") {
+        const { data: members } = await admin
+          .from("team_members")
+          .select("team_id, user_id")
+          .in("team_id", teamIds);
+        if (members && members.length > 0) {
+          resolved = true;
+          members.forEach((m: any) => {
+            participants.push({ userId: m.user_id, won: m.team_id === winningTeam });
+          });
+        }
+      }
+      if (!resolved) {
+        const { data: rosters } = await admin
+          .from("match_rosters")
+          .select("team_id, user_id")
+          .eq("match_id", match.id);
+        (rosters ?? []).forEach((r: any) => {
+          participants.push({ userId: r.user_id, won: r.team_id === winningTeam });
         });
-      });
+      }
     }
 
     if (participants.length === 0) {
@@ -208,6 +224,8 @@ Deno.serve(async (req) => {
     for (const p of participants) {
       await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }).catch(() => {});
     }
+
+    await admin.from("matches").update({ elo_processed_at: new Date().toISOString() }).eq("id", match.id);
 
     return json({ ok: true, game, updated });
   } catch (err) {
