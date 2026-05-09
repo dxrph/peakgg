@@ -68,10 +68,15 @@ export default function MatchDetailPage() {
     if ((m as any).kind === "open_cup") {
       const { data: rs } = await supabase
         .from("match_rosters")
-        .select("team_id, user_id, profiles:profiles!match_rosters_user_id_fkey(username, display_name, avatar_url)")
+        .select("team_id, user_id")
         .eq("match_id", m.id);
-      // fetch elo
       const userIds = (rs ?? []).map((r: any) => r.user_id);
+      let profMap = new Map<string, any>();
+      if (userIds.length) {
+        const { data: pr } = await supabase
+          .from("profiles").select("id, username, display_name, avatar_url").in("id", userIds);
+        (pr ?? []).forEach((p: any) => profMap.set(p.id, p));
+      }
       let eloMap = new Map<string, number>();
       if (userIds.length) {
         const { data: ps } = await supabase
@@ -83,9 +88,9 @@ export default function MatchDetailPage() {
       }
       const mapped: RosterEntry[] = (rs ?? []).map((r: any) => ({
         team_id: r.team_id, user_id: r.user_id,
-        username: r.profiles?.username ?? null,
-        display_name: r.profiles?.display_name ?? null,
-        avatar_url: r.profiles?.avatar_url ?? null,
+        username: profMap.get(r.user_id)?.username ?? null,
+        display_name: profMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profMap.get(r.user_id)?.avatar_url ?? null,
         elo: eloMap.get(r.user_id) ?? null,
       }));
       setRosters(mapped);
