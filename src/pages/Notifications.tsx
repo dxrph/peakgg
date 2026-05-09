@@ -7,18 +7,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Notification } from "@/hooks/useNotifications";
-import { formatDistanceToNow, format } from "date-fns";
-import { it, enUS, fr } from "date-fns/locale";
 import { useI18n } from "@/i18n";
-
-const dateLocaleMap: Record<string, Locale> = { it, en: enUS, fr };
-import type { Locale } from "date-fns";
+import NotificationCard from "@/components/notifications/NotificationCard";
 
 export default function NotificationsPage() {
   const { user } = useAuth();
-  const { t, locale } = useI18n();
-  const dateLocale = dateLocaleMap[locale] ?? enUS;
-  const { unreadCount, markAllAsRead, markAsRead } = useNotifications(10);
+  const { t } = useI18n();
+  const {
+    unreadCount,
+    markAllAsRead,
+    markAsRead,
+    resolveNotification,
+    dismissNotification,
+  } = useNotifications(10);
   const [all, setAll] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,13 +55,6 @@ export default function NotificationsPage() {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
-  const handleClick = (n: Notification) => {
-    if (!n.is_read) {
-      markAsRead(n.id);
-      setAll((prev) => prev.map((x) => (x.id === n.id ? { ...x, is_read: true } : x)));
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -98,33 +92,13 @@ export default function NotificationsPage() {
             </div>
           ) : (
             all.map((n) => (
-              <button
+              <NotificationCard
                 key={n.id}
-                onClick={() => handleClick(n)}
-                className={`w-full text-left px-5 py-4 border-b border-border last:border-0 hover:bg-secondary/40 transition-colors ${
-                  !n.is_read ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  {!n.is_read && (
-                    <span className="mt-2 h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-display font-bold">{n.title}</div>
-                      <div className="text-xs text-muted-foreground shrink-0">
-                        {format(new Date(n.created_at), "d MMM yyyy HH:mm", { locale: dateLocale })}
-                      </div>
-                    </div>
-                    {n.message && (
-                      <div className="text-sm text-muted-foreground mt-1">{n.message}</div>
-                    )}
-                    <div className="text-[11px] text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: dateLocale })}
-                    </div>
-                  </div>
-                </div>
-              </button>
+                n={n}
+                onMarkRead={markAsRead}
+                onResolve={resolveNotification}
+                onDismiss={dismissNotification}
+              />
             ))
           )}
         </div>
