@@ -36,13 +36,20 @@ export default function RankShowcase() {
           </p>
         </motion.div>
 
-        <div className="relative max-w-6xl mx-auto">
-          {/* Horizontal scroll container — keeps all 10 ranks on a single line, no awkward wrap. */}
-          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-            <div className="relative min-w-[760px] lg:min-w-0">
-              {/* Connecting progression line — sits behind badges, aligned to badge centers */}
-              <div className="absolute top-[44px] left-[3%] right-[3%] h-px bg-gradient-to-r from-transparent via-primary/30 to-accent/40" />
-
+        <div className="relative max-w-7xl mx-auto">
+          {/* Horizontal scroll-snap on mobile, fluid grid on desktop. */}
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-3 snap-x snap-mandatory lg:snap-none">
+            <div className="relative min-w-[920px] lg:min-w-0">
+              {/* Connecting progression rail — sits behind cards, aligned to badge centers */}
+              <div
+                className="absolute left-[4%] right-[4%] h-[2px] pointer-events-none"
+                style={{
+                  top: 78,
+                  background:
+                    "linear-gradient(90deg, transparent 0%, hsl(var(--border)) 12%, hsl(var(--primary) / 0.45) 55%, hsl(var(--accent) / 0.7) 92%, transparent 100%)",
+                  boxShadow: "0 0 18px hsl(var(--primary) / 0.18)",
+                }}
+              />
               <div className="grid grid-cols-10 gap-x-2 lg:gap-x-3 gap-y-6">
                 {RANKS.map((r, i) => {
                   const isApex = r.name === "Apex";
@@ -53,33 +60,73 @@ export default function RankShowcase() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.05 }}
-                      className="relative flex flex-col items-center text-center px-1 pt-4"
+                      className="relative snap-center"
                     >
-                      {isApex && (
-                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-widest text-accent uppercase bg-[#0a0a0a] px-2 py-0.5 rounded-full border border-accent/40 z-10 whitespace-nowrap">
-                          {t("rank_showcase.goal_label")}
+                      {/* Premium slot card */}
+                      <div
+                        className={`group relative flex flex-col items-center text-center rounded-xl px-2 lg:px-3 pt-7 pb-4 transition-all duration-300 ${
+                          isApex
+                            ? "bg-gradient-to-b from-accent/10 via-[#0a0a0a]/80 to-[#050505] border border-accent/40 shadow-[0_0_28px_-6px_hsl(var(--accent)/0.45)]"
+                            : "bg-gradient-to-b from-[#0e0e12]/85 to-[#06060a]/85 border border-white/[0.06] hover:border-white/[0.14] hover:-translate-y-1 hover:shadow-[0_8px_32px_-12px_rgba(0,0,0,0.8)]"
+                        }`}
+                        style={
+                          !isApex
+                            ? ({
+                                ["--rank-glow" as any]: r.hex,
+                              } as React.CSSProperties)
+                            : undefined
+                        }
+                      >
+                        {/* Tier number chip */}
+                        <span
+                          className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-[0.18em] uppercase px-2 py-0.5 rounded-full border bg-[#0a0a0a] z-10 whitespace-nowrap"
+                          style={{
+                            color: isApex ? "#FCD34D" : r.hex,
+                            borderColor: isApex ? "hsl(var(--accent) / 0.55)" : `${r.hex}55`,
+                          }}
+                        >
+                          {isApex ? t("rank_showcase.goal_label") : `T${r.tier}`}
                         </span>
-                      )}
-                      <div
-                        className={`relative ${isApex ? "rank-shimmer" : ""}`}
-                        style={isApex ? { borderRadius: 12 } : undefined}
-                      >
-                        <RankBadge rank={r.name} size={isApex ? "lg" : "md"} forceProcedural />
-                      </div>
-                      <div
-                        className="mt-3 font-display font-bold text-[11px] lg:text-sm tracking-wide whitespace-nowrap"
-                        style={{ color: r.hex }}
-                      >
-                        {tRank(r.name)}
-                      </div>
-                      <div className="text-[9px] lg:text-[11px] text-muted-foreground font-mono mt-0.5 whitespace-nowrap">
-                        {r.minElo}{r.maxElo < 99999 ? `–${r.maxElo}` : "+"}
+
+                        {/* Badge */}
+                        <div
+                          className={`relative ${isApex ? "rank-shimmer" : ""}`}
+                          style={isApex ? { borderRadius: 12 } : undefined}
+                        >
+                          <RankBadge rank={r.name} size={isApex ? "lg" : "md"} forceProcedural />
+                        </div>
+
+                        {/* Name */}
+                        <div
+                          className="mt-3 font-display font-bold text-[11px] lg:text-sm tracking-[0.08em] uppercase whitespace-nowrap"
+                          style={{ color: r.hex }}
+                        >
+                          {tRank(r.name)}
+                        </div>
+
+                        {/* ELO range */}
+                        <div className="text-[9px] lg:text-[11px] text-muted-foreground/80 font-mono mt-1 whitespace-nowrap tabular-nums">
+                          {r.minElo}{r.maxElo < 99999 ? `–${r.maxElo}` : "+"} <span className="opacity-50">ELO</span>
+                        </div>
+
+                        {/* Hover underline accent (desktop) */}
+                        {!isApex && (
+                          <div
+                            className="hidden lg:block absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-0 group-hover:w-2/3 transition-all duration-300 rounded-full"
+                            style={{ background: r.hex }}
+                          />
+                        )}
                       </div>
                     </motion.div>
                   );
                 })}
               </div>
             </div>
+          </div>
+
+          {/* Mobile scroll hint */}
+          <div className="mt-3 text-center text-[10px] uppercase tracking-widest text-muted-foreground/60 font-display lg:hidden">
+            ← {t("rank_showcase.subtitle")} →
           </div>
         </div>
 
