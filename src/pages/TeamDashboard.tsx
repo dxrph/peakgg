@@ -174,13 +174,14 @@ export default function TeamDashboard() {
 
   if (!isMember && !isAdmin) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <div className="container py-20 text-center">
-          <h1 className="font-display text-3xl uppercase">Members only</h1>
-          <p className="text-muted-foreground mt-2">You must be a member of this team to view its dashboard.</p>
+        <main className="flex-1 container py-20 text-center">
+          <h1 className="font-display text-3xl uppercase">Access restricted</h1>
+          <p className="text-muted-foreground mt-2">You don't have access to this team dashboard.</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate(`/teams/${team.id}`)}>View public page</Button>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -194,6 +195,7 @@ export default function TeamDashboard() {
           <ChevronLeft className="h-4 w-4" /> Public team page
         </Button>
 
+        <div className="text-[10px] font-display uppercase tracking-[0.25em] text-primary/80 mb-2">Team Dashboard · Internal HQ</div>
         <Card className="p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={64} rounded="lg" />
@@ -202,10 +204,19 @@ export default function TeamDashboard() {
               <p className="text-xs text-muted-foreground uppercase tracking-widest">{team.game} · {team.region ?? "—"}</p>
               {team.description && <p className="text-sm mt-2 max-w-2xl">{team.description}</p>}
             </div>
-            <div className="flex gap-4 text-center">
-              <div><div className="font-display text-2xl">{members.length}</div><div className="text-xs text-muted-foreground">Roster</div></div>
-              <div><div className="font-display text-2xl">{team.trophies}</div><div className="text-xs text-muted-foreground">Trophies</div></div>
-              <div><div className="font-display text-2xl">{winLoss.w}-{winLoss.l}</div><div className="text-xs text-muted-foreground">W-L</div></div>
+            <div className="flex flex-col gap-3 w-full md:w-auto">
+              <div className="flex gap-4 text-center md:justify-end">
+                <div><div className="font-display text-2xl">{members.length}</div><div className="text-xs text-muted-foreground">Roster</div></div>
+                {team.trophies > 0 && (
+                  <div><div className="font-display text-2xl">{team.trophies}</div><div className="text-xs text-muted-foreground">Trophies</div></div>
+                )}
+                {(winLoss.w + winLoss.l) > 0 && (
+                  <div><div className="font-display text-2xl">{winLoss.w}-{winLoss.l}</div><div className="text-xs text-muted-foreground">W-L</div></div>
+                )}
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/teams/${team.id}`}>View public page</Link>
+              </Button>
             </div>
           </div>
         </Card>
@@ -241,19 +252,30 @@ export default function TeamDashboard() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Not registered for any league yet.</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">Not registered for any league yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/leagues">View Peak League</Link></Button>
+                </div>
               )}
             </Card>
             <Card className="p-5">
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Next match</h3>
               {upcoming[upcoming.length - 1] ? (
                 <MatchCard m={upcoming[upcoming.length - 1]} />
-              ) : <p className="text-sm text-muted-foreground">No matches scheduled.</p>}
+              ) : (
+                <div>
+                  <p className="text-sm text-muted-foreground">No matches scheduled yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/leagues">Join a cup or register</Link></Button>
+                </div>
+              )}
             </Card>
             <Card className="p-5">
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Recent results</h3>
               {past.slice(0, 3).length === 0 ? (
-                <p className="text-sm text-muted-foreground">No completed matches yet.</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">No completed matches yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/scrims">Play your first match</Link></Button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {past.slice(0, 3).map((m) => {
@@ -516,36 +538,65 @@ function SettingsPanel({ team, reload }: { team: Team; reload: () => void }) {
     }).eq("id", team.id);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Saved"); reload();
+    toast.success("Team settings saved"); reload();
   };
 
   return (
-    <Card className="p-5 max-w-2xl space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div><Label>Tag</Label><Input value={tag} onChange={(e) => setTag(e.target.value)} maxLength={4} /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Region</Label><Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="EU West" /></div>
+    <div className="grid lg:grid-cols-3 gap-6">
+      <Card className="p-6 lg:col-span-2 space-y-4">
         <div>
-          <Label>Main game</Label>
-          <Select value={game} onValueChange={setGame}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="valorant">Valorant</SelectItem>
-              <SelectItem value="cs2">CS2</SelectItem>
-              <SelectItem value="r6s">R6 Siege</SelectItem>
-            </SelectContent>
-          </Select>
+          <h3 className="font-display uppercase text-lg">Team identity</h3>
+          <p className="text-xs text-muted-foreground mt-1">Edit how your team appears across PeakGG.</p>
         </div>
-      </div>
-      <div><Label>Description</Label><Textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} /></div>
-      <div>
-        <Label>Logo URL</Label>
-        <Input value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://…" />
-        {avatar && <img src={avatar} alt="preview" className="mt-2 w-16 h-16 rounded object-cover border border-border" />}
-      </div>
-      <Button onClick={save} disabled={busy}><ShieldCheck className="h-4 w-4 mr-1.5" /> Save settings</Button>
-    </Card>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} maxLength={50} /></div>
+          <div className="space-y-1.5"><Label>Tag</Label><Input value={tag} onChange={(e) => setTag(e.target.value.toUpperCase())} maxLength={4} /></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5"><Label>Region</Label><Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="EU West" maxLength={20} /></div>
+          <div className="space-y-1.5">
+            <Label>Main game</Label>
+            <Select value={game} onValueChange={setGame}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="valorant">Valorant</SelectItem>
+                <SelectItem value="cs2">CS2</SelectItem>
+                <SelectItem value="r6s">R6 Siege</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Description</Label>
+          <Textarea rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} placeholder="Describe your team, goals and what kind of players you are looking for." />
+          <p className="text-[11px] text-muted-foreground text-right">{desc.length}/500</p>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Logo URL</Label>
+          <Input value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://…" />
+          <p className="text-[11px] text-muted-foreground">Paste a public image URL. Square images work best.</p>
+        </div>
+        <div className="flex justify-end pt-2">
+          <Button onClick={save} disabled={busy}><ShieldCheck className="h-4 w-4 mr-1.5" /> {busy ? "Saving…" : "Save settings"}</Button>
+        </div>
+      </Card>
+      <Card className="p-6 space-y-4 h-fit">
+        <div className="text-xs font-display uppercase tracking-wider text-muted-foreground">Public preview</div>
+        <div className="rounded-lg border border-border bg-secondary/30 p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <TeamLogo name={name} tag={tag} avatarUrl={avatar || team.avatar_url} color={team.color} size={56} rounded="lg" />
+            <div className="min-w-0">
+              <div className="font-display font-bold truncate uppercase">{name || team.name}</div>
+              <div className="text-[11px] text-muted-foreground uppercase">{game} · {region || "—"}</div>
+            </div>
+          </div>
+          {desc ? (
+            <p className="text-xs text-muted-foreground line-clamp-4">{desc}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">Add a description so players know what you're about.</p>
+          )}
+        </div>
+      </Card>
+    </div>
   );
 }

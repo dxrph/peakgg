@@ -16,17 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
   Users, Globe, Shield, Trophy, ChevronRight, UserPlus, Crown,
-  Settings, Inbox, Pencil, Check, X, Loader2, LogOut, Trash2,
-  Award, Swords, LayoutDashboard, MessageCircle, Sparkles,
+  Loader2, LogOut, Award, Swords, LayoutDashboard, MessageCircle, Sparkles,
 } from "lucide-react";
 import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import TeamLogo from "@/components/teams/TeamLogo";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 interface TeamRow {
   id: string;
@@ -63,7 +57,7 @@ interface JoinReqRow {
   profile?: { username: string; display_name: string | null; avatar_url: string | null } | null;
 }
 
-export default function TeamDetailPage({ manageMode = false }: { manageMode?: boolean } = {}) {
+export default function TeamDetailPage() {
   const { teamId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -73,30 +67,12 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const [requests, setRequests] = useState<JoinReqRow[]>([]);
   const [myRequest, setMyRequest] = useState<JoinReqRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(manageMode ? "manage" : "overview");
+  const [tab, setTab] = useState("overview");
   const [joinOpen, setJoinOpen] = useState(false);
-
-  // Edit form state
-  const [editName, setEditName] = useState("");
-  const [editTag, setEditTag] = useState("");
-  const [editDesc, setEditDesc] = useState("");
-  const [editRegion, setEditRegion] = useState("");
-  const [editLfp, setEditLfp] = useState(true);
-  const [editRecruitStatus, setEditRecruitStatus] = useState<"open" | "invite" | "closed">("open");
-  const [editSlots, setEditSlots] = useState(2);
-  const [savingEdit, setSavingEdit] = useState(false);
 
   const isCaptain = !!(user && team && user.id === team.owner_id);
   const isMember = !!(user && members.some((m) => m.user_id === user.id));
   const hasPending = !!(myRequest && myRequest.status === "pending");
-
-  // Manage mode protection: if route is /manage but viewer is not captain, redirect to public view.
-  useEffect(() => {
-    if (!loading && manageMode && team && user && !isCaptain) {
-      toast.error("Only the team captain can manage this team");
-      navigate(`/teams/${team.id}`, { replace: true });
-    }
-  }, [loading, manageMode, team, user, isCaptain, navigate]);
 
   const load = async () => {
     if (!teamId) return;
@@ -109,13 +85,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
     if (!t) { setTeam(null); setLoading(false); return; }
     setTeam(t as any);
-    setEditName((t as any).name);
-    setEditTag((t as any).tag);
-    setEditDesc((t as any).description ?? "");
-    setEditRegion((t as any).region ?? "");
-    setEditLfp((t as any).looking_for_players);
-    setEditRecruitStatus((t as any).looking_for_players ? "open" : "closed");
-    setEditSlots((t as any).slots ?? 2);
 
     const { data: ms } = await supabase
       .from("team_members")
@@ -170,37 +139,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [teamId, user?.id]);
 
-  const pendingCount = requests.length;
-
-  const handleAccept = async (req: JoinReqRow) => {
-    const { error } = await supabase
-      .from("team_join_requests")
-      .update({ status: "accepted" })
-      .eq("id", req.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Application accepted");
-    load();
-  };
-
-  const handleReject = async (req: JoinReqRow) => {
-    const { error } = await supabase
-      .from("team_join_requests")
-      .update({ status: "rejected" })
-      .eq("id", req.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Application rejected");
-    load();
-  };
-
-  const handleRemoveMember = async (m: MemberRow) => {
-    if (m.user_id === team?.owner_id) { toast.error("Cannot remove the captain"); return; }
-    if (!confirm(`Remove ${m.profile?.username ?? "this member"} from the team?`)) return;
-    const { error } = await supabase.from("team_members").delete().eq("id", m.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Member removed");
-    load();
-  };
-
   const handleLeave = async () => {
     if (!user || !team) return;
     if (!confirm("Leave this team?")) return;
@@ -209,36 +147,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
       .eq("team_id", team.id).eq("user_id", user.id);
     if (error) { toast.error(error.message); return; }
     toast.success("You left the team");
-    navigate("/teams");
-  };
-
-  const handleSaveEdit = async () => {
-    if (!team) return;
-    setSavingEdit(true);
-    const lfp = editRecruitStatus === "open";
-    const { error } = await supabase
-      .from("teams")
-      .update({
-        name: editName.trim(),
-        tag: editTag.trim().toUpperCase().slice(0, 4),
-        description: editDesc.trim() || null,
-        region: editRegion.trim() || null,
-        looking_for_players: lfp,
-        slots: Math.max(0, Math.min(7, editSlots)),
-      } as any)
-      .eq("id", team.id);
-    setSavingEdit(false);
-    if (error) { toast.error(error.message); return; }
-    setEditLfp(lfp);
-    toast.success("Team updated");
-    load();
-  };
-
-  const handleDeleteTeam = async () => {
-    if (!team) return;
-    const { error } = await supabase.from("teams").delete().eq("id", team.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Team deleted");
     navigate("/teams");
   };
 
@@ -266,10 +174,10 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <SEO title={`${team.name} · PeakGG Team`} description={team.description ?? `${team.name} team profile on PeakGG`} />
       <Navbar />
-      <div className="container pt-24 pb-16">
+      <main className="flex-1 container pt-24 pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
           <Link to="/teams" className="hover:text-foreground transition-colors">Teams</Link>
@@ -320,31 +228,11 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                 <Button asChild variant="neon" className="w-full"><Link to="/login">Login to apply</Link></Button>
               )}
               {user && isCaptain && (
-                <>
-                  <Button asChild variant="neon" className="w-full">
-                    <Link to={`/teams/${team.id}/dashboard`}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
-                    </Link>
-                  </Button>
-                  {manageMode ? (
-                    <Button asChild variant="neonOutline" className="w-full">
-                      <Link to={`/teams/${team.id}`}>
-                        <Shield className="mr-2 h-4 w-4" />View Public Page
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button asChild variant="neonOutline" className="w-full">
-                      <Link to={`/teams/${team.id}/manage`}>
-                        <Settings className="mr-2 h-4 w-4" />Manage Team
-                      </Link>
-                    </Button>
-                  )}
-                  {pendingCount > 0 && (
-                    <Button variant="neonOutline" onClick={() => setTab("applications")}>
-                      <Inbox className="mr-2 h-4 w-4" />Applications ({pendingCount})
-                    </Button>
-                  )}
-                </>
+                <Button asChild variant="neon" className="w-full">
+                  <Link to={`/teams/${team.id}/dashboard`}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
+                  </Link>
+                </Button>
               )}
               {user && !isCaptain && isMember && (
                 <>
@@ -378,9 +266,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               <TabsTrigger value="roster"><Users className="h-4 w-4 mr-1" />Roster</TabsTrigger>
               <TabsTrigger value="recruitment"><UserPlus className="h-4 w-4 mr-1" />Recruitment</TabsTrigger>
               <TabsTrigger value="achievements"><Award className="h-4 w-4 mr-1" />Achievements</TabsTrigger>
-              <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Scrims</TabsTrigger>
-              {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
-              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Settings</TabsTrigger>}
+              <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Matches</TabsTrigger>
             </TabsList>
           </div>
 
@@ -475,15 +361,15 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
             </div>
           </TabsContent>
 
-          {/* SCRIMS (public) */}
+          {/* MATCHES (public) */}
           <TabsContent value="scrims">
             <div className="rounded-lg border border-border bg-card p-10 text-center">
               <Swords className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-display font-bold text-lg uppercase">No scrims posted yet</h3>
+              <h3 className="font-display font-bold text-lg uppercase">No public matches yet</h3>
               <p className="text-sm text-muted-foreground font-body mt-1 mb-4">
-                When this team posts scrims, you'll find them here.
+                Match history will appear once {team.name} plays its first official match.
               </p>
-              <Link to="/scrims"><Button variant="neonOutline">Find Scrims</Button></Link>
+              <Link to="/leagues"><Button variant="neonOutline">View Peak League</Button></Link>
             </div>
           </TabsContent>
 
@@ -519,8 +405,8 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                         </div>
                       </Link>
                       {isCaptain && !captain && (
-                        <Button size="sm" variant="ghost" onClick={() => handleRemoveMember(m)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <Button asChild size="sm" variant="ghost">
+                          <Link to={`/teams/${team.id}/dashboard`}>Manage</Link>
                         </Button>
                       )}
                     </div>
@@ -529,219 +415,8 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               </div>
             </div>
           </TabsContent>
-
-          {/* APPLICATIONS */}
-          {isCaptain && (
-            <TabsContent value="applications">
-              <div className="rounded-lg border border-border bg-card p-6">
-                {requests.length === 0 ? (
-                  <div className="text-center py-10 font-body">
-                    <Inbox className="h-10 w-10 text-primary mx-auto mb-3" />
-                    <h3 className="font-display font-bold text-lg uppercase">No applications yet</h3>
-                    <p className="text-sm text-muted-foreground mt-1 mb-4">Open recruitment or browse Free Agents.</p>
-                    <Link to="/free-agents"><Button variant="neonOutline">Browse Free Agents</Button></Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {requests.map((r) => (
-                      <div key={r.id} className="rounded border border-border bg-secondary/30 p-4">
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <Link to={`/profile/${r.profile?.username ?? r.user_id}`} className="flex items-center gap-3 min-w-0">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={r.profile?.avatar_url ?? undefined} />
-                              <AvatarFallback>{(r.profile?.username ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <div className="font-display font-semibold">{r.profile?.display_name ?? r.profile?.username}</div>
-                              <div className="text-xs text-muted-foreground">Role: {r.role ?? "—"}</div>
-                            </div>
-                          </Link>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="neon" onClick={() => handleAccept(r)}><Check className="h-4 w-4 mr-1" />Accept</Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleReject(r)}><X className="h-4 w-4 mr-1" />Reject</Button>
-                          </div>
-                        </div>
-                        {r.message && (
-                          <p className="text-sm text-muted-foreground font-body mt-3 border-t border-border pt-3">{r.message}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          )}
-
-          {/* MANAGE */}
-          {isCaptain && (
-            <TabsContent value="manage">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* LEFT: Edit form sections */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Basic Info */}
-                  <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-                    <div>
-                      <h3 className="font-display text-lg uppercase tracking-wider flex items-center gap-2"><Pencil className="h-4 w-4 text-primary" />Basic Info</h3>
-                      <p className="text-xs text-muted-foreground font-body mt-1">Identity of your team across PeakGG.</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="sm:col-span-2 space-y-1.5">
-                        <Label className="font-display text-xs uppercase">Team name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={50} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="font-display text-xs uppercase">Tag</Label>
-                        <Input value={editTag} onChange={(e) => setEditTag(e.target.value.toUpperCase())} maxLength={4} />
-                        <p className="text-[11px] text-muted-foreground font-body">Up to 4 characters.</p>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="font-display text-xs uppercase">Region</Label>
-                      <Input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} maxLength={20} placeholder="EU, NA, Italy…" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="font-display text-xs uppercase">Description</Label>
-                      <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={4} maxLength={500} placeholder="Tell players what your team is about." />
-                      <p className="text-[11px] text-muted-foreground font-body text-right">{editDesc.length}/500</p>
-                    </div>
-                  </div>
-
-                  {/* Recruitment */}
-                  <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-                    <div>
-                      <h3 className="font-display text-lg uppercase tracking-wider flex items-center gap-2"><UserPlus className="h-4 w-4 text-primary" />Recruitment</h3>
-                      <p className="text-xs text-muted-foreground font-body mt-1">Control how players can join your roster.</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <Label className="font-display text-xs uppercase">Recruitment status</Label>
-                        <Select value={editRecruitStatus} onValueChange={(v) => setEditRecruitStatus(v as any)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="open">Open — accepting applications</SelectItem>
-                            <SelectItem value="invite">Invite only</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="font-display text-xs uppercase">Open slots</Label>
-                        <Select value={String(editSlots)} onValueChange={(v) => setEditSlots(parseInt(v, 10))}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {[0,1,2,3,4,5,6,7].map((n) => (
-                              <SelectItem key={n} value={String(n)}>{n} slot{n === 1 ? "" : "s"}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-[11px] text-muted-foreground font-body">How many players are you currently looking for?</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Save bar */}
-                  <div className="flex flex-wrap gap-2 justify-end">
-                    <Button variant="ghost" onClick={() => load()}>Cancel</Button>
-                    <Button variant="neon" onClick={handleSaveEdit} disabled={savingEdit}>
-                      {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
-                    </Button>
-                  </div>
-
-                  {/* Danger Zone */}
-                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 space-y-3">
-                    <div>
-                      <h3 className="font-display text-lg uppercase tracking-wider text-destructive flex items-center gap-2"><Trash2 className="h-4 w-4" />Danger Zone</h3>
-                      <p className="text-xs text-muted-foreground font-body mt-1">Irreversible actions. Proceed with caution.</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded border border-destructive/30 bg-background/40 p-4">
-                      <div>
-                        <div className="font-display font-semibold">Delete this team</div>
-                        <p className="text-xs text-muted-foreground font-body">This action cannot be undone. All members and applications will be removed.</p>
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4" />Delete Team</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete {team.name}?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete the team, its roster, and pending applications. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteTeam} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Delete permanently
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </div>
-
-                {/* RIGHT: Summary + live preview */}
-                <div className="space-y-6">
-                  <div className="rounded-lg border border-border bg-card p-6">
-                    <div className="text-xs font-display uppercase tracking-wider text-muted-foreground mb-3">Team Summary</div>
-                    <div className="flex items-center gap-3">
-                      <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={56} rounded="lg" />
-                      <div className="min-w-0">
-                        <div className="font-display font-bold truncate">{team.name}</div>
-                        <div className="text-xs text-muted-foreground font-body uppercase">{team.game} · {team.region ?? "—"}</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 mt-4 text-center">
-                      <div className="rounded border border-border bg-secondary/30 p-3">
-                        <div className="text-[10px] uppercase text-muted-foreground font-display">Members</div>
-                        <div className="font-display font-bold text-lg">{members.length}</div>
-                      </div>
-                      <div className="rounded border border-border bg-secondary/30 p-3">
-                        <div className="text-[10px] uppercase text-muted-foreground font-display">Open slots</div>
-                        <div className="font-display font-bold text-lg">{Math.max(0, editSlots)}</div>
-                      </div>
-                    </div>
-                    <div className="mt-3">
-                      <Badge variant="outline" className={`font-display w-full justify-center py-1.5 ${editRecruitStatus === "open" ? "border-success text-success" : editRecruitStatus === "invite" ? "border-accent text-accent" : "border-muted text-muted-foreground"}`}>
-                        {editRecruitStatus === "open" ? "Open recruitment" : editRecruitStatus === "invite" ? "Invite only" : "Recruitment closed"}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Live preview */}
-                  <div className="rounded-lg border border-border bg-card p-6">
-                    <div className="text-xs font-display uppercase tracking-wider text-muted-foreground mb-3">Public preview</div>
-                    <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-lg flex items-center justify-center font-display font-bold text-white" style={{ background: team.color }}>
-                          {(editTag || team.tag).slice(0, 4)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-display font-bold truncate">{editName || team.name}</div>
-                          <div className="text-[11px] text-muted-foreground font-body uppercase">{team.game} · {editRegion || "—"}</div>
-                        </div>
-                      </div>
-                      {editDesc && <p className="text-xs text-muted-foreground font-body line-clamp-3 mb-3">{editDesc}</p>}
-                      <div className="flex flex-wrap gap-1.5">
-                        {editRecruitStatus === "open" && (
-                          <Badge variant="outline" className="border-success text-success font-display text-[10px]">Recruiting · {editSlots} slot{editSlots === 1 ? "" : "s"}</Badge>
-                        )}
-                        {editRecruitStatus === "invite" && (
-                          <Badge variant="outline" className="border-accent text-accent font-display text-[10px]">Invite only</Badge>
-                        )}
-                        {editRecruitStatus === "closed" && (
-                          <Badge variant="outline" className="font-display text-[10px]">Closed</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          )}
         </Tabs>
-      </div>
+      </main>
 
       <JoinTeamDialog open={joinOpen} onOpenChange={setJoinOpen} team={team ? { id: team.id, name: team.name, game: team.game } : null} />
       <Footer />

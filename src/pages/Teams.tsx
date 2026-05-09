@@ -380,8 +380,8 @@ export default function TeamsPage() {
                         </Button>
                         <div className="grid grid-cols-2 gap-2">
                           {isOwner ? (
-                            <Button variant="neon" size="sm" className="col-span-2" onClick={() => navigate(`/teams/${tt.id}/manage`)}>
-                              <Settings className="h-4 w-4 mr-1.5" /> {t("teams_page.manage_team", { defaultValue: "Manage Team" })}
+                            <Button variant="neon" size="sm" className="col-span-2" onClick={() => navigate(`/teams/${tt.id}/dashboard`)}>
+                              <Settings className="h-4 w-4 mr-1.5" /> {t("teams_page.open_dashboard", { defaultValue: "Open Dashboard" })}
                             </Button>
                           ) : (
                             <>
