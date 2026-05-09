@@ -209,7 +209,10 @@ export default function LeagueDetailPage() {
         <Navbar />
         <div className="container py-20 text-center">
           <h1 className="font-display text-3xl uppercase">League not found</h1>
-          <Button asChild variant="outline" className="mt-4"><Link to="/leagues">Back to Leagues</Link></Button>
+          <p className="text-muted-foreground mt-2">This league could not be found or is no longer available.</p>
+          <div className="flex gap-3 justify-center mt-6">
+            <Button asChild variant="outline"><Link to="/leagues">Back to League Hub</Link></Button>
+          </div>
         </div>
       </div>
     );
