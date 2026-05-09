@@ -17,8 +17,9 @@ import { toast } from "sonner";
 import {
   Users, Globe, Shield, Trophy, ChevronRight, UserPlus, Crown,
   Settings, Inbox, Pencil, Check, X, Loader2, LogOut, Trash2,
-  Award, Swords, LayoutDashboard,
+  Award, Swords, LayoutDashboard, MessageCircle, Sparkles,
 } from "lucide-react";
+import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -40,6 +41,7 @@ interface TeamRow {
   slots: number;
   color: string;
   owner_id: string;
+  is_founding?: boolean;
 }
 
 interface MemberRow {
@@ -100,7 +102,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
     setLoading(true);
     const { data: t } = await supabase
       .from("teams")
-      .select("id, name, tag, game, region, rank, description, avatar_url, trophies, looking_for_players, slots, color, owner_id")
+      .select("id, name, tag, game, region, rank, description, avatar_url, trophies, looking_for_players, slots, color, owner_id, is_founding")
       .eq("id", teamId)
       .maybeSingle();
 
@@ -287,6 +289,11 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-display font-bold">{team.name}</h1>
                 <Badge variant="outline" className="font-display uppercase text-xs">{team.game}</Badge>
+                {team.is_founding && (
+                  <Badge variant="outline" className="border-accent text-accent font-display gap-1">
+                    <Sparkles className="h-3 w-3" /> Founding Team
+                  </Badge>
+                )}
                 {team.looking_for_players && (
                   <Badge variant="outline" className="border-success text-success font-display">Recruiting</Badge>
                 )}
@@ -305,7 +312,9 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-body items-center">
                 <span className="flex items-center gap-1.5"><Globe className="h-4 w-4" />{team.region ?? "—"}</span>
                 <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{members.length} members</span>
-                <span className="flex items-center gap-1.5"><Trophy className="h-4 w-4 text-accent" />{team.trophies}</span>
+                {team.trophies > 0 && (
+                  <span className="flex items-center gap-1.5"><Trophy className="h-4 w-4 text-accent" />{team.trophies}</span>
+                )}
               </div>
             </div>
 
@@ -381,12 +390,39 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
           {/* OVERVIEW */}
           <TabsContent value="overview">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Members" value={members.length} />
-              <StatCard label="Trophies" value={team.trophies} />
-              <StatCard label="Open slots" value={Math.max(0, team.slots)} />
+              {team.trophies > 0 && <StatCard label="Trophies" value={team.trophies} />}
+              {team.looking_for_players && team.slots > 0 && (
+                <StatCard label="Open slots" value={Math.min(Math.max(0, team.slots), 5)} />
+              )}
               <StatCard label="Region" value={team.region ?? "—"} />
-              <StatCard label="Avg rank" value={team.rank ?? "—"} />
+              {team.rank && <StatCard label="Avg rank" value={team.rank} />}
+            </div>
+            <div className="mt-6 grid md:grid-cols-2 gap-4">
+              <div className="rounded-lg border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <h3 className="font-display uppercase tracking-wider text-sm">League Status</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {team.is_founding
+                    ? "Founding team for Peak League Season 0 Beta. Standings will appear once the season starts."
+                    : "Not currently registered to a Peak League season."}
+                </p>
+                <Button asChild variant="neonOutline" size="sm" className="mt-3">
+                  <Link to="/leagues">View Peak League</Link>
+                </Button>
+              </div>
+              <div className="rounded-lg border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Award className="h-4 w-4 text-accent" />
+                  <h3 className="font-display uppercase tracking-wider text-sm">Reputation</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Reputation will be built through official matches, fair play and activity.
+                </p>
+              </div>
             </div>
           </TabsContent>
 
@@ -398,25 +434,48 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               </Badge>
               <p className="text-sm text-muted-foreground font-body mt-3 max-w-md mx-auto">
                 {team.looking_for_players
-                  ? `${team.name} is currently recruiting. ${Math.max(0, team.slots)} open slot${team.slots === 1 ? "" : "s"}.`
-                  : `${team.name} is not currently looking for new players.`}
+                  ? team.is_founding
+                    ? `${team.name} is recruiting players for Season 0 Beta. Apply to join this roster.`
+                    : `${team.name} is looking for competitive players. Apply to join this roster.`
+                  : `Recruitment is currently closed for ${team.name}.`}
               </p>
-              {!isCaptain && !isMember && team.looking_for_players && user && (
-                <Button variant="neon" className="mt-4" onClick={() => setJoinOpen(true)}>
-                  <UserPlus className="h-4 w-4 mr-2" />Apply to Team
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                {!isCaptain && !isMember && team.looking_for_players && user && (
+                  <Button variant="neon" onClick={() => setJoinOpen(true)}>
+                    <UserPlus className="h-4 w-4 mr-2" />Apply to Team
+                  </Button>
+                )}
+                <Button asChild variant="neonOutline">
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-4 w-4 mr-2" />Join Discord
+                  </a>
                 </Button>
-              )}
+              </div>
             </div>
           </TabsContent>
 
           {/* ACHIEVEMENTS (public) */}
           <TabsContent value="achievements">
-            <div className="rounded-lg border border-border bg-card p-10 text-center">
-              <Award className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-display font-bold text-lg uppercase">No achievements yet</h3>
-              <p className="text-sm text-muted-foreground font-body mt-1">
-                Trophies won in tournaments and seasons will appear here.
-              </p>
+            <div className="rounded-lg border border-border bg-card p-8">
+              {team.is_founding ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-lg bg-accent/10 border border-accent/40 flex items-center justify-center">
+                    <Sparkles className="h-7 w-7 text-accent" />
+                  </div>
+                  <div>
+                    <div className="font-display font-bold uppercase">Founding Team</div>
+                    <div className="text-xs text-muted-foreground">Awarded for joining Peak League Season 0 Beta as a founding roster.</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Award className="h-10 w-10 text-primary mx-auto mb-3" />
+                  <h3 className="font-display font-bold text-lg uppercase">No achievements yet</h3>
+                  <p className="text-sm text-muted-foreground font-body mt-1">
+                    Achievements will appear after official matches and events.
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
