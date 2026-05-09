@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import StatusPill from "./StatusPill";
 import { Crown, Trophy } from "lucide-react";
+import TeamLogo from "@/components/teams/TeamLogo";
 
 export interface PlayoffMatch {
   id: string;
@@ -96,11 +97,7 @@ function Row({ team, score, winner }: { team: TeamLite | null; score: number | n
   return (
     <div className={`flex items-center justify-between py-1.5 ${winner ? "text-primary font-bold" : ""}`}>
       <div className="flex items-center gap-2 min-w-0">
-        {team?.avatar_url ? (
-          <img src={team.avatar_url} alt="" className="w-5 h-5 rounded object-cover" />
-        ) : (
-          <div className="w-5 h-5 rounded bg-muted" />
-        )}
+        <TeamLogo name={team?.name} tag={team?.tag} avatarUrl={team?.avatar_url} size={20} rounded="md" />
         <span className="font-display uppercase truncate">{team?.name ?? "TBD"}</span>
       </div>
       <span className="font-display tabular-nums">{score ?? "-"}</span>

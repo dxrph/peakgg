@@ -6,6 +6,7 @@ import SEO from "@/components/SEO";
 import StatusPill from "@/components/leagues/StatusPill";
 import ReadyCheck from "@/components/matches/ReadyCheck";
 import MatchChat from "@/components/matches/MatchChat";
+import TeamLogo from "@/components/teams/TeamLogo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -167,7 +168,7 @@ export default function MatchDetailPage() {
           </div>
           <div className="grid grid-cols-3 items-center gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              {teamA?.avatar_url ? <img src={teamA.avatar_url} className="w-14 h-14 rounded object-cover" alt="" /> : <div className="w-14 h-14 rounded bg-muted border border-border" />}
+              <TeamLogo name={teamA?.name} tag={teamA?.tag} avatarUrl={teamA?.avatar_url} size={56} rounded="lg" />
               <div className="min-w-0">
                 <Link to={teamA ? `/teams/${teamA.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamA?.name ?? "TBD"}</Link>
                 {teamA?.tag && <div className="text-xs text-muted-foreground">[{teamA.tag}]</div>}
@@ -191,7 +192,7 @@ export default function MatchDetailPage() {
                 <Link to={teamB ? `/teams/${teamB.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamB?.name ?? "TBD"}</Link>
                 {teamB?.tag && <div className="text-xs text-muted-foreground">[{teamB.tag}]</div>}
               </div>
-              {teamB?.avatar_url ? <img src={teamB.avatar_url} className="w-14 h-14 rounded object-cover" alt="" /> : <div className="w-14 h-14 rounded bg-muted border border-border" />}
+              <TeamLogo name={teamB?.name} tag={teamB?.tag} avatarUrl={teamB?.avatar_url} size={56} rounded="lg" />
             </div>
           </div>
 

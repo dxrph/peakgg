@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import StatusPill from "./StatusPill";
+import TeamLogo from "@/components/teams/TeamLogo";
 
 export interface MatchCardData {
   id: string;
@@ -17,11 +18,7 @@ export interface MatchCardData {
 function TeamBlock({ t, side }: { t: MatchCardData["team_a"]; side: "left" | "right" }) {
   return (
     <div className={`flex items-center gap-2 ${side === "right" ? "flex-row-reverse text-right" : ""} flex-1 min-w-0`}>
-      {t?.avatar_url ? (
-        <img src={t.avatar_url} alt="" className="w-8 h-8 rounded-sm object-cover" />
-      ) : (
-        <div className="w-8 h-8 rounded-sm bg-muted border border-border" />
-      )}
+      <TeamLogo name={t?.name} tag={t?.tag} avatarUrl={t?.avatar_url} size={32} rounded="md" />
       <div className="min-w-0">
         <div className="font-display font-bold uppercase truncate text-sm">{t?.name ?? "TBD"}</div>
         {t?.tag && <div className="text-[10px] text-muted-foreground">[{t.tag}]</div>}

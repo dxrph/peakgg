@@ -7,6 +7,7 @@ import StatusPill from "@/components/leagues/StatusPill";
 import StandingsTable, { StandingRow } from "@/components/leagues/StandingsTable";
 import MatchCard, { MatchCardData } from "@/components/leagues/MatchCard";
 import PlayoffBracket, { PlayoffMatch } from "@/components/leagues/PlayoffBracket";
+import TeamLogo from "@/components/teams/TeamLogo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -344,7 +345,7 @@ export default function LeagueDetailPage() {
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {teams.map(t => (
                     <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors flex items-center gap-3">
-                      {t.avatar_url ? <img src={t.avatar_url} alt="" className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-muted border border-border" />}
+                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} size={40} rounded="md" />
                       <div className="min-w-0">
                         <div className="font-display font-bold uppercase truncate">{t.name}</div>
                         <div className="flex items-center gap-1.5 mt-0.5">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import FormDots from "./FormDots";
 import { cn } from "@/lib/utils";
+import TeamLogo from "@/components/teams/TeamLogo";
 
 export interface StandingRow {
   team_id: string;
@@ -69,11 +70,7 @@ export default function StandingsTable({
                 </td>
                 <td className="px-3 py-2.5">
                   <Link to={`/teams/${r.team_id}`} className="flex items-center gap-2 hover:text-primary">
-                    {r.team_avatar ? (
-                      <img src={r.team_avatar} alt="" className="w-6 h-6 rounded-sm object-cover" />
-                    ) : (
-                      <div className="w-6 h-6 rounded-sm bg-muted border border-border" />
-                    )}
+                    <TeamLogo name={r.team_name} tag={r.team_tag} avatarUrl={r.team_avatar} size={24} rounded="md" />
                     <span className="font-display font-bold uppercase tracking-wide truncate max-w-[180px]">
                       {r.team_name}
                     </span>
