@@ -29,8 +29,10 @@ interface MatchRow {
   season_id: string | null; division_id: string | null;
   submitted_by: string | null; confirmed_by: string | null;
   lobby_code: string | null; server_info: string | null;
+  kind?: string | null;
 }
 interface TeamRow { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; }
+interface RosterEntry { team_id: string; user_id: string; username: string | null; display_name: string | null; avatar_url: string | null; elo: number | null; }
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -40,6 +42,7 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<MatchRow | null>(null);
   const [teamA, setTeamA] = useState<TeamRow | null>(null);
   const [teamB, setTeamB] = useState<TeamRow | null>(null);
+  const [rosters, setRosters] = useState<RosterEntry[]>([]);
   const [isParticipant, setIsParticipant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitOpen, setSubmitOpen] = useState(false);
@@ -56,59 +59,101 @@ export default function MatchDetailPage() {
     if (!matchId) return;
     const { data: m } = await supabase
       .from("matches")
-      .select("id, game, map, team_a_id, team_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info")
+      .select("id, game, map, team_a_id, team_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info, kind")
       .eq("id", matchId)
       .maybeSingle();
     if (!m) { setLoading(false); return; }
     setMatch(m as MatchRow);
     setScoreA(m.score_a ?? 0); setScoreB(m.score_b ?? 0); setMap(m.map ?? "");
-    const ids = [m.team_a_id, m.team_b_id].filter(Boolean) as string[];
-    if (ids.length) {
-      const { data: ts } = await supabase.from("teams").select("id, name, tag, avatar_url, owner_id").in("id", ids);
-      const tA = (ts ?? []).find(t => t.id === m.team_a_id) ?? null;
-      const tB = (ts ?? []).find(t => t.id === m.team_b_id) ?? null;
-      setTeamA(tA as TeamRow); setTeamB(tB as TeamRow);
+    if ((m as any).kind === "open_cup") {
+      const { data: rs } = await supabase
+        .from("match_rosters")
+        .select("team_id, user_id, profiles:profiles!match_rosters_user_id_fkey(username, display_name, avatar_url)")
+        .eq("match_id", m.id);
+      // fetch elo
+      const userIds = (rs ?? []).map((r: any) => r.user_id);
+      let eloMap = new Map<string, number>();
+      if (userIds.length) {
+        const { data: ps } = await supabase
+          .from("player_stats")
+          .select("user_id, elo")
+          .eq("game", m.game)
+          .in("user_id", userIds);
+        (ps ?? []).forEach((p: any) => eloMap.set(p.user_id, p.elo));
+      }
+      const mapped: RosterEntry[] = (rs ?? []).map((r: any) => ({
+        team_id: r.team_id, user_id: r.user_id,
+        username: r.profiles?.username ?? null,
+        display_name: r.profiles?.display_name ?? null,
+        avatar_url: r.profiles?.avatar_url ?? null,
+        elo: eloMap.get(r.user_id) ?? null,
+      }));
+      setRosters(mapped);
+      setTeamA({ id: m.team_a_id ?? "", name: "Team A", tag: null, avatar_url: null, owner_id: "" } as TeamRow);
+      setTeamB({ id: m.team_b_id ?? "", name: "Team B", tag: null, avatar_url: null, owner_id: "" } as TeamRow);
+    } else {
+      const ids = [m.team_a_id, m.team_b_id].filter(Boolean) as string[];
+      if (ids.length) {
+        const { data: ts } = await supabase.from("teams").select("id, name, tag, avatar_url, owner_id").in("id", ids);
+        const tA = (ts ?? []).find(t => t.id === m.team_a_id) ?? null;
+        const tB = (ts ?? []).find(t => t.id === m.team_b_id) ?? null;
+        setTeamA(tA as TeamRow); setTeamB(tB as TeamRow);
+      }
     }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [matchId]);
 
-  // Check if current user is a member/coach of either team
+  // Check participation: team_members for normal matches OR match_rosters for Open Cup
   useEffect(() => {
     if (!user || !match) { setIsParticipant(false); return; }
-    const ids = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
-    if (!ids.length) { setIsParticipant(false); return; }
     (async () => {
+      if (match.kind === "open_cup") {
+        const { data } = await supabase.from("match_rosters").select("id").eq("match_id", match.id).eq("user_id", user.id).limit(1);
+        setIsParticipant((data ?? []).length > 0);
+        return;
+      }
+      const ids = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
+      if (!ids.length) { setIsParticipant(false); return; }
       const { data } = await supabase
-        .from("team_members")
-        .select("team_id")
-        .eq("user_id", user.id)
-        .in("team_id", ids)
-        .limit(1);
+        .from("team_members").select("team_id").eq("user_id", user.id).in("team_id", ids).limit(1);
       setIsParticipant((data ?? []).length > 0);
     })();
-  }, [user, match?.team_a_id, match?.team_b_id]);
+  }, [user, match?.team_a_id, match?.team_b_id, match?.kind, match?.id]);
 
   const isCaptainA = !!user && teamA?.owner_id === user.id;
   const isCaptainB = !!user && teamB?.owner_id === user.id;
   const isAnyCaptain = isCaptainA || isCaptainB;
+  const isOpenCup = match?.kind === "open_cup";
+  const mySide: "a" | "b" | null = isOpenCup && user
+    ? (rosters.find(r => r.user_id === user.id)?.team_id === match?.team_a_id ? "a"
+      : rosters.find(r => r.user_id === user.id)?.team_id === match?.team_b_id ? "b" : null)
+    : null;
   const isStaff = isAdmin || isModerator;
   const canAccessChat = isAnyCaptain || isParticipant || isStaff;
   const canSeeLobby = canAccessChat;
-  const canSubmit = isAnyCaptain && match && ["scheduled", "live", "awaiting_result"].includes(match.result_status);
+  const canSubmit = match && ["scheduled", "live", "awaiting_result"].includes(match.result_status)
+    && (isAnyCaptain || (isOpenCup && isParticipant));
   const submittedByMe = match?.submitted_by === user?.id;
-  const canConfirm = isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
-  const canDispute = isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
+  const canConfirm = match?.result_status === "pending_confirmation" && !submittedByMe
+    && (isAnyCaptain || (isOpenCup && isParticipant));
+  const canDispute = !isOpenCup && isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
   const canAdminResolve = isStaff && match && ["disputed", "pending_confirmation", "scheduled", "awaiting_result", "live"].includes(match.result_status);
+
+  const triggerEloUpdate = async (id: string) => {
+    try { await supabase.functions.invoke("update-match-result", { body: { match_id: id } }); } catch {}
+  };
 
   const submit = async () => {
     if (!match) return;
     setBusy(true);
-    const { error } = await supabase.rpc("submit_match_result", {
-      _match_id: match.id, _score_a: scoreA, _score_b: scoreB,
-      _map: map || null, _notes: notes || null, _screenshot: null,
-    });
+    const { error } = isOpenCup
+      ? await supabase.rpc("submit_open_cup_result", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB })
+      : await supabase.rpc("submit_match_result", {
+          _match_id: match.id, _score_a: scoreA, _score_b: scoreB,
+          _map: map || null, _notes: notes || null, _screenshot: null,
+        });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Result submitted — waiting for opponent confirmation");
@@ -117,10 +162,14 @@ export default function MatchDetailPage() {
   const confirm = async () => {
     if (!match) return;
     setBusy(true);
-    const { error } = await supabase.rpc("confirm_match_result", { _match_id: match.id });
+    const { error } = isOpenCup
+      ? await supabase.rpc("confirm_open_cup_result", { _match_id: match.id })
+      : await supabase.rpc("confirm_match_result", { _match_id: match.id });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Result confirmed"); load();
+    toast.success("Result confirmed");
+    if (isOpenCup) await triggerEloUpdate(match.id);
+    load();
   };
   const dispute = async () => {
     if (!match || !reason) return toast.error("Reason required");
@@ -134,10 +183,14 @@ export default function MatchDetailPage() {
   const adminResolve = async () => {
     if (!match) return;
     setBusy(true);
-    const { error } = await supabase.rpc("admin_resolve_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB });
+    const { error } = isOpenCup
+      ? await supabase.rpc("admin_resolve_open_cup_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB })
+      : await supabase.rpc("admin_resolve_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Match resolved"); setAdminOpen(false); load();
+    toast.success("Match resolved");
+    if (isOpenCup) await triggerEloUpdate(match.id);
+    setAdminOpen(false); load();
   };
 
   if (loading) return <div className="min-h-screen bg-background"><Navbar /><div className="container py-10"><Skeleton className="h-64" /></div></div>;
