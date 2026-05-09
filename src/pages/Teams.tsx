@@ -343,20 +343,30 @@ export default function TeamsPage() {
                           );
                         })()}
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs font-body mb-3 text-center">
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="text-primary font-display flex items-center justify-center gap-1"><Trophy className="h-3 w-3" />{tt.trophies}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.trophies", { defaultValue: "Trophies" })}</div>
-                        </div>
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="font-display">{tt.slots}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.open_slots", { defaultValue: "Open slots" })}</div>
-                        </div>
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="font-display">{tt.rank ?? "—"}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.avg_rank", { defaultValue: "Avg rank" })}</div>
-                        </div>
-                      </div>
+                      {(() => {
+                        const cells = [
+                          tt.trophies > 0 && (
+                            <div key="t" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="text-primary font-display flex items-center justify-center gap-1"><Trophy className="h-3 w-3" />{tt.trophies}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.trophies", { defaultValue: "Trophies" })}</div>
+                            </div>
+                          ),
+                          tt.looking_for_players && tt.slots > 0 && (
+                            <div key="s" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="font-display">{Math.min(tt.slots, 5)}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.open_slots", { defaultValue: "Open slots" })}</div>
+                            </div>
+                          ),
+                          tt.rank && (
+                            <div key="r" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="font-display">{tt.rank}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.avg_rank", { defaultValue: "Avg rank" })}</div>
+                            </div>
+                          ),
+                        ].filter(Boolean);
+                        if (cells.length === 0) return null;
+                        return <div className={`grid grid-cols-${cells.length} gap-2 text-xs font-body mb-3 text-center`}>{cells}</div>;
+                      })()}
                       {tt.looking_for_players && (
                         <div className="text-center text-xs font-display uppercase tracking-wider py-1.5 mb-3 rounded bg-success/10 text-success border border-success/30">
                           {t("teams_page.recruiting", { defaultValue: "Recruiting" })}
