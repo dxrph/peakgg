@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import {
   Users, Globe, Shield, Trophy, ChevronRight, UserPlus, Crown,
   Settings, Inbox, Pencil, Check, X, Loader2, LogOut, Trash2,
-  Award, Swords,
+  Award, Swords, LayoutDashboard,
 } from "lucide-react";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -316,6 +316,11 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
               )}
               {user && isCaptain && (
                 <>
+                  <Link to={`/teams/${team.id}/dashboard`}>
+                    <Button variant="neon" className="w-full">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
+                    </Button>
+                  </Link>
                   {manageMode ? (
                     <Link to={`/teams/${team.id}`}>
                       <Button variant="neonOutline" className="w-full">
@@ -324,7 +329,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                     </Link>
                   ) : (
                     <Link to={`/teams/${team.id}/manage`}>
-                      <Button variant="neon" className="w-full">
+                      <Button variant="neonOutline" className="w-full">
                         <Settings className="mr-2 h-4 w-4" />Manage Team
                       </Button>
                     </Link>
@@ -337,9 +342,16 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                 </>
               )}
               {user && !isCaptain && isMember && (
-                <Button variant="ghost" onClick={handleLeave}>
-                  <LogOut className="mr-2 h-4 w-4" />Leave Team
-                </Button>
+                <>
+                  <Link to={`/teams/${team.id}/dashboard`}>
+                    <Button variant="neonOutline" className="w-full">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" onClick={handleLeave}>
+                    <LogOut className="mr-2 h-4 w-4" />Leave Team
+                  </Button>
+                </>
               )}
               {user && !isCaptain && !isMember && hasPending && (
                 <Badge variant="outline" className="font-display py-2 px-3 justify-center">Application pending</Badge>
