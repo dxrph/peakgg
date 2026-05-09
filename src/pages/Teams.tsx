@@ -365,7 +365,8 @@ export default function TeamsPage() {
                           ),
                         ].filter(Boolean);
                         if (cells.length === 0) return null;
-                        return <div className={`grid grid-cols-${cells.length} gap-2 text-xs font-body mb-3 text-center`}>{cells}</div>;
+                        const colsClass = cells.length === 1 ? "grid-cols-1" : cells.length === 2 ? "grid-cols-2" : "grid-cols-3";
+                        return <div className={`grid ${colsClass} gap-2 text-xs font-body mb-3 text-center`}>{cells}</div>;
                       })()}
                       {tt.looking_for_players && (
                         <div className="text-center text-xs font-display uppercase tracking-wider py-1.5 mb-3 rounded bg-success/10 text-success border border-success/30">
