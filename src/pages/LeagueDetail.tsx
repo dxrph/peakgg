@@ -6,6 +6,7 @@ import SEO from "@/components/SEO";
 import StatusPill from "@/components/leagues/StatusPill";
 import StandingsTable, { StandingRow } from "@/components/leagues/StandingsTable";
 import MatchCard, { MatchCardData } from "@/components/leagues/MatchCard";
+import PlayoffBracket, { PlayoffMatch } from "@/components/leagues/PlayoffBracket";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
-interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; }
+interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
 interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; }
 
@@ -29,6 +30,7 @@ export default function LeagueDetailPage() {
   const [division, setDivision] = useState<Division | null>(null);
   const [standings, setStandings] = useState<StandingRow[]>([]);
   const [matches, setMatches] = useState<MatchCardData[]>([]);
+  const [playoffMatches, setPlayoffMatches] = useState<PlayoffMatch[]>([]);
   const [teams, setTeams] = useState<TeamLite[]>([]);
   const [myTeams, setMyTeams] = useState<TeamLite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,15 +91,24 @@ export default function LeagueDetailPage() {
       // Matches
       const { data: ms } = await supabase
         .from("matches")
-        .select("id, matchday, scheduled_at, team_a_id, team_b_id, score_a, score_b, result_status, map, game")
+        .select("id, matchday, scheduled_at, team_a_id, team_b_id, score_a, score_b, result_status, map, game, bracket_position, winner_id")
         .eq("season_id", s.id)
         .order("matchday", { ascending: true });
       const tMap2 = Object.fromEntries(teamRows.map(t => [t.id, t]));
-      setMatches((ms ?? []).map((m: any) => ({
+      const all = (ms ?? []) as any[];
+      const regular = all.filter(m => (m.matchday ?? 0) < 999);
+      const playoffs = all.filter(m => (m.matchday ?? 0) >= 999);
+      setMatches(regular.map((m: any) => ({
         id: m.id, matchday: m.matchday, scheduled_at: m.scheduled_at,
         team_a: tMap2[m.team_a_id] ?? null, team_b: tMap2[m.team_b_id] ?? null,
         score_a: m.score_a, score_b: m.score_b,
         result_status: m.result_status ?? "scheduled", map: m.map, game: m.game,
+      })));
+      setPlayoffMatches(playoffs.map((m: any) => ({
+        id: m.id, matchday: m.matchday, bracket_position: m.bracket_position,
+        team_a_id: m.team_a_id, team_b_id: m.team_b_id,
+        score_a: m.score_a, score_b: m.score_b, winner_id: m.winner_id,
+        result_status: m.result_status ?? "scheduled", scheduled_at: m.scheduled_at,
       })));
     }
     setLoading(false);
@@ -343,11 +354,23 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="playoffs" className="mt-6">
-              <div className="border border-dashed border-border rounded-md p-12 text-center">
-                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="font-display uppercase tracking-wider text-sm">Playoffs unlock at the end of the regular season</p>
-                <p className="text-xs text-muted-foreground mt-2">Top {season?.playoff_size ?? 4} teams qualify · Single-elimination bracket · BO3 grand final.</p>
-              </div>
+              {!season?.playoffs_started_at ? (
+                <div className="border border-dashed border-border rounded-md p-12 text-center">
+                  <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">Playoffs have not started yet</p>
+                  <p className="text-xs text-muted-foreground mt-2">Top {season?.playoff_size ?? 4} teams qualify after the regular season.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="min-w-[640px]">
+                    <PlayoffBracket
+                      matches={playoffMatches}
+                      teamMap={teamMap as any}
+                      championTeamId={season?.champion_team_id ?? null}
+                    />
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="rules" className="mt-6">
