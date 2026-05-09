@@ -224,54 +224,132 @@ export default function LeagueDetailPage() {
             <Button asChild variant="ghost" size="sm" className="mb-3 -ml-2">
               <Link to="/leagues"><ChevronLeft className="h-4 w-4" /> All leagues</Link>
             </Button>
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
+            <div className="grid lg:grid-cols-3 gap-6 items-start">
+              <div className="lg:col-span-2">
                 <div className="flex items-center gap-2 text-xs font-display uppercase tracking-widest text-primary mb-2">
                   <Mountain className="h-4 w-4" /> {league.game} · {season?.name ?? "No season"}
                 </div>
                 <h1 className="font-display font-bold text-4xl md:text-5xl uppercase tracking-tight">{league.name}</h1>
-                {league.description && <p className="mt-3 text-muted-foreground max-w-2xl">{league.description}</p>}
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <StatusPill status={season?.status ?? league.status} />
-                {league.reward_text && (
-                  <div className="text-sm flex items-center gap-1.5"><Trophy className="h-4 w-4 text-primary" /> {league.reward_text}</div>
-                )}
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" /> {teams.length}/{league.max_teams} teams
+                <p className="mt-3 text-muted-foreground max-w-2xl">
+                  {league.description ?? "The founding competitive season for European FPS teams."}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
+                  Build your roster, register for {season?.name ?? "the season"} and fight for a playoff spot.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {user ? (
+                    myCaptainTeams.length === 0 ? (
+                      <>
+                        <Button asChild><Link to="/teams">Create Team</Link></Button>
+                        <Button asChild variant="outline"><Link to="/free-agents">Find Players</Link></Button>
+                      </>
+                    ) : (
+                      <Button asChild variant="outline"><Link to="/teams">My Teams</Link></Button>
+                    )
+                  ) : (
+                    <Button onClick={() => navigate("/login")}>Sign in to register</Button>
+                  )}
+                  <Button asChild variant="outline">
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4 mr-1.5" />Join Discord</a>
+                  </Button>
                 </div>
+              </div>
+              <div className="space-y-3">
+                <Card className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <StatusPill status={season?.status ?? league.status} />
+                    <span className="text-xs text-muted-foreground font-display uppercase">{teams.length}/{league.max_teams} teams</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (teams.length / Math.max(1, league.max_teams)) * 100)}%` }} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                    <div><div className="font-display text-lg">{teams.length}</div><div className="text-[10px] uppercase text-muted-foreground">Registered</div></div>
+                    <div><div className="font-display text-lg">{Math.max(0, league.max_teams - teams.length)}</div><div className="text-[10px] uppercase text-muted-foreground">Open slots</div></div>
+                    <div><div className="font-display text-lg">{league.min_roster_size}</div><div className="text-[10px] uppercase text-muted-foreground">Min roster</div></div>
+                  </div>
+                </Card>
+                {league.reward_text && (
+                  <Card className="p-4 border-primary/30">
+                    <div className="flex items-start gap-2">
+                      <Award className="h-4 w-4 text-primary mt-0.5" />
+                      <div>
+                        <div className="text-xs font-display uppercase tracking-wider">Founding Rewards</div>
+                        <p className="text-xs text-muted-foreground mt-1">{league.reward_text}</p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
             </div>
 
+            {/* Already registered (logos, not raw names) */}
             {myPendingOrApproved.length > 0 && (
               <Card className="mt-6 p-4 border-success/40 bg-success/5">
-                <p className="text-sm">
-                  ✓ {myPendingOrApproved.map(t => t.name).join(", ")} {myPendingOrApproved.length === 1 ? "is" : "are"} already registered for {season?.name}.
-                </p>
-              </Card>
-            )}
-            {canRegister && eligible.length > 0 && (
-              <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-display uppercase tracking-wider text-sm">Register your team for {season?.name}</p>
-                    <p className="text-xs text-muted-foreground">Min roster: {league.min_roster_size} players · Registration deadline {season?.registration_deadline ? new Date(season.registration_deadline).toLocaleDateString() : "TBD"}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {eligible.map(t => (
-                      <Button key={t.id} onClick={() => handleRegister(t.id)} disabled={registering}>
-                        Register {t.name}
-                      </Button>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  <p className="font-display uppercase tracking-wider text-sm">Your team{myPendingOrApproved.length === 1 ? " is" : "s are"} registered</p>
+                </div>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {myPendingOrApproved.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 rounded border border-border bg-background/40 p-3">
+                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} color={t.color} size={36} rounded="md" />
+                      <div className="min-w-0 flex-1">
+                        <Link to={`/teams/${t.id}`} className="font-display uppercase text-sm hover:text-primary truncate block">{t.name}</Link>
+                        <span className="text-[10px] uppercase text-success">Registered</span>
+                      </div>
+                      <Button asChild size="sm" variant="ghost"><Link to={`/teams/${t.id}/dashboard`}>Manage</Link></Button>
+                    </div>
+                  ))}
                 </div>
               </Card>
             )}
-            {canRegister && eligible.length === 0 && wrongGameTeams.length > 0 && (
+
+            {/* Eligible team cards */}
+            {canRegister && eligible.length > 0 && (
+              <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="font-display uppercase tracking-wider text-sm">Register your team</p>
+                    <p className="text-[11px] text-muted-foreground">Min roster {league.min_roster_size} · Deadline {season?.registration_deadline ? new Date(season.registration_deadline).toLocaleDateString() : "TBD"}</p>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {eligible.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 rounded border border-border bg-background/60 p-3">
+                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} color={t.color} size={36} rounded="md" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-display uppercase text-sm truncate">{t.name}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase">{t.game ?? league.game}</div>
+                      </div>
+                      <Button size="sm" onClick={() => handleRegister(t.id)} disabled={registering}>Register</Button>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {canRegister && eligible.length === 0 && myPendingOrApproved.length === 0 && wrongGameTeams.length > 0 && (
               <Card className="mt-6 p-4 border-amber-500/40 bg-amber-500/5">
                 <p className="text-sm">Your team's game doesn't match this league ({league.game}). Create a {league.game} team to register.</p>
               </Card>
             )}
+
+            {user && season?.status === "registration_open" && myCaptainTeams.length === 0 && (
+              <Card className="mt-6 p-4">
+                <p className="font-display uppercase text-sm mb-1">You need a team to register</p>
+                <p className="text-xs text-muted-foreground mb-3">Captains can register their roster for {season?.name}.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm"><Link to="/teams">Create Team</Link></Button>
+                  <Button asChild size="sm" variant="outline"><Link to="/free-agents">Find Players</Link></Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1.5" />Join Discord</a>
+                  </Button>
+                </div>
+              </Card>
+            )}
+
             {!user && season?.status === "registration_open" && (
               <Card className="mt-6 p-4">
                 <div className="flex items-center justify-between flex-wrap gap-3">
