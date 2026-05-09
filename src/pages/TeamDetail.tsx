@@ -405,8 +405,8 @@ export default function TeamDetailPage() {
                         </div>
                       </Link>
                       {isCaptain && !captain && (
-                        <Button size="sm" variant="ghost" onClick={() => handleRemoveMember(m)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <Button asChild size="sm" variant="ghost">
+                          <Link to={`/teams/${team.id}/dashboard`}>Manage</Link>
                         </Button>
                       )}
                     </div>
@@ -416,58 +416,6 @@ export default function TeamDetailPage() {
             </div>
           </TabsContent>
 
-          {/* APPLICATIONS */}
-          {isCaptain && (
-            <TabsContent value="applications">
-              <div className="rounded-lg border border-border bg-card p-6">
-                {requests.length === 0 ? (
-                  <div className="text-center py-10 font-body">
-                    <Inbox className="h-10 w-10 text-primary mx-auto mb-3" />
-                    <h3 className="font-display font-bold text-lg uppercase">No applications yet</h3>
-                    <p className="text-sm text-muted-foreground mt-1 mb-4">Open recruitment or browse Free Agents.</p>
-                    <Link to="/free-agents"><Button variant="neonOutline">Browse Free Agents</Button></Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {requests.map((r) => (
-                      <div key={r.id} className="rounded border border-border bg-secondary/30 p-4">
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <Link to={`/profile/${r.profile?.username ?? r.user_id}`} className="flex items-center gap-3 min-w-0">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={r.profile?.avatar_url ?? undefined} />
-                              <AvatarFallback>{(r.profile?.username ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <div className="font-display font-semibold">{r.profile?.display_name ?? r.profile?.username}</div>
-                              <div className="text-xs text-muted-foreground">Role: {r.role ?? "—"}</div>
-                            </div>
-                          </Link>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="neon" onClick={() => handleAccept(r)}><Check className="h-4 w-4 mr-1" />Accept</Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleReject(r)}><X className="h-4 w-4 mr-1" />Reject</Button>
-                          </div>
-                        </div>
-                        {r.message && (
-                          <p className="text-sm text-muted-foreground font-body mt-3 border-t border-border pt-3">{r.message}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          )}
-
-          {/* MANAGE */}
-          {isCaptain && (
-            <TabsContent value="manage">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* LEFT: Edit form sections */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Basic Info */}
-                  <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-                    <div>
-                      <h3 className="font-display text-lg uppercase tracking-wider flex items-center gap-2"><Pencil className="h-4 w-4 text-primary" />Basic Info</h3>
                       <p className="text-xs text-muted-foreground font-body mt-1">Identity of your team across PeakGG.</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
