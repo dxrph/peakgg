@@ -174,10 +174,10 @@ export default function TeamDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <SEO title={`${team.name} · PeakGG Team`} description={team.description ?? `${team.name} team profile on PeakGG`} />
       <Navbar />
-      <div className="container pt-24 pb-16">
+      <main className="flex-1 container pt-24 pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-body">
           <Link to="/teams" className="hover:text-foreground transition-colors">Teams</Link>
@@ -416,7 +416,7 @@ export default function TeamDetailPage() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
 
       <JoinTeamDialog open={joinOpen} onOpenChange={setJoinOpen} team={team ? { id: team.id, name: team.name, game: team.game } : null} />
       <Footer />
