@@ -64,7 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "leagues",     labelKey: "navmap.leagues",     label: "Peak League", path: "/leagues",     icon: Mountain, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "teams",       labelKey: "navmap.teams",       label: "Teams",       path: "/teams",       icon: Users,  category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "free_agents", labelKey: "navmap.free_agents", label: "Free Agents", path: "/free-agents", icon: UserPlus, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
-  { key: "clips",       labelKey: "navmap.clips",       label: "Clips",       path: "/clips",       icon: Film,   category: "platform", showInMoreDropdown: true, comingSoon: true },
+  { key: "clips",       labelKey: "navmap.clips",       label: "Clips",       path: "/clips",       icon: Film,   category: "platform", comingSoon: true },
   { key: "leaderboard", labelKey: "navmap.leaderboard", label: "Leaderboard", path: "/leaderboard", icon: BarChart3, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "scrims",      labelKey: "navmap.scrims",      label: "Scrims",      path: "/scrims",      icon: Swords, category: "platform", showInMoreDropdown: true },
   { key: "play",        labelKey: "navmap.play",        label: "Find Match",  path: "/play",        icon: Mountain, category: "platform", requiresAuth: true, showInDashboard: true },
@@ -72,15 +72,15 @@ export const NAV_ITEMS: NavItem[] = [
   // ───────── TOOLS / SECONDARY (More dropdown + footer) ─────────
   { key: "how_it_works",   labelKey: "navmap.how_it_works",   label: "How It Works",         path: "/about",                    icon: Compass,  category: "tools", showInMoreDropdown: true },
   { key: "rank_system",    labelKey: "navmap.rank_system",    label: "Rank System",          path: "/elo",                      icon: Award,    category: "tools", showInMoreDropdown: true },
-  { key: "seasons",        labelKey: "navmap.seasons",        label: "Seasons",              path: "/seasons",                  icon: Calendar, category: "tools", showInMoreDropdown: true, comingSoon: true },
+  { key: "seasons",        labelKey: "navmap.seasons",        label: "Seasons",              path: "/seasons",                  icon: Calendar, category: "tools", comingSoon: true },
   { key: "aim_guide",      labelKey: "navmap.aim_guide",      label: "Aim Training Guide",   path: "/aim-guide",                icon: Crosshair, category: "tools", showInMoreDropdown: true },
-  { key: "crosshair",      labelKey: "navmap.crosshair",      label: "Crosshair Builder",    path: "/tools/crosshair",          icon: Crosshair, category: "tools", showInMoreDropdown: true, comingSoon: true },
-  { key: "sensitivity",    labelKey: "navmap.sensitivity",    label: "Sensitivity Calculator", path: "/tools/sensitivity",      icon: Gauge,    category: "tools", showInMoreDropdown: true, comingSoon: true },
+  { key: "crosshair",      labelKey: "navmap.crosshair",      label: "Crosshair Builder",    path: "/tools/crosshair",          icon: Crosshair, category: "tools", comingSoon: true },
+  { key: "sensitivity",    labelKey: "navmap.sensitivity",    label: "Sensitivity Calculator", path: "/tools/sensitivity",      icon: Gauge,    category: "tools", comingSoon: true },
 
   // ───────── COMMUNITY ─────────
-  { key: "news",     labelKey: "navmap.news",     label: "News / Blog",   path: "/news",    icon: Newspaper, category: "community", showInMoreDropdown: true, comingSoon: true },
+  { key: "news",     labelKey: "navmap.news",     label: "News / Blog",   path: "/news",    icon: Newspaper, category: "community", comingSoon: true },
   { key: "faq",      labelKey: "navmap.faq",      label: "FAQ",           path: "/faq",     icon: HelpCircle, category: "community", showInMoreDropdown: true, showInFooter: true },
-  { key: "rules",    labelKey: "navmap.rules",    label: "Community Rules", path: "/rules", icon: ScrollText, category: "community", showInMoreDropdown: true, comingSoon: true },
+  { key: "rules",    labelKey: "navmap.rules",    label: "Community Rules", path: "/rules", icon: ScrollText, category: "community", comingSoon: true },
   { key: "contact",  labelKey: "navmap.contact",  label: "Contact",       path: "/contact", icon: Mail,      category: "community", showInFooter: true },
 
   // ───────── ACCOUNT (user dropdown + dashboard) ─────────
@@ -89,7 +89,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "edit_profile",   labelKey: "navmap.edit_profile",   label: "Edit Profile",     path: "/settings",      icon: Settings,        category: "account", requiresAuth: true, showInDashboard: true },
   { key: "my_team",        labelKey: "navmap.my_team",        label: "My Team",          path: "/teams",         icon: Users,           category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
   { key: "my_tournaments", labelKey: "navmap.my_tournaments", label: "My Tournaments",   path: "/tournaments",   icon: Trophy,          category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
-  { key: "my_clips",       labelKey: "navmap.my_clips",       label: "My Clips",         path: "/clips",         icon: Film,            category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true, comingSoon: true },
+  { key: "my_clips",       labelKey: "navmap.my_clips",       label: "My Clips",         path: "/clips",         icon: Film,            category: "account", requiresAuth: true, comingSoon: true },
   { key: "notifications",  labelKey: "navmap.notifications",  label: "Notifications",    path: "/notifications", icon: Bell,            category: "account", requiresAuth: true, showInDashboard: true },
   { key: "settings",       labelKey: "navmap.settings",       label: "Settings",         path: "/settings",      icon: Settings,        category: "account", requiresAuth: true, showInUserDropdown: true, showInDashboard: true },
 
