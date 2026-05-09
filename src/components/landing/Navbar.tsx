@@ -208,13 +208,22 @@ export default function Navbar() {
                   <DropdownMenuSeparator />
                   {userNav.map((item) => {
                     const Icon = item.icon;
-                    const path = item.key === "my_profile" ? profilePath : resolvePath(item);
+                    const path =
+                      item.key === "my_profile"
+                        ? profilePath
+                        : item.key === "my_team"
+                          ? (myTeamId ? `/teams/${myTeamId}` : "/teams")
+                          : resolvePath(item);
+                    const label =
+                      item.key === "my_team" && !myTeamId
+                        ? t("nav.find_team", { defaultValue: "Find / Create Team" })
+                        : tr(item);
                     return (
                       <DropdownMenuItem key={item.key} asChild>
                         <Link to={path} className="cursor-pointer flex items-center justify-between gap-2">
                           <span className="flex items-center gap-2">
                             {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-                            {tr(item)}
+                            {label}
                           </span>
                           {item.comingSoon && (
                             <Badge variant="outline" className="h-4 px-1.5 text-[9px] uppercase tracking-wider border-accent/40 text-accent">
@@ -302,6 +311,7 @@ export default function Navbar() {
           isAdmin={isAdmin}
           profilePath={profilePath}
           isLoggedIn={!!user}
+          myTeamId={myTeamId}
           tr={tr}
           t={t}
         />
@@ -318,11 +328,12 @@ interface MobileMenuProps {
   isAdmin: boolean;
   profilePath: string;
   isLoggedIn: boolean;
+  myTeamId: string | null;
   tr: (item: NavItem) => string;
   t: (key: string, options?: Record<string, unknown>) => string;
 }
 
-function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, tr, t }: MobileMenuProps) {
+function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, myTeamId, tr, t }: MobileMenuProps) {
   const sections: { key: string; label: string; items: NavItem[] }[] = [
     { key: "platform", label: t("nav.section_platform", { defaultValue: "Platform" }), items: navbarItems() },
     { key: "tools", label: t("nav.section_tools", { defaultValue: "Tools & Community" }), items: moreItems() },
@@ -344,7 +355,16 @@ function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, tr, 
           <div className="grid grid-cols-1">
             {sec.items.map((item) => {
               const Icon = item.icon;
-              const path = item.key === "my_profile" ? profilePath : resolvePath(item);
+              const path =
+                item.key === "my_profile"
+                  ? profilePath
+                  : item.key === "my_team"
+                    ? (myTeamId ? `/teams/${myTeamId}` : "/teams")
+                    : resolvePath(item);
+              const label =
+                item.key === "my_team" && !myTeamId
+                  ? t("nav.find_team", { defaultValue: "Find / Create Team" })
+                  : tr(item);
               return (
                 <Link
                   key={item.key}
@@ -354,7 +374,7 @@ function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, tr, 
                 >
                   <span className="flex items-center gap-2">
                     {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-                    {tr(item)}
+                    {label}
                   </span>
                   {item.comingSoon && (
                     <span className="text-[9px] uppercase tracking-wider text-accent/90 border border-accent/40 rounded-sm px-1.5 py-px">

@@ -21,6 +21,7 @@ import ScrimDialog from "@/components/teams/ScrimDialog";
 import ContactPlayerDialog from "@/components/teams/ContactPlayerDialog";
 import DiscordCTA from "@/components/landing/DiscordCTA";
 import { Trophy as TrophyIcon, Sparkles, BadgeCheck } from "lucide-react";
+import TeamLogo from "@/components/teams/TeamLogo";
 
 const GAMES = [
   { value: "all", label: "All games" },
@@ -59,6 +60,7 @@ interface TeamRow {
   is_founding?: boolean;
   color: string;
   owner_id: string;
+  avatar_url?: string | null;
 }
 
 interface ScrimRow {
@@ -118,7 +120,7 @@ export default function TeamsPage() {
   const loadTeams = async () => {
     const { data } = await supabase
       .from("teams")
-      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding")
+      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding, avatar_url")
       .order("trophies", { ascending: false });
     setTeams((data as any) ?? []);
   };
@@ -148,7 +150,7 @@ export default function TeamsPage() {
     if (!user) { setMyTeam(null); return; }
     const { data: tm } = await supabase
       .from("team_members")
-      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding)")
+      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding, avatar_url)")
       .eq("user_id", user.id)
       .limit(1)
       .maybeSingle();
@@ -319,9 +321,7 @@ export default function TeamsPage() {
                   return (
                     <div key={tt.id} className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-all flex flex-col">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-lg flex items-center justify-center font-display font-bold text-primary-foreground text-sm shrink-0" style={{ background: tt.color }}>
-                          {tt.tag}
-                        </div>
+                        <TeamLogo name={tt.name} tag={tt.tag} avatarUrl={tt.avatar_url} color={tt.color} size={48} rounded="lg" />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-display font-bold text-lg truncate">{tt.name}</h3>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -430,9 +430,7 @@ export default function TeamsPage() {
                   )}
                   {recruitingTeams.map((tt) => (
                     <div key={tt.id} className="flex items-center gap-3 border border-border bg-card rounded-md p-3">
-                      <div className="w-10 h-10 rounded flex items-center justify-center font-display text-primary-foreground text-xs" style={{ background: tt.color }}>
-                        {tt.tag}
-                      </div>
+                      <TeamLogo name={tt.name} tag={tt.tag} avatarUrl={tt.avatar_url} color={tt.color} size={40} rounded="md" />
                       <div className="flex-1 min-w-0">
                         <div className="font-display truncate">{tt.name}</div>
                         <div className="flex gap-1 mt-1">

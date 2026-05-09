@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
+import TeamLogo from "@/components/teams/TeamLogo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -279,12 +280,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
         {/* Header card */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8 mb-8">
           <div className="flex flex-col md:flex-row items-start gap-6">
-            <div
-              className="w-20 h-20 rounded-xl flex items-center justify-center font-display font-bold text-white text-2xl shrink-0"
-              style={{ background: team.color }}
-            >
-              {team.tag}
-            </div>
+            <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={80} rounded="xl" />
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-display font-bold">{team.name}</h1>
@@ -690,9 +686,7 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
                   <div className="rounded-lg border border-border bg-card p-6">
                     <div className="text-xs font-display uppercase tracking-wider text-muted-foreground mb-3">Team Summary</div>
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-lg flex items-center justify-center font-display font-bold text-white text-lg shrink-0" style={{ background: team.color }}>
-                        {team.tag}
-                      </div>
+                      <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={56} rounded="lg" />
                       <div className="min-w-0">
                         <div className="font-display font-bold truncate">{team.name}</div>
                         <div className="text-xs text-muted-foreground font-body uppercase">{team.game} · {team.region ?? "—"}</div>
