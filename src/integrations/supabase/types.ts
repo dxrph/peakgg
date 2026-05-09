@@ -340,7 +340,10 @@ export type Database = {
           game: string
           id: string
           match_id: string | null
+          new_rank: string | null
+          old_rank: string | null
           reason: string
+          source_type: string | null
           user_id: string
         }
         Insert: {
@@ -351,7 +354,10 @@ export type Database = {
           game: string
           id?: string
           match_id?: string | null
+          new_rank?: string | null
+          old_rank?: string | null
           reason?: string
+          source_type?: string | null
           user_id: string
         }
         Update: {
@@ -362,7 +368,10 @@ export type Database = {
           game?: string
           id?: string
           match_id?: string | null
+          new_rank?: string | null
+          old_rank?: string | null
           reason?: string
+          source_type?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1398,6 +1407,8 @@ export type Database = {
           id: string
           losses: number
           matches_played: number
+          peak_elo: number
+          peak_rank: string
           updated_at: string
           user_id: string
           win_streak: number
@@ -1411,6 +1422,8 @@ export type Database = {
           id?: string
           losses?: number
           matches_played?: number
+          peak_elo?: number
+          peak_rank?: string
           updated_at?: string
           user_id: string
           win_streak?: number
@@ -1424,6 +1437,8 @@ export type Database = {
           id?: string
           losses?: number
           matches_played?: number
+          peak_elo?: number
+          peak_rank?: string
           updated_at?: string
           user_id?: string
           win_streak?: number
@@ -1570,6 +1585,54 @@ export type Database = {
           updated_at?: string
           username?: string
           warn_count?: number
+        }
+        Relationships: []
+      }
+      rank_definitions: {
+        Row: {
+          color_token: string | null
+          created_at: string
+          description: string | null
+          emblem_url: string | null
+          id: string
+          is_active: boolean
+          max_elo: number | null
+          min_elo: number
+          rank_key: string
+          rank_name: string
+          short_description: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color_token?: string | null
+          created_at?: string
+          description?: string | null
+          emblem_url?: string | null
+          id?: string
+          is_active?: boolean
+          max_elo?: number | null
+          min_elo: number
+          rank_key: string
+          rank_name: string
+          short_description?: string | null
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          color_token?: string | null
+          created_at?: string
+          description?: string | null
+          emblem_url?: string | null
+          id?: string
+          is_active?: boolean
+          max_elo?: number | null
+          min_elo?: number
+          rank_key?: string
+          rank_name?: string
+          short_description?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2658,6 +2721,7 @@ export type Database = {
         }
         Returns: number
       }
+      rank_name_from_elo: { Args: { _elo: number }; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
