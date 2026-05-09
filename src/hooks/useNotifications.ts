@@ -9,6 +9,12 @@ export interface Notification {
   message: string | null;
   is_read: boolean;
   created_at: string;
+  type?: string | null;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  action_url?: string | null;
+  status?: string | null;
+  meta?: Record<string, any> | null;
 }
 
 export function useNotifications(limit = 10) {
@@ -85,5 +91,26 @@ export function useNotifications(limit = 10) {
     refresh();
   };
 
-  return { notifications, unreadCount, loading, markAsRead, markAllAsRead, refresh };
+  const resolveNotification = async (id: string) => {
+    if (!user) return;
+    await supabase.rpc("resolve_notification", { _id: id });
+    refresh();
+  };
+
+  const dismissNotification = async (id: string) => {
+    if (!user) return;
+    await supabase.from("notifications").delete().eq("id", id);
+    refresh();
+  };
+
+  return {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    resolveNotification,
+    dismissNotification,
+    refresh,
+  };
 }
