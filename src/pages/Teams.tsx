@@ -30,7 +30,10 @@ const GAMES = [
 ];
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
 
-function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) {
+function getTeamBadge(team: { trophies: number; looking_for_players: boolean; is_founding?: boolean }) {
+  if (team.is_founding) {
+    return { label: "Founding Team", className: "border-accent/50 text-accent bg-accent/10", icon: TrophyIcon };
+  }
   if (team.trophies >= 5) {
     return { label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon };
   }
@@ -38,7 +41,7 @@ function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) 
     return { label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck };
   }
   if (team.looking_for_players) {
-    return { label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
+    return { label: "Recruiting", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
   }
   return null;
 }
@@ -53,6 +56,7 @@ interface TeamRow {
   trophies: number;
   looking_for_players: boolean;
   slots: number;
+  is_founding?: boolean;
   color: string;
   owner_id: string;
 }
