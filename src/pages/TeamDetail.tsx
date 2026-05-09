@@ -228,31 +228,11 @@ export default function TeamDetailPage() {
                 <Button asChild variant="neon" className="w-full"><Link to="/login">Login to apply</Link></Button>
               )}
               {user && isCaptain && (
-                <>
-                  <Button asChild variant="neon" className="w-full">
-                    <Link to={`/teams/${team.id}/dashboard`}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
-                    </Link>
-                  </Button>
-                  {manageMode ? (
-                    <Button asChild variant="neonOutline" className="w-full">
-                      <Link to={`/teams/${team.id}`}>
-                        <Shield className="mr-2 h-4 w-4" />View Public Page
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button asChild variant="neonOutline" className="w-full">
-                      <Link to={`/teams/${team.id}/manage`}>
-                        <Settings className="mr-2 h-4 w-4" />Manage Team
-                      </Link>
-                    </Button>
-                  )}
-                  {pendingCount > 0 && (
-                    <Button variant="neonOutline" onClick={() => setTab("applications")}>
-                      <Inbox className="mr-2 h-4 w-4" />Applications ({pendingCount})
-                    </Button>
-                  )}
-                </>
+                <Button asChild variant="neon" className="w-full">
+                  <Link to={`/teams/${team.id}/dashboard`}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />Open Team Dashboard
+                  </Link>
+                </Button>
               )}
               {user && !isCaptain && isMember && (
                 <>
@@ -286,9 +266,7 @@ export default function TeamDetailPage() {
               <TabsTrigger value="roster"><Users className="h-4 w-4 mr-1" />Roster</TabsTrigger>
               <TabsTrigger value="recruitment"><UserPlus className="h-4 w-4 mr-1" />Recruitment</TabsTrigger>
               <TabsTrigger value="achievements"><Award className="h-4 w-4 mr-1" />Achievements</TabsTrigger>
-              <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Scrims</TabsTrigger>
-              {isCaptain && <TabsTrigger value="applications"><Inbox className="h-4 w-4 mr-1" />Applications {pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}</TabsTrigger>}
-              {isCaptain && <TabsTrigger value="manage"><Settings className="h-4 w-4 mr-1" />Settings</TabsTrigger>}
+              <TabsTrigger value="scrims"><Swords className="h-4 w-4 mr-1" />Matches</TabsTrigger>
             </TabsList>
           </div>
 
