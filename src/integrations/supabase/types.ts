@@ -1007,9 +1007,11 @@ export type Database = {
           confirmed_by: string | null
           created_at: string
           division_id: string | null
+          elo_processed_at: string | null
           game: string
           id: string
           is_demo: boolean
+          kind: string
           lobby_code: string | null
           map: string | null
           matchday: number | null
@@ -1040,9 +1042,11 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           division_id?: string | null
+          elo_processed_at?: string | null
           game?: string
           id?: string
           is_demo?: boolean
+          kind?: string
           lobby_code?: string | null
           map?: string | null
           matchday?: number | null
@@ -1073,9 +1077,11 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           division_id?: string | null
+          elo_processed_at?: string | null
           game?: string
           id?: string
           is_demo?: boolean
+          kind?: string
           lobby_code?: string | null
           map?: string | null
           matchday?: number | null
@@ -1233,6 +1239,38 @@ export type Database = {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      open_cup_queue: {
+        Row: {
+          game: string
+          id: string
+          joined_at: string
+          team_size: number
+          user_id: string
+        }
+        Insert: {
+          game: string
+          id?: string
+          joined_at?: string
+          team_size?: number
+          user_id: string
+        }
+        Update: {
+          game?: string
+          id?: string
+          joined_at?: string
+          team_size?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "open_cup_queue_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2472,6 +2510,10 @@ export type Database = {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
       }
+      admin_resolve_open_cup_match: {
+        Args: { _match_id: string; _score_a: number; _score_b: number }
+        Returns: undefined
+      }
       apply_elo_decay: {
         Args: never
         Returns: {
@@ -2503,8 +2545,13 @@ export type Database = {
         Args: { _match_id: string; _user_id: string }
         Returns: boolean
       }
+      cancel_open_cup_queue: { Args: never; Returns: undefined }
       close_season: { Args: { _season_id: string }; Returns: undefined }
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
+      confirm_open_cup_result: {
+        Args: { _match_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2546,6 +2593,10 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      join_open_cup_queue: {
+        Args: { _game: string; _team_size?: number }
+        Returns: Json
       }
       move_to_dlq: {
         Args: {
@@ -2596,6 +2647,10 @@ export type Database = {
           _score_b: number
           _screenshot?: string
         }
+        Returns: undefined
+      }
+      submit_open_cup_result: {
+        Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
       }
       wipe_demo_teams: { Args: never; Returns: number }
