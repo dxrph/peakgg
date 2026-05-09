@@ -2,7 +2,6 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mountain, Menu, X, LogOut, MessageCircle, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
-import GameSwitcher from "@/components/GameSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsBell from "@/components/NotificationsBell";
@@ -168,15 +167,6 @@ export default function Navbar() {
 
         {/* RIGHT: utility */}
         <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
-          <div title={t("nav.game_filter_hint")} className="hidden lg:block">
-            <GameSwitcher />
-          </div>
-          <div className="lg:hidden">
-            <GameSwitcher compact />
-          </div>
-
-          <span className="hidden lg:inline-block w-px h-5 bg-border/60" />
-
           <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" aria-label="Discord">
             <Button
               variant="outline"
@@ -303,11 +293,6 @@ export default function Navbar() {
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-      </div>
-
-      {/* Mobile horizontal game tabs row */}
-      <div className="md:hidden border-t border-border/40 bg-background/60 px-3 py-2 overflow-x-auto no-scrollbar">
-        <GameSwitcher />
       </div>
 
       {mobileOpen && (
