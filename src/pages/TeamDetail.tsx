@@ -16,17 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
   Users, Globe, Shield, Trophy, ChevronRight, UserPlus, Crown,
-  Settings, Inbox, Pencil, Check, X, Loader2, LogOut, Trash2,
-  Award, Swords, LayoutDashboard, MessageCircle, Sparkles,
+  Loader2, LogOut, Award, Swords, LayoutDashboard, MessageCircle, Sparkles,
 } from "lucide-react";
 import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import TeamLogo from "@/components/teams/TeamLogo";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 interface TeamRow {
   id: string;
@@ -63,7 +57,7 @@ interface JoinReqRow {
   profile?: { username: string; display_name: string | null; avatar_url: string | null } | null;
 }
 
-export default function TeamDetailPage({ manageMode = false }: { manageMode?: boolean } = {}) {
+export default function TeamDetailPage() {
   const { teamId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -73,30 +67,12 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
   const [requests, setRequests] = useState<JoinReqRow[]>([]);
   const [myRequest, setMyRequest] = useState<JoinReqRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(manageMode ? "manage" : "overview");
+  const [tab, setTab] = useState("overview");
   const [joinOpen, setJoinOpen] = useState(false);
-
-  // Edit form state
-  const [editName, setEditName] = useState("");
-  const [editTag, setEditTag] = useState("");
-  const [editDesc, setEditDesc] = useState("");
-  const [editRegion, setEditRegion] = useState("");
-  const [editLfp, setEditLfp] = useState(true);
-  const [editRecruitStatus, setEditRecruitStatus] = useState<"open" | "invite" | "closed">("open");
-  const [editSlots, setEditSlots] = useState(2);
-  const [savingEdit, setSavingEdit] = useState(false);
 
   const isCaptain = !!(user && team && user.id === team.owner_id);
   const isMember = !!(user && members.some((m) => m.user_id === user.id));
   const hasPending = !!(myRequest && myRequest.status === "pending");
-
-  // Manage mode protection: if route is /manage but viewer is not captain, redirect to public view.
-  useEffect(() => {
-    if (!loading && manageMode && team && user && !isCaptain) {
-      toast.error("Only the team captain can manage this team");
-      navigate(`/teams/${team.id}`, { replace: true });
-    }
-  }, [loading, manageMode, team, user, isCaptain, navigate]);
 
   const load = async () => {
     if (!teamId) return;
@@ -109,13 +85,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
     if (!t) { setTeam(null); setLoading(false); return; }
     setTeam(t as any);
-    setEditName((t as any).name);
-    setEditTag((t as any).tag);
-    setEditDesc((t as any).description ?? "");
-    setEditRegion((t as any).region ?? "");
-    setEditLfp((t as any).looking_for_players);
-    setEditRecruitStatus((t as any).looking_for_players ? "open" : "closed");
-    setEditSlots((t as any).slots ?? 2);
 
     const { data: ms } = await supabase
       .from("team_members")
@@ -170,37 +139,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [teamId, user?.id]);
 
-  const pendingCount = requests.length;
-
-  const handleAccept = async (req: JoinReqRow) => {
-    const { error } = await supabase
-      .from("team_join_requests")
-      .update({ status: "accepted" })
-      .eq("id", req.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Application accepted");
-    load();
-  };
-
-  const handleReject = async (req: JoinReqRow) => {
-    const { error } = await supabase
-      .from("team_join_requests")
-      .update({ status: "rejected" })
-      .eq("id", req.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Application rejected");
-    load();
-  };
-
-  const handleRemoveMember = async (m: MemberRow) => {
-    if (m.user_id === team?.owner_id) { toast.error("Cannot remove the captain"); return; }
-    if (!confirm(`Remove ${m.profile?.username ?? "this member"} from the team?`)) return;
-    const { error } = await supabase.from("team_members").delete().eq("id", m.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Member removed");
-    load();
-  };
-
   const handleLeave = async () => {
     if (!user || !team) return;
     if (!confirm("Leave this team?")) return;
@@ -209,36 +147,6 @@ export default function TeamDetailPage({ manageMode = false }: { manageMode?: bo
       .eq("team_id", team.id).eq("user_id", user.id);
     if (error) { toast.error(error.message); return; }
     toast.success("You left the team");
-    navigate("/teams");
-  };
-
-  const handleSaveEdit = async () => {
-    if (!team) return;
-    setSavingEdit(true);
-    const lfp = editRecruitStatus === "open";
-    const { error } = await supabase
-      .from("teams")
-      .update({
-        name: editName.trim(),
-        tag: editTag.trim().toUpperCase().slice(0, 4),
-        description: editDesc.trim() || null,
-        region: editRegion.trim() || null,
-        looking_for_players: lfp,
-        slots: Math.max(0, Math.min(7, editSlots)),
-      } as any)
-      .eq("id", team.id);
-    setSavingEdit(false);
-    if (error) { toast.error(error.message); return; }
-    setEditLfp(lfp);
-    toast.success("Team updated");
-    load();
-  };
-
-  const handleDeleteTeam = async () => {
-    if (!team) return;
-    const { error } = await supabase.from("teams").delete().eq("id", team.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Team deleted");
     navigate("/teams");
   };
 
