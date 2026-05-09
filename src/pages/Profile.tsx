@@ -196,7 +196,7 @@ export default function ProfilePage() {
           .limit(12),
         supabase
           .from("player_stats")
-          .select("user_id, game, elo, matches_played, wins, losses, win_streak, best_win_streak")
+          .select("user_id, game, elo, matches_played, wins, losses, win_streak, best_win_streak, peak_elo, peak_rank")
           .eq("user_id", p.id),
       ]);
       if (!active) return;
