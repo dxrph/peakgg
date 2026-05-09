@@ -332,11 +332,17 @@ export default function TournamentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {SOLO_TIERS.map((tier, i) => {
               const Icon = tier.icon;
+              const isOpen = tier.id === "open";
+              const unlocked = tier.id === "open"
+                ? true
+                : tier.id === "challenger" ? myElo >= CHALLENGER_ELO
+                : myElo >= CHAMPIONSHIP_ELO;
+              const progressTo = tier.id === "challenger" ? CHALLENGER_ELO : tier.id === "championship" ? CHAMPIONSHIP_ELO : null;
               return (
                 <div
                   key={tier.id}
                   className={`relative rounded-xl border bg-card p-6 flex flex-col transition-all hover:border-primary/40 ${
-                    tier.locked ? "opacity-90" : ""
+                    !unlocked && !isOpen ? "opacity-90" : ""
                   } ${i === 0 ? "border-success/30" : "border-border"}`}
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -347,8 +353,8 @@ export default function TournamentsPage() {
                       variant="outline"
                       className={`font-display text-[10px] uppercase tracking-wider ${tier.accent}`}
                     >
-                      {tier.locked && <Lock className="h-3 w-3 mr-1" />}
-                      {tier.status}
+                      {!unlocked && !isOpen && <Lock className="h-3 w-3 mr-1" />}
+                      {isOpen ? "Open · Beta" : (unlocked ? "Unlocked" : tier.status)}
                     </Badge>
                   </div>
                   <h3 className="text-xl font-display font-bold uppercase">{tier.name}</h3>
@@ -360,6 +366,9 @@ export default function TournamentsPage() {
                   <div className="mt-4 rounded-md border border-border bg-secondary/30 p-3">
                     <p className="text-[10px] font-display uppercase tracking-wider text-muted-foreground mb-1">Requirement</p>
                     <p className="text-sm font-body">{tier.unlock}</p>
+                    {user && progressTo && !unlocked && (
+                      <p className="text-[11px] mt-1 text-muted-foreground">{myElo} / {progressTo} ELO</p>
+                    )}
                   </div>
 
                   <div className="mt-4 flex-1">
@@ -375,18 +384,18 @@ export default function TournamentsPage() {
                   </div>
 
                   <div className="mt-5">
-                    {tier.cta.external ? (
-                      <a href={tier.cta.href} target="_blank" rel="noopener noreferrer" className="block">
-                        <Button variant={i === 0 ? "neon" : "neonOutline"} className="w-full uppercase tracking-wider">
-                          {tier.cta.label}<ArrowRight className="ml-2 h-3 w-3" />
-                        </Button>
-                      </a>
+                    {isOpen ? (
+                      <Button variant="neon" className="w-full uppercase tracking-wider" onClick={joinQueue} disabled={joining || !!queueEntry || !!activeMatch}>
+                        {activeMatch ? "Match in progress" : queueEntry ? "In queue…" : "Join Open Cup"}<ArrowRight className="ml-2 h-3 w-3" />
+                      </Button>
+                    ) : unlocked ? (
+                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
+                        Coming Soon
+                      </Button>
                     ) : (
-                      <a href={tier.cta.href} className="block">
-                        <Button variant="neonOutline" className="w-full uppercase tracking-wider">
-                          {tier.cta.label}
-                        </Button>
-                      </a>
+                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
+                        <Lock className="h-3 w-3 mr-1.5" />Locked
+                      </Button>
                     )}
                   </div>
                 </div>
