@@ -194,6 +194,7 @@ export default function TeamDashboard() {
           <ChevronLeft className="h-4 w-4" /> Public team page
         </Button>
 
+        <div className="text-[10px] font-display uppercase tracking-[0.25em] text-primary/80 mb-2">Team Dashboard · Internal HQ</div>
         <Card className="p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={64} rounded="lg" />
@@ -202,10 +203,19 @@ export default function TeamDashboard() {
               <p className="text-xs text-muted-foreground uppercase tracking-widest">{team.game} · {team.region ?? "—"}</p>
               {team.description && <p className="text-sm mt-2 max-w-2xl">{team.description}</p>}
             </div>
-            <div className="flex gap-4 text-center">
-              <div><div className="font-display text-2xl">{members.length}</div><div className="text-xs text-muted-foreground">Roster</div></div>
-              <div><div className="font-display text-2xl">{team.trophies}</div><div className="text-xs text-muted-foreground">Trophies</div></div>
-              <div><div className="font-display text-2xl">{winLoss.w}-{winLoss.l}</div><div className="text-xs text-muted-foreground">W-L</div></div>
+            <div className="flex flex-col gap-3 w-full md:w-auto">
+              <div className="flex gap-4 text-center md:justify-end">
+                <div><div className="font-display text-2xl">{members.length}</div><div className="text-xs text-muted-foreground">Roster</div></div>
+                {team.trophies > 0 && (
+                  <div><div className="font-display text-2xl">{team.trophies}</div><div className="text-xs text-muted-foreground">Trophies</div></div>
+                )}
+                {(winLoss.w + winLoss.l) > 0 && (
+                  <div><div className="font-display text-2xl">{winLoss.w}-{winLoss.l}</div><div className="text-xs text-muted-foreground">W-L</div></div>
+                )}
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/teams/${team.id}`}>View public page</Link>
+              </Button>
             </div>
           </div>
         </Card>
@@ -241,19 +251,30 @@ export default function TeamDashboard() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Not registered for any league yet.</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">Not registered for any league yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/leagues">View Peak League</Link></Button>
+                </div>
               )}
             </Card>
             <Card className="p-5">
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Next match</h3>
               {upcoming[upcoming.length - 1] ? (
                 <MatchCard m={upcoming[upcoming.length - 1]} />
-              ) : <p className="text-sm text-muted-foreground">No matches scheduled.</p>}
+              ) : (
+                <div>
+                  <p className="text-sm text-muted-foreground">No matches scheduled yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/leagues">Join a cup or register</Link></Button>
+                </div>
+              )}
             </Card>
             <Card className="p-5">
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Recent results</h3>
               {past.slice(0, 3).length === 0 ? (
-                <p className="text-sm text-muted-foreground">No completed matches yet.</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">No completed matches yet.</p>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/scrims">Play your first match</Link></Button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {past.slice(0, 3).map((m) => {
