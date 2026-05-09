@@ -151,8 +151,9 @@ export default function TeamsPage() {
     if (!user) { setMyTeam(null); return; }
     const { data: tm } = await supabase
       .from("team_members")
-      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding, avatar_url)")
+      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding, avatar_url, is_demo)")
       .eq("user_id", user.id)
+      .eq("teams.is_demo", false)
       .limit(1)
       .maybeSingle();
     setMyTeam(((tm as any)?.teams as TeamRow) ?? null);

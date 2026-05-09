@@ -54,14 +54,22 @@ export default function Navbar() {
     if (!user) { setMyTeamId(null); return; }
     let cancelled = false;
     (async () => {
+      // Prefer a real (non-demo) team the user owns
       const { data: owned } = await supabase
-        .from("teams").select("id").eq("owner_id", user.id).limit(1).maybeSingle();
+        .from("teams").select("id").eq("owner_id", user.id).eq("is_demo", false)
+        .order("created_at", { ascending: true }).limit(1).maybeSingle();
       if (cancelled) return;
       if (owned?.id) { setMyTeamId(owned.id); return; }
+      // Otherwise pick a real team they're a member of
       const { data: mem } = await supabase
-        .from("team_members").select("team_id").eq("user_id", user.id).limit(1).maybeSingle();
+        .from("team_members")
+        .select("team_id, teams!inner(id, is_demo)")
+        .eq("user_id", user.id)
+        .eq("teams.is_demo", false)
+        .limit(1)
+        .maybeSingle();
       if (cancelled) return;
-      setMyTeamId(mem?.team_id ?? null);
+      setMyTeamId((mem as any)?.team_id ?? null);
     })();
     return () => { cancelled = true; };
   }, [user?.id]);
