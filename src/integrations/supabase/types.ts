@@ -1187,27 +1187,45 @@ export type Database = {
       }
       notifications: {
         Row: {
+          action_url: string | null
           created_at: string
+          entity_id: string | null
+          entity_type: string | null
           id: string
           is_read: boolean
           message: string | null
+          meta: Json
+          status: string
           title: string
+          type: string
           user_id: string
         }
         Insert: {
+          action_url?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           is_read?: boolean
           message?: string | null
+          meta?: Json
+          status?: string
           title: string
+          type?: string
           user_id: string
         }
         Update: {
+          action_url?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           is_read?: boolean
           message?: string | null
+          meta?: Json
+          status?: string
           title?: string
+          type?: string
           user_id?: string
         }
         Relationships: [
@@ -2559,6 +2577,7 @@ export type Database = {
         Args: { _registration_id: string }
         Returns: undefined
       }
+      resolve_notification: { Args: { _id: string }; Returns: undefined }
       seed_demo_teams_for_league: {
         Args: { _count?: number; _league_id: string }
         Returns: number
