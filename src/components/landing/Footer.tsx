@@ -51,7 +51,7 @@ export default function Footer() {
               <MessageCircle className="h-4 w-4" /> {t("footer.discord", { defaultValue: "Discord" })}
             </a>
           </div>
-          {sections.map((sec) => (
+          {sections.filter(sec => sec.items.length > 0).map((sec) => (
             <div key={sec.key}>
               <h4 className="font-display font-bold mb-4 uppercase tracking-wider text-sm">{sec.title}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground font-body">
