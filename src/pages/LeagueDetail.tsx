@@ -67,10 +67,12 @@ export default function LeagueDetailPage() {
         const { data: tdata } = await supabase
           .from("teams")
           .select("id, name, tag, avatar_url, owner_id, is_founding")
-          .in("id", teamIds);
+          .in("id", teamIds)
+          .eq("is_demo", false);
         teamRows = (tdata ?? []) as TeamLite[];
       }
       setTeams(teamRows);
+      const realTeamIds = new Set(teamRows.map(t => t.id));
       // Standings
       if (d) {
         const { data: st } = await supabase
@@ -79,7 +81,7 @@ export default function LeagueDetailPage() {
           .eq("division_id", d.id)
           .order("position", { ascending: true, nullsFirst: false });
         const tMap = Object.fromEntries(teamRows.map(t => [t.id, t]));
-        setStandings((st ?? []).map((r: any) => ({
+        setStandings((st ?? []).filter((r: any) => realTeamIds.has(r.team_id)).map((r: any) => ({
           team_id: r.team_id,
           team_name: tMap[r.team_id]?.name ?? "Unknown",
           team_tag: tMap[r.team_id]?.tag ?? null,
@@ -96,7 +98,11 @@ export default function LeagueDetailPage() {
         .eq("season_id", s.id)
         .order("matchday", { ascending: true });
       const tMap2 = Object.fromEntries(teamRows.map(t => [t.id, t]));
-      const all = (ms ?? []) as any[];
+      const all = ((ms ?? []) as any[]).filter(
+        m =>
+          (!m.team_a_id || realTeamIds.has(m.team_a_id)) &&
+          (!m.team_b_id || realTeamIds.has(m.team_b_id)),
+      );
       const regular = all.filter(m => (m.matchday ?? 0) < 999);
       const playoffs = all.filter(m => (m.matchday ?? 0) >= 999);
       setMatches(regular.map((m: any) => ({
