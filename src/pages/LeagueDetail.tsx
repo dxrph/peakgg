@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle } from "lucide-react";
+import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle, ShieldCheck, CheckCircle2, ListChecks, Clock, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ import { DISCORD_INVITE } from "@/lib/links";
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
-interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; }
+interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; color?: string | null; }
 
 export default function LeagueDetailPage() {
   const { leagueId } = useParams();
@@ -129,11 +129,22 @@ export default function LeagueDetailPage() {
     (async () => {
       const { data } = await supabase
         .from("teams")
-        .select("id, name, tag, avatar_url, owner_id, game")
-        .eq("owner_id", user.id);
+        .select("id, name, tag, avatar_url, owner_id, game, color, is_demo")
+        .eq("owner_id", user.id)
+        .eq("is_demo", false);
       setMyTeams((data ?? []) as TeamLite[]);
     })();
   }, [user]);
+  // Realtime registrations -> refresh team list & counts
+  useEffect(() => {
+    if (!season) return;
+    const ch = supabase
+      .channel(`regs-${season.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "league_registrations", filter: `season_id=eq.${season.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [season?.id]);
+
 
   // Realtime standings
   useEffect(() => {
@@ -213,54 +224,132 @@ export default function LeagueDetailPage() {
             <Button asChild variant="ghost" size="sm" className="mb-3 -ml-2">
               <Link to="/leagues"><ChevronLeft className="h-4 w-4" /> All leagues</Link>
             </Button>
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
+            <div className="grid lg:grid-cols-3 gap-6 items-start">
+              <div className="lg:col-span-2">
                 <div className="flex items-center gap-2 text-xs font-display uppercase tracking-widest text-primary mb-2">
                   <Mountain className="h-4 w-4" /> {league.game} · {season?.name ?? "No season"}
                 </div>
                 <h1 className="font-display font-bold text-4xl md:text-5xl uppercase tracking-tight">{league.name}</h1>
-                {league.description && <p className="mt-3 text-muted-foreground max-w-2xl">{league.description}</p>}
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <StatusPill status={season?.status ?? league.status} />
-                {league.reward_text && (
-                  <div className="text-sm flex items-center gap-1.5"><Trophy className="h-4 w-4 text-primary" /> {league.reward_text}</div>
-                )}
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" /> {teams.length}/{league.max_teams} teams
+                <p className="mt-3 text-muted-foreground max-w-2xl">
+                  {league.description ?? "The founding competitive season for European FPS teams."}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
+                  Build your roster, register for {season?.name ?? "the season"} and fight for a playoff spot.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {user ? (
+                    myCaptainTeams.length === 0 ? (
+                      <>
+                        <Button asChild><Link to="/teams">Create Team</Link></Button>
+                        <Button asChild variant="outline"><Link to="/free-agents">Find Players</Link></Button>
+                      </>
+                    ) : (
+                      <Button asChild variant="outline"><Link to="/teams">My Teams</Link></Button>
+                    )
+                  ) : (
+                    <Button onClick={() => navigate("/login")}>Sign in to register</Button>
+                  )}
+                  <Button asChild variant="outline">
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4 mr-1.5" />Join Discord</a>
+                  </Button>
                 </div>
+              </div>
+              <div className="space-y-3">
+                <Card className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <StatusPill status={season?.status ?? league.status} />
+                    <span className="text-xs text-muted-foreground font-display uppercase">{teams.length}/{league.max_teams} teams</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (teams.length / Math.max(1, league.max_teams)) * 100)}%` }} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                    <div><div className="font-display text-lg">{teams.length}</div><div className="text-[10px] uppercase text-muted-foreground">Registered</div></div>
+                    <div><div className="font-display text-lg">{Math.max(0, league.max_teams - teams.length)}</div><div className="text-[10px] uppercase text-muted-foreground">Open slots</div></div>
+                    <div><div className="font-display text-lg">{league.min_roster_size}</div><div className="text-[10px] uppercase text-muted-foreground">Min roster</div></div>
+                  </div>
+                </Card>
+                {league.reward_text && (
+                  <Card className="p-4 border-primary/30">
+                    <div className="flex items-start gap-2">
+                      <Award className="h-4 w-4 text-primary mt-0.5" />
+                      <div>
+                        <div className="text-xs font-display uppercase tracking-wider">Founding Rewards</div>
+                        <p className="text-xs text-muted-foreground mt-1">{league.reward_text}</p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
             </div>
 
+            {/* Already registered (logos, not raw names) */}
             {myPendingOrApproved.length > 0 && (
               <Card className="mt-6 p-4 border-success/40 bg-success/5">
-                <p className="text-sm">
-                  ✓ {myPendingOrApproved.map(t => t.name).join(", ")} {myPendingOrApproved.length === 1 ? "is" : "are"} already registered for {season?.name}.
-                </p>
-              </Card>
-            )}
-            {canRegister && eligible.length > 0 && (
-              <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-display uppercase tracking-wider text-sm">Register your team for {season?.name}</p>
-                    <p className="text-xs text-muted-foreground">Min roster: {league.min_roster_size} players · Registration deadline {season?.registration_deadline ? new Date(season.registration_deadline).toLocaleDateString() : "TBD"}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {eligible.map(t => (
-                      <Button key={t.id} onClick={() => handleRegister(t.id)} disabled={registering}>
-                        Register {t.name}
-                      </Button>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  <p className="font-display uppercase tracking-wider text-sm">Your team{myPendingOrApproved.length === 1 ? " is" : "s are"} registered</p>
+                </div>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {myPendingOrApproved.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 rounded border border-border bg-background/40 p-3">
+                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} color={t.color} size={36} rounded="md" />
+                      <div className="min-w-0 flex-1">
+                        <Link to={`/teams/${t.id}`} className="font-display uppercase text-sm hover:text-primary truncate block">{t.name}</Link>
+                        <span className="text-[10px] uppercase text-success">Registered</span>
+                      </div>
+                      <Button asChild size="sm" variant="ghost"><Link to={`/teams/${t.id}/dashboard`}>Manage</Link></Button>
+                    </div>
+                  ))}
                 </div>
               </Card>
             )}
-            {canRegister && eligible.length === 0 && wrongGameTeams.length > 0 && (
+
+            {/* Eligible team cards */}
+            {canRegister && eligible.length > 0 && (
+              <Card className="mt-6 p-4 border-primary/40 bg-primary/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="font-display uppercase tracking-wider text-sm">Register your team</p>
+                    <p className="text-[11px] text-muted-foreground">Min roster {league.min_roster_size} · Deadline {season?.registration_deadline ? new Date(season.registration_deadline).toLocaleDateString() : "TBD"}</p>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {eligible.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 rounded border border-border bg-background/60 p-3">
+                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} color={t.color} size={36} rounded="md" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-display uppercase text-sm truncate">{t.name}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase">{t.game ?? league.game}</div>
+                      </div>
+                      <Button size="sm" onClick={() => handleRegister(t.id)} disabled={registering}>Register</Button>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {canRegister && eligible.length === 0 && myPendingOrApproved.length === 0 && wrongGameTeams.length > 0 && (
               <Card className="mt-6 p-4 border-amber-500/40 bg-amber-500/5">
                 <p className="text-sm">Your team's game doesn't match this league ({league.game}). Create a {league.game} team to register.</p>
               </Card>
             )}
+
+            {user && season?.status === "registration_open" && myCaptainTeams.length === 0 && (
+              <Card className="mt-6 p-4">
+                <p className="font-display uppercase text-sm mb-1">You need a team to register</p>
+                <p className="text-xs text-muted-foreground mb-3">Captains can register their roster for {season?.name}.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm"><Link to="/teams">Create Team</Link></Button>
+                  <Button asChild size="sm" variant="outline"><Link to="/free-agents">Find Players</Link></Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1.5" />Join Discord</a>
+                  </Button>
+                </div>
+              </Card>
+            )}
+
             {!user && season?.status === "registration_open" && (
               <Card className="mt-6 p-4">
                 <div className="flex items-center justify-between flex-wrap gap-3">
@@ -286,8 +375,19 @@ export default function LeagueDetailPage() {
             <TabsContent value="overview" className="mt-6 grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card className="p-6">
-                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">About this league</h2>
-                  <p className="text-sm leading-relaxed whitespace-pre-line">{league.description ?? "No description provided."}</p>
+                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">About</h2>
+                  <p className="text-sm leading-relaxed whitespace-pre-line">
+                    {league.description ?? `${league.name} ${season?.name ?? "Season 0 Beta"} is the first official competitive season on PeakGG.`}
+                  </p>
+                </Card>
+                <Card className="p-6">
+                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3 flex items-center gap-2"><ListChecks className="h-4 w-4 text-primary" />How to join</h2>
+                  <ol className="text-sm space-y-2 list-decimal pl-5">
+                    <li>Create a team on PeakGG.</li>
+                    <li>Build a roster of {league.min_roster_size} players.</li>
+                    <li>Register your team for {season?.name ?? "the season"}.</li>
+                    <li>Join Discord for scheduling and updates.</li>
+                  </ol>
                 </Card>
                 {standings.length > 0 && (
                   <Card className="p-4">
@@ -318,7 +418,15 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="standings" className="mt-6">
-              <StandingsTable rows={standings} playoffSize={season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+              {standings.length === 0 ? (
+                <div className="border border-dashed border-border rounded-md p-12 text-center">
+                  <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">No standings yet</p>
+                  <p className="text-xs text-muted-foreground mt-2">Standings will appear once official matches begin.</p>
+                </div>
+              ) : (
+                <StandingsTable rows={standings} playoffSize={season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+              )}
             </TabsContent>
 
             <TabsContent value="schedule" className="mt-6 space-y-6">
@@ -342,6 +450,16 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="teams" className="mt-6">
+              {teams.length === 0 && (
+                <div className="mb-4 border border-dashed border-primary/30 bg-primary/5 rounded-md p-6 text-center">
+                  <p className="font-display uppercase tracking-wider text-sm text-primary">Founding team slots are open</p>
+                  <p className="text-xs text-muted-foreground mt-2">Be among the first {league.max_teams} teams to lock in a Founding Team Badge.</p>
+                  <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                    <Button asChild size="sm"><Link to="/teams">Create Team</Link></Button>
+                    <Button asChild size="sm" variant="outline"><a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1.5" />Join Discord</a></Button>
+                  </div>
+                </div>
+              )}
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {teams.map(t => (
                     <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors flex items-center gap-3">
