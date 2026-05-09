@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import { RANKS, getRankByElo, type RankTier } from "@/lib/ranks";
-import { Mountain, MapPin, ArrowRight, Trophy, Lock, Check } from "lucide-react";
+import { Mountain, MapPin, ArrowRight, Trophy, Lock, Check, Sparkles, TrendingUp, Flag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,6 +108,43 @@ export default function RankShowcase() {
           <p className="mt-4 text-muted-foreground font-body max-w-xl mx-auto">
             {t("rank_showcase.subtitle")}
           </p>
+
+          {/* "Everyone starts at Rookie" notice */}
+          <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-[#0a0a0a]/70 text-[11px] sm:text-xs font-body text-foreground/85">
+            <Flag className="w-3.5 h-3.5 text-primary" />
+            <span className="font-display uppercase tracking-wider text-primary">
+              {t("rank_showcase.start_label")}
+            </span>
+            <span className="text-muted-foreground hidden sm:inline">·</span>
+            <span>{t("rank_showcase.start_explainer")}</span>
+          </div>
+
+          {/* How progression works — 3 quick steps */}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-3xl mx-auto text-left">
+            {[
+              { icon: Flag, key: "step_start" },
+              { icon: TrendingUp, key: "step_play" },
+              { icon: Sparkles, key: "step_climb" },
+            ].map(({ icon: Icon, key }, idx) => (
+              <div
+                key={key}
+                className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg border border-white/10 bg-[#0a0a0a]/60"
+              >
+                <span className="shrink-0 w-6 h-6 rounded-md bg-primary/15 border border-primary/30 inline-flex items-center justify-center text-primary">
+                  <Icon className="w-3.5 h-3.5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-widest font-display text-muted-foreground">
+                    {t("rank_showcase.step_label")} {idx + 1}
+                  </div>
+                  <div className="text-xs sm:text-[13px] text-foreground/85 leading-snug">
+                    {t(`rank_showcase.${key}`)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {userRank && typeof userElo === "number" && (
             <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-[#0a0a0a]/70 text-xs font-display tracking-wide">
               <span className="text-muted-foreground uppercase">{t("rank_showcase.your_rank")}:</span>
@@ -122,8 +159,8 @@ export default function RankShowcase() {
 
         <div className="relative max-w-7xl mx-auto">
           {/* Horizontal scroll-snap on mobile, fluid grid on desktop. */}
-          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-3 snap-x snap-mandatory lg:snap-none">
-            <div className="relative min-w-[920px] lg:min-w-0">
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pt-6 pb-4 snap-x snap-mandatory lg:snap-none">
+            <div className="relative min-w-[1040px] lg:min-w-0">
               {/* Connecting progression rail — sits behind cards, aligned to badge centers */}
               <div
                 className="absolute left-[4%] right-[4%] h-[2px] pointer-events-none"
@@ -134,7 +171,7 @@ export default function RankShowcase() {
                   boxShadow: "0 0 18px hsl(var(--primary) / 0.18)",
                 }}
               />
-              <div className="grid grid-cols-10 gap-x-2 lg:gap-x-3 gap-y-6">
+              <div className="grid grid-cols-10 gap-x-2.5 lg:gap-x-4 gap-y-6">
                 {RANKS.map((r, i) => {
                   const isApex = r.name === "Apex";
                   const isSelected = selected.name === r.name;
