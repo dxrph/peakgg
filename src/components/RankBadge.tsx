@@ -133,16 +133,19 @@ export const RankBadgeCompact = (p: Omit<RankBadgeProps, "size">) => (
 /* ================================================================== */
 
 /**
- * Premium "aegis shield" silhouette — a hex-shield hybrid with
- * subtly arched flanks and a pointed crest, instantly readable as
- * a competitive rank emblem (not a hexagon, not a generic pill).
+ * Premium "aegis shield" silhouette — sharper hex-shield hybrid with
+ * chamfered shoulders and a pointed crest. Aggressive esports feel,
+ * instantly readable as a competitive rank emblem (not a hex, not a pill).
  */
+// Outer silhouette — chamfered top corners, gentle waist, pointed bottom crest
 const SHIELD_OUTER =
-  "M50 3 C66 3 84 8 92 14 C92 36 92 56 86 70 C78 86 64 94 50 99 C36 94 22 86 14 70 C8 56 8 36 8 14 C16 8 34 3 50 3 Z";
+  "M50 2 L72 6 L92 14 L92 40 C92 60 84 76 70 88 L50 99 L30 88 C16 76 8 60 8 40 L8 14 L28 6 Z";
+// Metal shoulder ring (between outer rim and inner plate)
 const SHIELD_RIM =
-  "M50 9 C64 9 80 13 87 18 C87 38 87 56 82 68 C75 82 63 89 50 94 C37 89 25 82 18 68 C13 56 13 38 13 18 C20 13 36 9 50 9 Z";
+  "M50 8 L70 12 L87 18 L87 40 C87 58 80 72 67 83 L50 93 L33 83 C20 72 13 58 13 40 L13 18 L30 12 Z";
+// Inner mounted plate (dark glass interior)
 const SHIELD_INNER =
-  "M50 16 C62 16 76 19 82 24 C82 40 82 56 78 66 C72 78 62 85 50 89 C38 85 28 78 22 66 C18 56 18 40 18 24 C24 19 38 16 50 16 Z";
+  "M50 15 L67 18 L82 24 L82 40 C82 55 76 67 64 76 L50 85 L36 76 C24 67 18 55 18 40 L18 24 L33 18 Z";
 
 function darken(hex: string, amt = 0.4): string {
   const h = hex.replace("#", "");
@@ -169,8 +172,9 @@ function RankEmblem({ rank, size }: EmblemProps) {
   const id = `rk-${rank.name.toLowerCase()}`;
   const c = rank.hex;
   const dark = darken(c, 0.55);
-  const deep = darken(c, 0.78);
+  const deep = darken(c, 0.82);
   const light = lighten(c, 0.45);
+  const bright = lighten(c, 0.72);
   const isApex = rank.name === "Apex";
 
   return (
@@ -183,61 +187,97 @@ function RankEmblem({ rank, size }: EmblemProps) {
       className="block"
     >
       <defs>
-        {/* Outer metallic rim */}
+        {/* Outer metallic rim — multi-stop for richer chrome feel */}
         <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={light} />
-          <stop offset="45%" stopColor={c} />
+          <stop offset="0%" stopColor={bright} />
+          <stop offset="18%" stopColor={light} />
+          <stop offset="55%" stopColor={c} />
+          <stop offset="85%" stopColor={dark} />
           <stop offset="100%" stopColor={deep} />
         </linearGradient>
-        {/* Inner bevel ring */}
+        {/* Inner bevel groove — a dark recessed ring between rim and plate */}
         <linearGradient id={`${id}-bevel`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={dark} />
-          <stop offset="100%" stopColor="#000" />
+          <stop offset="0%" stopColor="#000" stopOpacity="0.95" />
+          <stop offset="50%" stopColor={dark} stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#000" stopOpacity="1" />
         </linearGradient>
-        {/* Interior dark glass */}
-        <radialGradient id={`${id}-glass`} cx="50%" cy="32%" r="78%">
-          <stop offset="0%" stopColor={c} stopOpacity="0.45" />
-          <stop offset="55%" stopColor="#0b0b0f" stopOpacity="0.96" />
+        {/* Interior dark glass with rank-tinted glow at top */}
+        <radialGradient id={`${id}-glass`} cx="50%" cy="28%" r="82%">
+          <stop offset="0%" stopColor={c} stopOpacity="0.55" />
+          <stop offset="38%" stopColor={dark} stopOpacity="0.55" />
+          <stop offset="70%" stopColor="#0a0a0e" stopOpacity="0.98" />
           <stop offset="100%" stopColor="#000" stopOpacity="1" />
         </radialGradient>
-        {/* Top shine sweep */}
+        {/* Top shine sweep — sharper highlight band */}
         <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.42" />
-          <stop offset="45%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="35%" stopColor="#ffffff" stopOpacity="0.08" />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        {/* Clip mask so shine respects shield silhouette */}
+        {/* Subtle hex texture pattern, clipped to inner plate */}
+        <pattern id={`${id}-tex`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+          <path d="M3 0 L6 1.5 L6 4.5 L3 6 L0 4.5 L0 1.5 Z" fill="none" stroke={light} strokeWidth="0.25" strokeOpacity="0.18" />
+        </pattern>
+        {/* Clip mask so shine + texture respect inner plate silhouette */}
         <clipPath id={`${id}-clip`}>
           <path d={SHIELD_INNER} />
         </clipPath>
       </defs>
 
-      {/* Outer shield rim */}
+      {/* 1. Outer chrome rim */}
       <path d={SHIELD_OUTER} fill={`url(#${id}-rim)`} />
-      {/* Bevel band */}
+      {/* 2. Bright top edge highlight */}
+      <path
+        d={SHIELD_OUTER}
+        fill="none"
+        stroke={bright}
+        strokeOpacity="0.85"
+        strokeWidth="0.6"
+      />
+      {/* 3. Recessed bevel groove */}
       <path d={SHIELD_RIM} fill={`url(#${id}-bevel)`} />
-      {/* Dark glass interior */}
+      {/* 4. Dark glass mounted plate */}
       <path d={SHIELD_INNER} fill={`url(#${id}-glass)`} />
-      {/* Inner thin accent stroke */}
+      {/* 5. Hex texture inside the plate (very subtle) */}
+      <g clipPath={`url(#${id}-clip)`}>
+        <rect x="0" y="0" width="100" height="100" fill={`url(#${id}-tex)`} />
+      </g>
+      {/* 6. Inner accent ring */}
       <path
         d={SHIELD_INNER}
         fill="none"
         stroke={light}
-        strokeOpacity="0.6"
-        strokeWidth="0.7"
+        strokeOpacity="0.7"
+        strokeWidth="0.8"
       />
-      {/* Glyph (clipped to shield silhouette) */}
+      {/* 7. Glyph — clipped to plate */}
       <g clipPath={`url(#${id}-clip)`}>{Glyph({ color: c, light, dark })}</g>
-      {/* Top shine sweep */}
+      {/* 8. Top shine sweep over everything */}
       <path d={SHIELD_INNER} fill={`url(#${id}-shine)`} />
-      {/* Apex extra: subtle gold corona */}
+      {/* 9. Tier color pip on crest (skipped on Apex which has corona) */}
+      {!isApex && (
+        <circle cx="50" cy="11" r="1.6" fill={bright} opacity="0.95" />
+      )}
+      {/* Apex extra: gold corona + crown spikes */}
       {isApex && (
-        <path
-          d={SHIELD_OUTER}
-          fill="none"
-          stroke="#FCD34D"
-          strokeOpacity="0.5"
-          strokeWidth="1.2"
-        />
+        <>
+          <path
+            d={SHIELD_OUTER}
+            fill="none"
+            stroke="#FCD34D"
+            strokeOpacity="0.7"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M42 6 L46 1 L50 5 L54 1 L58 6"
+            fill="none"
+            stroke="#FCD34D"
+            strokeOpacity="0.9"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
       )}
     </svg>
   );
