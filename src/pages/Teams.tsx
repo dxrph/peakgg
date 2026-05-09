@@ -30,7 +30,10 @@ const GAMES = [
 ];
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
 
-function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) {
+function getTeamBadge(team: { trophies: number; looking_for_players: boolean; is_founding?: boolean }) {
+  if (team.is_founding) {
+    return { label: "Founding Team", className: "border-accent/50 text-accent bg-accent/10", icon: TrophyIcon };
+  }
   if (team.trophies >= 5) {
     return { label: "Tournament Winner", className: "border-accent/40 text-accent bg-accent/10", icon: TrophyIcon };
   }
@@ -38,7 +41,7 @@ function getTeamBadge(team: { trophies: number; looking_for_players: boolean }) 
     return { label: "Verified", className: "border-primary/40 text-primary bg-primary/10", icon: BadgeCheck };
   }
   if (team.looking_for_players) {
-    return { label: "Rising Team", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
+    return { label: "Recruiting", className: "border-success/40 text-success bg-success/10", icon: Sparkles };
   }
   return null;
 }
@@ -53,6 +56,7 @@ interface TeamRow {
   trophies: number;
   looking_for_players: boolean;
   slots: number;
+  is_founding?: boolean;
   color: string;
   owner_id: string;
 }
@@ -114,7 +118,7 @@ export default function TeamsPage() {
   const loadTeams = async () => {
     const { data } = await supabase
       .from("teams")
-      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id")
+      .select("id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding")
       .order("trophies", { ascending: false });
     setTeams((data as any) ?? []);
   };
@@ -144,7 +148,7 @@ export default function TeamsPage() {
     if (!user) { setMyTeam(null); return; }
     const { data: tm } = await supabase
       .from("team_members")
-      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id)")
+      .select("team_id, teams:teams!inner(id, name, tag, game, rank, region, trophies, looking_for_players, slots, color, owner_id, is_founding)")
       .eq("user_id", user.id)
       .limit(1)
       .maybeSingle();
@@ -339,20 +343,31 @@ export default function TeamsPage() {
                           );
                         })()}
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs font-body mb-3 text-center">
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="text-primary font-display flex items-center justify-center gap-1"><Trophy className="h-3 w-3" />{tt.trophies}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.trophies", { defaultValue: "Trophies" })}</div>
-                        </div>
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="font-display">{tt.slots}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.open_slots", { defaultValue: "Open slots" })}</div>
-                        </div>
-                        <div className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                          <div className="font-display">{tt.rank ?? "—"}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.avg_rank", { defaultValue: "Avg rank" })}</div>
-                        </div>
-                      </div>
+                      {(() => {
+                        const cells = [
+                          tt.trophies > 0 && (
+                            <div key="t" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="text-primary font-display flex items-center justify-center gap-1"><Trophy className="h-3 w-3" />{tt.trophies}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.trophies", { defaultValue: "Trophies" })}</div>
+                            </div>
+                          ),
+                          tt.looking_for_players && tt.slots > 0 && (
+                            <div key="s" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="font-display">{Math.min(tt.slots, 5)}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.open_slots", { defaultValue: "Open slots" })}</div>
+                            </div>
+                          ),
+                          tt.rank && (
+                            <div key="r" className="rounded border border-border/60 bg-secondary/30 py-1.5">
+                              <div className="font-display">{tt.rank}</div>
+                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.avg_rank", { defaultValue: "Avg rank" })}</div>
+                            </div>
+                          ),
+                        ].filter(Boolean);
+                        if (cells.length === 0) return null;
+                        const colsClass = cells.length === 1 ? "grid-cols-1" : cells.length === 2 ? "grid-cols-2" : "grid-cols-3";
+                        return <div className={`grid ${colsClass} gap-2 text-xs font-body mb-3 text-center`}>{cells}</div>;
+                      })()}
                       {tt.looking_for_players && (
                         <div className="text-center text-xs font-display uppercase tracking-wider py-1.5 mb-3 rounded bg-success/10 text-success border border-success/30">
                           {t("teams_page.recruiting", { defaultValue: "Recruiting" })}
@@ -423,7 +438,7 @@ export default function TeamsPage() {
                         <div className="flex gap-1 mt-1">
                           <Badge variant="secondary" className="text-[10px] font-display uppercase">{tt.game}</Badge>
                           {tt.rank && <Badge variant="outline" className="text-[10px] font-display">{tt.rank}</Badge>}
-                          <span className="text-[10px] text-muted-foreground self-center">· {tt.slots} {t("teams_page.slots", { defaultValue: "slots" })}</span>
+                          <span className="text-[10px] text-muted-foreground self-center">· {Math.min(tt.slots, 5)} {t("teams_page.slots", { defaultValue: "open" })}</span>
                         </div>
                       </div>
                       <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)}>
