@@ -11,10 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Calendar, ChevronLeft, Mountain } from "lucide-react";
+import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { DISCORD_INVITE } from "@/lib/links";
 
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
 interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
@@ -334,13 +335,8 @@ export default function LeagueDetailPage() {
             </TabsContent>
 
             <TabsContent value="teams" className="mt-6">
-              {teams.length === 0 ? (
-                <div className="border border-dashed border-border rounded-md p-12 text-center text-sm text-muted-foreground">
-                  No approved teams yet.
-                </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {teams.map(t => (
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {teams.map(t => (
                     <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors flex items-center gap-3">
                       {t.avatar_url ? <img src={t.avatar_url} alt="" className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-muted border border-border" />}
                       <div className="min-w-0">
@@ -348,9 +344,22 @@ export default function LeagueDetailPage() {
                         {t.tag && <div className="text-[10px] text-muted-foreground">[{t.tag}]</div>}
                       </div>
                     </Link>
-                  ))}
-                </div>
-              )}
+                ))}
+                {Array.from({ length: Math.max(0, league.max_teams - teams.length) }).map((_, i) => (
+                  <div key={`open-${i}`} className="border border-dashed border-primary/30 rounded-md p-4 bg-primary/5 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded bg-primary/10 border border-primary/30 flex items-center justify-center">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-display font-bold uppercase text-primary text-sm">Open Slot</div>
+                      <div className="text-[10px] text-muted-foreground">Founding team slot for Season 0 Beta</div>
+                    </div>
+                    <Button asChild size="sm" variant="outline" className="shrink-0">
+                      <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1" />Apply</a>
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="playoffs" className="mt-6">
