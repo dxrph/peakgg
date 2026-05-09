@@ -44,7 +44,7 @@ async function loadOnce(): Promise<RankDefinitionRow[]> {
         is_active: true,
       }));
     } else {
-      cache = data as RankDefinitionRow[];
+      cache = data as unknown as RankDefinitionRow[];
     }
     subscribers.forEach((cb) => cb(cache!));
     return cache!;
