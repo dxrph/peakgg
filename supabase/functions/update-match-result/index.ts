@@ -215,6 +215,7 @@ Deno.serve(async (req) => {
         elo_after: newElo,
         delta: newElo - baseElo,
         reason: p.won ? "match_win" : "match_loss",
+        source_type: match.kind === "open_cup" ? "open_cup" : "match",
       });
 
       updated.push({ user_id: p.userId, won: p.won, elo: newElo });
