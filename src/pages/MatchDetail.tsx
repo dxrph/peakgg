@@ -39,6 +39,7 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<MatchRow | null>(null);
   const [teamA, setTeamA] = useState<TeamRow | null>(null);
   const [teamB, setTeamB] = useState<TeamRow | null>(null);
+  const [isParticipant, setIsParticipant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [disputeOpen, setDisputeOpen] = useState(false);
@@ -72,10 +73,28 @@ export default function MatchDetailPage() {
 
   useEffect(() => { load(); }, [matchId]);
 
+  // Check if current user is a member/coach of either team
+  useEffect(() => {
+    if (!user || !match) { setIsParticipant(false); return; }
+    const ids = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
+    if (!ids.length) { setIsParticipant(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .in("team_id", ids)
+        .limit(1);
+      setIsParticipant((data ?? []).length > 0);
+    })();
+  }, [user, match?.team_a_id, match?.team_b_id]);
+
   const isCaptainA = !!user && teamA?.owner_id === user.id;
   const isCaptainB = !!user && teamB?.owner_id === user.id;
   const isAnyCaptain = isCaptainA || isCaptainB;
   const isStaff = isAdmin || isModerator;
+  const canAccessChat = isAnyCaptain || isParticipant || isStaff;
+  const canSeeLobby = canAccessChat;
   const canSubmit = isAnyCaptain && match && ["scheduled", "live", "awaiting_result"].includes(match.result_status);
   const submittedByMe = match?.submitted_by === user?.id;
   const canConfirm = isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
@@ -209,7 +228,7 @@ export default function MatchDetailPage() {
                 resultStatus={match.result_status}
                 onChanged={load}
               />
-              {(match.lobby_code || match.server_info) && (
+              {canSeeLobby && (match.lobby_code || match.server_info) && (
                 <Card className="p-4">
                   <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-2">Lobby Info</h3>
                   {match.lobby_code && <div className="text-sm"><span className="text-muted-foreground">Code:</span> <span className="font-mono">{match.lobby_code}</span></div>}
@@ -217,10 +236,14 @@ export default function MatchDetailPage() {
                 </Card>
               )}
             </div>
-            {user ? (
+            {!user ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">Sign in to access match chat.</Card>
+            ) : canAccessChat ? (
               <MatchChat matchId={match.id} />
             ) : (
-              <Card className="p-6 text-center text-sm text-muted-foreground">Sign in to access match chat.</Card>
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">
+                Only match participants can access this room.
+              </Card>
             )}
           </div>
         )}
