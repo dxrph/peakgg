@@ -1,6 +1,8 @@
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
 import rookieEmblem from "@/assets/ranks/rookie.png";
+import { useRankDefinitions, getCachedEmblemUrl } from "@/hooks/useRankDefinitions";
+import { useState } from "react";
 
 /** Map of ranks that use a custom uploaded PNG asset instead of the procedural SVG emblem. */
 const CUSTOM_EMBLEMS: Partial<Record<RankTier, string>> = {
@@ -60,7 +62,12 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
-  const customSrc = forceProcedural ? undefined : CUSTOM_EMBLEMS[info.name];
+  // Subscribe so we re-render when defs load (cheap — single shared cache).
+  useRankDefinitions();
+  const dbEmblem = forceProcedural ? null : getCachedEmblemUrl(info.name);
+  const localFallback = forceProcedural ? undefined : CUSTOM_EMBLEMS[info.name];
+  const [imgFailed, setImgFailed] = useState(false);
+  const customSrc = !forceProcedural && !imgFailed ? (dbEmblem ?? localFallback) : undefined;
 
   return (
     <span
@@ -79,6 +86,7 @@ export default function RankBadge({
             alt={`${localizedName} rank emblem`}
             className="w-full h-full object-contain select-none pointer-events-none"
             draggable={false}
+            onError={() => setImgFailed(true)}
           />
         </span>
       ) : (
