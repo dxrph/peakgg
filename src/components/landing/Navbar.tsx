@@ -208,13 +208,22 @@ export default function Navbar() {
                   <DropdownMenuSeparator />
                   {userNav.map((item) => {
                     const Icon = item.icon;
-                    const path = item.key === "my_profile" ? profilePath : resolvePath(item);
+                    const path =
+                      item.key === "my_profile"
+                        ? profilePath
+                        : item.key === "my_team"
+                          ? (myTeamId ? `/teams/${myTeamId}` : "/teams")
+                          : resolvePath(item);
+                    const label =
+                      item.key === "my_team" && !myTeamId
+                        ? t("nav.find_team", { defaultValue: "Find / Create Team" })
+                        : tr(item);
                     return (
                       <DropdownMenuItem key={item.key} asChild>
                         <Link to={path} className="cursor-pointer flex items-center justify-between gap-2">
                           <span className="flex items-center gap-2">
                             {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-                            {tr(item)}
+                            {label}
                           </span>
                           {item.comingSoon && (
                             <Badge variant="outline" className="h-4 px-1.5 text-[9px] uppercase tracking-wider border-accent/40 text-accent">
