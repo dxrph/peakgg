@@ -438,7 +438,7 @@ export default function TeamsPage() {
                         <div className="flex gap-1 mt-1">
                           <Badge variant="secondary" className="text-[10px] font-display uppercase">{tt.game}</Badge>
                           {tt.rank && <Badge variant="outline" className="text-[10px] font-display">{tt.rank}</Badge>}
-                          <span className="text-[10px] text-muted-foreground self-center">· {tt.slots} {t("teams_page.slots", { defaultValue: "slots" })}</span>
+                          <span className="text-[10px] text-muted-foreground self-center">· {Math.min(tt.slots, 5)} {t("teams_page.slots", { defaultValue: "open" })}</span>
                         </div>
                       </div>
                       <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)}>
