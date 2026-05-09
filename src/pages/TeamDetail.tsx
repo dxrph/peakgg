@@ -361,15 +361,15 @@ export default function TeamDetailPage() {
             </div>
           </TabsContent>
 
-          {/* SCRIMS (public) */}
+          {/* MATCHES (public) */}
           <TabsContent value="scrims">
             <div className="rounded-lg border border-border bg-card p-10 text-center">
               <Swords className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-display font-bold text-lg uppercase">No scrims posted yet</h3>
+              <h3 className="font-display font-bold text-lg uppercase">No public matches yet</h3>
               <p className="text-sm text-muted-foreground font-body mt-1 mb-4">
-                When this team posts scrims, you'll find them here.
+                Match history will appear once {team.name} plays its first official match.
               </p>
-              <Link to="/scrims"><Button variant="neonOutline">Find Scrims</Button></Link>
+              <Link to="/leagues"><Button variant="neonOutline">View Peak League</Button></Link>
             </div>
           </TabsContent>
 
