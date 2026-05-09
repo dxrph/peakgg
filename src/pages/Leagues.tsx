@@ -80,12 +80,21 @@ export default function LeaguesPage() {
         const current = seasons?.[0] ?? null;
         let team_count = 0;
         if (current) {
-          const { count } = await supabase
+          // Count only approved registrations whose team is real (non-demo) — must match Teams tab.
+          const { data: regs } = await supabase
             .from("league_registrations")
-            .select("*", { count: "exact", head: true })
+            .select("team_id")
             .eq("season_id", current.id)
             .eq("status", "approved");
-          team_count = count ?? 0;
+          const ids = (regs ?? []).map((r: any) => r.team_id);
+          if (ids.length) {
+            const { count } = await supabase
+              .from("teams")
+              .select("id", { count: "exact", head: true })
+              .in("id", ids)
+              .eq("is_demo", false);
+            team_count = count ?? 0;
+          }
         }
         return { ...l, current_season: current, team_count };
       }));
