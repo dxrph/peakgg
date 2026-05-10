@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { rankedPublicBetaEnabled } from "@/lib/feature-flags";
 
 export default function PlayPage() {
   const { selectedGame } = useGame();
@@ -67,15 +68,19 @@ export default function PlayPage() {
           </div>
 
           <Badge variant="outline" className="mb-3 border-primary/40 text-primary uppercase tracking-widest">
-            <Sparkles className="h-3 w-3 mr-1" /> Closed Beta
+            <Sparkles className="h-3 w-3 mr-1" /> {rankedPublicBetaEnabled ? "Public Beta" : "Closed Beta"}
           </Badge>
 
           <h1 className="text-4xl font-display font-bold mb-2">Ranked Matchmaking</h1>
           <p className="text-muted-foreground font-body mb-2">
-            Ranked matchmaking is being tested with early players.
+            {rankedPublicBetaEnabled
+              ? "Ranked matchmaking is in public beta — 1v1 Test Queue."
+              : "Ranked matchmaking is being tested with early players."}
           </p>
           <p className="text-sm text-muted-foreground font-body mb-8 max-w-md mx-auto">
-            It will affect your ELO and rank once public. For now, join Discord to access early tests with the PeakGG team.
+            {rankedPublicBetaEnabled
+              ? "Results affect your ELO and rank after both sides confirm. During beta, the Ranked queue runs through the Open Cup test queue."
+              : "It will affect your ELO and rank once public. For now, join Discord to access early tests with the PeakGG team."}
           </p>
 
           {isAdmin && (
@@ -153,9 +158,17 @@ export default function PlayPage() {
             </Button>
           </div>
 
-          <Button variant="ghost" size="sm" disabled className="mb-10 opacity-70">
-            Find Match — opens with Season 1
-          </Button>
+          {rankedPublicBetaEnabled ? (
+            <Button variant="neon" size="lg" asChild className="mb-10">
+              <Link to={user ? "/tournaments#solo-path" : "/login?redirect=/tournaments"}>
+                <Swords className="h-4 w-4 mr-1.5" />Find Ranked Match (1v1 Beta)
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" disabled className="mb-10 opacity-70">
+              Find Match — opens with Season 1
+            </Button>
+          )}
 
           {/* Multi-game note */}
           <div className="mb-10 p-4 rounded-lg border border-border bg-card/40 text-left">
