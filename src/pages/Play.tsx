@@ -205,7 +205,20 @@ export default function PlayPage() {
             </Button>
           </div>
 
-          {rankedPublicBetaEnabled ? (
+          {rankedPublicBetaEnabled && (activeMatchId || queueRow) ? (
+            <div className="mb-10 text-left">
+              <QueueLobby
+                mode="ranked"
+                game={selectedGame}
+                teamSize={rankedCfg.teamSize}
+                joinedAt={queueRow?.joined_at}
+                myElo={elo}
+                onCancel={cancelQueue}
+                cancelling={cancellingQueue}
+                activeMatchId={activeMatchId}
+              />
+            </div>
+          ) : rankedPublicBetaEnabled ? (
             <Button
               variant="neon"
               size="lg"
