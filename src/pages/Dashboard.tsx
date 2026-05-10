@@ -39,7 +39,7 @@ export default function DashboardPage() {
   const { isAdmin } = useUserRoles();
   const { profile, user } = useAuth();
   const { t } = useI18n();
-  const { currentGame } = useGame();
+  const { selectedGame: currentGame } = useGame();
   const { notifications, loading: notifLoading } = useNotifications(5);
   const tr = (item: NavItem) => t(item.labelKey, { defaultValue: item.label });
 
