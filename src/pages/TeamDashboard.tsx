@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, Crown, Users, Trophy, Calendar, ShieldCheck, MessageSquare, Settings, FileText, Inbox, Mountain, Check, X, Trash2 } from "lucide-react";
+import { ChevronLeft, Crown, Users, Trophy, Calendar, ShieldCheck, MessageSquare, Settings, FileText, Inbox, Mountain, Check, X, Trash2, Swords } from "lucide-react";
+import { competitiveQueues } from "@/lib/feature-flags";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -273,6 +274,25 @@ export default function TeamDashboard() {
               )}
             </Card>
             <Card className="p-5">
+                  <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Queue with team</h3>
+                  {competitiveQueues.open_cup.allowFullTeam || competitiveQueues.open_cup.allowParty ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">Queue your full or partial roster — missing slots are auto-filled.</p>
+                      <Button size="sm" variant="neon" disabled={!isCaptain}>
+                        <Swords className="h-4 w-4 mr-1" /> Queue Team
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Currently the public queue runs at {competitiveQueues.open_cup.teamSize}v{competitiveQueues.open_cup.teamSize}.
+                      </p>
+                      <Button size="sm" variant="outline" disabled className="opacity-70 cursor-not-allowed">
+                        <Swords className="h-4 w-4 mr-1" /> Queue Team — opens with 5v5 beta
+                      </Button>
+                    </div>
+                  )}
+                </Card>
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Recent results</h3>
               {past.slice(0, 3).length === 0 ? (
                 <div>
