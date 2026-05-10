@@ -273,13 +273,31 @@ export default function MatchDetailPage() {
     if (!match || !reasonType) return toast.error("Reason required");
     const reasonText = `[${reasonType}] ${reason || ""}`.trim();
     setBusy(true);
+    let uploadedUrl = evidenceUrl || null;
+    try {
+      if (evidenceFile) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not signed in");
+        const ext = evidenceFile.name.split(".").pop()?.toLowerCase() || "bin";
+        const path = `${user.id}/${match.id}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("dispute-evidence")
+          .upload(path, evidenceFile, { upsert: false, contentType: evidenceFile.type || undefined });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("dispute-evidence").getPublicUrl(path);
+        uploadedUrl = pub.publicUrl;
+      }
+    } catch (e: any) {
+      setBusy(false);
+      return toast.error(e.message || "Evidence upload failed");
+    }
     const { error } = await supabase.rpc("dispute_match_result", {
-      _match_id: match.id, _reason: reasonText, _evidence: evidenceUrl || null,
+      _match_id: match.id, _reason: reasonText, _evidence: uploadedUrl,
     });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Dispute opened. An admin will review this match.");
-    setDisputeOpen(false); setReason(""); setEvidenceUrl(""); load();
+    setDisputeOpen(false); setReason(""); setEvidenceUrl(""); setEvidenceFile(null); load();
   };
   const adminResolve = async () => {
     if (!match) return;
