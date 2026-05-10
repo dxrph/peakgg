@@ -173,7 +173,10 @@ export default function TournamentsPage() {
   const joinQueue = async () => {
     if (!user) { navigate("/login?redirect=/tournaments"); return; }
     setJoining(true);
-    const { data, error } = await supabase.rpc("join_open_cup_queue", { _game: selectedGame, _team_size: teamSize });
+    const { data, error } = await supabase.rpc("enqueue_solo", {
+      _mode: "open_cup",
+      _game: selectedGame,
+    });
     setJoining(false);
     if (error) { toast.error(error.message); return; }
     const result = data as any;
