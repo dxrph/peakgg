@@ -51,7 +51,7 @@ const LANGUAGES = [
 
 export default function FreeAgentsPage() {
   const { t } = useI18n();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState<AgentRow[]>([]);
 
