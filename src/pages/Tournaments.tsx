@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { openCupPublicQueueEnabled } from "@/lib/feature-flags";
+import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
@@ -106,6 +107,10 @@ export default function TournamentsPage() {
   // for end-to-end testing of matchmaking + ELO.
   const queueEnabled = openCupPublicQueueEnabled || isAdmin;
 
+  // Auto-redirect when a match is created for me (covers the second player
+  // who is still sitting on this page when the queue pairs them).
+  useMatchFoundListener();
+
   // Player ELO for current game
   const { data: myStats } = useQuery({
     queryKey: ["my-player-stats", user?.id, selectedGame],
@@ -138,16 +143,28 @@ export default function TournamentsPage() {
     queryKey: ["my-open-cup-match", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      // 1v1 matches: lookup by player_a_id / player_b_id.
+      // Team-based open cup (future): also include match_rosters.
+      const { data: m1 } = await supabase
+        .from("matches")
+        .select("id, status, kind, result_status, created_at")
+        .eq("kind", "open_cup")
+        .or(`player_a_id.eq.${user!.id},player_b_id.eq.${user!.id}`)
+        .not("status", "in", "(completed,cancelled)")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (m1) return m1;
       const { data: rs } = await supabase
         .from("match_rosters").select("match_id").eq("user_id", user!.id);
       const ids = (rs ?? []).map((r: any) => r.match_id);
       if (!ids.length) return null;
-      const { data: m } = await supabase
+      const { data: m2 } = await supabase
         .from("matches").select("id, status, kind, result_status")
         .in("id", ids).eq("kind", "open_cup")
         .not("status", "in", "(completed,cancelled)")
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
-      return m;
+      return m2;
     },
     refetchInterval: 5000,
   });
@@ -175,21 +192,7 @@ export default function TournamentsPage() {
     refetchQueue();
   };
 
-  // Realtime: when a roster row appears for me, navigate to match
-  useEffect(() => {
-    if (!user) return;
-    const ch = supabase.channel(`oc-roster-${user.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "match_rosters", filter: `user_id=eq.${user.id}` }, (payload: any) => {
-        const mid = payload.new?.match_id;
-        if (mid) {
-          toast.success("Open Cup match found!");
-          refetchActive();
-          refetchQueue();
-          navigate(`/matches/${mid}`);
-        }
-      }).subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [user?.id]);
+  // Realtime redirect handled by useMatchFoundListener above.
 
   const { data: teamTournaments = [] } = useQuery({
     queryKey: ["public-team-tournaments", selectedGame],

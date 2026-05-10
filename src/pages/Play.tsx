@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { rankedPublicBetaEnabled } from "@/lib/feature-flags";
+import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 
 export default function PlayPage() {
   const { selectedGame } = useGame();
@@ -24,6 +25,9 @@ export default function PlayPage() {
   const [elo, setElo] = useState<number | null>(null);
   const [matchesPlayed, setMatchesPlayed] = useState(0);
   const [loadingStats, setLoadingStats] = useState(false);
+
+  // Auto-redirect if user is matched while sitting on /play
+  useMatchFoundListener();
 
   useEffect(() => {
     let active = true;
