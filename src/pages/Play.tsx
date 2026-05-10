@@ -17,6 +17,7 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { rankedPublicBetaEnabled, competitiveQueues } from "@/lib/feature-flags";
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 import { toast } from "sonner";
+import QueueLobby from "@/components/competitive/QueueLobby";
 
 export default function PlayPage() {
   const { selectedGame } = useGame();
@@ -27,11 +28,49 @@ export default function PlayPage() {
   const [matchesPlayed, setMatchesPlayed] = useState(0);
   const [loadingStats, setLoadingStats] = useState(false);
   const [joiningRanked, setJoiningRanked] = useState(false);
+  const [cancellingQueue, setCancellingQueue] = useState(false);
+  const [queueRow, setQueueRow] = useState<{ joined_at: string; team_size: number } | null>(null);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const navigate = useNavigate();
   const rankedCfg = competitiveQueues.ranked;
 
   // Auto-redirect if user is matched while sitting on /play
   useMatchFoundListener();
+
+  // Live queue + active-match state for current user/game
+  useEffect(() => {
+    if (!user) { setQueueRow(null); setActiveMatchId(null); return; }
+    let alive = true;
+    const refresh = async () => {
+      const [{ data: q }, { data: rs }] = await Promise.all([
+        supabase.from("open_cup_queue").select("joined_at, team_size, game").eq("user_id", user.id).maybeSingle(),
+        supabase.from("match_rosters").select("match_id").eq("user_id", user.id),
+      ]);
+      if (!alive) return;
+      setQueueRow(q && q.game === selectedGame ? { joined_at: q.joined_at, team_size: q.team_size } : null);
+      const ids = (rs ?? []).map((r: any) => r.match_id);
+      if (!ids.length) { setActiveMatchId(null); return; }
+      const { data: m } = await supabase.from("matches")
+        .select("id, status, kind, game").in("id", ids)
+        .in("kind", ["ranked", "open_cup"]).eq("game", selectedGame)
+        .not("status", "in", "(completed,cancelled)")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (!alive) return;
+      setActiveMatchId(m?.id ?? null);
+    };
+    refresh();
+    const id = setInterval(refresh, 5000);
+    return () => { alive = false; clearInterval(id); };
+  }, [user?.id, selectedGame]);
+
+  const cancelQueue = async () => {
+    setCancellingQueue(true);
+    const { error } = await supabase.rpc("cancel_open_cup_queue");
+    setCancellingQueue(false);
+    if (error) return toast.error(error.message);
+    setQueueRow(null);
+    toast.success("Queue cancelled");
+  };
 
   useEffect(() => {
     let active = true;
@@ -166,7 +205,20 @@ export default function PlayPage() {
             </Button>
           </div>
 
-          {rankedPublicBetaEnabled ? (
+          {rankedPublicBetaEnabled && (activeMatchId || queueRow) ? (
+            <div className="mb-10 text-left">
+              <QueueLobby
+                mode="ranked"
+                game={selectedGame}
+                teamSize={rankedCfg.teamSize}
+                joinedAt={queueRow?.joined_at}
+                myElo={elo}
+                onCancel={cancelQueue}
+                cancelling={cancellingQueue}
+                activeMatchId={activeMatchId}
+              />
+            </div>
+          ) : rankedPublicBetaEnabled ? (
             <Button
               variant="neon"
               size="lg"
@@ -184,6 +236,12 @@ export default function PlayPage() {
                 });
                 setJoiningRanked(false);
                 if (error) {
+                  // If user is already queued, treat as success — UI shows the lobby.
+                  const msg = String(error.message ?? "").toLowerCase();
+                  if (msg.includes("already") || msg.includes("duplicate") || msg.includes("23505")) {
+                    setQueueRow({ joined_at: new Date().toISOString(), team_size: rankedCfg.teamSize });
+                    return;
+                  }
                   toast.error("Could not create match. Please try again or contact support.");
                   return;
                 }
@@ -193,6 +251,7 @@ export default function PlayPage() {
                   navigate(`/matches/${r.match_id}`);
                 } else {
                   toast.success(`You're in the Ranked queue (${rankedCfg.teamSize}v${rankedCfg.teamSize}).`);
+                  setQueueRow({ joined_at: new Date().toISOString(), team_size: rankedCfg.teamSize });
                 }
               }}
             >

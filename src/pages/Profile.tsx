@@ -121,6 +121,7 @@ type MatchRow = {
   score_a: number | null; score_b: number | null;
   winner_id: string | null;
   map: string | null;
+  kind?: string | null;
 };
 
 type TrophyRow = {
@@ -183,7 +184,7 @@ export default function ProfilePage() {
           .maybeSingle(),
         supabase
           .from("matches")
-          .select("id, game, status, played_at, created_at, player_a_id, player_b_id, team_a_id, team_b_id, score_a, score_b, winner_id, map")
+          .select("id, game, status, played_at, created_at, player_a_id, player_b_id, team_a_id, team_b_id, score_a, score_b, winner_id, map, kind")
           .or(`player_a_id.eq.${p.id},player_b_id.eq.${p.id}`)
           .order("created_at", { ascending: false })
           .limit(10),
@@ -891,7 +892,13 @@ function RecentMatchesList({ matches, profileId }: { matches: MatchRow[]; profil
             >
               {result}
             </span>
-            <span className="font-display font-semibold truncate flex-1 min-w-0">{m.map ?? "Unknown Map"}</span>
+            <span className="font-display font-semibold truncate flex-1 min-w-0">
+              {m.map
+                ?? (m.kind === "open_cup" ? "Open Cup 1v1"
+                  : m.kind === "ranked" ? "Ranked 1v1 Beta"
+                  : m.kind === "scrim" ? "Scrim"
+                  : "Match")}
+            </span>
             <span className="font-mono text-foreground hidden sm:inline shrink-0">
               {myScore ?? "-"} : {oppScore ?? "-"}
             </span>

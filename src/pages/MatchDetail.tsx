@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,6 +74,8 @@ export default function MatchDetailPage() {
   const [map, setMap] = useState("");
   const [notes, setNotes] = useState("");
   const [reason, setReason] = useState("");
+  const [reasonType, setReasonType] = useState<string>("wrong_result");
+  const [evidenceUrl, setEvidenceUrl] = useState("");
   const [busy, setBusy] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
@@ -267,13 +270,16 @@ export default function MatchDetailPage() {
     load();
   };
   const dispute = async () => {
-    if (!match || !reason) return toast.error("Reason required");
+    if (!match || !reasonType) return toast.error("Reason required");
+    const reasonText = `[${reasonType}] ${reason || ""}`.trim();
     setBusy(true);
-    const { error } = await supabase.rpc("dispute_match_result", { _match_id: match.id, _reason: reason, _evidence: null });
+    const { error } = await supabase.rpc("dispute_match_result", {
+      _match_id: match.id, _reason: reasonText, _evidence: evidenceUrl || null,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Dispute opened — admin will review");
-    setDisputeOpen(false); setReason(""); load();
+    toast.success("Dispute opened. An admin will review this match.");
+    setDisputeOpen(false); setReason(""); setEvidenceUrl(""); load();
   };
   const adminResolve = async () => {
     if (!match) return;
@@ -549,6 +555,33 @@ export default function MatchDetailPage() {
             )}
           </div>
         )}
+
+        {isQueueMatch && (
+          <div className="grid lg:grid-cols-2 gap-6 mb-6">
+            <Card className="p-4 text-sm">
+              <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-2">Coordinate with your opponent</h3>
+              <p className="text-muted-foreground">
+                Use the match chat to agree on lobby setup. Need help? Hop into Discord.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Discord
+                  </a>
+                </Button>
+              </div>
+            </Card>
+            {!user ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">Sign in to access match chat.</Card>
+            ) : canAccessChat ? (
+              <MatchChat matchId={match.id} />
+            ) : (
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">
+                Only match participants can access this room.
+              </Card>
+            )}
+          </div>
+        )}
       </main>
       <Footer />
 
@@ -590,10 +623,33 @@ export default function MatchDetailPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Open Dispute</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Label>Reason</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} rows={4} placeholder="Explain what went wrong" />
+            <div>
+              <Label className="mb-1.5 block">Reason</Label>
+              <Select value={reasonType} onValueChange={setReasonType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wrong_result">Wrong result</SelectItem>
+                  <SelectItem value="opponent_no_response">Opponent not responding</SelectItem>
+                  <SelectItem value="no_show">No-show</SelectItem>
+                  <SelectItem value="toxic">Toxic behavior</SelectItem>
+                  <SelectItem value="cheating">Cheating suspicion</SelectItem>
+                  <SelectItem value="technical">Technical issue</SelectItem>
+                  <SelectItem value="elo_not_updated">ELO not updated</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Message (optional)</Label>
+              <Textarea value={reason} onChange={e => setReason(e.target.value)} rows={3} placeholder="Add context for the admin" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Evidence URL (optional)</Label>
+              <Input value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} placeholder="https://… (screenshot, clip)" />
+            </div>
+            <p className="text-xs text-muted-foreground">An admin will review this match. ELO is frozen until resolved.</p>
           </div>
-          <DialogFooter><Button variant="destructive" onClick={dispute} disabled={busy || !reason}>Open Dispute</Button></DialogFooter>
+          <DialogFooter><Button variant="destructive" onClick={dispute} disabled={busy}>Open Dispute</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
