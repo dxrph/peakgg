@@ -555,6 +555,33 @@ export default function MatchDetailPage() {
             )}
           </div>
         )}
+
+        {isQueueMatch && (
+          <div className="grid lg:grid-cols-2 gap-6 mb-6">
+            <Card className="p-4 text-sm">
+              <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-2">Coordinate with your opponent</h3>
+              <p className="text-muted-foreground">
+                Use the match chat to agree on lobby setup. Need help? Hop into Discord.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Discord
+                  </a>
+                </Button>
+              </div>
+            </Card>
+            {!user ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">Sign in to access match chat.</Card>
+            ) : canAccessChat ? (
+              <MatchChat matchId={match.id} />
+            ) : (
+              <Card className="p-6 text-center text-sm text-muted-foreground flex items-center justify-center">
+                Only match participants can access this room.
+              </Card>
+            )}
+          </div>
+        )}
       </main>
       <Footer />
 
