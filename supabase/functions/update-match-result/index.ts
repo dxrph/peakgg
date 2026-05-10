@@ -72,64 +72,41 @@ Deno.serve(async (req) => {
     if (claimErr) return json({ error: claimErr.message }, 500);
     if (!claimed) return json({ ok: true, already_processed: true });
 
-    // Collect participating user IDs.
+    // Collect participating user IDs. Queue matches use match_rosters.side as
+    // source of truth; team_a_id/team_b_id stay null for temporary sides.
     const participants: { userId: string; won: boolean }[] = [];
+    const isQueueMatch = match.kind === "open_cup" || match.kind === "ranked";
 
-    if (match.player_a_id || match.player_b_id) {
-      // 1v1 match
-      if (match.player_a_id) {
-        participants.push({
-          userId: match.player_a_id,
-          won: match.winner_id === match.player_a_id,
-        });
-      }
-      if (match.player_b_id) {
-        participants.push({
-          userId: match.player_b_id,
-          won: match.winner_id === match.player_b_id,
-        });
-      }
-    } else if (match.team_a_id || match.team_b_id) {
-      // Team match: derive members from team_members, OR fall back to match_rosters
-      // (Open Cup matches use synthetic team UUIDs that don't exist in `teams`).
-      const teamIds = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
-      const winningTeam = match.winner_id;
-      let resolved = false;
-      if (match.kind !== "open_cup") {
-        const { data: members } = await admin
-          .from("team_members")
-          .select("team_id, user_id")
-          .in("team_id", teamIds);
-        if (members && members.length > 0) {
-          resolved = true;
-          members.forEach((m: any) => {
-            participants.push({ userId: m.user_id, won: m.team_id === winningTeam });
-          });
-        }
-      }
-      if (!resolved) {
-        const { data: rosters } = await admin
-          .from("match_rosters")
-          .select("team_id, user_id")
-          .eq("match_id", match.id);
-        (rosters ?? []).forEach((r: any) => {
-          participants.push({ userId: r.user_id, won: r.team_id === winningTeam });
+    if (isQueueMatch) {
+      const { data: rosters } = await admin
+        .from("match_rosters")
+        .select("team_id, user_id, side")
+        .eq("match_id", match.id);
+
+      if (rosters && rosters.length > 0) {
+        const winnerRoster = rosters.find((r: any) => r.user_id === match.winner_id || r.team_id === match.winner_id);
+        const winnerSide = winnerRoster?.side ?? null;
+        rosters.forEach((r: any) => {
+          const won = winnerSide ? r.side === winnerSide : r.team_id === match.winner_id || r.user_id === match.winner_id;
+          participants.push({ userId: r.user_id, won });
         });
       }
     }
 
-    // For open_cup, prefer rosters when both player_a/b and rosters exist
-    if (match.kind === "open_cup" && (match.player_a_id || match.player_b_id)) {
-      const { data: rosters } = await admin
-        .from("match_rosters")
+    if (participants.length === 0 && (match.player_a_id || match.player_b_id)) {
+      // Legacy 1v1 match without rosters.
+      if (match.player_a_id) participants.push({ userId: match.player_a_id, won: match.winner_id === match.player_a_id });
+      if (match.player_b_id) participants.push({ userId: match.player_b_id, won: match.winner_id === match.player_b_id });
+    } else if (participants.length === 0 && (match.team_a_id || match.team_b_id)) {
+      // Permanent team match: derive members from real teams.
+      const teamIds = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
+      const { data: members } = await admin
+        .from("team_members")
         .select("team_id, user_id")
-        .eq("match_id", match.id);
-      if (rosters && rosters.length > 0) {
-        participants.length = 0;
-        rosters.forEach((r: any) => {
-          participants.push({ userId: r.user_id, won: r.team_id === match.winner_id });
-        });
-      }
+        .in("team_id", teamIds);
+      (members ?? []).forEach((m: any) => {
+        participants.push({ userId: m.user_id, won: m.team_id === match.winner_id });
+      });
     }
 
     if (participants.length === 0) {
@@ -236,7 +213,7 @@ Deno.serve(async (req) => {
         elo_after: newElo,
         delta: newElo - baseElo,
         reason: p.won ? "match_win" : "match_loss",
-        source_type: match.kind === "open_cup" ? "open_cup" : "match",
+        source_type: isQueueMatch ? match.kind : "match",
       });
 
       updated.push({ user_id: p.userId, won: p.won, elo: newElo });
