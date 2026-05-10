@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { DISCORD_INVITE } from "@/lib/links";
+import { isPublicPlayer, hasCompetitiveActivity } from "@/lib/public-users";
 
 type TopPlayer = {
   user_id: string;
@@ -16,6 +17,7 @@ type TopPlayer = {
   avatar_url: string | null;
   elo: number;
   wins: number;
+  matches_played: number;
 };
 
 function rankColor(r: number) {
@@ -35,9 +37,10 @@ export default function TopPlayersWeek() {
     async function load() {
       const { data: stats } = await supabase
         .from("player_stats")
-        .select("user_id, elo, wins")
+        .select("user_id, elo, wins, losses, matches_played")
+        .gt("matches_played", 0)
         .order("elo", { ascending: false })
-        .limit(5);
+        .limit(20);
       if (cancelled || !stats?.length) {
         setPlayers([]);
         return;
@@ -55,13 +58,14 @@ export default function TopPlayersWeek() {
           user_id: s.user_id,
           elo: s.elo,
           wins: s.wins,
+          matches_played: s.matches_played ?? 0,
           username: prof?.username ?? "Player",
           avatar_url: prof?.avatar_url ?? null,
         };
-      });
-      // Only show real leaderboard if at least one player has played a match (elo != default 1000 or wins > 0)
-      const hasActivity = mapped.some((p) => p.wins > 0 || p.elo !== 1000);
-      setPlayers(hasActivity ? mapped : []);
+      })
+      .filter((p) => isPublicPlayer(p) && hasCompetitiveActivity(p))
+      .slice(0, 5);
+      setPlayers(mapped);
     }
     load();
     return () => { cancelled = true; };
@@ -93,11 +97,11 @@ export default function TopPlayersWeek() {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto rounded-xl border border-border bg-card overflow-hidden"
           >
-            <div className="grid grid-cols-[3rem_1fr_auto_4rem_5rem] gap-3 px-5 py-3 bg-secondary/40 text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-display">
+            <div className="grid grid-cols-[2rem_1fr_auto_4rem] sm:grid-cols-[3rem_1fr_auto_4rem_5rem] gap-2 sm:gap-3 px-3 sm:px-5 py-3 bg-secondary/40 text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-display">
               <span>#</span>
               <span>{t("top_players.header_player")}</span>
               <span className="text-right pr-2">{t("top_players.header_rank")}</span>
-              <span className="text-right">{t("top_players.header_wins")}</span>
+              <span className="text-right hidden sm:block">{t("top_players.header_wins")}</span>
               <span className="text-right">{t("top_players.header_elo")}</span>
             </div>
             {players!.map((p, i) => {
@@ -109,7 +113,7 @@ export default function TopPlayersWeek() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="grid grid-cols-[3rem_1fr_auto_4rem_5rem] gap-3 px-5 py-3 border-t border-border/60 items-center hover:bg-secondary/30 transition-colors"
+                  className="grid grid-cols-[2rem_1fr_auto_4rem] sm:grid-cols-[3rem_1fr_auto_4rem_5rem] gap-2 sm:gap-3 px-3 sm:px-5 py-3 border-t border-border/60 items-center hover:bg-secondary/30 transition-colors"
                 >
                   <span className={`font-display font-bold text-lg flex items-center gap-1 ${rankColor(rank)}`}>
                     {rank <= 3 && <Crown className="h-4 w-4" />}
@@ -122,12 +126,12 @@ export default function TopPlayersWeek() {
                         {p.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-semibold truncate font-body">{p.username}</span>
+                    <span className="font-semibold truncate font-body min-w-0">{p.username}</span>
                   </div>
                   <div className="flex justify-end pr-2">
                     <RankBadge elo={p.elo} size="sm" />
                   </div>
-                  <span className="text-right text-sm font-mono text-foreground/80">{p.wins}</span>
+                  <span className="text-right text-sm font-mono text-foreground/80 hidden sm:block">{p.wins}</span>
                   <span className="text-right font-mono font-bold text-primary">{p.elo}</span>
                 </motion.div>
               );

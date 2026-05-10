@@ -13,6 +13,7 @@ import { Crown, Search, Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucid
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { isPublicPlayer, hasCompetitiveActivity } from "@/lib/public-users";
 
 import { type GameId } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
@@ -68,8 +69,9 @@ export default function LeaderboardPage() {
       // Fetch player_stats for the selected game, with embedded profile
       const { data: stats } = await supabase
         .from("player_stats")
-        .select("user_id, elo, wins, losses, profile:profiles!inner(id, username, display_name, avatar_url)")
+        .select("user_id, elo, wins, losses, matches_played, profile:profiles!inner(id, username, display_name, avatar_url)")
         .eq("game", game)
+        .gt("matches_played", 0)
         .order("elo", { ascending: false })
         .limit(1000);
       if (cancelled || !stats) {
@@ -97,6 +99,17 @@ export default function LeaderboardPage() {
 
       const rows: PlayerRow[] = (stats as any[])
         .filter((s) => s.profile)
+        .filter((s) =>
+          isPublicPlayer({
+            username: s.profile.username,
+            display_name: s.profile.display_name,
+          }) &&
+          hasCompetitiveActivity({
+            matches_played: s.matches_played,
+            wins: s.wins,
+            losses: s.losses,
+          })
+        )
         .map((s: any) => ({
           id: s.profile.id,
           username: s.profile.username,
