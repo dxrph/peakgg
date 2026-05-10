@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
@@ -7,22 +7,28 @@ import StatusPill from "@/components/leagues/StatusPill";
 import ReadyCheck from "@/components/matches/ReadyCheck";
 import MatchChat from "@/components/matches/MatchChat";
 import TeamLogo from "@/components/teams/TeamLogo";
+import RankBadge from "@/components/RankBadge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ShieldAlert, Check, Send, Gavel } from "lucide-react";
+import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { DISCORD_INVITE } from "@/lib/links";
 import { toast } from "sonner";
 
 interface MatchRow {
   id: string; game: string; map: string | null;
   team_a_id: string | null; team_b_id: string | null;
+  player_a_id: string | null; player_b_id: string | null;
   score_a: number | null; score_b: number | null;
   result_status: string; status: string;
   matchday: number | null; scheduled_at: string | null;
@@ -30,72 +36,77 @@ interface MatchRow {
   submitted_by: string | null; confirmed_by: string | null;
   lobby_code: string | null; server_info: string | null;
   kind?: string | null;
+  winner_id?: string | null;
+  elo_processed_at?: string | null;
 }
 interface TeamRow { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; }
-interface RosterEntry { team_id: string; user_id: string; username: string | null; display_name: string | null; avatar_url: string | null; elo: number | null; }
+interface PlayerInfo {
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  elo: number | null;
+}
+interface EloDelta { user_id: string; delta: number; elo_after: number; }
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin, isModerator } = useUserRoles();
   const [match, setMatch] = useState<MatchRow | null>(null);
   const [teamA, setTeamA] = useState<TeamRow | null>(null);
   const [teamB, setTeamB] = useState<TeamRow | null>(null);
-  const [rosters, setRosters] = useState<RosterEntry[]>([]);
-  const [isParticipant, setIsParticipant] = useState(false);
+  const [playerA, setPlayerA] = useState<PlayerInfo | null>(null);
+  const [playerB, setPlayerB] = useState<PlayerInfo | null>(null);
+  const [eloDeltas, setEloDeltas] = useState<EloDelta[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
+  const [winnerSide, setWinnerSide] = useState<"a" | "b">("a");
   const [map, setMap] = useState("");
   const [notes, setNotes] = useState("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const isOpenCup = match?.kind === "open_cup";
+  const is1v1 = !!match && (!!match.player_a_id || !!match.player_b_id);
+
+  const loadPlayer = async (uid: string, game: string): Promise<PlayerInfo> => {
+    const [{ data: p }, { data: s }] = await Promise.all([
+      supabase.from("profiles").select("id, username, display_name, avatar_url").eq("id", uid).maybeSingle(),
+      supabase.from("player_stats").select("elo").eq("user_id", uid).eq("game", game).maybeSingle(),
+    ]);
+    return {
+      user_id: uid,
+      username: p?.username ?? null,
+      display_name: p?.display_name ?? null,
+      avatar_url: p?.avatar_url ?? null,
+      elo: s?.elo ?? null,
+    };
+  };
+
   const load = async () => {
     if (!matchId) return;
     const { data: m } = await supabase
       .from("matches")
-      .select("id, game, map, team_a_id, team_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info, kind")
+      .select("id, game, map, team_a_id, team_b_id, player_a_id, player_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info, kind, winner_id, elo_processed_at")
       .eq("id", matchId)
       .maybeSingle();
     if (!m) { setLoading(false); return; }
     setMatch(m as MatchRow);
     setScoreA(m.score_a ?? 0); setScoreB(m.score_b ?? 0); setMap(m.map ?? "");
-    if ((m as any).kind === "open_cup") {
-      const { data: rs } = await supabase
-        .from("match_rosters")
-        .select("team_id, user_id")
-        .eq("match_id", m.id);
-      const userIds = (rs ?? []).map((r: any) => r.user_id);
-      let profMap = new Map<string, any>();
-      if (userIds.length) {
-        const { data: pr } = await supabase
-          .from("profiles").select("id, username, display_name, avatar_url").in("id", userIds);
-        (pr ?? []).forEach((p: any) => profMap.set(p.id, p));
-      }
-      let eloMap = new Map<string, number>();
-      if (userIds.length) {
-        const { data: ps } = await supabase
-          .from("player_stats")
-          .select("user_id, elo")
-          .eq("game", m.game)
-          .in("user_id", userIds);
-        (ps ?? []).forEach((p: any) => eloMap.set(p.user_id, p.elo));
-      }
-      const mapped: RosterEntry[] = (rs ?? []).map((r: any) => ({
-        team_id: r.team_id, user_id: r.user_id,
-        username: profMap.get(r.user_id)?.username ?? null,
-        display_name: profMap.get(r.user_id)?.display_name ?? null,
-        avatar_url: profMap.get(r.user_id)?.avatar_url ?? null,
-        elo: eloMap.get(r.user_id) ?? null,
-      }));
-      setRosters(mapped);
-      setTeamA({ id: m.team_a_id ?? "", name: "Team A", tag: null, avatar_url: null, owner_id: "" } as TeamRow);
-      setTeamB({ id: m.team_b_id ?? "", name: "Team B", tag: null, avatar_url: null, owner_id: "" } as TeamRow);
+
+    if (m.player_a_id || m.player_b_id) {
+      // 1v1 match (Open Cup / Ranked beta)
+      const [pa, pb] = await Promise.all([
+        m.player_a_id ? loadPlayer(m.player_a_id, m.game) : Promise.resolve(null),
+        m.player_b_id ? loadPlayer(m.player_b_id, m.game) : Promise.resolve(null),
+      ]);
+      setPlayerA(pa); setPlayerB(pb);
+      setTeamA(null); setTeamB(null);
     } else {
       const ids = [m.team_a_id, m.team_b_id].filter(Boolean) as string[];
       if (ids.length) {
@@ -105,58 +116,93 @@ export default function MatchDetailPage() {
         setTeamA(tA as TeamRow); setTeamB(tB as TeamRow);
       }
     }
+
+    // ELO deltas after completion
+    if (m.elo_processed_at) {
+      const { data: hist } = await supabase
+        .from("elo_history")
+        .select("user_id, delta, elo_after")
+        .eq("match_id", m.id);
+      setEloDeltas((hist ?? []) as EloDelta[]);
+    } else {
+      setEloDeltas([]);
+    }
+
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [matchId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [matchId]);
 
-  // Check participation: team_members for normal matches OR match_rosters for Open Cup
+  // Realtime: re-load when this match row changes (status/score/elo_processed_at)
   useEffect(() => {
-    if (!user || !match) { setIsParticipant(false); return; }
+    if (!matchId) return;
+    const ch = supabase
+      .channel(`match-${matchId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "matches", filter: `id=eq.${matchId}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line
+  }, [matchId]);
+
+  const isParticipant = useMemo(() => {
+    if (!user || !match) return false;
+    if (is1v1) return user.id === match.player_a_id || user.id === match.player_b_id;
+    return false; // team participation handled below
+  }, [user, match, is1v1]);
+
+  const [isTeamParticipant, setIsTeamParticipant] = useState(false);
+  useEffect(() => {
+    if (!user || !match || is1v1) { setIsTeamParticipant(false); return; }
     (async () => {
-      if (match.kind === "open_cup") {
-        const { data } = await supabase.from("match_rosters").select("id").eq("match_id", match.id).eq("user_id", user.id).limit(1);
-        setIsParticipant((data ?? []).length > 0);
-        return;
-      }
       const ids = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
-      if (!ids.length) { setIsParticipant(false); return; }
+      if (!ids.length) { setIsTeamParticipant(false); return; }
       const { data } = await supabase
         .from("team_members").select("team_id").eq("user_id", user.id).in("team_id", ids).limit(1);
-      setIsParticipant((data ?? []).length > 0);
+      setIsTeamParticipant((data ?? []).length > 0);
     })();
-  }, [user, match?.team_a_id, match?.team_b_id, match?.kind, match?.id]);
+  }, [user?.id, match?.team_a_id, match?.team_b_id, is1v1]);
 
   const isCaptainA = !!user && teamA?.owner_id === user.id;
   const isCaptainB = !!user && teamB?.owner_id === user.id;
   const isAnyCaptain = isCaptainA || isCaptainB;
-  const isOpenCup = match?.kind === "open_cup";
-  const mySide: "a" | "b" | null = isOpenCup && user
-    ? (rosters.find(r => r.user_id === user.id)?.team_id === match?.team_a_id ? "a"
-      : rosters.find(r => r.user_id === user.id)?.team_id === match?.team_b_id ? "b" : null)
-    : null;
   const isStaff = isAdmin || isModerator;
-  const canAccessChat = isAnyCaptain || isParticipant || isStaff;
+  const canAccessChat = isAnyCaptain || isTeamParticipant || isParticipant || isStaff;
   const canSeeLobby = canAccessChat;
-  const canSubmit = match && ["scheduled", "live", "awaiting_result"].includes(match.result_status)
-    && (isAnyCaptain || (isOpenCup && isParticipant));
+
+  const canSubmit = match
+    && ["scheduled", "live", "awaiting_result"].includes(match.result_status)
+    && (isAnyCaptain || (isOpenCup && (isParticipant || isTeamParticipant)));
   const submittedByMe = match?.submitted_by === user?.id;
   const canConfirm = match?.result_status === "pending_confirmation" && !submittedByMe
-    && (isAnyCaptain || (isOpenCup && isParticipant));
-  const canDispute = !isOpenCup && isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
-  const canAdminResolve = isStaff && match && ["disputed", "pending_confirmation", "scheduled", "awaiting_result", "live"].includes(match.result_status);
+    && (isAnyCaptain || (isOpenCup && (isParticipant || isTeamParticipant)));
+  const canDispute = !is1v1 && isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
+  const canAdminResolve = isStaff && match
+    && ["disputed", "pending_confirmation", "scheduled", "awaiting_result", "live"].includes(match.result_status);
 
   const triggerEloUpdate = async (id: string) => {
     try { await supabase.functions.invoke("update-match-result", { body: { match_id: id } }); } catch {}
   };
 
+  const openSubmit = () => {
+    // Pre-select winner for 1v1
+    if (is1v1 && user) {
+      setWinnerSide(user.id === match?.player_a_id ? "a" : "b");
+    }
+    setSubmitOpen(true);
+  };
+
   const submit = async () => {
     if (!match) return;
     setBusy(true);
+    let sa = scoreA, sb = scoreB;
+    if (is1v1) {
+      sa = winnerSide === "a" ? 1 : 0;
+      sb = winnerSide === "b" ? 1 : 0;
+    }
     const { error } = isOpenCup
-      ? await supabase.rpc("submit_open_cup_result", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB })
+      ? await supabase.rpc("submit_open_cup_result", { _match_id: match.id, _score_a: sa, _score_b: sb })
       : await supabase.rpc("submit_match_result", {
-          _match_id: match.id, _score_a: scoreA, _score_b: scoreB,
+          _match_id: match.id, _score_a: sa, _score_b: sb,
           _map: map || null, _notes: notes || null, _screenshot: null,
         });
     setBusy(false);
@@ -209,91 +255,196 @@ export default function MatchDetailPage() {
   );
 
   const showScore = ["confirmed", "admin_resolved", "pending_confirmation", "live"].includes(match.result_status);
+  const statusLabel = (() => {
+    switch (match.result_status) {
+      case "scheduled": return "Match Ready";
+      case "live": return "Live";
+      case "awaiting_result": return "Awaiting Result";
+      case "pending_confirmation": return "Pending Confirmation";
+      case "confirmed": return "Completed";
+      case "admin_resolved": return "Admin Resolved";
+      case "disputed": return "Disputed";
+      default: return match.result_status;
+    }
+  })();
+
+  const instruction = (() => {
+    if (!isParticipant && !isTeamParticipant) return null;
+    if (["scheduled","live","awaiting_result"].includes(match.result_status))
+      return "Play the match, then submit the result.";
+    if (match.result_status === "pending_confirmation")
+      return submittedByMe
+        ? "Waiting for your opponent to confirm."
+        : "Confirm or dispute the submitted result.";
+    if (match.result_status === "confirmed") return "Match completed. ELO has been updated.";
+    if (match.result_status === "admin_resolved") return "An admin resolved this match.";
+    return null;
+  })();
+
+  const renderPlayerCard = (p: PlayerInfo | null, side: "a" | "b", align: "left" | "right") => {
+    const initials = (p?.display_name ?? p?.username ?? "?").slice(0, 2).toUpperCase();
+    const delta = p ? eloDeltas.find(d => d.user_id === p.user_id) : null;
+    return (
+      <div className={`flex items-center gap-3 min-w-0 ${align === "right" ? "justify-end text-right flex-row-reverse" : ""}`}>
+        <Avatar className="h-14 w-14 border border-border">
+          {p?.avatar_url && <AvatarImage src={p.avatar_url} alt={p.display_name ?? p.username ?? ""} />}
+          <AvatarFallback className="font-display">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Player {side.toUpperCase()}</div>
+          {p ? (
+            <Link to={`/u/${p.username ?? p.user_id}`} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">
+              {p.display_name ?? p.username ?? "Player"}
+            </Link>
+          ) : (
+            <div className="font-display font-bold text-lg uppercase text-muted-foreground">TBD</div>
+          )}
+          {p?.elo != null && (
+            <div className={`flex items-center gap-2 mt-1 ${align === "right" ? "justify-end" : ""}`}>
+              <RankBadge elo={p.elo} size="sm" />
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {p.elo} ELO
+                {delta && (
+                  <span className={`ml-1 font-semibold ${delta.delta >= 0 ? "text-success" : "text-destructive"}`}>
+                    {delta.delta >= 0 ? "+" : ""}{delta.delta}
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <SEO title={`${teamA?.name ?? "Team A"} vs ${teamB?.name ?? "Team B"} — Match | PeakGG`} description="Peak League match" />
+      <SEO
+        title={
+          is1v1
+            ? `${playerA?.display_name ?? playerA?.username ?? "Player A"} vs ${playerB?.display_name ?? playerB?.username ?? "Player B"} — Match | PeakGG`
+            : `${teamA?.name ?? "Team A"} vs ${teamB?.name ?? "Team B"} — Match | PeakGG`
+        }
+        description="PeakGG match"
+      />
       <Navbar />
       <main className="flex-1 container py-6">
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-4">
-          <Link to={match.season_id ? `/leagues` : "/teams"}><ChevronLeft className="h-4 w-4" /> Back</Link>
+          <Link to={isOpenCup ? "/tournaments" : (match.season_id ? "/leagues" : "/teams")}>
+            <ChevronLeft className="h-4 w-4" /> Back
+          </Link>
         </Button>
 
-        <Card className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-4 text-xs font-display uppercase tracking-widest text-muted-foreground">
-            <span>{isOpenCup ? "Open Cup" : (match.matchday ? `Matchday ${match.matchday}` : "Match")} · {match.game}</span>
+        <Card className="p-4 sm:p-6 mb-6">
+          <div className="flex items-center justify-between mb-4 gap-2 flex-wrap text-xs font-display uppercase tracking-widest text-muted-foreground">
+            <div className="flex items-center gap-2 flex-wrap">
+              {isOpenCup && <Badge variant="outline" className="border-success/40 text-success">Open Cup Beta</Badge>}
+              {is1v1 && <Badge variant="outline" className="border-primary/40 text-primary">1v1 Test Queue</Badge>}
+              <span>{match.game.toUpperCase()}</span>
+              {match.matchday && <span>· Matchday {match.matchday}</span>}
+            </div>
             <StatusPill status={match.result_status} />
           </div>
-          <div className="grid grid-cols-3 items-center gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <TeamLogo name={teamA?.name} tag={teamA?.tag} avatarUrl={teamA?.avatar_url} size={56} rounded="lg" />
-              <div className="min-w-0">
-                <Link to={teamA ? `/teams/${teamA.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamA?.name ?? "TBD"}</Link>
-                {teamA?.tag && <div className="text-xs text-muted-foreground">[{teamA.tag}]</div>}
-              </div>
-            </div>
-            <div className="text-center">
-              {showScore ? (
-                <div className="font-display font-bold text-4xl md:text-5xl">
-                  <span className={(match.score_a ?? 0) > (match.score_b ?? 0) ? "text-primary" : ""}>{match.score_a ?? 0}</span>
-                  <span className="text-muted-foreground mx-2">:</span>
-                  <span className={(match.score_b ?? 0) > (match.score_a ?? 0) ? "text-primary" : ""}>{match.score_b ?? 0}</span>
-                </div>
-              ) : (
-                <div className="font-display text-2xl text-muted-foreground">VS</div>
-              )}
-              {match.scheduled_at && <div className="text-xs text-muted-foreground mt-2">{new Date(match.scheduled_at).toLocaleString()}</div>}
-              {match.map && <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{match.map}</div>}
-            </div>
-            <div className="flex items-center gap-3 min-w-0 justify-end text-right">
-              <div className="min-w-0">
-                <Link to={teamB ? `/teams/${teamB.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamB?.name ?? "TBD"}</Link>
-                {teamB?.tag && <div className="text-xs text-muted-foreground">[{teamB.tag}]</div>}
-              </div>
-              <TeamLogo name={teamB?.name} tag={teamB?.tag} avatarUrl={teamB?.avatar_url} size={56} rounded="lg" />
-            </div>
-          </div>
 
-          {isOpenCup && rosters.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              {(["a","b"] as const).map(side => {
-                const sideTeamId = side === "a" ? match.team_a_id : match.team_b_id;
-                const sideRoster = rosters.filter(r => r.team_id === sideTeamId);
-                return (
-                  <div key={side} className="rounded-lg border border-border bg-secondary/30 p-3">
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mb-2">Team {side.toUpperCase()}</div>
-                    <ul className="space-y-1.5">
-                      {sideRoster.map(p => (
-                        <li key={p.user_id} className="flex items-center justify-between text-sm">
-                          <Link to={`/u/${p.username ?? p.user_id}`} className="hover:text-primary truncate">
-                            {p.display_name ?? p.username ?? "Player"}
-                          </Link>
-                          {p.elo != null && <span className="text-xs text-muted-foreground tabular-nums">{p.elo} ELO</span>}
-                        </li>
-                      ))}
-                    </ul>
+          {is1v1 ? (
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
+              {renderPlayerCard(playerA, "a", "left")}
+              <div className="text-center">
+                {showScore ? (
+                  <div className="font-display font-bold text-3xl sm:text-5xl">
+                    <span className={(match.score_a ?? 0) > (match.score_b ?? 0) ? "text-primary" : ""}>{match.score_a ?? 0}</span>
+                    <span className="text-muted-foreground mx-2">:</span>
+                    <span className={(match.score_b ?? 0) > (match.score_a ?? 0) ? "text-primary" : ""}>{match.score_b ?? 0}</span>
                   </div>
-                );
-              })}
+                ) : (
+                  <div className="font-display text-2xl text-muted-foreground">VS</div>
+                )}
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-2">{statusLabel}</div>
+              </div>
+              {renderPlayerCard(playerB, "b", "right")}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 items-center gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <TeamLogo name={teamA?.name} tag={teamA?.tag} avatarUrl={teamA?.avatar_url} size={56} rounded="lg" />
+                <div className="min-w-0">
+                  <Link to={teamA ? `/teams/${teamA.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamA?.name ?? "TBD"}</Link>
+                  {teamA?.tag && <div className="text-xs text-muted-foreground">[{teamA.tag}]</div>}
+                </div>
+              </div>
+              <div className="text-center">
+                {showScore ? (
+                  <div className="font-display font-bold text-4xl md:text-5xl">
+                    <span className={(match.score_a ?? 0) > (match.score_b ?? 0) ? "text-primary" : ""}>{match.score_a ?? 0}</span>
+                    <span className="text-muted-foreground mx-2">:</span>
+                    <span className={(match.score_b ?? 0) > (match.score_a ?? 0) ? "text-primary" : ""}>{match.score_b ?? 0}</span>
+                  </div>
+                ) : (
+                  <div className="font-display text-2xl text-muted-foreground">VS</div>
+                )}
+                {match.scheduled_at && <div className="text-xs text-muted-foreground mt-2">{new Date(match.scheduled_at).toLocaleString()}</div>}
+                {match.map && <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{match.map}</div>}
+              </div>
+              <div className="flex items-center gap-3 min-w-0 justify-end text-right">
+                <div className="min-w-0">
+                  <Link to={teamB ? `/teams/${teamB.id}` : "#"} className="font-display font-bold text-lg uppercase hover:text-primary truncate block">{teamB?.name ?? "TBD"}</Link>
+                  {teamB?.tag && <div className="text-xs text-muted-foreground">[{teamB.tag}]</div>}
+                </div>
+                <TeamLogo name={teamB?.name} tag={teamB?.tag} avatarUrl={teamB?.avatar_url} size={56} rounded="lg" />
+              </div>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 mt-6 justify-center">
-            {canSubmit && <Button onClick={() => setSubmitOpen(true)}><Send className="h-4 w-4 mr-1.5" /> Submit Result</Button>}
-            {canConfirm && <Button onClick={confirm} disabled={busy}><Check className="h-4 w-4 mr-1.5" /> Confirm Result</Button>}
-            {canDispute && <Button variant="outline" onClick={() => setDisputeOpen(true)}><ShieldAlert className="h-4 w-4 mr-1.5" /> Dispute</Button>}
-            {canAdminResolve && <Button variant="secondary" onClick={() => setAdminOpen(true)}><Gavel className="h-4 w-4 mr-1.5" /> Admin Resolve</Button>}
+          {instruction && (
+            <div className="mt-5 flex items-start gap-2 rounded-lg border border-border bg-secondary/30 p-3 text-sm">
+              <Info className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+              <span>{instruction}</span>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2 mt-5 justify-center">
+            {canSubmit && <Button onClick={openSubmit} className="w-full sm:w-auto"><Send className="h-4 w-4 mr-1.5" /> Submit Result</Button>}
+            {canConfirm && <Button onClick={confirm} disabled={busy} className="w-full sm:w-auto"><Check className="h-4 w-4 mr-1.5" /> Confirm Result</Button>}
+            {canDispute && <Button variant="outline" onClick={() => setDisputeOpen(true)} className="w-full sm:w-auto"><ShieldAlert className="h-4 w-4 mr-1.5" /> Dispute</Button>}
+            {is1v1 && canConfirm && (
+              <Button variant="outline" asChild className="w-full sm:w-auto">
+                <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4 mr-1.5" /> Report on Discord</a>
+              </Button>
+            )}
+            {canAdminResolve && <Button variant="secondary" onClick={() => setAdminOpen(true)} className="w-full sm:w-auto"><Gavel className="h-4 w-4 mr-1.5" /> Admin Resolve</Button>}
           </div>
+
+          {match.elo_processed_at && eloDeltas.length === 0 && (
+            <div className="mt-4 text-center text-xs text-muted-foreground">ELO update processed.</div>
+          )}
+          {match.status === "completed" && !match.elo_processed_at && (
+            <div className="mt-4 text-center text-xs text-muted-foreground">ELO update pending…</div>
+          )}
         </Card>
 
         {match.result_status === "pending_confirmation" && (
           <Card className="p-4 mb-6 border-amber-500/40 bg-amber-500/5">
-            <p className="text-sm">A score was submitted by {submittedByMe ? "you" : "the opposing captain"} — waiting for confirmation.</p>
+            <p className="text-sm">A score was submitted by {submittedByMe ? "you" : "the opposing side"} — waiting for confirmation.</p>
           </Card>
         )}
         {match.result_status === "disputed" && (
           <Card className="p-4 mb-6 border-destructive/40 bg-destructive/5">
             <p className="text-sm">This match is disputed. Standings are frozen until admin resolution.</p>
+          </Card>
+        )}
+
+        {is1v1 && (
+          <Card className="p-4 mb-6 text-sm">
+            <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-2">Match Instructions</h3>
+            <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+              <li>Coordinate with your opponent (Discord recommended).</li>
+              <li>Play your 1v1 match in {match.game.toUpperCase()}.</li>
+              <li>Winner submits the result. Loser confirms.</li>
+              <li>ELO updates once after confirmation. No double-counting.</li>
+            </ol>
+            <p className="mt-3 text-[11px] text-muted-foreground/80 italic">
+              Beta test match — please report any issues in Discord.
+            </p>
           </Card>
         )}
 
@@ -336,14 +487,33 @@ export default function MatchDetailPage() {
       <Dialog open={submitOpen} onOpenChange={setSubmitOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Submit Result</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>{teamA?.name} score</Label><Input type="number" min={0} value={scoreA} onChange={e => setScoreA(parseInt(e.target.value || "0"))} /></div>
-              <div><Label>{teamB?.name} score</Label><Input type="number" min={0} value={scoreB} onChange={e => setScoreB(parseInt(e.target.value || "0"))} /></div>
+          {is1v1 ? (
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-2 block">Who won?</Label>
+                <RadioGroup value={winnerSide} onValueChange={(v) => setWinnerSide(v as "a" | "b")} className="grid grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2 rounded-lg border border-border p-3 cursor-pointer hover:bg-secondary/40">
+                    <RadioGroupItem value="a" id="w-a" />
+                    <span className="font-display uppercase text-sm">{playerA?.display_name ?? playerA?.username ?? "Player A"}{user?.id === match.player_a_id ? " (Me)" : ""}</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-border p-3 cursor-pointer hover:bg-secondary/40">
+                    <RadioGroupItem value="b" id="w-b" />
+                    <span className="font-display uppercase text-sm">{playerB?.display_name ?? playerB?.username ?? "Player B"}{user?.id === match.player_b_id ? " (Me)" : ""}</span>
+                  </label>
+                </RadioGroup>
+              </div>
+              <p className="text-xs text-muted-foreground">Recorded as 1–0 for the winner. Final scores can be adjusted later by an admin if needed.</p>
             </div>
-            <div><Label>Map</Label><Input value={map} onChange={e => setMap(e.target.value)} placeholder="Ascent, Mirage..." /></div>
-            <div><Label>Notes (optional)</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} /></div>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{teamA?.name ?? "Team A"} score</Label><Input type="number" min={0} value={scoreA} onChange={e => setScoreA(parseInt(e.target.value || "0"))} /></div>
+                <div><Label>{teamB?.name ?? "Team B"} score</Label><Input type="number" min={0} value={scoreB} onChange={e => setScoreB(parseInt(e.target.value || "0"))} /></div>
+              </div>
+              <div><Label>Map</Label><Input value={map} onChange={e => setMap(e.target.value)} placeholder="Ascent, Mirage..." /></div>
+              <div><Label>Notes (optional)</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} /></div>
+            </div>
+          )}
           <DialogFooter><Button onClick={submit} disabled={busy}>Submit</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -364,10 +534,10 @@ export default function MatchDetailPage() {
           <DialogHeader><DialogTitle>Admin Resolve</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{teamA?.name}</Label><Input type="number" min={0} value={scoreA} onChange={e => setScoreA(parseInt(e.target.value || "0"))} /></div>
-              <div><Label>{teamB?.name}</Label><Input type="number" min={0} value={scoreB} onChange={e => setScoreB(parseInt(e.target.value || "0"))} /></div>
+              <div><Label>{is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Team A")}</Label><Input type="number" min={0} value={scoreA} onChange={e => setScoreA(parseInt(e.target.value || "0"))} /></div>
+              <div><Label>{is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Team B")}</Label><Input type="number" min={0} value={scoreB} onChange={e => setScoreB(parseInt(e.target.value || "0"))} /></div>
             </div>
-            <p className="text-xs text-muted-foreground">This overrides the result and recomputes standings.</p>
+            <p className="text-xs text-muted-foreground">This overrides the result and recomputes ELO/standings.</p>
           </div>
           <DialogFooter><Button onClick={adminResolve} disabled={busy}>Resolve</Button></DialogFooter>
         </DialogContent>
