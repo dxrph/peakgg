@@ -31,7 +31,7 @@ type SoloTier = {
   id: "open" | "challenger" | "championship";
   name: string;
   tagline: string;
-  status: "Closed Beta" | "Locked · Coming Later" | "Invite-only · Coming Later";
+  status: "Public Beta" | "Locked · Coming Later" | "Invite-only · Coming Later";
   unlock: string;
   rewards: string[];
   cta: { label: string; href: string; external?: boolean };
@@ -44,11 +44,11 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "open",
     name: "Open Cup",
-    tagline: "Solo queue · Temporary teams · Affects ELO · Closed Beta",
-    status: "Closed Beta",
-    unlock: "Open Cup matchmaking is being tested with early players. Once enabled, players will join solo, get matched into temporary teams and gain or lose ELO based on confirmed results.",
+    tagline: "Solo queue · 1v1 Test · Affects ELO · Public Beta",
+    status: "Public Beta",
+    unlock: "Open Cup is in public beta. Queue size and rules may change while we test matchmaking and ELO updates. Currently 1v1 only — full 5v5 opens as the player pool grows.",
     rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
-    cta: { label: "Join Discord for Open Cup Beta", href: DISCORD_INVITE, external: true },
+    cta: { label: "Join Open Cup", href: "#solo-path" },
     accent: "border-success/40 text-success",
     icon: Trophy,
   },
