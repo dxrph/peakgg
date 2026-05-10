@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
-import { Clock, Swords, Users, MessageCircle, UserPlus, Trophy, Sparkles } from "lucide-react";
+import { Clock, Swords, Users, MessageCircle, UserPlus, Trophy, Sparkles, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useGame } from "@/lib/game-context";
@@ -13,11 +13,13 @@ import GameIcon from "@/components/GameIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 export default function PlayPage() {
   const { selectedGame } = useGame();
   const game = GAMES.find((g) => g.id === selectedGame)!;
   const { user, profile } = useAuth();
+  const { isAdmin } = useUserRoles();
   const [elo, setElo] = useState<number | null>(null);
   const [matchesPlayed, setMatchesPlayed] = useState(0);
   const [loadingStats, setLoadingStats] = useState(false);
@@ -65,16 +67,25 @@ export default function PlayPage() {
           </div>
 
           <Badge variant="outline" className="mb-3 border-primary/40 text-primary uppercase tracking-widest">
-            <Sparkles className="h-3 w-3 mr-1" /> Coming Soon
+            <Sparkles className="h-3 w-3 mr-1" /> Closed Beta
           </Badge>
 
           <h1 className="text-4xl font-display font-bold mb-2">Ranked Matchmaking</h1>
           <p className="text-muted-foreground font-body mb-2">
-            5v5 competitive queue is coming with Season 1.
+            Ranked matchmaking is being tested with early players.
           </p>
           <p className="text-sm text-muted-foreground font-body mb-8 max-w-md mx-auto">
-            PeakGG ranked matchmaking is being prepared for launch. Complete your profile, join the Discord and get ready to climb when Season 1 opens.
+            It will affect your ELO and rank once public. For now, join Discord to access early tests with the PeakGG team.
           </p>
+
+          {isAdmin && (
+            <div className="mb-6 p-3 rounded-lg border border-accent/40 bg-accent/5 text-left flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs text-accent font-display uppercase tracking-wider">
+                <ShieldCheck className="h-4 w-4" /> Admin tools
+              </div>
+              <Link to="/admin/elo" className="text-xs underline text-accent">Open ELO panel</Link>
+            </div>
+          )}
 
           {/* Rank card */}
           <div className="mb-8 p-6 rounded-lg border border-border bg-card/60 backdrop-blur-sm">
