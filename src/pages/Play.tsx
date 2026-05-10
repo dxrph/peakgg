@@ -184,7 +184,7 @@ export default function PlayPage() {
                 });
                 setJoiningRanked(false);
                 if (error) {
-                  toast.error(error.message);
+                  toast.error("Could not create match. Please try again or contact support.");
                   return;
                 }
                 const r = data as any;
