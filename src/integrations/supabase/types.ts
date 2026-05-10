@@ -2678,6 +2678,7 @@ export type Database = {
         Returns: boolean
       }
       cancel_open_cup_queue: { Args: never; Returns: undefined }
+      claim_match_for_elo: { Args: { _match_id: string }; Returns: boolean }
       close_season: { Args: { _season_id: string }; Returns: undefined }
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
       confirm_open_cup_result: {

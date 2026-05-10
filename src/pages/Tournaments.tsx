@@ -21,7 +21,7 @@ import { format as fmtDate } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { openCupPublicQueueEnabled } from "@/lib/feature-flags";
+import { openCupPublicQueueEnabled, openCupTeamSize } from "@/lib/feature-flags";
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 
 // Thresholds for cup unlocks (ELO-based)
@@ -101,7 +101,8 @@ export default function TournamentsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [joining, setJoining] = useState(false);
-  const [teamSize] = useState<1>(1); // 1v1 only during public beta
+  // Driven by config — flip openCupTeamSize in feature-flags.ts to switch to 5v5.
+  const [teamSize] = useState<number>(openCupTeamSize);
   const { isAdmin } = useUserRoles();
   // Public queue is gated behind a feature flag. Admins always retain access
   // for end-to-end testing of matchmaking + ELO.

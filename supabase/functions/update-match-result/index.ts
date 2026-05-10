@@ -66,6 +66,12 @@ Deno.serve(async (req) => {
       return json({ error: "Unsupported game" }, 400);
     }
 
+    // Atomic claim: set elo_processed_at NOW so concurrent invocations bail out.
+    // If another invocation already claimed it, we exit early.
+    const { data: claimed, error: claimErr } = await admin.rpc("claim_match_for_elo", { _match_id: match.id });
+    if (claimErr) return json({ error: claimErr.message }, 500);
+    if (!claimed) return json({ ok: true, already_processed: true });
+
     // Collect participating user IDs.
     const participants: { userId: string; won: boolean }[] = [];
 
@@ -112,7 +118,23 @@ Deno.serve(async (req) => {
       }
     }
 
+    // For open_cup, prefer rosters when both player_a/b and rosters exist
+    if (match.kind === "open_cup" && (match.player_a_id || match.player_b_id)) {
+      const { data: rosters } = await admin
+        .from("match_rosters")
+        .select("team_id, user_id")
+        .eq("match_id", match.id);
+      if (rosters && rosters.length > 0) {
+        participants.length = 0;
+        rosters.forEach((r: any) => {
+          participants.push({ userId: r.user_id, won: r.team_id === match.winner_id });
+        });
+      }
+    }
+
     if (participants.length === 0) {
+      // Release the claim so it can be retried later
+      await admin.from("matches").update({ elo_processed_at: null }).eq("id", match.id);
       return json({ error: "No participants resolved" }, 400);
     }
 
@@ -225,8 +247,7 @@ Deno.serve(async (req) => {
       try { await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }); } catch { /* ignore */ }
     }
 
-    await admin.from("matches").update({ elo_processed_at: new Date().toISOString() }).eq("id", match.id);
-
+    // elo_processed_at already set by claim_match_for_elo
     return json({ ok: true, game, updated });
   } catch (err) {
     return json({ error: (err as Error).message ?? "Internal error" }, 500);
