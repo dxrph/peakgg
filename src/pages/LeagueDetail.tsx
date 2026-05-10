@@ -501,17 +501,38 @@ export default function LeagueDetailPage() {
                     </Link>
                 ))}
                 {Array.from({ length: Math.max(0, league.max_teams - teams.length) }).map((_, i) => (
-                  <div key={`open-${i}`} className="border border-dashed border-primary/30 rounded-md p-4 bg-primary/5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded bg-primary/10 border border-primary/30 flex items-center justify-center">
-                      <Plus className="h-5 w-5 text-primary" />
+                  <div key={`open-${i}`} className="border border-dashed border-primary/30 rounded-md p-4 bg-primary/5 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+                        <Plus className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-display font-bold uppercase text-primary text-sm">Open Slot</div>
+                        <div className="text-[10px] text-muted-foreground">Founding team slot · Season 0 Beta</div>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-display font-bold uppercase text-primary text-sm">Open Slot</div>
-                      <div className="text-[10px] text-muted-foreground">Founding team slot for Season 0 Beta</div>
+                    <div className="flex flex-wrap gap-2">
+                      {!user ? (
+                        <Button asChild size="sm" className="flex-1">
+                          <Link to="/register">Create Account</Link>
+                        </Button>
+                      ) : myCaptainTeams.length === 0 ? (
+                        <Button asChild size="sm" className="flex-1">
+                          <Link to="/teams">Create Team</Link>
+                        </Button>
+                      ) : eligible.length > 0 ? (
+                        <Button size="sm" className="flex-1" onClick={() => handleRegister(eligible[0].id)} disabled={registering}>
+                          Register Team
+                        </Button>
+                      ) : (
+                        <Button asChild size="sm" variant="outline" className="flex-1">
+                          <Link to="/teams">My Teams</Link>
+                        </Button>
+                      )}
+                      <Button asChild size="sm" variant="outline" className="shrink-0">
+                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1" />Discord</a>
+                      </Button>
                     </div>
-                    <Button asChild size="sm" variant="outline" className="shrink-0">
-                      <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1" />Apply</a>
-                    </Button>
                   </div>
                 ))}
               </div>

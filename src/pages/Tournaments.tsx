@@ -57,9 +57,9 @@ const SOLO_TIERS: SoloTier[] = [
     name: "Challenger Series",
     tagline: "Coming later · ELO threshold required when live",
     status: "Locked · Coming Later",
-    unlock: "Unlocks once Open Cup matchmaking exits closed beta and ELO thresholds are active.",
+    unlock: "Unlocks through ELO progression once Open Cup is live. Climb in Open Cup to qualify.",
     rewards: ["Challenger badge", "Higher-stake matches", "Path to Championship"],
-    cta: { label: "View Requirements", href: "#solo-path" },
+    cta: { label: "View Path", href: "#solo-path" },
     accent: "border-accent/40 text-accent",
     icon: Award,
     locked: true,
@@ -427,9 +427,16 @@ export default function TournamentsPage() {
                         Coming Soon
                       </Button>
                     ) : (
-                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
-                        <Lock className="h-3 w-3 mr-1.5" />Locked
-                      </Button>
+                      <div className="flex flex-col gap-2">
+                        <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
+                          <Lock className="h-3 w-3 mr-1.5" />{tier.id === "championship" ? "Invite-only" : "Locked"}
+                        </Button>
+                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
+                          <Button variant="ghost" size="sm" className="w-full uppercase tracking-wider text-xs">
+                            <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord
+                          </Button>
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>

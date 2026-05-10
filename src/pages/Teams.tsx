@@ -20,8 +20,9 @@ import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import ScrimDialog from "@/components/teams/ScrimDialog";
 import ContactPlayerDialog from "@/components/teams/ContactPlayerDialog";
 import DiscordCTA from "@/components/landing/DiscordCTA";
-import { Trophy as TrophyIcon, Sparkles, BadgeCheck } from "lucide-react";
+import { Trophy as TrophyIcon, Sparkles, BadgeCheck, MessageCircle, LayoutDashboard, LogIn } from "lucide-react";
 import TeamLogo from "@/components/teams/TeamLogo";
+import { DISCORD_INVITE } from "@/lib/links";
 
 const GAMES = [
   { value: "all", label: "All games" },
@@ -159,8 +160,22 @@ export default function TeamsPage() {
     setMyTeam(((tm as any)?.teams as TeamRow) ?? null);
   };
 
+  // Track all teams user is in (per-game conflict detection)
+  const [myTeamsAll, setMyTeamsAll] = useState<{ id: string; name: string; game: string }[]>([]);
+  const loadMyTeamsAll = async () => {
+    if (!user) { setMyTeamsAll([]); return; }
+    const { data } = await supabase
+      .from("team_members")
+      .select("team_id, teams!inner(id, name, game, is_demo)")
+      .eq("user_id", user.id)
+      .eq("teams.is_demo", false);
+    setMyTeamsAll(((data ?? []) as any[]).map((r) => ({
+      id: r.teams.id, name: r.teams.name, game: r.teams.game,
+    })));
+  };
+
   useEffect(() => { loadTeams(); loadScrims(); loadPlayers(); }, []);
-  useEffect(() => { loadMyTeam(); }, [user?.id]);
+  useEffect(() => { loadMyTeam(); loadMyTeamsAll(); }, [user?.id]);
 
   const filteredTeams = useMemo(() => teams.filter(tt => {
     if (gameFilter !== "all" && tt.game !== gameFilter) return false;
@@ -311,23 +326,37 @@ export default function TeamsPage() {
               <EmptyState
                 title={t("teams_page.empty_teams_title", { defaultValue: "No public teams yet" })}
                 desc={t("teams_page.empty_teams_desc", { defaultValue: "Create your team and become one of the founding rosters of PeakGG. Join the Discord to coordinate with other early players." })}
-                ctaLabel={t("teams_page.create_team", { defaultValue: "Create Team" })}
-                onCta={openCreateTeam}
+                ctaLabel={
+                  !user
+                    ? t("teams_page.create_account", { defaultValue: "Create Account" })
+                    : t("teams_page.create_team", { defaultValue: "Create Team" })
+                }
+                onCta={() => (!user ? navigate("/register") : openCreateTeam())}
                 icon={Shield}
+                secondaryHref={DISCORD_INVITE}
+                secondaryLabel="Join Discord"
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredTeams.map((tt) => {
                   const isOwner = !!user && tt.owner_id === user.id;
-                  const userHasOtherTeam = !!myTeam && myTeam.id !== tt.id;
+                  const isMyTeam = myTeamsAll.some((m) => m.id === tt.id);
+                  const sameGameConflict = !isMyTeam
+                    ? myTeamsAll.find((m) => m.game === tt.game) ?? null
+                    : null;
+                  const memberCount = Math.max(1, 5 - Math.min(Math.max(0, tt.slots), 5));
                   return (
                     <div key={tt.id} className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-all flex flex-col">
                       <div className="flex items-center gap-3 mb-4">
                         <TeamLogo name={tt.name} tag={tt.tag} avatarUrl={tt.avatar_url} color={tt.color} size={48} rounded="lg" />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-display font-bold text-lg truncate">{tt.name}</h3>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Globe className="h-3 w-3" />{tt.region ?? "—"}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground font-body">
+                            {tt.tag && <span className="uppercase tracking-wider">[{tt.tag}]</span>}
+                            {tt.region && (
+                              <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{tt.region}</span>
+                            )}
+                            <span className="flex items-center gap-1"><Users className="h-3 w-3" />{memberCount}/5</span>
                           </div>
                         </div>
                       </div>
@@ -345,60 +374,43 @@ export default function TeamsPage() {
                           );
                         })()}
                       </div>
-                      {(() => {
-                        const cells = [
-                          tt.trophies > 0 && (
-                            <div key="t" className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                              <div className="text-primary font-display flex items-center justify-center gap-1"><Trophy className="h-3 w-3" />{tt.trophies}</div>
-                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.trophies", { defaultValue: "Trophies" })}</div>
-                            </div>
-                          ),
-                          tt.looking_for_players && tt.slots > 0 && (
-                            <div key="s" className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                              <div className="font-display">{Math.min(tt.slots, 5)}</div>
-                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.open_slots", { defaultValue: "Open slots" })}</div>
-                            </div>
-                          ),
-                          tt.rank && (
-                            <div key="r" className="rounded border border-border/60 bg-secondary/30 py-1.5">
-                              <div className="font-display">{tt.rank}</div>
-                              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("teams_page.avg_rank", { defaultValue: "Avg rank" })}</div>
-                            </div>
-                          ),
-                        ].filter(Boolean);
-                        if (cells.length === 0) return null;
-                        const colsClass = cells.length === 1 ? "grid-cols-1" : cells.length === 2 ? "grid-cols-2" : "grid-cols-3";
-                        return <div className={`grid ${colsClass} gap-2 text-xs font-body mb-3 text-center`}>{cells}</div>;
-                      })()}
-                      {tt.looking_for_players && (
+                      {tt.trophies > 0 && (
+                        <div className="mb-3 inline-flex items-center gap-1.5 rounded border border-accent/30 bg-accent/10 text-accent px-2 py-1 text-xs font-display uppercase tracking-wider self-start">
+                          <Trophy className="h-3 w-3" />{tt.trophies} {t("teams_page.trophies", { defaultValue: "Trophies" })}
+                        </div>
+                      )}
+                      {tt.looking_for_players && !isMyTeam && (
                         <div className="text-center text-xs font-display uppercase tracking-wider py-1.5 mb-3 rounded bg-success/10 text-success border border-success/30">
-                          {t("teams_page.recruiting", { defaultValue: "Recruiting" })}
+                          {Math.min(Math.max(1, tt.slots), 5)} {t("teams_page.spots_open", { defaultValue: "spots open" })}
                         </div>
                       )}
                       <div className="mt-auto flex flex-col gap-2">
                         <Button variant="neonOutline" size="sm" onClick={() => navigate(`/teams/${tt.id}`)}>
                           <Eye className="h-4 w-4 mr-1.5" /> {t("teams_page.view_team", { defaultValue: "View Team" })}
                         </Button>
-                        <div className="grid grid-cols-2 gap-2">
-                          {isOwner ? (
-                            <Button variant="neon" size="sm" className="col-span-2" onClick={() => navigate(`/teams/${tt.id}/dashboard`)}>
-                              <Settings className="h-4 w-4 mr-1.5" /> {t("teams_page.open_dashboard", { defaultValue: "Open Dashboard" })}
+                        {isOwner || isMyTeam ? (
+                          <Button variant="neon" size="sm" onClick={() => navigate(isOwner ? `/teams/${tt.id}/dashboard` : `/teams/${tt.id}`)}>
+                            <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                            {isOwner
+                              ? t("teams_page.open_dashboard", { defaultValue: "Open Team Dashboard" })
+                              : t("teams_page.open_team", { defaultValue: "Open My Team" })}
+                          </Button>
+                        ) : !user ? (
+                          <Button variant="neon" size="sm" onClick={() => navigate("/login")}>
+                            <LogIn className="h-4 w-4 mr-1.5" /> {t("teams_page.signin_to_apply", { defaultValue: "Sign in to apply" })}
+                          </Button>
+                        ) : sameGameConflict ? (
+                          <div className="rounded-md border border-accent/40 bg-accent/5 p-2.5 text-[11px] font-body text-foreground/90">
+                            {t("teams_page.already_in_game_team", { defaultValue: "Already in a {{game}} team" }).replace("{{game}}", tt.game.toUpperCase())}: <span className="font-display uppercase text-accent">{sameGameConflict.name}</span>
+                            <Button variant="neonOutline" size="sm" className="mt-2 w-full" onClick={() => navigate(`/teams/${sameGameConflict.id}`)}>
+                              {t("teams_page.view_my_team", { defaultValue: "View My Team" })}
                             </Button>
-                          ) : (
-                            <>
-                              {tt.looking_for_players && (
-                                <Button variant="neon" size="sm" onClick={() => openJoin(tt)}>
-                                  <UserPlus className="h-4 w-4 mr-1.5" /> {t("teams_page.apply", { defaultValue: "Apply" })}
-                                </Button>
-                              )}
-                              {userHasOtherTeam && (
-                                <Button variant="ghost" size="sm" className="border border-border/60" onClick={() => openScrim(tt)}>
-                                  <Swords className="h-4 w-4 mr-1.5" /> {t("teams_page.request_scrim", { defaultValue: "Request Scrim" })}
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </div>
+                          </div>
+                        ) : tt.looking_for_players ? (
+                          <Button variant="neon" size="sm" onClick={() => openJoin(tt)}>
+                            <UserPlus className="h-4 w-4 mr-1.5" /> {t("teams_page.apply_to_join", { defaultValue: "Apply to Join" })}
+                          </Button>
+                        ) : null}
                       </div>
                     </div>
                   );
@@ -589,6 +601,8 @@ function EmptyState({
   onCta,
   icon: Icon,
   compact = false,
+  secondaryLabel,
+  secondaryHref,
 }: {
   title: string;
   desc: string;
@@ -596,6 +610,8 @@ function EmptyState({
   onCta: () => void;
   icon: React.ComponentType<{ className?: string }>;
   compact?: boolean;
+  secondaryLabel?: string;
+  secondaryHref?: string;
 }) {
   return (
     <div
@@ -610,9 +626,18 @@ function EmptyState({
         <h3 className="font-display font-bold text-lg uppercase tracking-tight">{title}</h3>
         <p className="text-sm text-muted-foreground font-body mt-1 max-w-md mx-auto">{desc}</p>
       </div>
-      <Button variant="neon" size="sm" onClick={onCta}>
-        <Plus className="h-4 w-4 mr-1.5" /> {ctaLabel}
-      </Button>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <Button variant="neon" size="sm" onClick={onCta}>
+          <Plus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+        </Button>
+        {secondaryLabel && secondaryHref && (
+          <Button asChild variant="neonOutline" size="sm">
+            <a href={secondaryHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4 mr-1.5" />{secondaryLabel}
+            </a>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
