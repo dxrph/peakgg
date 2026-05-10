@@ -7,4 +7,10 @@
  * for end-to-end testing.
  * Flip to `true` after the 2-account ELO flow has been verified.
  */
-export const openCupPublicQueueEnabled = false;
+export const openCupPublicQueueEnabled = true;
+
+/**
+ * Public Beta — exposes Ranked routes/CTAs. During beta the Ranked flow
+ * shares the Open Cup test queue (1v1) — see /tournaments.
+ */
+export const rankedPublicBetaEnabled = true;
