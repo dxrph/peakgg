@@ -48,6 +48,7 @@ interface PlayerInfo {
   elo: number | null;
 }
 interface EloDelta { user_id: string; delta: number; elo_after: number; }
+interface RosterRow { user_id: string; team_id: string; }
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -58,6 +59,9 @@ export default function MatchDetailPage() {
   const [teamB, setTeamB] = useState<TeamRow | null>(null);
   const [playerA, setPlayerA] = useState<PlayerInfo | null>(null);
   const [playerB, setPlayerB] = useState<PlayerInfo | null>(null);
+  const [rosterA, setRosterA] = useState<PlayerInfo[]>([]);
+  const [rosterB, setRosterB] = useState<PlayerInfo[]>([]);
+  const [rosterRows, setRosterRows] = useState<RosterRow[]>([]);
   const [eloDeltas, setEloDeltas] = useState<EloDelta[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitOpen, setSubmitOpen] = useState(false);
@@ -72,7 +76,21 @@ export default function MatchDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
-  const is1v1 = !!match && (!!match.player_a_id || !!match.player_b_id);
+  // Derive team size from rosters (rosters are now the source of truth for Open Cup).
+  // Falls back to player_a/b for legacy 1v1 matches that pre-date the rosters refactor.
+  const teamSize = useMemo(() => {
+    if (rosterRows.length > 0) {
+      const sideACount = rosterRows.filter(r => r.team_id === match?.team_a_id).length;
+      const sideBCount = rosterRows.filter(r => r.team_id === match?.team_b_id).length;
+      return Math.max(sideACount, sideBCount, 1);
+    }
+    if (match?.player_a_id || match?.player_b_id) return 1;
+    return 0;
+  }, [rosterRows, match?.team_a_id, match?.team_b_id, match?.player_a_id, match?.player_b_id]);
+  const isSoloTest = isOpenCup && teamSize === 1;
+  const isRosterMatch = isOpenCup && teamSize > 1;
+  // Backwards-compat alias used through render code: solo (1-per-side) layout.
+  const is1v1 = teamSize === 1 && (isOpenCup || !!match?.player_a_id || !!match?.player_b_id);
 
   const loadPlayer = async (uid: string, game: string): Promise<PlayerInfo> => {
     const [{ data: p }, { data: s }] = await Promise.all([
@@ -99,13 +117,33 @@ export default function MatchDetailPage() {
     setMatch(m as MatchRow);
     setScoreA(m.score_a ?? 0); setScoreB(m.score_b ?? 0); setMap(m.map ?? "");
 
-    if (m.player_a_id || m.player_b_id) {
-      // 1v1 match (Open Cup / Ranked beta)
+    // Always try to load match_rosters first (Open Cup writes them for any team size).
+    const { data: rosters } = await supabase
+      .from("match_rosters")
+      .select("user_id, team_id")
+      .eq("match_id", m.id);
+    const rRows = (rosters ?? []) as RosterRow[];
+    setRosterRows(rRows);
+
+    if (rRows.length > 0) {
+      const aRows = rRows.filter(r => r.team_id === m.team_a_id);
+      const bRows = rRows.filter(r => r.team_id === m.team_b_id);
+      const [aPlayers, bPlayers] = await Promise.all([
+        Promise.all(aRows.map(r => loadPlayer(r.user_id, m.game))),
+        Promise.all(bRows.map(r => loadPlayer(r.user_id, m.game))),
+      ]);
+      setRosterA(aPlayers); setRosterB(bPlayers);
+      setPlayerA(aPlayers[0] ?? null);
+      setPlayerB(bPlayers[0] ?? null);
+      setTeamA(null); setTeamB(null);
+    } else if (m.player_a_id || m.player_b_id) {
+      // Legacy 1v1 (no rosters written)
       const [pa, pb] = await Promise.all([
         m.player_a_id ? loadPlayer(m.player_a_id, m.game) : Promise.resolve(null),
         m.player_b_id ? loadPlayer(m.player_b_id, m.game) : Promise.resolve(null),
       ]);
       setPlayerA(pa); setPlayerB(pb);
+      setRosterA(pa ? [pa] : []); setRosterB(pb ? [pb] : []);
       setTeamA(null); setTeamB(null);
     } else {
       const ids = [m.team_a_id, m.team_b_id].filter(Boolean) as string[];
@@ -146,9 +184,10 @@ export default function MatchDetailPage() {
 
   const isParticipant = useMemo(() => {
     if (!user || !match) return false;
+    if (rosterRows.some(r => r.user_id === user.id)) return true;
     if (is1v1) return user.id === match.player_a_id || user.id === match.player_b_id;
     return false; // team participation handled below
-  }, [user, match, is1v1]);
+  }, [user, match, is1v1, rosterRows]);
 
   const [isTeamParticipant, setIsTeamParticipant] = useState(false);
   useEffect(() => {
@@ -175,7 +214,11 @@ export default function MatchDetailPage() {
   const submittedByMe = match?.submitted_by === user?.id;
   const canConfirm = match?.result_status === "pending_confirmation" && !submittedByMe
     && (isAnyCaptain || (isOpenCup && (isParticipant || isTeamParticipant)));
-  const canDispute = !is1v1 && isAnyCaptain && match?.result_status === "pending_confirmation" && !submittedByMe;
+  // Open Cup: any participant can dispute. League/team matches: captain only.
+  const canDispute = match?.result_status === "pending_confirmation" && !submittedByMe && (
+    (isOpenCup && (isParticipant || isTeamParticipant))
+    || (!isOpenCup && isAnyCaptain)
+  );
   const canAdminResolve = isStaff && match
     && ["disputed", "pending_confirmation", "scheduled", "awaiting_result", "live"].includes(match.result_status);
 
@@ -339,7 +382,8 @@ export default function MatchDetailPage() {
           <div className="flex items-center justify-between mb-4 gap-2 flex-wrap text-xs font-display uppercase tracking-widest text-muted-foreground">
             <div className="flex items-center gap-2 flex-wrap">
               {isOpenCup && <Badge variant="outline" className="border-success/40 text-success">Open Cup Beta</Badge>}
-              {is1v1 && <Badge variant="outline" className="border-primary/40 text-primary">1v1 Test Queue</Badge>}
+              {isSoloTest && <Badge variant="outline" className="border-primary/40 text-primary">1v1 Test Queue</Badge>}
+              {isRosterMatch && <Badge variant="outline" className="border-primary/40 text-primary">{teamSize}v{teamSize} Solo Queue</Badge>}
               <span>{match.game.toUpperCase()}</span>
               {match.matchday && <span>· Matchday {match.matchday}</span>}
             </div>
