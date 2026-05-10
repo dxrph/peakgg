@@ -68,7 +68,7 @@ export const NAV_ITEMS: NavItem[] = [
   // Hidden until ready (Clips, Scrims, Find Match): no public exposure.
   { key: "clips",       labelKey: "navmap.clips",       label: "Clips",       path: "/clips",       icon: Film,   category: "platform", comingSoon: true },
   { key: "scrims",      labelKey: "navmap.scrims",      label: "Scrims",      path: "/scrims",      icon: Swords, category: "platform", comingSoon: true },
-  { key: "play",        labelKey: "navmap.play",        label: "Find Match",  path: "/play",        icon: Mountain, category: "platform", requiresAuth: true },
+  { key: "play",        labelKey: "navmap.play",        label: "Ranked",      path: "/play",        icon: Swords,   category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
 
   // ───────── TOOLS / SECONDARY (More dropdown + footer) ─────────
   { key: "how_it_works",   labelKey: "navmap.how_it_works",   label: "How It Works",         path: "/about",                    icon: Compass,  category: "tools", showInMoreDropdown: true },
