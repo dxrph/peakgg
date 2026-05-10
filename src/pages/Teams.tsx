@@ -125,6 +125,20 @@ export default function TeamsPage() {
       .eq("is_demo", false)
       .order("trophies", { ascending: false });
     setTeams((data as any) ?? []);
+    const ids = ((data as any[]) ?? []).map((t) => t.id);
+    if (ids.length) {
+      const { data: tm } = await supabase
+        .from("team_members")
+        .select("team_id, user_id")
+        .in("team_id", ids);
+      const counts: Record<string, number> = {};
+      ((tm as any[]) ?? []).forEach((r) => {
+        counts[r.team_id] = (counts[r.team_id] ?? 0) + 1;
+      });
+      setMemberCounts(counts);
+    } else {
+      setMemberCounts({});
+    }
   };
 
   const loadScrims = async () => {
@@ -162,6 +176,7 @@ export default function TeamsPage() {
 
   // Track all teams user is in (per-game conflict detection)
   const [myTeamsAll, setMyTeamsAll] = useState<{ id: string; name: string; game: string }[]>([]);
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const loadMyTeamsAll = async () => {
     if (!user) { setMyTeamsAll([]); return; }
     const { data } = await supabase
