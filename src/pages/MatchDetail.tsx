@@ -192,7 +192,7 @@ export default function MatchDetailPage() {
 
   const [isTeamParticipant, setIsTeamParticipant] = useState(false);
   useEffect(() => {
-    if (!user || !match || is1v1) { setIsTeamParticipant(false); return; }
+    if (!user || !match || isQueueMatch || is1v1) { setIsTeamParticipant(false); return; }
     (async () => {
       const ids = [match.team_a_id, match.team_b_id].filter(Boolean) as string[];
       if (!ids.length) { setIsTeamParticipant(false); return; }
@@ -211,13 +211,13 @@ export default function MatchDetailPage() {
 
   const canSubmit = match
     && ["scheduled", "live", "awaiting_result"].includes(match.result_status)
-    && (isAnyCaptain || (isOpenCup && (isParticipant || isTeamParticipant)));
+    && (isAnyCaptain || (isQueueMatch && (isParticipant || isTeamParticipant)));
   const submittedByMe = match?.submitted_by === user?.id;
   const canConfirm = match?.result_status === "pending_confirmation" && !submittedByMe
-    && (isAnyCaptain || (isOpenCup && (isParticipant || isTeamParticipant)));
+    && (isAnyCaptain || (isQueueMatch && (isParticipant || isTeamParticipant)));
   // Open Cup: any participant can dispute. League/team matches: captain only.
   const canDispute = match?.result_status === "pending_confirmation" && !submittedByMe && (
-    (isOpenCup && (isParticipant || isTeamParticipant))
+    (isQueueMatch && (isParticipant || isTeamParticipant))
     || (!isOpenCup && isAnyCaptain)
   );
   const canAdminResolve = isStaff && match
@@ -243,7 +243,7 @@ export default function MatchDetailPage() {
       sa = winnerSide === "a" ? 1 : 0;
       sb = winnerSide === "b" ? 1 : 0;
     }
-    const { error } = isOpenCup
+    const { error } = isQueueMatch
       ? await supabase.rpc("submit_open_cup_result", { _match_id: match.id, _score_a: sa, _score_b: sb })
       : await supabase.rpc("submit_match_result", {
           _match_id: match.id, _score_a: sa, _score_b: sb,
@@ -257,13 +257,13 @@ export default function MatchDetailPage() {
   const confirm = async () => {
     if (!match) return;
     setBusy(true);
-    const { error } = isOpenCup
+    const { error } = isQueueMatch
       ? await supabase.rpc("confirm_open_cup_result", { _match_id: match.id })
       : await supabase.rpc("confirm_match_result", { _match_id: match.id });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Result confirmed");
-    if (isOpenCup) await triggerEloUpdate(match.id);
+    if (isQueueMatch) await triggerEloUpdate(match.id);
     load();
   };
   const dispute = async () => {
@@ -278,13 +278,13 @@ export default function MatchDetailPage() {
   const adminResolve = async () => {
     if (!match) return;
     setBusy(true);
-    const { error } = isOpenCup
+    const { error } = isQueueMatch
       ? await supabase.rpc("admin_resolve_open_cup_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB })
       : await supabase.rpc("admin_resolve_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Match resolved");
-    if (isOpenCup) await triggerEloUpdate(match.id);
+    if (isQueueMatch) await triggerEloUpdate(match.id);
     setAdminOpen(false); load();
   };
 
