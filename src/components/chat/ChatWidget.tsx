@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Globe2, Users, Send, Flag, Trash2, Crown, Shield, BadgeCheck, Pin, Plus } from "lucide-react";
+import { MessageSquare, X, Globe2, Users, Send, Trash2, Crown, Shield, BadgeCheck, Pin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
@@ -19,13 +19,11 @@ function MessageRow({
   msg,
   isOwn,
   onDelete,
-  onReport,
   canModerate,
 }: {
   msg: ChatMessage;
   isOwn: boolean;
   onDelete: (id: string) => void;
-  onReport: (id: string) => void;
   canModerate: boolean;
 }) {
   const time = new Date(msg.created_at);
@@ -94,13 +92,6 @@ function MessageRow({
       </div>
 
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 pt-1">
-        <button
-          onClick={() => onReport(msg.id)}
-          title="Report"
-          className="text-muted-foreground hover:text-destructive p-0.5"
-        >
-          <Flag className="h-3 w-3" />
-        </button>
         {(isOwn || canModerate) && (
           <button
             onClick={() => onDelete(msg.id)}
@@ -197,7 +188,6 @@ function ChannelView({ kind, teamId, teamName }: { kind: Tab; teamId: string | n
               msg={m}
               isOwn={m.user_id === user?.id}
               onDelete={chat.deleteMessage}
-              onReport={chat.reportMessage}
               canModerate={canModerate}
             />
           ))
