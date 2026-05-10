@@ -596,10 +596,33 @@ export default function MatchDetailPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Open Dispute</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Label>Reason</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} rows={4} placeholder="Explain what went wrong" />
+            <div>
+              <Label className="mb-1.5 block">Reason</Label>
+              <Select value={reasonType} onValueChange={setReasonType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wrong_result">Wrong result</SelectItem>
+                  <SelectItem value="opponent_no_response">Opponent not responding</SelectItem>
+                  <SelectItem value="no_show">No-show</SelectItem>
+                  <SelectItem value="toxic">Toxic behavior</SelectItem>
+                  <SelectItem value="cheating">Cheating suspicion</SelectItem>
+                  <SelectItem value="technical">Technical issue</SelectItem>
+                  <SelectItem value="elo_not_updated">ELO not updated</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Message (optional)</Label>
+              <Textarea value={reason} onChange={e => setReason(e.target.value)} rows={3} placeholder="Add context for the admin" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Evidence URL (optional)</Label>
+              <Input value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} placeholder="https://… (screenshot, clip)" />
+            </div>
+            <p className="text-xs text-muted-foreground">An admin will review this match. ELO is frozen until resolved.</p>
           </div>
-          <DialogFooter><Button variant="destructive" onClick={dispute} disabled={busy || !reason}>Open Dispute</Button></DialogFooter>
+          <DialogFooter><Button variant="destructive" onClick={dispute} disabled={busy}>Open Dispute</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
