@@ -178,7 +178,7 @@ export default function TournamentsPage() {
       _game: selectedGame,
     });
     setJoining(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error("Could not create match. Please try again or contact support."); return; }
     const result = data as any;
     if (result?.status === "matched" && result.match_id) {
       toast.success("Match found!");
