@@ -48,7 +48,7 @@ interface PlayerInfo {
   elo: number | null;
 }
 interface EloDelta { user_id: string; delta: number; elo_after: number; }
-interface RosterRow { user_id: string; team_id: string; }
+interface RosterRow { user_id: string; team_id: string | null; side: "A" | "B" | null; }
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -76,21 +76,22 @@ export default function MatchDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
+  const isQueueMatch = match?.kind === "open_cup" || match?.kind === "ranked";
   // Derive team size from rosters (rosters are now the source of truth for Open Cup).
   // Falls back to player_a/b for legacy 1v1 matches that pre-date the rosters refactor.
   const teamSize = useMemo(() => {
     if (rosterRows.length > 0) {
-      const sideACount = rosterRows.filter(r => r.team_id === match?.team_a_id).length;
-      const sideBCount = rosterRows.filter(r => r.team_id === match?.team_b_id).length;
+      const sideACount = rosterRows.filter(r => r.side === "A" || (!r.side && r.team_id === match?.team_a_id)).length;
+      const sideBCount = rosterRows.filter(r => r.side === "B" || (!r.side && r.team_id === match?.team_b_id)).length;
       return Math.max(sideACount, sideBCount, 1);
     }
     if (match?.player_a_id || match?.player_b_id) return 1;
     return 0;
   }, [rosterRows, match?.team_a_id, match?.team_b_id, match?.player_a_id, match?.player_b_id]);
-  const isSoloTest = isOpenCup && teamSize === 1;
-  const isRosterMatch = isOpenCup && teamSize > 1;
+  const isSoloTest = isQueueMatch && teamSize === 1;
+  const isRosterMatch = isQueueMatch && teamSize > 1;
   // Backwards-compat alias used through render code: solo (1-per-side) layout.
-  const is1v1 = teamSize === 1 && (isOpenCup || !!match?.player_a_id || !!match?.player_b_id);
+  const is1v1 = teamSize === 1 && (isQueueMatch || !!match?.player_a_id || !!match?.player_b_id);
 
   const loadPlayer = async (uid: string, game: string): Promise<PlayerInfo> => {
     const [{ data: p }, { data: s }] = await Promise.all([
@@ -120,14 +121,14 @@ export default function MatchDetailPage() {
     // Always try to load match_rosters first (Open Cup writes them for any team size).
     const { data: rosters } = await supabase
       .from("match_rosters")
-      .select("user_id, team_id")
+      .select("user_id, team_id, side")
       .eq("match_id", m.id);
     const rRows = (rosters ?? []) as RosterRow[];
     setRosterRows(rRows);
 
     if (rRows.length > 0) {
-      const aRows = rRows.filter(r => r.team_id === m.team_a_id);
-      const bRows = rRows.filter(r => r.team_id === m.team_b_id);
+      const aRows = rRows.filter(r => r.side === "A" || (!r.side && r.team_id === m.team_a_id));
+      const bRows = rRows.filter(r => r.side === "B" || (!r.side && r.team_id === m.team_b_id));
       const [aPlayers, bPlayers] = await Promise.all([
         Promise.all(aRows.map(r => loadPlayer(r.user_id, m.game))),
         Promise.all(bRows.map(r => loadPlayer(r.user_id, m.game))),
