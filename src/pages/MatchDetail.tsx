@@ -390,7 +390,30 @@ export default function MatchDetailPage() {
             <StatusPill status={match.result_status} />
           </div>
 
-          {is1v1 ? (
+          {isRosterMatch ? (
+            <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 sm:gap-4">
+              <div className="space-y-2">
+                <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Side A · {rosterA.length} players · avg {rosterA.length ? Math.round(rosterA.reduce((s,p)=>s+(p.elo??0),0)/rosterA.length) : 0} ELO</div>
+                {rosterA.map(p => renderPlayerCard(p, "a", "left"))}
+              </div>
+              <div className="text-center pt-6">
+                {showScore ? (
+                  <div className="font-display font-bold text-3xl sm:text-5xl">
+                    <span className={(match.score_a ?? 0) > (match.score_b ?? 0) ? "text-primary" : ""}>{match.score_a ?? 0}</span>
+                    <span className="text-muted-foreground mx-2">:</span>
+                    <span className={(match.score_b ?? 0) > (match.score_a ?? 0) ? "text-primary" : ""}>{match.score_b ?? 0}</span>
+                  </div>
+                ) : (
+                  <div className="font-display text-2xl text-muted-foreground">VS</div>
+                )}
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-2">{statusLabel}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground text-right">Side B · {rosterB.length} players · avg {rosterB.length ? Math.round(rosterB.reduce((s,p)=>s+(p.elo??0),0)/rosterB.length) : 0} ELO</div>
+                {rosterB.map(p => renderPlayerCard(p, "b", "right"))}
+              </div>
+            </div>
+          ) : is1v1 ? (
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
               {renderPlayerCard(playerA, "a", "left")}
               <div className="text-center">
