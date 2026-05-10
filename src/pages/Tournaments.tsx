@@ -295,7 +295,7 @@ export default function TournamentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">1v1 Test</Badge>
+                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">{teamSize}v{teamSize} {teamSize === 1 ? "Test" : "Beta"}</Badge>
                     <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
                       <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
                     </Button>
