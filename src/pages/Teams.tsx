@@ -359,7 +359,8 @@ export default function TeamsPage() {
                   const sameGameConflict = !isMyTeam
                     ? myTeamsAll.find((m) => m.game === tt.game) ?? null
                     : null;
-                  const memberCount = Math.max(1, 5 - Math.min(Math.max(0, tt.slots), 5));
+                  const memberCount = memberCounts[tt.id] ?? 0;
+                  const openSpots = Math.max(0, 5 - memberCount);
                   return (
                     <div key={tt.id} className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-all flex flex-col">
                       <div className="flex items-center gap-3 mb-4">
@@ -394,9 +395,9 @@ export default function TeamsPage() {
                           <Trophy className="h-3 w-3" />{tt.trophies} {t("teams_page.trophies", { defaultValue: "Trophies" })}
                         </div>
                       )}
-                      {tt.looking_for_players && !isMyTeam && (
+                      {tt.looking_for_players && !isMyTeam && openSpots > 0 && (
                         <div className="text-center text-xs font-display uppercase tracking-wider py-1.5 mb-3 rounded bg-success/10 text-success border border-success/30">
-                          {Math.min(Math.max(1, tt.slots), 5)} {t("teams_page.spots_open", { defaultValue: "spots open" })}
+                          {openSpots} {t("teams_page.spots_open", { defaultValue: "spots open" })}
                         </div>
                       )}
                       <div className="mt-auto flex flex-col gap-2">
