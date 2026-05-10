@@ -100,7 +100,7 @@ export default function TournamentsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [joining, setJoining] = useState(false);
-  const [teamSize, setTeamSize] = useState<1 | 2 | 5>(1);
+  const [teamSize] = useState<1>(1); // 1v1 only during public beta
   const { isAdmin } = useUserRoles();
   // Public queue is gated behind a feature flag. Admins always retain access
   // for end-to-end testing of matchmaking + ELO.
@@ -288,11 +288,7 @@ export default function TournamentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex rounded-md border border-border overflow-hidden">
-                      {([1,2,5] as const).map(s => (
-                        <button key={s} onClick={() => setTeamSize(s)} className={`px-2.5 py-1 text-xs font-display uppercase ${teamSize===s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{s}v{s}</button>
-                      ))}
-                    </div>
+                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">1v1 Test</Badge>
                     <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
                       <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
                     </Button>
