@@ -178,7 +178,16 @@ export default function TournamentsPage() {
       _game: selectedGame,
     });
     setJoining(false);
-    if (error) { toast.error("Could not create match. Please try again or contact support."); return; }
+    if (error) {
+      const msg = String(error.message ?? "").toLowerCase();
+      if (msg.includes("already") || msg.includes("duplicate") || msg.includes("23505")) {
+        // Already queued — surface as the lobby state, not a hard error.
+        refetchQueue();
+        return;
+      }
+      toast.error("Could not create match. Please try again or contact support.");
+      return;
+    }
     const result = data as any;
     if (result?.status === "matched" && result.match_id) {
       toast.success("Match found!");
