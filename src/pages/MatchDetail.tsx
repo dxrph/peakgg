@@ -76,6 +76,7 @@ export default function MatchDetailPage() {
   const [reason, setReason] = useState("");
   const [reasonType, setReasonType] = useState<string>("wrong_result");
   const [evidenceUrl, setEvidenceUrl] = useState("");
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
@@ -662,8 +663,26 @@ export default function MatchDetailPage() {
               <Textarea value={reason} onChange={e => setReason(e.target.value)} rows={3} placeholder="Add context for the admin" />
             </div>
             <div>
-              <Label className="mb-1.5 block">Evidence URL (optional)</Label>
-              <Input value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} placeholder="https://… (screenshot, clip)" />
+              <Label className="mb-1.5 block">Evidence (optional)</Label>
+              <Input
+                type="file"
+                accept="image/*,video/*,.pdf"
+                onChange={e => {
+                  const f = e.target.files?.[0] ?? null;
+                  if (f && f.size > 20 * 1024 * 1024) {
+                    toast.error("Max 20MB");
+                    e.target.value = "";
+                    return;
+                  }
+                  setEvidenceFile(f);
+                }}
+              />
+              {evidenceFile && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {evidenceFile.name} · {(evidenceFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Screenshot, clip, or PDF (max 20MB).</p>
             </div>
             <p className="text-xs text-muted-foreground">An admin will review this match. ELO is frozen until resolved.</p>
           </div>
