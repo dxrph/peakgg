@@ -31,7 +31,7 @@ type SoloTier = {
   id: "open" | "challenger" | "championship";
   name: string;
   tagline: string;
-  status: "Opening Soon" | "Locked" | "Final Tier";
+  status: "Closed Beta" | "Locked · Coming Later" | "Invite-only · Coming Later";
   unlock: string;
   rewards: string[];
   cta: { label: string; href: string; external?: boolean };
@@ -45,7 +45,7 @@ const SOLO_TIERS: SoloTier[] = [
     id: "open",
     name: "Open Cup",
     tagline: "Solo queue · Temporary teams · Affects ELO · Closed Beta",
-    status: "Opening Soon",
+    status: "Closed Beta",
     unlock: "Open Cup matchmaking is being tested with early players. Once enabled, players will join solo, get matched into temporary teams and gain or lose ELO based on confirmed results.",
     rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
     cta: { label: "Join Discord for Open Cup Beta", href: DISCORD_INVITE, external: true },
@@ -55,8 +55,8 @@ const SOLO_TIERS: SoloTier[] = [
   {
     id: "challenger",
     name: "Challenger Series",
-    tagline: "Locked until Open Cup is live",
-    status: "Locked",
+    tagline: "Coming later · ELO threshold required when live",
+    status: "Locked · Coming Later",
     unlock: "Unlocks once Open Cup matchmaking exits closed beta and ELO thresholds are active.",
     rewards: ["Challenger badge", "Higher-stake matches", "Path to Championship"],
     cta: { label: "View Requirements", href: "#solo-path" },
@@ -68,7 +68,7 @@ const SOLO_TIERS: SoloTier[] = [
     id: "championship",
     name: "Peak Championship",
     tagline: "Invite-only · Coming later",
-    status: "Final Tier",
+    status: "Invite-only · Coming Later",
     unlock: "Invite-only for now. Future qualification path will open after Challenger Series goes live.",
     rewards: ["Season badge", "Championship recognition", "Leaderboard glory"],
     cta: { label: "View Path", href: "#solo-path" },
@@ -330,7 +330,7 @@ export default function TournamentsPage() {
               <h2 className="text-2xl font-display font-bold">Solo Queue Cups</h2>
             </div>
             <p className="text-sm text-muted-foreground font-body">
-              Join alone. We create a temporary team for the cup. Earn personal Tournament Points that stay on your profile.
+              Join alone. We create a temporary team for the cup. Each confirmed result updates your personal ELO.
             </p>
           </div>
           <div className="rounded-xl border border-primary/30 bg-card p-6">
@@ -341,7 +341,7 @@ export default function TournamentsPage() {
               <h2 className="text-2xl font-display font-bold">Team Tournaments</h2>
             </div>
             <p className="text-sm text-muted-foreground font-body">
-              Captain registers a full roster. Standard bracket format. Results count for the team — built for orgs and established lineups.
+              Captain registers a full roster. Results count for the team — built for orgs and established lineups. Coming after Season 0 Beta.
             </p>
           </div>
         </section>
@@ -351,7 +351,7 @@ export default function TournamentsPage() {
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
             <div>
               <h2 className="text-3xl font-display font-bold uppercase tracking-tight">Solo Queue Cup Path</h2>
-              <p className="text-sm text-muted-foreground font-body mt-1">Three tiers. Climb with Tournament Points.</p>
+              <p className="text-sm text-muted-foreground font-body mt-1">Three tiers. Climb with ELO from confirmed results.</p>
             </div>
           </div>
 

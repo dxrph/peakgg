@@ -265,7 +265,10 @@ export default function TeamDashboard() {
               ) : (
                 <div>
                   <p className="text-sm text-muted-foreground">No matches scheduled yet.</p>
-                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/leagues">Join a cup or register</Link></Button>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <Button asChild size="sm" variant="outline"><Link to="/tournaments">View Tournaments</Link></Button>
+                    <Button asChild size="sm" variant="outline"><Link to="/leagues">View Peak League</Link></Button>
+                  </div>
                 </div>
               )}
             </Card>
@@ -274,7 +277,7 @@ export default function TeamDashboard() {
               {past.slice(0, 3).length === 0 ? (
                 <div>
                   <p className="text-sm text-muted-foreground">No completed matches yet.</p>
-                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/scrims">Play your first match</Link></Button>
+                  <Button asChild size="sm" variant="outline" className="mt-3"><Link to="/tournaments">View Tournaments</Link></Button>
                 </div>
               ) : (
                 <div className="space-y-2">

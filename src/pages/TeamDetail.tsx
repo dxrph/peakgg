@@ -69,6 +69,7 @@ export default function TeamDetailPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("overview");
   const [joinOpen, setJoinOpen] = useState(false);
+  const [conflictTeam, setConflictTeam] = useState<{ id: string; name: string } | null>(null);
 
   const isCaptain = !!(user && team && user.id === team.owner_id);
   const isMember = !!(user && members.some((m) => m.user_id === user.id));
@@ -115,6 +116,20 @@ export default function TeamDetailPage() {
         .limit(1)
         .maybeSingle();
       setMyRequest((mine as any) ?? null);
+
+      // Detect existing team for the same game (one-team-per-game rule)
+      const { data: myTeams } = await supabase
+        .from("team_members")
+        .select("team_id, teams!inner(id, name, game, is_demo)")
+        .eq("user_id", user.id);
+      const conflict = (myTeams ?? []).find(
+        (r: any) =>
+          r.teams &&
+          r.teams.is_demo === false &&
+          r.teams.game === (t as any).game &&
+          r.team_id !== (t as any).id,
+      );
+      setConflictTeam(conflict ? { id: (conflict as any).teams.id, name: (conflict as any).teams.name } : null);
 
       // captain loads all pending
       if ((t as any).owner_id === user.id) {
@@ -249,7 +264,15 @@ export default function TeamDetailPage() {
               {user && !isCaptain && !isMember && hasPending && (
                 <Badge variant="outline" className="font-display py-2 px-3 justify-center">Application pending</Badge>
               )}
-              {user && !isCaptain && !isMember && !hasPending && team.looking_for_players && (
+              {user && !isCaptain && !isMember && !hasPending && conflictTeam && (
+                <div className="rounded-md border border-accent/40 bg-accent/5 p-3 text-xs font-body text-foreground/90">
+                  You're already in a {team.game} team: <span className="font-display uppercase text-accent">{conflictTeam.name}</span>.
+                  <Button asChild variant="neonOutline" size="sm" className="mt-2 w-full">
+                    <Link to={`/teams/${conflictTeam.id}`}>View My Team</Link>
+                  </Button>
+                </div>
+              )}
+              {user && !isCaptain && !isMember && !hasPending && !conflictTeam && team.looking_for_players && (
                 <Button variant="neon" onClick={() => setJoinOpen(true)}>
                   <UserPlus className="mr-2 h-4 w-4" />Apply to Team
                 </Button>
