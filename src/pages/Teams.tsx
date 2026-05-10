@@ -233,6 +233,15 @@ export default function TeamsPage() {
       toast.error("You cannot apply to your own team");
       return;
     }
+    const conflict = myTeamsAll.find((m) => m.game === team.game && m.id !== team.id);
+    if (conflict) {
+      toast.error(`You're already in a ${team.game.toUpperCase()} team (${conflict.name}).`);
+      return;
+    }
+    if (myTeamsAll.some((m) => m.id === team.id)) {
+      toast.error("You're already a member of this team.");
+      return;
+    }
     setJoinTeam({ id: team.id, name: team.name, game: team.game });
     setJoinOpen(true);
   };
@@ -466,12 +475,27 @@ export default function TeamsPage() {
                         <div className="flex gap-1 mt-1">
                           <Badge variant="secondary" className="text-[10px] font-display uppercase">{tt.game}</Badge>
                           {tt.rank && <Badge variant="outline" className="text-[10px] font-display">{tt.rank}</Badge>}
-                          <span className="text-[10px] text-muted-foreground self-center">· {Math.min(tt.slots, 5)} {t("teams_page.slots", { defaultValue: "open" })}</span>
+                          <span className="text-[10px] text-muted-foreground self-center">· {Math.max(0, 5 - (memberCounts[tt.id] ?? 0))} {t("teams_page.slots", { defaultValue: "open" })}</span>
                         </div>
                       </div>
-                      <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)}>
-                        <UserPlus className="h-3 w-3 mr-1" /> {t("teams_page.apply", { defaultValue: "Apply" })}
-                      </Button>
+                      {(() => {
+                        const isMine = myTeamsAll.some((m) => m.id === tt.id);
+                        const conflict = !isMine ? myTeamsAll.find((m) => m.game === tt.game) : null;
+                        if (isMine) {
+                          return <Button variant="ghost" size="sm" onClick={() => navigate(`/teams/${tt.id}`)}>My Team</Button>;
+                        }
+                        if (conflict) {
+                          return <Button variant="ghost" size="sm" className="text-[10px]" onClick={() => navigate(`/teams/${conflict.id}`)}>In {tt.game.toUpperCase()} team</Button>;
+                        }
+                        if (!user) {
+                          return <Button variant="neonOutline" size="sm" onClick={() => navigate("/login")}>Sign in</Button>;
+                        }
+                        return (
+                          <Button variant="neonOutline" size="sm" onClick={() => openJoin(tt)}>
+                            <UserPlus className="h-3 w-3 mr-1" /> {t("teams_page.apply", { defaultValue: "Apply" })}
+                          </Button>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
