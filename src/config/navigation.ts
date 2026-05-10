@@ -60,13 +60,13 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   // ───────── PLATFORM (main navbar) ─────────
-  { key: "tournaments", labelKey: "navmap.tournaments", label: "Tournaments", path: "/tournaments", icon: Trophy, category: "platform", showInMoreDropdown: true, showInDashboard: true },
+  { key: "tournaments", labelKey: "navmap.tournaments", label: "Tournaments", path: "/tournaments", icon: Trophy, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "leagues",     labelKey: "navmap.leagues",     label: "Peak League", path: "/leagues",     icon: Mountain, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "teams",       labelKey: "navmap.teams",       label: "Teams",       path: "/teams",       icon: Users,  category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "free_agents", labelKey: "navmap.free_agents", label: "Free Agents", path: "/free-agents", icon: UserPlus, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
   { key: "clips",       labelKey: "navmap.clips",       label: "Clips",       path: "/clips",       icon: Film,   category: "platform", comingSoon: true },
   { key: "leaderboard", labelKey: "navmap.leaderboard", label: "Leaderboard", path: "/leaderboard", icon: BarChart3, category: "platform", showInNavbar: true, showInFooter: true, showInDashboard: true },
-  { key: "scrims",      labelKey: "navmap.scrims",      label: "Scrims",      path: "/scrims",      icon: Swords, category: "platform", showInMoreDropdown: true },
+  { key: "scrims",      labelKey: "navmap.scrims",      label: "Scrims",      path: "/scrims",      icon: Swords, category: "platform", comingSoon: true },
   { key: "play",        labelKey: "navmap.play",        label: "Find Match",  path: "/play",        icon: Mountain, category: "platform", requiresAuth: true, showInDashboard: true },
 
   // ───────── TOOLS / SECONDARY (More dropdown + footer) ─────────
