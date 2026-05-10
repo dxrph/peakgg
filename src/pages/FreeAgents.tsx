@@ -11,12 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon } from "lucide-react";
+import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon, UserPlus, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { GAMES, getRankByElo, type GameId } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import GameIcon from "@/components/GameIcon";
+import { useAuth } from "@/hooks/useAuth";
+import { DISCORD_INVITE } from "@/lib/links";
 
 type AgentRow = {
   id: string;
@@ -49,6 +51,7 @@ const LANGUAGES = [
 
 export default function FreeAgentsPage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState<AgentRow[]>([]);
 
@@ -140,14 +143,51 @@ export default function FreeAgentsPage() {
         />
         <div className="container relative z-[1]">
           <Badge variant="outline" className="mb-3 border-primary/40 text-primary uppercase font-display tracking-widest text-[11px]">
-            <Users className="h-3 w-3 mr-1.5" /> {t("free_agents.eyebrow")}
+            <Users className="h-3 w-3 mr-1.5" /> {t("free_agents.eyebrow", { defaultValue: "Recruitment Board" })}
           </Badge>
           <h1 className="font-display font-bold text-4xl md:text-5xl mb-3">
-            {t("free_agents.title")}
+            {t("free_agents.title", { defaultValue: "Find Players. Get Discovered." })}
           </h1>
           <p className="text-muted-foreground font-body max-w-2xl">
-            {t("free_agents.subtitle")}
+            {t("free_agents.subtitle", { defaultValue: "Create your player profile, show your rank and get discovered by teams preparing for Peak League and future events." })}
           </p>
+
+          {/* Auth-aware hero CTAs */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {!user ? (
+              <>
+                <Link to="/register"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
+                <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="neonOutline" size="lg"><MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord</Button></a>
+              </>
+            ) : (
+              <>
+                <Link to="/settings"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
+                <Link to="/teams"><Button variant="neonOutline" size="lg"><Users className="h-4 w-4 mr-1.5" /> My Teams</Button></Link>
+              </>
+            )}
+          </div>
+
+          {/* Dual-purpose strip */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-lg border border-border bg-card/60 p-4 flex gap-3">
+              <div className="h-10 w-10 rounded-md bg-primary/10 border border-primary/40 flex items-center justify-center shrink-0">
+                <UserPlus className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-display font-bold uppercase tracking-wider text-sm">For Players</h3>
+                <p className="text-xs text-muted-foreground font-body mt-0.5">List yourself, show your game, role and rank — get discovered by founding teams.</p>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-card/60 p-4 flex gap-3">
+              <div className="h-10 w-10 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center shrink-0">
+                <Target className="h-5 w-5 text-accent" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-display font-bold uppercase tracking-wider text-sm">For Teams</h3>
+                <p className="text-xs text-muted-foreground font-body mt-0.5">Filter by game, ELO, region and language to scout your next roster.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -264,10 +304,29 @@ export default function FreeAgentsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border bg-card/50 p-12 text-center">
-              <Users className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-              <h3 className="font-display font-bold text-lg mb-1">{t("free_agents.empty_title")}</h3>
-              <p className="text-sm text-muted-foreground font-body">{t("free_agents.empty_sub")}</p>
+            <div className="rounded-lg border border-dashed border-border bg-card/50 p-10 text-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 border border-primary/40 flex items-center justify-center mb-4 shadow-[0_0_30px_hsl(var(--primary)/0.35)]">
+                <Users className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-display font-bold text-xl mb-1.5">
+                {t("free_agents.empty_title", { defaultValue: "No free agents listed yet" })}
+              </h3>
+              <p className="text-sm text-muted-foreground font-body max-w-md mx-auto">
+                {t("free_agents.empty_sub", { defaultValue: "Be one of the first players to put your name on the board and get discovered by founding teams." })}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 justify-center">
+                {!user ? (
+                  <>
+                    <Link to="/register"><Button variant="neon">Create Account</Button></Link>
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="neonOutline">Join Discord</Button></a>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/settings"><Button variant="neon">Complete Profile</Button></Link>
+                    <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="neonOutline">Join Discord</Button></a>
+                  </>
+                )}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

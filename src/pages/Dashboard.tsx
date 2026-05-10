@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
-import { Bell, Mountain, Shield, Swords, Trophy, TrendingUp, Activity, Users } from "lucide-react";
+import { Bell, Mountain, Shield, Swords, Trophy, TrendingUp, Activity, Users, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { dashboardCards, dashboardAdmin, resolvePath, type NavItem } from "@/config/navigation";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -15,6 +15,7 @@ import { useGame } from "@/lib/game-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getRankByElo } from "@/lib/ranks";
+import { DISCORD_INVITE } from "@/lib/links";
 
 interface PlayerStat {
   elo: number;
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const [recent, setRecent] = useState<RecentMatch[]>([]);
   const [tournamentsWon, setTournamentsWon] = useState(0);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [hasTeam, setHasTeam] = useState<boolean | null>(null);
 
   const profileName = profile?.display_name || profile?.username || "Player";
   const profilePath = profile?.username ? `/profile/${profile.username}` : "/dashboard";
@@ -157,6 +159,27 @@ export default function DashboardPage() {
         if (!cancelled) setTournamentsWon(0);
       }
       if (!cancelled) setStatsLoading(false);
+      // Has team for current game?
+      const { data: ownedTeam } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("owner_id", user.id)
+        .eq("game", currentGame)
+        .eq("is_demo", false)
+        .limit(1)
+        .maybeSingle();
+      let teamFound = !!ownedTeam;
+      if (!teamFound) {
+        const { data: tm } = await supabase
+          .from("team_members")
+          .select("team_id, teams!inner(id, game, is_demo)")
+          .eq("user_id", user.id)
+          .limit(20);
+        teamFound = !!(tm ?? []).find(
+          (r: any) => r.teams && r.teams.game === currentGame && r.teams.is_demo === false,
+        );
+      }
+      if (!cancelled) setHasTeam(teamFound);
     })();
     return () => {
       cancelled = true;
@@ -183,13 +206,28 @@ export default function DashboardPage() {
               {t("dashboard.subtitle", { defaultValue: "Here's your competitive overview." })}
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link to="/play">
-              <Button variant="neon">
-                <Mountain className="mr-2 h-4 w-4" />
-                {t("dashboard.find_match", { defaultValue: "Find Match" })}
+          <div className="flex flex-wrap gap-2">
+            {hasTeam ? (
+              <Link to="/teams">
+                <Button variant="neon">
+                  <Users className="mr-2 h-4 w-4" />
+                  {t("dashboard.my_team", { defaultValue: "My Team" })}
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/teams">
+                <Button variant="neon">
+                  <Shield className="mr-2 h-4 w-4" />
+                  {t("dashboard.create_team", { defaultValue: "Create Team" })}
+                </Button>
+              </Link>
+            )}
+            <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+              <Button variant="neonOutline">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {t("dashboard.discord", { defaultValue: "Join Discord" })}
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
 

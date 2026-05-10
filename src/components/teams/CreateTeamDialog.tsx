@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
-import { Settings2, ChevronDown, Shield, Users } from "lucide-react";
+import { Settings2, ChevronDown, Shield, Users, Sparkles, Trophy, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -22,9 +22,9 @@ interface Props {
 }
 
 const GAMES = [
-  { value: "valorant", label: "Valorant", emoji: "⚡", color: "#FF4655", glow: "rgba(255,70,85,0.45)" },
-  { value: "cs2",      label: "CS2",      emoji: "💥", color: "#F59E0B", glow: "rgba(245,158,11,0.45)" },
-  { value: "r6s",      label: "R6",       emoji: "🛡️", color: "#3B82F6", glow: "rgba(59,130,246,0.45)" },
+  { value: "valorant", label: "Valorant", short: "VAL", color: "#FF4655", glow: "rgba(255,70,85,0.45)" },
+  { value: "cs2",      label: "CS2",      short: "CS2", color: "#F59E0B", glow: "rgba(245,158,11,0.45)" },
+  { value: "r6s",      label: "R6 Siege", short: "R6",  color: "#3B82F6", glow: "rgba(59,130,246,0.45)" },
 ] as const;
 
 const REGIONS = [
@@ -115,7 +115,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent
         className={cn(
-          "max-w-lg p-0 overflow-hidden border-2",
+          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)]",
           "bg-card",
           "data-[state=open]:animate-fade-in",
           "duration-200"
@@ -129,15 +129,18 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display text-2xl uppercase tracking-wider">
               <Shield className="h-6 w-6 text-primary" />
-              {t("teams_page.create_team", { defaultValue: "Create Team" })}
+              {t("teams_page.create_team_title", { defaultValue: "Create Your Team" })}
             </DialogTitle>
-            <DialogDescription className="font-body">
-              {t("teams_page.create_team_sub", { defaultValue: "Build your roster and dominate the ladder." })}
+            <DialogDescription className="font-body max-w-2xl">
+              {t("teams_page.create_team_sub", { defaultValue: "Set up your team identity, build your roster and enter the PeakGG competitive ecosystem." })}
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="px-6 pb-2 space-y-5 max-h-[65vh] overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-0 max-h-[75vh] overflow-y-auto">
+        <div className="px-6 pb-2 space-y-5 lg:border-r lg:border-border">
+          {/* SECTION: IDENTITY */}
+          <SectionLabel icon={Shield} text={t("teams_page.section_identity", { defaultValue: "Team identity" })} />
           {/* NAME + TAG */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2 space-y-1.5">
@@ -166,10 +169,12 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
             </div>
           </div>
 
+          {/* SECTION: COMPETITIVE SETUP */}
+          <SectionLabel icon={Trophy} text={t("teams_page.section_competitive", { defaultValue: "Competitive setup" })} />
           {/* GAME PICKER */}
           <div className="space-y-2">
             <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
-              {t("teams_page.game", { defaultValue: "Game" })}
+              {t("teams_page.main_game", { defaultValue: "Main game" })}
             </Label>
             <div className="grid grid-cols-3 gap-2">
               {GAMES.map((g) => {
@@ -180,7 +185,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                     type="button"
                     onClick={() => setGame(g.value)}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-md border-2 transition-all",
+                      "flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-md border-2 transition-all",
                       "bg-background/60 hover:scale-[1.02]",
                       active ? "scale-[1.02]" : "border-border opacity-70 hover:opacity-100"
                     )}
@@ -190,7 +195,12 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                         : undefined
                     }
                   >
-                    <span className="text-2xl leading-none">{g.emoji}</span>
+                    <span
+                      className="font-display text-lg leading-none tracking-wider"
+                      style={{ color: active ? g.color : "hsl(var(--muted-foreground))" }}
+                    >
+                      {g.short}
+                    </span>
                     <span
                       className="font-display uppercase text-xs tracking-wider"
                       style={active ? { color: g.color } : undefined}
@@ -231,6 +241,8 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
             </div>
           </div>
 
+          {/* SECTION: OPTIONAL */}
+          <SectionLabel icon={Settings2} text={t("teams_page.section_optional", { defaultValue: "Optional details" })} />
           {/* ADVANCED COLLAPSIBLE */}
           <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
             <CollapsibleTrigger asChild>
@@ -240,7 +252,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
               >
                 <span className="flex items-center gap-2 font-display uppercase text-xs tracking-wider text-muted-foreground group-hover:text-foreground">
                   <Settings2 className="h-4 w-4" />
-                  {t("teams_page.advanced_settings", { defaultValue: "Advanced settings" })}
+                  {t("teams_page.advanced_settings", { defaultValue: "Description, recruitment & contact" })}
                 </span>
                 <ChevronDown className={cn("h-4 w-4 transition-transform text-muted-foreground", advancedOpen && "rotate-180")} />
               </button>
@@ -346,6 +358,92 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           </Collapsible>
         </div>
 
+        {/* LIVE PREVIEW PANEL */}
+        <aside className="px-6 py-5 bg-background/40 lg:bg-background/60 border-t lg:border-t-0 border-border space-y-4">
+          <div className="flex items-center gap-2 text-[11px] font-display uppercase tracking-widest text-muted-foreground">
+            <Eye className="h-3.5 w-3.5" />
+            {t("teams_page.live_preview", { defaultValue: "Live preview" })}
+          </div>
+
+          {/* Team card preview */}
+          <div
+            className="rounded-lg border-2 bg-card overflow-hidden transition-all"
+            style={{ borderColor: selectedGame.color, boxShadow: `0 0 24px ${selectedGame.glow}` }}
+          >
+            <div
+              className="h-14 relative"
+              style={{
+                background: `linear-gradient(135deg, ${selectedGame.color}33 0%, hsl(var(--background)) 100%)`,
+              }}
+            >
+              <div
+                className="absolute inset-0 opacity-25"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(hsl(var(--primary)/0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.3) 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
+                }}
+              />
+            </div>
+            <div className="px-4 pb-4 -mt-7">
+              <div
+                className="w-14 h-14 rounded-md border-2 flex items-center justify-center font-display text-lg tracking-wider bg-card"
+                style={{ borderColor: selectedGame.color, color: selectedGame.color }}
+              >
+                {(tag || name.slice(0, 3) || "?").toUpperCase().slice(0, 4)}
+              </div>
+              <div className="mt-3 min-w-0">
+                <div className="font-display font-bold text-lg truncate">
+                  {name.trim() || t("teams_page.preview_name_ph", { defaultValue: "Your team name" })}
+                </div>
+                <div className="font-mono text-xs text-muted-foreground">
+                  [{tag.toUpperCase().slice(0, 4) || "TAG"}] · {selectedGame.label} · {region}
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {recruitment === "open" && (
+                  <span className="text-[10px] uppercase tracking-wider font-display border border-success/40 text-success rounded-sm px-1.5 py-0.5">
+                    {t("teams_page.rec_open", { defaultValue: "Open" })}
+                  </span>
+                )}
+                {recruitment === "invite" && (
+                  <span className="text-[10px] uppercase tracking-wider font-display border border-accent/40 text-accent rounded-sm px-1.5 py-0.5">
+                    {t("teams_page.rec_invite", { defaultValue: "Invite Only" })}
+                  </span>
+                )}
+                {recruitment === "closed" && (
+                  <span className="text-[10px] uppercase tracking-wider font-display border border-border text-muted-foreground rounded-sm px-1.5 py-0.5">
+                    {t("teams_page.rec_closed", { defaultValue: "Closed" })}
+                  </span>
+                )}
+                <span className="text-[10px] uppercase tracking-wider font-display border border-primary/40 text-primary rounded-sm px-1.5 py-0.5">
+                  <Sparkles className="h-2.5 w-2.5 inline mr-0.5" />
+                  {t("teams_page.founding_team", { defaultValue: "Founding Team" })}
+                </span>
+              </div>
+              {description.trim() && (
+                <p className="text-xs text-muted-foreground font-body mt-3 line-clamp-3">
+                  {description.trim()}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Tips */}
+          <div className="rounded-md border border-border bg-card/40 p-3 space-y-2">
+            <div className="flex items-center gap-1.5 text-[11px] font-display uppercase tracking-widest text-primary">
+              <Trophy className="h-3.5 w-3.5" />
+              {t("teams_page.tips_title", { defaultValue: "Founding a roster" })}
+            </div>
+            <ul className="text-[11px] text-muted-foreground font-body space-y-1.5 leading-relaxed">
+              <li>• {t("teams_page.tip_1", { defaultValue: "Pick a strong tag — it appears next to your matches." })}</li>
+              <li>• {t("teams_page.tip_2", { defaultValue: "One owned team per game. Choose wisely." })}</li>
+              <li>• {t("teams_page.tip_3", { defaultValue: "Founding teams get an early badge on their public page." })}</li>
+            </ul>
+          </div>
+        </aside>
+        </div>
+
         {/* FOOTER */}
         <div className="flex flex-col gap-2 px-6 py-4 border-t border-border bg-background/40 mt-2">
           {!isValid && (
@@ -374,11 +472,21 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           >
             {loading
               ? t("teams_page.creating", { defaultValue: "Creating…" })
-              : t("teams_page.create", { defaultValue: "Create Team" })}
+              : t("teams_page.create_my_team", { defaultValue: "Create My Team" })}
           </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SectionLabel({ icon: Icon, text }: { icon: React.ComponentType<{ className?: string }>; text: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <Icon className="h-3.5 w-3.5 text-primary" />
+      <span className="font-display uppercase text-[11px] tracking-widest text-muted-foreground">{text}</span>
+      <div className="flex-1 h-px bg-border" />
+    </div>
   );
 }
