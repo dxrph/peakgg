@@ -293,6 +293,7 @@ export default function TeamDashboard() {
                     </div>
                   )}
                 </Card>
+            <Card className="p-5">
               <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground mb-3">Recent results</h3>
               {past.slice(0, 3).length === 0 ? (
                 <div>
