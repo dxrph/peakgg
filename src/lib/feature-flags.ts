@@ -14,3 +14,15 @@ export const openCupPublicQueueEnabled = true;
  * shares the Open Cup test queue (1v1) — see /tournaments.
  */
 export const rankedPublicBetaEnabled = true;
+
+/**
+ * Open Cup team size. 1 = current 1v1 test queue. 5 = future public 5v5
+ * solo queue. Switching this value (plus copy on /tournaments) is the only
+ * change required to flip Open Cup to 5v5 — the queue RPC, match_rosters,
+ * Match Room and ELO pipeline are all size-agnostic.
+ */
+export const openCupTeamSize: 1 | 5 = 1;
+
+/** "test_1v1" while openCupTeamSize === 1, "public_5v5" otherwise. */
+export const openCupQueueMode: "test_1v1" | "public_5v5" =
+  openCupTeamSize === 1 ? "test_1v1" : "public_5v5";
