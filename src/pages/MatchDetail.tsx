@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,6 +74,8 @@ export default function MatchDetailPage() {
   const [map, setMap] = useState("");
   const [notes, setNotes] = useState("");
   const [reason, setReason] = useState("");
+  const [reasonType, setReasonType] = useState<string>("wrong_result");
+  const [evidenceUrl, setEvidenceUrl] = useState("");
   const [busy, setBusy] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
@@ -267,13 +270,16 @@ export default function MatchDetailPage() {
     load();
   };
   const dispute = async () => {
-    if (!match || !reason) return toast.error("Reason required");
+    if (!match || !reasonType) return toast.error("Reason required");
+    const reasonText = `[${reasonType}] ${reason || ""}`.trim();
     setBusy(true);
-    const { error } = await supabase.rpc("dispute_match_result", { _match_id: match.id, _reason: reason, _evidence: null });
+    const { error } = await supabase.rpc("dispute_match_result", {
+      _match_id: match.id, _reason: reasonText, _evidence: evidenceUrl || null,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Dispute opened — admin will review");
-    setDisputeOpen(false); setReason(""); load();
+    toast.success("Dispute opened. An admin will review this match.");
+    setDisputeOpen(false); setReason(""); setEvidenceUrl(""); load();
   };
   const adminResolve = async () => {
     if (!match) return;
