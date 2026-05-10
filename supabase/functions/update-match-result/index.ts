@@ -222,7 +222,7 @@ Deno.serve(async (req) => {
 
     // Recalculate smurf risk for all participants (best-effort, non-blocking)
     for (const p of participants) {
-      await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }).catch(() => {});
+      try { await admin.rpc("recalculate_smurf_risk", { _user_id: p.userId }); } catch { /* ignore */ }
     }
 
     await admin.from("matches").update({ elo_processed_at: new Date().toISOString() }).eq("id", match.id);
