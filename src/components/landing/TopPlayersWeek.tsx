@@ -190,7 +190,10 @@ export default function TopPlayersWeek() {
 
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground mb-4 font-body italic">
-            {t("top_players.want_to_be_top")} <Link to="/register" className="text-primary hover:underline">{t("top_players.start_playing")}</Link>
+            {t("top_players.want_to_be_top")}{" "}
+            <Link to={user ? "/dashboard" : "/register"} className="text-primary hover:underline">
+              {t("top_players.start_playing")}
+            </Link>
           </p>
           <Link to="/leaderboard">
             <Button variant="neonOutline" size="lg" className="rounded-md">
