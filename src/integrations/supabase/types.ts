@@ -1698,39 +1698,56 @@ export type Database = {
       }
       scrim_requests: {
         Row: {
+          accepted_at: string | null
+          accepted_by: string | null
           challenger_team_id: string
           created_at: string
           format: string
           game: string
           id: string
+          match_id: string | null
           notes: string | null
           scheduled_date: string
           status: string
           target_team_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           challenger_team_id: string
           created_at?: string
           format?: string
           game?: string
           id?: string
+          match_id?: string | null
           notes?: string | null
           scheduled_date: string
           status?: string
           target_team_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           challenger_team_id?: string
           created_at?: string
           format?: string
           game?: string
           id?: string
+          match_id?: string | null
           notes?: string | null
           scheduled_date?: string
           status?: string
           target_team_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scrim_requests_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scrims: {
         Row: {
@@ -2620,6 +2637,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_scrim_request: { Args: { _request_id: string }; Returns: string }
       admin_resolve_match: {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
@@ -2664,6 +2682,10 @@ export type Database = {
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
       confirm_open_cup_result: {
         Args: { _match_id: string }
+        Returns: undefined
+      }
+      decline_scrim_request: {
+        Args: { _request_id: string }
         Returns: undefined
       }
       delete_email: {
