@@ -173,7 +173,10 @@ export default function TournamentsPage() {
   const joinQueue = async () => {
     if (!user) { navigate("/login?redirect=/tournaments"); return; }
     setJoining(true);
-    const { data, error } = await supabase.rpc("join_open_cup_queue", { _game: selectedGame, _team_size: teamSize });
+    const { data, error } = await supabase.rpc("enqueue_solo", {
+      _mode: "open_cup",
+      _game: selectedGame,
+    });
     setJoining(false);
     if (error) { toast.error(error.message); return; }
     const result = data as any;
@@ -292,7 +295,7 @@ export default function TournamentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">1v1 Test</Badge>
+                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">{teamSize}v{teamSize} {teamSize === 1 ? "Test" : "Beta"}</Badge>
                     <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
                       <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
                     </Button>

@@ -6,7 +6,7 @@ import RankBadge from "@/components/RankBadge";
 import EloProgressBar from "@/components/EloProgressBar";
 import { Clock, Swords, Users, MessageCircle, UserPlus, Trophy, Sparkles, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGame } from "@/lib/game-context";
 import { GAMES } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
@@ -14,8 +14,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { rankedPublicBetaEnabled } from "@/lib/feature-flags";
+import { rankedPublicBetaEnabled, competitiveQueues } from "@/lib/feature-flags";
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
+import { toast } from "sonner";
 
 export default function PlayPage() {
   const { selectedGame } = useGame();
@@ -25,6 +26,9 @@ export default function PlayPage() {
   const [elo, setElo] = useState<number | null>(null);
   const [matchesPlayed, setMatchesPlayed] = useState(0);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [joiningRanked, setJoiningRanked] = useState(false);
+  const navigate = useNavigate();
+  const rankedCfg = competitiveQueues.ranked;
 
   // Auto-redirect if user is matched while sitting on /play
   useMatchFoundListener();
@@ -163,10 +167,37 @@ export default function PlayPage() {
           </div>
 
           {rankedPublicBetaEnabled ? (
-            <Button variant="neon" size="lg" asChild className="mb-10">
-              <Link to={user ? "/tournaments#solo-path" : "/login?redirect=/tournaments"}>
-                <Swords className="h-4 w-4 mr-1.5" />Find Ranked Match (1v1 Beta)
-              </Link>
+            <Button
+              variant="neon"
+              size="lg"
+              className="mb-10"
+              disabled={joiningRanked}
+              onClick={async () => {
+                if (!user) {
+                  navigate("/login?redirect=/play");
+                  return;
+                }
+                setJoiningRanked(true);
+                const { data, error } = await supabase.rpc("enqueue_solo", {
+                  _mode: "ranked",
+                  _game: selectedGame,
+                });
+                setJoiningRanked(false);
+                if (error) {
+                  toast.error(error.message);
+                  return;
+                }
+                const r = data as any;
+                if (r?.status === "matched" && r.match_id) {
+                  toast.success("Match found!");
+                  navigate(`/matches/${r.match_id}`);
+                } else {
+                  toast.success(`You're in the Ranked queue (${rankedCfg.teamSize}v${rankedCfg.teamSize}).`);
+                }
+              }}
+            >
+              <Swords className="h-4 w-4 mr-1.5" />
+              {joiningRanked ? "Joining…" : `Find Ranked Match (${rankedCfg.teamSize}v${rankedCfg.teamSize} Beta)`}
             </Button>
           ) : (
             <Button variant="ghost" size="sm" disabled className="mb-10 opacity-70">

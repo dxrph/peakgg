@@ -283,6 +283,94 @@ export type Database = {
           },
         ]
       }
+      competitive_queue_group_members: {
+        Row: {
+          accepted: boolean
+          created_at: string
+          group_id: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          created_at?: string
+          group_id: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          created_at?: string
+          group_id?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitive_queue_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "competitive_queue_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitive_queue_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_party_size: number
+          desired_team_size: number
+          game: string
+          id: string
+          match_id: string | null
+          mode: string
+          permanent_team_id: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_party_size?: number
+          desired_team_size: number
+          game: string
+          id?: string
+          match_id?: string | null
+          mode: string
+          permanent_team_id?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_party_size?: number
+          desired_team_size?: number
+          game?: string
+          id?: string
+          match_id?: string | null
+          mode?: string
+          permanent_team_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitive_queue_groups_permanent_team_id_fkey"
+            columns: ["permanent_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -1007,25 +1095,37 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_fill: boolean
+          joined_from: string | null
           match_id: string
+          queue_group_id: string | null
           role: string
-          team_id: string
+          side: string | null
+          team_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          is_fill?: boolean
+          joined_from?: string | null
           match_id: string
+          queue_group_id?: string | null
           role?: string
-          team_id: string
+          side?: string | null
+          team_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          is_fill?: boolean
+          joined_from?: string | null
           match_id?: string
+          queue_group_id?: string | null
           role?: string
-          team_id?: string
+          side?: string | null
+          team_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2678,6 +2778,7 @@ export type Database = {
         Returns: boolean
       }
       cancel_open_cup_queue: { Args: never; Returns: undefined }
+      cancel_queue_group: { Args: { _group_id: string }; Returns: undefined }
       claim_match_for_elo: { Args: { _match_id: string }; Returns: boolean }
       close_season: { Args: { _season_id: string }; Returns: undefined }
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
@@ -2701,6 +2802,20 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      enqueue_full_team: {
+        Args: {
+          _game: string
+          _mode: string
+          _team_id: string
+          _user_ids: string[]
+        }
+        Returns: Json
+      }
+      enqueue_party: {
+        Args: { _game: string; _mode: string; _user_ids: string[] }
+        Returns: Json
+      }
+      enqueue_solo: { Args: { _game: string; _mode: string }; Returns: Json }
       generate_bracket: { Args: { _tournament_id: string }; Returns: undefined }
       generate_round_robin_fixtures: {
         Args: {
