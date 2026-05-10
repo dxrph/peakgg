@@ -601,6 +601,8 @@ function EmptyState({
   onCta,
   icon: Icon,
   compact = false,
+  secondaryLabel,
+  secondaryHref,
 }: {
   title: string;
   desc: string;
@@ -608,6 +610,8 @@ function EmptyState({
   onCta: () => void;
   icon: React.ComponentType<{ className?: string }>;
   compact?: boolean;
+  secondaryLabel?: string;
+  secondaryHref?: string;
 }) {
   return (
     <div
@@ -622,9 +626,18 @@ function EmptyState({
         <h3 className="font-display font-bold text-lg uppercase tracking-tight">{title}</h3>
         <p className="text-sm text-muted-foreground font-body mt-1 max-w-md mx-auto">{desc}</p>
       </div>
-      <Button variant="neon" size="sm" onClick={onCta}>
-        <Plus className="h-4 w-4 mr-1.5" /> {ctaLabel}
-      </Button>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <Button variant="neon" size="sm" onClick={onCta}>
+          <Plus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+        </Button>
+        {secondaryLabel && secondaryHref && (
+          <Button asChild variant="neonOutline" size="sm">
+            <a href={secondaryHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4 mr-1.5" />{secondaryLabel}
+            </a>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
