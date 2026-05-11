@@ -82,9 +82,8 @@ export default function AdminMatches() {
     const stuckList = ((dispMatches ?? []) as MatchRow[]).filter(m => !everDisputed.has(m.id) && !knownMatchIds.has(m.id));
     setStuck(stuckList);
 
-    const userIds = Array.from(new Set([
+    const userIds = Array.from(new Set<string>([
       ...list.map(x => x.opened_by),
-      ...Object.values(map(matchIds, matches)).flatMap((m: any) => [m?.player_a_id, m?.player_b_id]).filter(Boolean) as string[],
     ]));
     if (userIds.length) {
       const { data: ps } = await supabase.from("profiles").select("id,username").in("id", userIds);
@@ -94,9 +93,6 @@ export default function AdminMatches() {
     }
     setLoading(false);
   };
-
-  // helper kept inline to satisfy typescript; not used externally
-  function map<T>(_ids: string[], _src: Record<string, T>): Record<string, T> { return _src; }
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter]);
 
