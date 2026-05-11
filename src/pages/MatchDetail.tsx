@@ -583,7 +583,7 @@ export default function MatchDetailPage() {
                 <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4 mr-1.5" /> Report on Discord</a>
               </Button>
             )}
-            {canAdminResolve && <Button variant="secondary" onClick={() => setAdminOpen(true)} className="w-full sm:w-auto"><Gavel className="h-4 w-4 mr-1.5" /> Admin Resolve</Button>}
+            {canAdminResolve && <Button variant="secondary" onClick={openAdminResolve} className="w-full sm:w-auto"><Gavel className="h-4 w-4 mr-1.5" /> Admin Resolve</Button>}
           </div>
 
           {match.elo_processed_at && eloDeltas.length === 0 && (
@@ -594,14 +594,181 @@ export default function MatchDetailPage() {
           )}
         </Card>
 
-        {match.result_status === "pending_confirmation" && (
-          <Card className="p-4 mb-6 border-amber-500/40 bg-amber-500/5">
-            <p className="text-sm">A score was submitted by {submittedByMe ? "you" : "the opposing side"} — waiting for confirmation.</p>
+        {/* === RESULT STATUS PANEL === */}
+        <Card className="p-4 sm:p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Trophy className="h-4 w-4 text-primary" />
+            <h3 className="font-display uppercase tracking-wider text-sm">Result Status</h3>
+            <Badge variant="outline" className="ml-auto text-[10px]">{statusLabel}</Badge>
+          </div>
+          {(() => {
+            const submitterName = submitterProfile?.display_name ?? submitterProfile?.username ?? "—";
+            const submittedWinnerSide: "a" | "b" | null =
+              (match.score_a ?? 0) > (match.score_b ?? 0) ? "a"
+              : (match.score_b ?? 0) > (match.score_a ?? 0) ? "b" : null;
+            const submittedWinnerName = submittedWinnerSide
+              ? (submittedWinnerSide === "a"
+                  ? (playerA?.display_name ?? playerA?.username ?? teamA?.name ?? "Side A")
+                  : (playerB?.display_name ?? playerB?.username ?? teamB?.name ?? "Side B"))
+              : "Tie";
+            if (["scheduled","live","awaiting_result"].includes(match.result_status)) {
+              return <p className="text-sm text-muted-foreground">No result submitted yet. Play your match, then submit the result below.</p>;
+            }
+            if (match.result_status === "pending_confirmation") {
+              return (
+                <div className="space-y-2 text-sm">
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">Submitted winner: </span><span className="font-semibold text-foreground">{submittedWinnerName}</span></div>
+                    <div><span className="text-muted-foreground">Score: </span><span className="font-mono">{match.score_a ?? 0} – {match.score_b ?? 0}</span></div>
+                    <div><span className="text-muted-foreground">Submitted by: </span>{submitterName}</div>
+                    <div><span className="text-muted-foreground">When: </span>{match.scheduled_at ? new Date(match.scheduled_at).toLocaleString() : "—"}</div>
+                  </div>
+                  <p className="text-amber-400 text-xs mt-2">
+                    {submittedByMe ? "Waiting for the opposing side to confirm." : "Confirm this result, or open a dispute if it's wrong."}
+                  </p>
+                </div>
+              );
+            }
+            if (match.result_status === "disputed") {
+              return (
+                <div className="space-y-2 text-sm">
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">Submitted winner: </span><span className="font-semibold">{submittedWinnerName}</span></div>
+                    <div><span className="text-muted-foreground">Submitted score: </span><span className="font-mono">{match.score_a ?? 0} – {match.score_b ?? 0}</span></div>
+                    <div><span className="text-muted-foreground">Submitted by: </span>{submitterName}</div>
+                    <div><span className="text-destructive font-semibold">Awaiting admin resolution</span></div>
+                  </div>
+                </div>
+              );
+            }
+            if (match.result_status === "confirmed" || match.result_status === "admin_resolved") {
+              const winnerName = match.score_a === match.score_b
+                ? "Tie"
+                : ((match.score_a ?? 0) > (match.score_b ?? 0)
+                  ? (playerA?.display_name ?? playerA?.username ?? teamA?.name ?? "Side A")
+                  : (playerB?.display_name ?? playerB?.username ?? teamB?.name ?? "Side B"));
+              return (
+                <div className="space-y-2 text-sm">
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">Final winner: </span><span className="font-semibold text-success">{winnerName}</span></div>
+                    <div><span className="text-muted-foreground">Final score: </span><span className="font-mono">{match.score_a ?? 0} – {match.score_b ?? 0}</span></div>
+                    <div><span className="text-muted-foreground">{match.result_status === "admin_resolved" ? "Resolved by admin" : "Confirmed"}</span></div>
+                    <div><span className="text-muted-foreground">ELO: </span>{match.elo_processed_at ? <span className="text-success">Updated</span> : <span className="text-amber-400">Pending</span>}</div>
+                  </div>
+                </div>
+              );
+            }
+            return <p className="text-sm text-muted-foreground">Not provided.</p>;
+          })()}
+        </Card>
+
+        {/* === DISPUTE DETAILS === */}
+        {(match.result_status === "disputed" || disputes.length > 0) && (
+          <Card className={`p-4 sm:p-5 mb-6 ${match.result_status === "disputed" ? "border-destructive/40 bg-destructive/5" : ""}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <FileWarning className={`h-4 w-4 ${match.result_status === "disputed" ? "text-destructive" : "text-muted-foreground"}`} />
+              <h3 className="font-display uppercase tracking-wider text-sm">Dispute Details</h3>
+              {disputes.length > 1 && <Badge variant="outline" className="ml-auto text-[10px]">{disputes.length} disputes</Badge>}
+            </div>
+            {disputes.length === 0 ? (
+              <div className="flex items-start gap-2 text-sm text-amber-400">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>Match is marked disputed but no dispute record was found. Admin can still resolve manually.</span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {disputes.slice(0, 3).map(d => (
+                  <div key={d.id} className="rounded-lg border border-border bg-background/40 p-3 text-sm">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-xs text-muted-foreground">
+                        Opened by <span className="font-semibold text-foreground">{d.opener?.display_name ?? d.opener?.username ?? "—"}</span>
+                        {" · "}{new Date(d.created_at).toLocaleString()}
+                      </span>
+                      <Badge variant={d.status === "open" ? "destructive" : "outline"} className="text-[10px]">{d.status}</Badge>
+                    </div>
+                    {d.reason && <div className="text-foreground/90 break-words">{d.reason}</div>}
+                    {d.evidence_url && (
+                      <a href={d.evidence_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-primary hover:underline mt-1.5">
+                        View evidence ↗
+                      </a>
+                    )}
+                    {d.resolution_note && (
+                      <div className="mt-2 pt-2 border-t border-border/60 text-xs">
+                        <span className="text-muted-foreground">Resolution: </span>{d.resolution_note}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!isStaff && match.result_status === "disputed" && (
+                  <p className="text-xs text-muted-foreground">An admin will review this match. ELO is frozen until resolved.</p>
+                )}
+              </div>
+            )}
           </Card>
         )}
-        {match.result_status === "disputed" && (
-          <Card className="p-4 mb-6 border-destructive/40 bg-destructive/5">
-            <p className="text-sm">This match is disputed. Standings are frozen until admin resolution.</p>
+
+        {/* === ELO STATUS === */}
+        {isQueueMatch && (
+          <Card className="p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <h3 className="font-display uppercase tracking-wider text-sm">ELO Status</h3>
+            </div>
+            {(() => {
+              if (match.result_status === "disputed") return <p className="text-sm text-amber-400">ELO frozen until admin resolution.</p>;
+              if (["scheduled","live","awaiting_result"].includes(match.result_status)) return <p className="text-sm text-muted-foreground">ELO updates after result confirmation.</p>;
+              if (match.result_status === "pending_confirmation") return <p className="text-sm text-muted-foreground">No ELO has been awarded yet.</p>;
+              if ((match.result_status === "confirmed" || match.result_status === "admin_resolved") && !match.elo_processed_at) return <p className="text-sm text-muted-foreground">Processing ELO update…</p>;
+              if (match.elo_processed_at) {
+                if (eloDeltas.length === 0) return <p className="text-sm text-success">ELO updated.</p>;
+                return (
+                  <div className="space-y-1.5 text-sm">
+                    {eloDeltas.map(d => {
+                      const p = [...rosterA, ...rosterB, playerA, playerB].filter(Boolean).find((x: any) => x?.user_id === d.user_id) as PlayerInfo | undefined;
+                      const name = p?.display_name ?? p?.username ?? d.user_id.slice(0,6);
+                      const before = d.elo_after - d.delta;
+                      return (
+                        <div key={d.user_id} className="flex items-center justify-between gap-3">
+                          <span className="truncate">{name}</span>
+                          <span className="font-mono tabular-nums">
+                            {before} → {d.elo_after}{" "}
+                            <span className={d.delta >= 0 ? "text-success" : "text-destructive"}>({d.delta >= 0 ? "+" : ""}{d.delta})</span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </Card>
+        )}
+
+        {/* === ADMIN CONTROL PANEL === */}
+        {isStaff && (
+          <Card className="p-4 sm:p-5 mb-6 border-primary/30 bg-primary/5">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="h-4 w-4 text-primary" />
+              <h3 className="font-display uppercase tracking-wider text-sm">Admin Control Panel</h3>
+              <Badge variant="outline" className="ml-auto text-[10px] border-primary/40 text-primary">Staff only</Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2 text-xs text-muted-foreground mb-3">
+              <div>Status: <span className="text-foreground font-semibold">{statusLabel}</span></div>
+              <div>Open disputes: <span className="text-foreground font-semibold">{disputes.filter(d => d.status === "open").length}</span></div>
+              <div>Score: <span className="font-mono text-foreground">{match.score_a ?? 0} – {match.score_b ?? 0}</span></div>
+              <div>ELO processed: <span className="text-foreground">{match.elo_processed_at ? new Date(match.elo_processed_at).toLocaleString() : "No"}</span></div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {canAdminResolve && (
+                <Button size="sm" variant="secondary" onClick={openAdminResolve}>
+                  <Gavel className="h-4 w-4 mr-1.5" /> {match.result_status === "disputed" ? "Resolve Dispute" : "Resolve Match"}
+                </Button>
+              )}
+            </div>
+            {match.elo_processed_at && (
+              <p className="text-[11px] text-amber-400 mt-3">⚠ ELO has already been processed for this match. Resolving again will not re-process ELO.</p>
+            )}
           </Card>
         )}
 
