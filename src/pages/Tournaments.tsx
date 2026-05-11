@@ -10,6 +10,7 @@ import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, User, Lock, Sparkles, ArrowRight, Calendar,
   Target, Award, Shield, MessageCircle, Swords, Loader2, X, Zap,
+  TrendingUp, ChevronRight, Crown, Flame,
 } from "lucide-react";
 import { useGame } from "@/lib/game-context";
 import { GAMES, getRankByElo } from "@/lib/ranks";
@@ -23,6 +24,8 @@ import { toast } from "sonner";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { openCupPublicQueueEnabled, openCupTeamSize } from "@/lib/feature-flags";
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
+import RankBadge from "@/components/RankBadge";
+import QueueLobby from "@/components/competitive/QueueLobby";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
