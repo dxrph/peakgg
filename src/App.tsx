@@ -25,9 +25,6 @@ import AdminTournaments from "./pages/admin/sections/AdminTournaments";
 import AdminMatches from "./pages/admin/sections/AdminMatches";
 import AdminTickets from "./pages/admin/sections/AdminTickets";
 import AdminPlayers from "./pages/admin/sections/AdminPlayers";
-import AdminTeams from "./pages/admin/sections/AdminTeams";
-import AdminCommunication from "./pages/admin/sections/AdminCommunication";
-import AdminAnalytics from "./pages/admin/sections/AdminAnalytics";
 import AdminReputation from "./pages/admin/sections/AdminReputation";
 import AdminDisputes from "./pages/admin/sections/AdminDisputes";
 import AdminScrims from "./pages/admin/sections/AdminScrims";
@@ -109,9 +106,6 @@ const App = () => (
               <Route path="/admin/scrims" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminScrims /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/chat" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminChat /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/players" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminPlayers /></RoleGuard></ProtectedRoute>} />
-              <Route path="/admin/teams" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTeams /></RoleGuard></ProtectedRoute>} />
-              <Route path="/admin/communication" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminCommunication /></RoleGuard></ProtectedRoute>} />
-              <Route path="/admin/analytics" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminAnalytics /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/reputation" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminReputation /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/economy" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminEconomy /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminAnnouncements /></RoleGuard></ProtectedRoute>} />

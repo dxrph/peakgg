@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound, Mountain,
-  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
+  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, Mountain,
+  Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -20,16 +20,13 @@ const SECTIONS: Section[] = [
   { id: "dashboard",     label: "Dashboard",     icon: LayoutDashboard, to: "/admin",                allow: ["admin", "moderator", "organizer"] },
   { id: "tournaments",   label: "Tornei",        icon: Trophy,          to: "/admin/tournaments",    allow: ["admin", "organizer"] },
   { id: "leagues",       label: "Peak League",   icon: Mountain,        to: "/admin/leagues",        allow: ["admin"] },
-  { id: "matches",       label: "Partite",       icon: Swords,          to: "/admin/matches",        allow: ["admin", "organizer"] },
+  { id: "matches",       label: "Match monitor", icon: Swords,          to: "/admin/matches",        allow: ["admin", "moderator", "organizer"] },
   { id: "tickets",       label: "Ticket",        icon: AlertTriangle,   to: "/admin/tickets",        allow: ["admin", "moderator"] },
   { id: "disputes",      label: "Dispute",       icon: Gavel,           to: "/admin/disputes",       allow: ["admin", "moderator"] },
   { id: "scrims",        label: "Scrims",        icon: Target,          to: "/admin/scrims",         allow: ["admin", "moderator"] },
   { id: "chat",          label: "Chat",          icon: MessageSquare,   to: "/admin/chat",           allow: ["admin", "moderator"] },
   { id: "announcements", label: "Annunci",       icon: Bell,            to: "/admin/announcements",  allow: ["admin", "moderator"] },
   { id: "players",       label: "Player",        icon: Users,           to: "/admin/players",        allow: ["admin", "moderator"] },
-  { id: "teams",         label: "Team",          icon: UsersRound,      to: "/admin/teams",          allow: ["admin", "moderator"] },
-  { id: "comms",         label: "Comunicazione", icon: Megaphone,       to: "/admin/communication",  allow: ["admin", "moderator"] },
-  { id: "analytics",     label: "Analytics",     icon: BarChart3,       to: "/admin/analytics",      allow: ["admin", "organizer"] },
   { id: "reputation",    label: "Reputazione",   icon: Star,            to: "/admin/reputation",     allow: ["admin", "moderator"] },
   { id: "economy",       label: "Economia",      icon: Coins,           to: "/admin/economy",        allow: ["admin"] },
   { id: "seasons",       label: "Stagioni",      icon: CalendarRange,   to: "/admin/seasons",        allow: ["admin"] },

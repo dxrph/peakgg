@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Users, Swords, AlertTriangle, UsersRound, Trophy, Ban,
-  TrendingUp, Activity,
+  TrendingUp, Activity, Gavel, Hourglass,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,10 @@ type Stats = {
   activeTeams: number;
   liveTournaments: number;
   bannedPlayers: number;
+  openDisputes: number;
+  pendingMatches: number;
+  disputedMatches: number;
+  queueWaiting: number;
   signupsLast30: { day: string; count: number }[];
   rankDist: { rank: string; count: number }[];
 };
@@ -57,6 +61,10 @@ export default function AdminDashboard() {
         bannedRes,
         signupsRes,
         eloRes,
+        openDisputesRes,
+        pendingMatchesRes,
+        disputedMatchesRes,
+        queueRes,
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("matches").select("id", { count: "exact", head: true }).gte("created_at", todayISO),
@@ -66,6 +74,10 @@ export default function AdminDashboard() {
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_banned", true),
         supabase.from("profiles").select("created_at").gte("created_at", since30).order("created_at", { ascending: true }),
         supabase.from("player_stats").select("elo").eq("game", "valorant"),
+        supabase.from("match_disputes").select("id", { count: "exact", head: true }).eq("status", "open"),
+        supabase.from("matches").select("id", { count: "exact", head: true }).eq("result_status", "pending_confirmation"),
+        supabase.from("matches").select("id", { count: "exact", head: true }).eq("result_status", "disputed"),
+        supabase.from("open_cup_queue").select("user_id", { count: "exact", head: true }),
       ]);
 
       if (cancelled) return;
@@ -98,6 +110,10 @@ export default function AdminDashboard() {
         activeTeams: teamsRes.count ?? 0,
         liveTournaments: liveToursRes.count ?? 0,
         bannedPlayers: bannedRes.count ?? 0,
+        openDisputes: openDisputesRes.count ?? 0,
+        pendingMatches: pendingMatchesRes.count ?? 0,
+        disputedMatches: disputedMatchesRes.count ?? 0,
+        queueWaiting: queueRes.count ?? 0,
         signupsLast30,
         rankDist,
       });
@@ -120,6 +136,31 @@ export default function AdminDashboard() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <StatCard
+              icon={Gavel}
+              label="Open disputes"
+              value={stats.openDisputes}
+              badge={stats.openDisputes > 0 ? <Badge className="bg-destructive/20 text-destructive border-destructive/30">action</Badge> : undefined}
+              to="/admin/disputes"
+            />
+            <StatCard
+              icon={Hourglass}
+              label="Pending confirmation"
+              value={stats.pendingMatches}
+              to="/admin/matches"
+            />
+            <StatCard
+              icon={Swords}
+              label="Disputed matches"
+              value={stats.disputedMatches}
+              badge={stats.disputedMatches > 0 ? <Badge className="bg-warning/20 text-warning border-warning/30">{stats.disputedMatches}</Badge> : undefined}
+              to="/admin/matches"
+            />
+            <StatCard
+              icon={Activity}
+              label="In queue now"
+              value={stats.queueWaiting}
+            />
             <StatCard icon={Users}        label="Player totali"   value={stats.totalPlayers} />
             <StatCard icon={Activity}     label="Partite oggi"    value={stats.matchesToday} />
             <StatCard
