@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, UsersRound, Mountain,
-  Megaphone, BarChart3, Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
+  LayoutDashboard, Trophy, Swords, AlertTriangle, Users, Mountain,
+  Star, ShieldAlert, Gavel, Target, MessageSquare, Bell, Coins, CalendarRange, TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
