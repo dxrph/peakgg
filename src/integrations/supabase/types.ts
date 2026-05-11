@@ -2742,10 +2742,22 @@ export type Database = {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
       }
-      admin_resolve_open_cup_match: {
-        Args: { _match_id: string; _score_a: number; _score_b: number }
-        Returns: undefined
-      }
+      admin_resolve_open_cup_match:
+        | {
+            Args: { _match_id: string; _score_a: number; _score_b: number }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _match_id: string
+              _notes?: string
+              _reason?: string
+              _score_a: number
+              _score_b: number
+              _winner_user_id?: string
+            }
+            Returns: undefined
+          }
       apply_elo_decay: {
         Args: never
         Returns: {
