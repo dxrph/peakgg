@@ -936,17 +936,116 @@ export default function MatchDetailPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={adminOpen} onOpenChange={setAdminOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Admin Resolve</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>{is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Team A")}</Label><Input type="number" min={0} value={scoreA} onChange={e => setScoreA(parseInt(e.target.value || "0"))} /></div>
-              <div><Label>{is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Team B")}</Label><Input type="number" min={0} value={scoreB} onChange={e => setScoreB(parseInt(e.target.value || "0"))} /></div>
+      <Dialog open={adminOpen} onOpenChange={(o) => { setAdminOpen(o); if (!o) setAdminConfirmStep(false); }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Gavel className="h-4 w-4 text-primary" /> Admin Resolve Match
+            </DialogTitle>
+          </DialogHeader>
+          {!adminConfirmStep ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-xs rounded-lg border border-border bg-secondary/20 p-3">
+                <div>
+                  <div className="text-muted-foreground">Side A</div>
+                  <div className="font-display uppercase truncate">{is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Team A")}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-muted-foreground">Side B</div>
+                  <div className="font-display uppercase truncate">{is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Team B")}</div>
+                </div>
+                <div className="col-span-2 pt-2 border-t border-border/50">
+                  <span className="text-muted-foreground">Submitted: </span>
+                  <span className="font-mono">{match.score_a ?? 0} – {match.score_b ?? 0}</span>
+                  {disputes[0]?.reason && <span className="text-muted-foreground"> · Dispute: <span className="text-foreground">{disputes[0].reason}</span></span>}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">ELO processed: </span>
+                  <span className={match.elo_processed_at ? "text-amber-400" : "text-foreground"}>{match.elo_processed_at ? "Yes" : "No"}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Winner</Label>
+                <RadioGroup value={adminWinner} onValueChange={(v) => {
+                  const w = v as "a" | "b";
+                  setAdminWinner(w);
+                  if (is1v1) { setAdminScoreA(w === "a" ? 1 : 0); setAdminScoreB(w === "b" ? 1 : 0); }
+                }} className="grid grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2 rounded-lg border border-border p-3 cursor-pointer hover:bg-secondary/40">
+                    <RadioGroupItem value="a" id="aw-a" />
+                    <span className="font-display uppercase text-sm truncate">{is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Team A")}</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-border p-3 cursor-pointer hover:bg-secondary/40">
+                    <RadioGroupItem value="b" id="aw-b" />
+                    <span className="font-display uppercase text-sm truncate">{is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Team B")}</span>
+                  </label>
+                </RadioGroup>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Score A</Label>
+                  <Input type="number" min={0} value={adminScoreA} onChange={e => setAdminScoreA(Math.max(0, parseInt(e.target.value || "0")))} />
+                </div>
+                <div>
+                  <Label>Score B</Label>
+                  <Input type="number" min={0} value={adminScoreB} onChange={e => setAdminScoreB(Math.max(0, parseInt(e.target.value || "0")))} />
+                </div>
+              </div>
+              {(adminScoreA !== adminScoreB) && ((adminScoreA > adminScoreB ? "a" : "b") !== adminWinner) && (
+                <p className="text-xs text-amber-400">⚠ Score and selected winner do not match.</p>
+              )}
+
+              <div>
+                <Label className="mb-1.5 block">Reason</Label>
+                <Select value={adminReason} onValueChange={setAdminReason}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dispute_resolved">Dispute resolved</SelectItem>
+                    <SelectItem value="no_show">No-show</SelectItem>
+                    <SelectItem value="wrong_result">Wrong result submitted</SelectItem>
+                    <SelectItem value="screenshot_evidence">Screenshot evidence</SelectItem>
+                    <SelectItem value="admin_correction">Admin correction</SelectItem>
+                    <SelectItem value="technical_issue">Technical issue</SelectItem>
+                    <SelectItem value="elo_not_updated">ELO not updated</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block">Resolution notes (optional)</Label>
+                <Textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={2} placeholder="Visible to both players in their notification" />
+              </div>
+
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setAdminOpen(false)}>Cancel</Button>
+                <Button onClick={() => setAdminConfirmStep(true)} disabled={!adminReason || adminScoreA === adminScoreB}>
+                  Continue
+                </Button>
+              </DialogFooter>
             </div>
-            <p className="text-xs text-muted-foreground">This overrides the result and recomputes ELO/standings.</p>
-          </div>
-          <DialogFooter><Button onClick={adminResolve} disabled={busy}>Resolve</Button></DialogFooter>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+                You are about to resolve this match as <span className="font-semibold">
+                  {adminWinner === "a"
+                    ? (is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Team A"))
+                    : (is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Team B"))}
+                </span> win, <span className="font-mono">{adminScoreA} – {adminScoreB}</span>.
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {match.elo_processed_at ? "ELO will NOT be re-processed (already processed)." : "ELO will be processed once."} Both players will be notified.
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setAdminConfirmStep(false)} disabled={busy}>Back</Button>
+                <Button onClick={adminResolve} disabled={busy}>
+                  <Check className="h-4 w-4 mr-1.5" /> Confirm Resolve
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
