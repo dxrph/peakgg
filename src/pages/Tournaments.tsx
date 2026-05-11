@@ -245,233 +245,344 @@ export default function TournamentsPage() {
     );
   }
 
+  // Derived progress to next tier — used by the My Progress card.
+  const nextTierName = myElo < CHALLENGER_ELO ? "Challenger Series" : myElo < CHAMPIONSHIP_ELO ? "Peak Championship" : null;
+  const nextTierThreshold = myElo < CHALLENGER_ELO ? CHALLENGER_ELO : myElo < CHAMPIONSHIP_ELO ? CHAMPIONSHIP_ELO : null;
+  const nextTierFloor = myElo < CHALLENGER_ELO ? 0 : myElo < CHAMPIONSHIP_ELO ? CHALLENGER_ELO : CHAMPIONSHIP_ELO;
+  const tierProgressPct = nextTierThreshold
+    ? Math.min(100, Math.max(0, Math.round(((myElo - nextTierFloor) / (nextTierThreshold - nextTierFloor)) * 100)))
+    : 100;
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {seo}
       <Navbar />
 
       <main className="container pt-24 pb-16 flex-1">
-        {/* HERO */}
-        <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-12 mb-12 neon-border">
+        {/* HERO — premium 2-col with My Progress card */}
+        <section className="relative overflow-hidden rounded-2xl border border-border gradient-hero mb-12 neon-border">
           <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none"
+            className="absolute inset-0 opacity-[0.07] pointer-events-none"
             style={{
               backgroundImage:
                 "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
+              backgroundSize: "56px 56px",
+              maskImage: "radial-gradient(ellipse at 30% 20%, black 0%, transparent 75%)",
             }}
           />
-          <div className="relative max-w-3xl">
-            <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase tracking-widest text-[10px] mb-4">
-              Season 0 Beta · Unified Competitive Path
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
-              Start in Open Cup. <span className="text-primary">Climb with ELO.</span><br />Unlock Challenger. Qualify for Championship.
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground font-body mt-4">
-              One ladder. Three tiers. Every match moves you closer to the top.
-            </p>
-            <p className="text-xs text-muted-foreground/80 font-body mt-2 italic">
-              PeakGG ranked progression happens through Open Cup. There is no separate Ranked mode.
-            </p>
+          <div
+            className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsl(352 100% 62% / 0.18), transparent 60%)" }}
+          />
+          <div
+            className="absolute -bottom-40 -left-20 w-[420px] h-[420px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsl(24 100% 63% / 0.12), transparent 60%)" }}
+          />
 
-            {/* Open Cup Queue widget */}
-            {queueEnabled ? (
-            <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
-              {activeMatch ? (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-success">Active Open Cup match</div>
-                    <div className="text-sm font-body text-muted-foreground">Status: {activeMatch.result_status}</div>
-                  </div>
-                  <Link to={`/matches/${activeMatch.id}`}>
-                    <Button variant="neon" size="sm" className="uppercase tracking-wider">Open Match<ArrowRight className="ml-2 h-3 w-3" /></Button>
-                  </Link>
-                </div>
-              ) : queueEntry ? (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    <div>
-                      <div className="text-[10px] font-display uppercase tracking-widest text-primary">Searching for opponents</div>
-                      <div className="text-sm font-body text-muted-foreground">{queueEntry.team_size}v{queueEntry.team_size} · {queueEntry.game}</div>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={cancelQueue}><X className="h-3 w-3 mr-1.5" />Cancel</Button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">
-                      Solo Queue · Open Cup {isAdmin && !openCupPublicQueueEnabled && <span className="text-accent ml-1">· Admin Test</span>}
-                    </div>
-                    <div className="text-sm font-body">
-                      {user ? <>Your ELO: <span className="text-foreground font-medium">{myElo}</span> · Rank: <span style={{color: myRank.hex}}>{myRank.name}</span></> : "Sign in to play your first Open Cup match"}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase text-[10px]">{teamSize}v{teamSize} {teamSize === 1 ? "Test" : "Beta"}</Badge>
-                    <Button variant="neon" size="sm" onClick={joinQueue} disabled={joining} className="uppercase tracking-wider">
-                      <Zap className="h-3 w-3 mr-1.5" />Join Open Cup
-                    </Button>
-                  </div>
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 md:p-12 items-center">
+            {/* LEFT — title + CTAs */}
+            <div className="lg:col-span-7">
+              <div className="flex flex-wrap items-center gap-2 mb-5">
+                <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase tracking-widest text-[10px]">
+                  <Flame className="h-3 w-3 mr-1" />Season 0 Beta
+                </Badge>
+                <Badge variant="outline" className="border-border text-muted-foreground font-display uppercase tracking-widest text-[10px]">
+                  Unified Competitive Path
+                </Badge>
+              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight leading-[1.05]">
+                Your climb <br className="hidden sm:block" />
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">starts here.</span>
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground font-body mt-5 max-w-xl">
+                Play Open Cup, gain ELO, unlock Challenger and fight for a place in the Peak Championship.
+              </p>
+              <p className="text-xs text-muted-foreground/70 font-body mt-2 italic">
+                Final public format: 5v5 solo queue. Current test size: {teamSize}v{teamSize}.
+              </p>
+
+              {/* CTA row */}
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                {queueEnabled && !queueEntry && !activeMatch && (
+                  <Button
+                    variant="neon" size="lg" onClick={joinQueue} disabled={joining}
+                    className="shadow-xl shadow-primary/30"
+                  >
+                    <Zap className="h-4 w-4 mr-1" />
+                    {joining ? "Joining…" : "Join Open Cup"}
+                  </Button>
+                )}
+                {!queueEnabled && (
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <Button variant="neon" size="lg"><MessageCircle className="h-4 w-4 mr-1" />Join Discord for Beta</Button>
+                  </a>
+                )}
+                {activeMatch && (
+                  <Button variant="neon" size="lg" asChild>
+                    <Link to={`/matches/${activeMatch.id}`}>
+                      <Swords className="h-4 w-4 mr-1" />Open Match<ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="neonOutline" size="lg" asChild>
+                  <Link to="/leaderboard"><TrendingUp className="h-4 w-4 mr-1" />View Leaderboard</Link>
+                </Button>
+              </div>
+
+              {/* Active queue lobby — replaces hero CTA when queued */}
+              {queueEntry && !activeMatch && (
+                <div className="mt-6">
+                  <QueueLobby
+                    mode="open_cup"
+                    game={queueEntry.game}
+                    teamSize={queueEntry.team_size}
+                    joinedAt={queueEntry.joined_at}
+                    myElo={user ? myElo : null}
+                    onCancel={cancelQueue}
+                  />
                 </div>
               )}
             </div>
-            ) : (
-              <div className="mt-6 rounded-xl border border-primary/30 bg-secondary/40 p-4 max-w-2xl">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-accent">Closed Beta</div>
-                    <div className="text-sm font-body text-muted-foreground">
-                      Open Cup matchmaking is in closed beta. Join Discord to access early tests.
+
+            {/* RIGHT — My Progress card */}
+            <div className="lg:col-span-5">
+              {user ? (
+                <div className="relative rounded-2xl border border-primary/30 bg-card/80 backdrop-blur p-5 sm:p-6 shadow-xl shadow-primary/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Your Progress</div>
+                    <Badge variant="outline" className="border-success/40 text-success font-display uppercase text-[10px]">Tier 1 · Open Cup</Badge>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <RankBadge elo={myElo} size="lg" />
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-2xl uppercase leading-none" style={{ color: myRank.hex }}>
+                        {myRank.name}
+                      </div>
+                      <div className="font-mono text-sm text-muted-foreground mt-1">{myElo} ELO</div>
+                      {myStats && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {myStats.wins ?? 0}W · {myStats.losses ?? 0}L · {myStats.matches_played ?? 0} matches
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                    <Button variant="neon" size="sm" className="uppercase tracking-wider">
-                      <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord for Open Cup Beta
-                    </Button>
-                  </a>
+
+                  <div className="mt-5">
+                    {nextTierName ? (
+                      <>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Next Unlock</span>
+                          <span className="text-xs font-display uppercase text-foreground">{nextTierName}</span>
+                        </div>
+                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${tierProgressPct}%`,
+                              background: "linear-gradient(90deg, hsl(352 100% 62%), hsl(24 100% 63%))",
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-1.5 text-[11px] text-muted-foreground font-mono">
+                          <span>{myElo} / {nextTierThreshold} ELO</span>
+                          <span className="text-accent">{Math.max(0, nextTierThreshold! - myElo)} to go</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="rounded-md border border-accent/30 bg-accent/5 p-3 text-center">
+                        <Crown className="h-5 w-5 text-accent mx-auto mb-1" />
+                        <div className="text-sm font-display uppercase text-accent">Championship Eligible</div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+                    <div className="rounded-md border border-border bg-secondary/40 p-2">
+                      <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Challenger</div>
+                      <div className="text-sm font-mono mt-0.5">{CHALLENGER_ELO} ELO</div>
+                    </div>
+                    <div className="rounded-md border border-border bg-secondary/40 p-2">
+                      <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Championship</div>
+                      <div className="text-sm font-mono mt-0.5">{CHAMPIONSHIP_ELO} ELO</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="relative rounded-2xl border border-border bg-card/80 backdrop-blur p-6 text-center">
+                  <div className="w-14 h-14 mx-auto rounded-full gradient-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/30">
+                    <Trophy className="h-7 w-7 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg uppercase">Track your climb</h3>
+                  <p className="text-sm text-muted-foreground font-body mt-1">
+                    Create an account to track your ELO and unlock competitive tiers.
+                  </p>
+                  <Button variant="neon" size="sm" className="mt-4" asChild>
+                    <Link to="/register">Create Account<ArrowRight className="ml-1 h-3 w-3" /></Link>
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* TWO PATHS OVERVIEW */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
-          <div className="rounded-xl border border-success/30 bg-card p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-success/15 border border-success/40 flex items-center justify-center">
-                <User className="h-5 w-5 text-success" />
-              </div>
-              <h2 className="text-2xl font-display font-bold">Solo Queue Cups</h2>
-            </div>
-            <p className="text-sm text-muted-foreground font-body">
-              Join alone. We create a temporary team for the cup. Each confirmed result updates your personal ELO.
-            </p>
-          </div>
-          <div className="rounded-xl border border-primary/30 bg-card p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-primary/15 border border-primary/40 flex items-center justify-center">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <h2 className="text-2xl font-display font-bold">Team Tournaments</h2>
-            </div>
-            <p className="text-sm text-muted-foreground font-body">
-              Captain registers a full roster. Results count for the team — built for orgs and established lineups. Coming after Season 0 Beta.
-            </p>
-          </div>
-        </section>
-
-        {/* SOLO QUEUE PATH */}
-        <section id="solo-path" className="mb-14">
+        {/* COMPETITIVE PATH — 3 connected tier cards */}
+        <section id="solo-path" className="mb-16">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
             <div>
-              <h2 className="text-3xl font-display font-bold uppercase tracking-tight">Solo Queue Cup Path</h2>
-              <p className="text-sm text-muted-foreground font-body mt-1">Three tiers. Climb with ELO from confirmed results.</p>
+              <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight">Choose your next climb</h2>
+              <p className="text-sm text-muted-foreground font-body mt-1">One ladder. Three tiers. Every match matters.</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Connector line behind cards (desktop only) */}
+          <div className="relative">
+            <div
+              className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px pointer-events-none"
+              style={{ background: "linear-gradient(90deg, hsl(var(--success)/0.5), hsl(var(--accent)/0.5), hsl(var(--primary)/0.5))" }}
+            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative">
             {SOLO_TIERS.map((tier, i) => {
               const Icon = tier.icon;
               const isOpen = tier.id === "open";
-              const unlocked = tier.id === "open"
+              const eligible = tier.id === "open"
                 ? true
                 : tier.id === "challenger" ? myElo >= CHALLENGER_ELO
                 : myElo >= CHAMPIONSHIP_ELO;
               const progressTo = tier.id === "challenger" ? CHALLENGER_ELO : tier.id === "championship" ? CHAMPIONSHIP_ELO : null;
+              const isCurrent = isOpen; // only Open Cup is currently active
+              const tierTone =
+                tier.id === "open" ? "from-success/30 to-success/0 border-success/50"
+                : tier.id === "challenger" ? "from-accent/30 to-accent/0 border-accent/40"
+                : "from-primary/30 to-primary/0 border-primary/40";
+              const iconTone =
+                tier.id === "open" ? "bg-success/15 text-success border-success/40"
+                : tier.id === "challenger" ? "bg-accent/15 text-accent border-accent/40"
+                : "bg-primary/15 text-primary border-primary/40";
               return (
                 <div
                   key={tier.id}
-                  className={`relative rounded-xl border bg-card p-6 flex flex-col transition-all hover:border-primary/40 ${
-                    !unlocked && !isOpen ? "opacity-90" : ""
-                  } ${i === 0 ? "border-success/30" : "border-border"}`}
+                  className={`group relative rounded-2xl border bg-card p-6 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
+                    isCurrent
+                      ? "border-success/50 shadow-xl shadow-success/10"
+                      : "border-border hover:border-primary/40"
+                  }`}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-lg border flex items-center justify-center ${tier.accent} bg-card`}>
-                      <Icon className="h-6 w-6" />
+                  {/* Glow halo for current tier */}
+                  {isCurrent && (
+                    <div className={`absolute -inset-px rounded-2xl bg-gradient-to-b ${tierTone} opacity-60 pointer-events-none`} />
+                  )}
+                  {/* Tier number ribbon */}
+                  <div className="relative flex items-center justify-between mb-4">
+                    <div className={`w-14 h-14 rounded-xl border-2 flex items-center justify-center ${iconTone} shadow-md`}>
+                      <Icon className="h-7 w-7" />
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={`font-display text-[10px] uppercase tracking-wider ${tier.accent}`}
-                    >
-                      {!unlocked && !isOpen && <Lock className="h-3 w-3 mr-1" />}
-                      {isOpen ? "Open · Beta" : (unlocked ? "Unlocked" : tier.status)}
-                    </Badge>
-                  </div>
-                  <h3 className="text-xl font-display font-bold uppercase">{tier.name}</h3>
-                  <p className="text-xs font-display uppercase tracking-wider text-muted-foreground mt-1">
-                    Tier {i + 1}
-                  </p>
-                  <p className="text-sm text-muted-foreground font-body mt-3">{tier.tagline}</p>
-
-                  <div className="mt-4 rounded-md border border-border bg-secondary/30 p-3">
-                    <p className="text-[10px] font-display uppercase tracking-wider text-muted-foreground mb-1">Requirement</p>
-                    <p className="text-sm font-body">{tier.unlock}</p>
-                    {user && progressTo && !unlocked && (
-                      <p className="text-[11px] mt-1 text-muted-foreground">{myElo} / {progressTo} ELO</p>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex-1">
-                    <p className="text-[10px] font-display uppercase tracking-wider text-muted-foreground mb-2">Rewards</p>
-                    <ul className="space-y-1.5">
-                      {tier.rewards.map(r => (
-                        <li key={r} className="flex items-center gap-2 text-sm font-body">
-                          <Award className="h-3.5 w-3.5 text-accent shrink-0" />
-                          <span>{r}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-5">
-                    {isOpen ? (
-                      queueEnabled ? (
-                        <Button variant="neon" className="w-full uppercase tracking-wider" onClick={joinQueue} disabled={joining || !!queueEntry || !!activeMatch}>
-                          {activeMatch ? "Match in progress" : queueEntry ? "In queue…" : (isAdmin && !openCupPublicQueueEnabled ? "Join Open Cup (Admin Test)" : "Join Open Cup")}<ArrowRight className="ml-2 h-3 w-3" />
-                        </Button>
+                    <div className="text-right">
+                      <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Tier {i + 1}</div>
+                      {isCurrent ? (
+                        <Badge variant="outline" className="border-success/40 text-success font-display text-[10px] uppercase tracking-wider mt-1">
+                          <Flame className="h-3 w-3 mr-1" />Live · Open Beta
+                        </Badge>
+                      ) : eligible ? (
+                        <Badge variant="outline" className="border-accent/40 text-accent font-display text-[10px] uppercase tracking-wider mt-1">
+                          Eligible · Coming Soon
+                        </Badge>
                       ) : (
-                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
-                          <Button variant="neon" className="w-full uppercase tracking-wider">
-                            <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord for Open Cup Beta
-                          </Button>
-                        </a>
-                      )
-                    ) : unlocked ? (
-                      <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
-                        Coming Soon
-                      </Button>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        <Button variant="neonOutline" className="w-full uppercase tracking-wider" disabled>
-                          <Lock className="h-3 w-3 mr-1.5" />{tier.id === "championship" ? "Invite-only" : "Locked"}
-                        </Button>
-                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
-                          <Button variant="ghost" size="sm" className="w-full uppercase tracking-wider text-xs">
-                            <MessageCircle className="h-3 w-3 mr-1.5" />Join Discord
-                          </Button>
-                        </a>
+                        <Badge variant="outline" className="border-border text-muted-foreground font-display text-[10px] uppercase tracking-wider mt-1">
+                          <Lock className="h-3 w-3 mr-1" />{tier.id === "championship" ? "Invite-only" : "Locked"}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <h3 className="relative text-2xl font-display font-bold uppercase tracking-tight">{tier.name}</h3>
+                  <p className="relative text-xs text-muted-foreground font-body mt-1">
+                    {tier.id === "open" && "Open to everyone · Affects ELO"}
+                    {tier.id === "challenger" && `Requires ${CHALLENGER_ELO}+ ELO`}
+                    {tier.id === "championship" && `Requires ${CHAMPIONSHIP_ELO}+ ELO or Challenger qualification`}
+                  </p>
+
+                  <div className="relative mt-4 rounded-lg border border-border/60 bg-secondary/30 p-3 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-body">
+                      <span className="text-muted-foreground">Format</span>
+                      <span className="text-foreground">{tier.id === "open" ? `${teamSize}v${teamSize} Test` : "5v5 (planned)"}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-body">
+                      <span className="text-muted-foreground">Stakes</span>
+                      <span className="text-foreground">{tier.id === "open" ? "+25 / −15 ELO" : tier.id === "challenger" ? "Higher ELO swings" : "Season glory"}</span>
+                    </div>
+                    {user && progressTo && !eligible && (
+                      <div className="pt-2 border-t border-border/60">
+                        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                          <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${Math.min(100, Math.round((myElo / progressTo) * 100))}%` }} />
+                        </div>
+                        <div className="text-[10px] text-muted-foreground font-mono mt-1">{myElo} / {progressTo} ELO</div>
                       </div>
                     )}
                   </div>
+
+                  <div className="relative mt-4 flex-1">
+                    <p className="text-sm text-muted-foreground font-body">{tier.tagline}</p>
+                  </div>
+
+                  <div className="relative mt-5">
+                    {isOpen ? (
+                      queueEnabled ? (
+                        activeMatch ? (
+                          <Button variant="neon" className="w-full" asChild>
+                            <Link to={`/matches/${activeMatch.id}`}>Open Match<ArrowRight className="ml-1 h-3 w-3" /></Link>
+                          </Button>
+                        ) : queueEntry ? (
+                          <Button variant="neonOutline" className="w-full" disabled>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />In Queue
+                          </Button>
+                        ) : (
+                          <Button variant="neon" className="w-full" onClick={joinQueue} disabled={joining}>
+                            <Zap className="h-3 w-3 mr-1" />Join Open Cup<ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        )
+                      ) : (
+                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
+                          <Button variant="neon" className="w-full">
+                            <MessageCircle className="h-3 w-3 mr-1" />Join Discord
+                          </Button>
+                        </a>
+                      )
+                    ) : eligible ? (
+                      <Button variant="neonOutline" className="w-full" disabled>
+                        <Crown className="h-3 w-3 mr-1" />{tier.id === "championship" ? "Championship Eligible" : "Eligible · Coming Soon"}
+                      </Button>
+                    ) : (
+                      <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="block">
+                        <Button variant="neonOutline" className="w-full">
+                          <MessageCircle className="h-3 w-3 mr-1" />View Path on Discord
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Path arrow connector (desktop only, between cards) */}
+                  {i < SOLO_TIERS.length - 1 && (
+                    <div className="hidden md:flex absolute top-12 -right-3 z-10 w-6 h-6 rounded-full bg-card border border-border items-center justify-center">
+                      <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
+          </div>
         </section>
 
-        {/* HOW IT WORKS */}
-        <section className="mb-14">
-          <h2 className="text-3xl font-display font-bold uppercase tracking-tight mb-6">How Solo Queue Cups Work</h2>
+        {/* HOW IT WORKS — compact strip */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-display font-bold uppercase tracking-tight mb-6">How it works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {HOW_IT_WORKS.map((step, i) => {
               const Icon = step.icon;
               return (
-                <div key={i} className="rounded-xl border border-border bg-card p-5 relative">
-                  <div className="absolute top-3 right-3 text-xs font-display font-bold text-muted-foreground/50">
+                <div key={i} className="rounded-xl border border-border bg-card p-5 relative hover:border-primary/40 transition-colors">
+                  <div className="absolute top-3 right-3 text-sm font-display font-bold text-primary/40">
                     {String(i + 1).padStart(2, "0")}
                   </div>
                   <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/40 flex items-center justify-center mb-3">
@@ -485,16 +596,40 @@ export default function TournamentsPage() {
           </div>
         </section>
 
+        {/* FORMATS — slim strip replacing the old two-up overview */}
+        <section className="mb-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-success/30 bg-card p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-success/15 border border-success/40 flex items-center justify-center shrink-0">
+              <User className="h-6 w-6 text-success" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-display uppercase tracking-widest text-success">Available now</div>
+              <h3 className="font-display font-bold uppercase">Solo Queue</h3>
+              <p className="text-xs text-muted-foreground font-body">Sign up alone — we build a team for the match.</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 flex items-center gap-4 opacity-90">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Coming with 5v5 beta</div>
+              <h3 className="font-display font-bold uppercase">Team Queue</h3>
+              <p className="text-xs text-muted-foreground font-body">Captain registers a full roster. Results count for the team.</p>
+            </div>
+          </div>
+        </section>
+
         {/* TEAM TOURNAMENTS */}
-        <section className="mb-14">
+        <section className="mb-16">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
             <div>
-              <h2 className="text-3xl font-display font-bold uppercase tracking-tight">Team Tournaments</h2>
-              <p className="text-sm text-muted-foreground font-body mt-1">For full rosters. Captain registers, team plays.</p>
+              <h2 className="text-2xl md:text-3xl font-display font-bold uppercase tracking-tight">Team Tournaments</h2>
+              <p className="text-sm text-muted-foreground font-body mt-1">For full rosters. Captain registers, the team plays.</p>
             </div>
             <Link to="/teams">
-              <Button variant="neonOutline" size="sm" className="uppercase tracking-wider">
-                <Users className="mr-2 h-3 w-3" />Create Team
+              <Button variant="neonOutline" size="sm">
+                <Users className="mr-1 h-3 w-3" />Create Team
               </Button>
             </Link>
           </div>
