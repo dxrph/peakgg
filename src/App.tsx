@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { GameProvider } from "@/lib/game-context";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -53,6 +53,7 @@ import PrivacyPage from "./pages/Privacy";
 import TermsPage from "./pages/Terms";
 import ComingSoonPage from "./pages/ComingSoon";
 import ChatWidget from "./components/chat/ChatWidget";
+import GlobalActiveBar from "./components/competitive/GlobalActiveBar";
 import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -72,6 +73,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Analytics />
+            <GlobalActiveBar />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
@@ -81,7 +83,9 @@ const App = () => (
               <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
               <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-              <Route path="/play" element={<ProtectedRoute><PlayPage /></ProtectedRoute>} />
+              {/* Unified competitive path: /play redirects to the Tournaments hub */}
+              <Route path="/play" element={<Navigate to="/tournaments" replace />} />
+              <Route path="/play/legacy" element={<ProtectedRoute><PlayPage /></ProtectedRoute>} />
               <Route path="/scrims" element={<ProtectedRoute><ScrimsPage /></ProtectedRoute>} />
               <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetailPage /></ProtectedRoute>} />
               <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />

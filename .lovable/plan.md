@@ -1,148 +1,176 @@
-## Competitive UX Polish Plan
+# PeakGG Competitive Finalization — Implementation Plan
 
-A scoped pass to make the working competitive loop feel professional, without touching the queue/match/ELO engine, RLS, or formula.
+Three phases. No DB schema changes unless required for a bug. Keep `teamSize = 1`. No fake data, no ELO formula changes.
 
-### What I'll change
+## Phase 1 — Stabilize the current 1v1 loop
 
-**1. Match Room rework — `src/pages/MatchDetail.tsx**`
+### 1.1 Queue state hook (`src/hooks/useCompetitiveSession.ts`, new)
 
-- New top header: mode badge (Open Cup Beta / Ranked Beta), 1v1 Test Queue badge, game badge, status badge, short match ID, created time.
-- New scoreboard: Player A card · centered score+VS · Player B card. Each card: avatar, username, rank badge, current ELO, ELO delta (after completion), winner/loser highlight, ready/result chip.
-- Three columns below on desktop / stacked on mobile: Action panel (submit/confirm/dispute) · Instructions · Communication panel.
-- Footer no longer touches the cards (proper min-height + spacing).
-- Mobile: single column, full-width buttons, no horizontal overflow.
+Single source of truth for the user's competitive session. Polls every 5s + reacts to realtime on `open_cup_queue` and `match_rosters`. Returns:
 
-**2. Result voting state machine (frontend only)**
-Drives off existing `matches` columns: `submitted_by`, `submitted_at`, `result_status`, `winner_id`, `score_a/b`, `confirmed_at`.
+```
+{ status, mode, game, teamSize, queueRow, activeMatchId, joinedAt, refresh, cancel }
+status ∈ idle | queued | match_found | in_match | pending_confirmation | disputed | completed
+```
 
-- State A (no result): both see **Submit Result**.
-- State B (`pending_confirmation`): submitter sees "Waiting for opponent confirmation" + summary; opponent sees opponent's submission + **Confirm Result** / **Dispute Result**.
-- State C (`completed`): final scoreboard + ELO delta.
-- State D (`disputed`): "Under admin review" banner; admin sees resolve tools.
-- Fix: opponent never sees "nothing to confirm" when a pending submission exists — UI is driven by `result_status`, not by who submitted last.
+- `queued` = row exists in `open_cup_queue` for user
+- `match_found` / `in_match` / `pending_confirmation` / `disputed` = derived from latest `matches` row joined via `match_rosters` where `user_id = me` and `status != completed`
+- `cancel()` calls `cancel_open_cup_queue` RPC
+- Used by `Play`, `Tournaments`, `GlobalActiveBar`, `MatchDetail`
 
-**3. Submit Result modal polish**
+### 1.2 Queue Lobby polish (`Play.tsx`, `Tournaments.tsx`)
 
-- Two large winner cards ("I won" / "Opponent won") with selected highlight.
-- Submit button disabled until pick; loading state; success/error toast; auto-close + page refresh on success.
-- Helper line: "Recorded as 1–0. Opponent must confirm before ELO updates."
+- Already using `QueueLobby`. Wire it through `useCompetitiveSession`.
+- "Join" button while `status === 'queued'` → no-op + toast "Already searching" instead of error.
+- Refresh-safe (driven by polled hook, not local state).
 
-**4. Dispute / Call Admin**
+### 1.3 Global Active Session Bar (`src/components/competitive/GlobalActiveBar.tsx`, new)
 
-- Reuse existing `match_disputes` table (already has RLS for open-cup participants and team captains). Add a dispute modal on Match Room for participants of queue matches.
-- Reasons dropdown (Wrong result, No-show, Toxic, Cheating, Tech issue, ELO not updated, Other) + optional message + optional evidence URL.
-- On submit: insert into `match_disputes`, also flip `matches.result_status` to `disputed` via a small RPC (already-existing `submit_open_cup_result` path can be left alone; add a new RPC `open_match_dispute` that sets status + inserts notification rows for admins).
-- Success toast "Dispute opened. An admin will review this match." Both participants see a Disputed banner on the page.
+- Sticky bar above content (below navbar) on all authed routes except the Match Room itself.
+- Visible when `status !== idle`.
+- Variants:
+  - queued → "Open Cup Queue · {Game} · Searching {mm:ss}" + Cancel + Open
+  - match_found → "Match Found" + Open Match (pulse animation)
+  - in_match / pending_confirmation / disputed → "Open Cup Match · {status copy}" + Open Match
+- Mounted once in `App.tsx` inside `<AuthProvider>`.
 
-**5. Admin Resolve panel**
+### 1.4 Match Room polish (`MatchDetail.tsx`)
 
-- On Match Room when `isAdmin`, render an Admin tools card: participants, current submitted result, open disputes, ELO processed flag.
-- "Resolve Match" modal: pick winner, score fields, required reason, optional notes, warning if ELO already processed, confirm step.
-- Calls existing `admin_resolve_open_cup_match` RPC; resolves any open dispute rows; inserts notifications for both players.
+Existing layout is mostly there. Adjustments:
 
-**6. Match Chat**
+- Header: kind badge ("Open Cup Beta" / "Ranked Beta"), "1v1 Test Queue" badge, game, status pill, short id (`#${id.slice(0,8)}`), created-at relative.
+- For queue matches (kind in open_cup/ranked) with null teams: render Player A / Player B cards from `match_rosters` (avatar, username, rank badge, ELO) instead of "Team A / Team B".
+- Show ELO delta after `elo_processed_at` is set (read from `elo_history`).
+- Remove dead empty space; chat panel always rendered for queue matches.
 
-- `MatchChat` already exists and works for participants (RLS via `can_access_match_chat`). Wire it into the Match Room's communication panel for queue matches. Empty state: "No messages yet. Use match chat to coordinate."
+### 1.5 Submit / Confirm / Dispute state machine (already mostly in place)
 
-**7. Unified queue state hook — `src/hooks/useCompetitiveQueueState.ts**` (new)
+Verify:
 
-- Inputs: `mode` ("ranked" | "open_cup"), `game`.
-- Polls + subscribes to `competitive_queue_groups` (own row), `match_rosters` (active match), `matches.status`.
-- Returns: `{ status: "idle" | "queued" | "match_found" | "in_match" | "loading", group, matchId, elapsedSeconds, cancel(), error }`.
-- Single source of truth; consumed by Play and Tournaments.
+- `result_status = 'pending_confirmation'` → submitter sees waiting card; opponent sees Confirm + Dispute + Open Ticket.
+- Confirm result button always present when applicable, never "nothing to confirm".
+- Submit modal: winner cards, disabled until pick, loading + toast.
 
-**8. Queue Lobby component — `src/components/competitive/QueueLobby.tsx**` (new)
+### 1.6 Centralized status copy (`src/lib/competitive-status.ts`, new)
 
-- Animated searching state, mode/game/size badges, current rank+ELO chip, elapsed timer, **Cancel Queue**.
-- Footer note: "Do not close the page. We'll open your match automatically."
-- Sub-note: "Final Open Cup format will be 5v5 solo queue."
-- Match-found variant: "Match Found" with **Open Match** CTA + auto-redirect (already in `useMatchFoundListener`).
+Map `result_status` + `status` → label, color, helper text. Used by Match Room, GlobalActiveBar, QueueLobby.
 
-**9. Play & Tournaments queue UX**
+## Phase 2 — Competitive Pyramid Page
 
-- Replace the current "Find Match" toast/error path. If `useCompetitiveQueueState.status === "queued"` → render `<QueueLobby />` instead of the join CTA. If `"in_match"` → render an "Active Match" card with **Open Match**. If `"match_found"` → match-found card.
-- Calling `enqueue_solo` while already queued won't toast an error — UI flips to lobby on optimistic update, and any 23505/duplicate error is swallowed and treated as "already queued".
+### 2.1 Repurpose `Tournaments.tsx` as the unified competitive hub
 
-**10. Notifications**
+Sections (top → bottom):
 
-- Ensure `match_found`, `result_submitted`, `match_completed`, `dispute_opened`, `admin_resolved` all set `action_url = /matches/<id>`. Add the missing inserts inside `submit_open_cup_result`, `confirm_open_cup_result`, `admin_resolve_open_cup_match`, and the new `open_match_dispute` RPC. The frontend `NotificationsBell` already routes by `action_url`.
+1. **Hero** — "Start in Open Cup. Climb with ELO. Unlock Challenger. Qualify for Championship." + subtitle.
+2. **My Progress card** — current ELO, RankBadge, current tier, progress bar to next tier, ELO needed, leaderboard rank if available. Hidden for logged-out.
+3. **GlobalActiveBar context** (if active) — already global, but reinforced here with bigger card.
+4. **Tier 1 — Open Cup** card: Open Beta badge, "1v1 Test Queue" sub-label, CTA "Join Open Cup Queue" → wires existing `enqueue_solo` RPC. Future-format note.
+5. **Tier 2 — Challenger Series** card: Locked / 1200 ELO requirement. If user ELO ≥ 1200: "Eligible · Coming Soon" green state with "Join Discord" CTA. Else locked state with progress mini-bar.
+6. **Tier 3 — Peak Championship** card: Invite-only, 1800 ELO. Same eligibility logic.
+7. **How it works** — 3 short steps.
 
-**11. Recent match label — `src/pages/Profile.tsx**`
+### 2.2 `Play.tsx` route
 
-- Replace "Unknown Map" fallback with `Open Cup 1v1` / `Ranked 1v1 Beta` derived from `matches.kind` when `team_a_id`/`team_b_id` are null.
+- Redirect `/play` → `/tournaments` (using `<Navigate replace>`), OR keep as the Open Cup-only quick-queue surface that mirrors the Tier 1 card. Choose redirect to enforce single hub.
+- The existing "Ranked" UI: remove. Replace any "Ranked" CTA with copy "PeakGG ranked progression happens through Open Cup."
 
-**12. Status copy**
+## Phase 3 — One active competitive state
 
-- Centralize human strings in `src/lib/competitive-status.ts` (queue + match + ELO labels) so Match Room, Lobby, and Profile stay consistent.
+### 3.1 Guard in `useCompetitiveSession.enqueue()` wrapper
 
-### Database changes (one migration)
+- Before calling `enqueue_solo`, check current `status`. If not `idle`:
+  - status `queued` → toast "Already in queue" + open lobby
+  - status `match_found`/`in_match`/etc → modal "You already have an active competitive session" with Open Match / Cancel Queue actions.
+- Catch PG `23505` and treat as already-queued (already done).
 
-- New RPC `open_match_dispute(_match_id, _reason, _message, _evidence_url)` — SECURITY DEFINER:
-  - Verifies caller is a participant via `match_rosters` or legacy `player_a_id/player_b_id`.
-  - Inserts into `match_disputes` (with safe `opened_by_team_id = NULL` allowed — relax CHECK if any).
-  - Sets `matches.result_status = 'disputed'`.
-  - Inserts notifications for opponent + admin role users.
-- Allow `match_disputes.opened_by_team_id` to be nullable for queue matches (currently NOT NULL). Migration: `ALTER COLUMN ... DROP NOT NULL`. RLS already covers queue participants via the existing "Open cup participant opens dispute" policy — no policy change.
-- Add notification inserts in existing RPCs (`submit_open_cup_result`, `confirm_open_cup_result`, `admin_resolve_open_cup_match`) for both sides via `match_rosters`.
+### 3.2 Modal `ActiveSessionModal.tsx` (new)
 
-### What I won't touch
+Reusable, opened by guard. Two CTAs based on status.
 
-- ELO formula, `update-match-result` math, queue/matchmaking engine, RLS rules beyond the one nullable column, fake teams, team_size (stays 1), and no fake data.
+## Phase 4 — 5v5 readiness (no behavior change)
 
-### QA checklist I'll run
+- Keep `competitiveQueues` config-driven. Add code comment block in `feature-flags.ts` listing the exact switch points: `teamSize: 1 → 5`, `requiredPlayers: 2 → 10`, `allowParty/allowFullTeam` flags.
+- Make `MatchDetail` render N player cards per side from `match_rosters` (already a list-driven render — verify it doesn't hardcode `[0]`).
+- No DB or RPC change.
 
-- Two accounts: queue → match-found → both redirect → submit → confirm → ELO updates once.
-- Submit then dispute → admin sees ticket → resolves → both notified → ELO processed once.
-- Refresh /play and /tournaments while queued → lobby persists, no error.
-- Mobile viewport: Match Room, Submit modal, Dispute modal, Queue Lobby.
-- Profile recent match shows "Open Cup 1v1" instead of "Unknown Map".
+## Mobile QA
 
-Approve and I'll implement. Approved.
+After implementation, verify with viewport 375 wide:
 
-Proceed with this Competitive UX Polish pass.
+- GlobalActiveBar wraps gracefully (stacks Cancel below text)
+- Pyramid tier cards: 1 column, no overflow
+- Match Room: player cards stack, action panel full-width
+- Submit / Dispute modals: scrollable, max-height 90vh
 
-Important extra requirements:
+## Files to add
 
-1. Do not break the working queue → match → submit → confirm → ELO flow.
+- `src/hooks/useCompetitiveSession.ts`
+- `src/components/competitive/GlobalActiveBar.tsx`
+- `src/components/competitive/ActiveSessionModal.tsx`
+- `src/components/competitive/TierCard.tsx`
+- `src/components/competitive/MyProgressCard.tsx`
+- `src/lib/competitive-status.ts`
 
-2. Do not change ELO formula or matchmaking engine.
+## Files to edit
+
+- `src/App.tsx` — mount `GlobalActiveBar`
+- `src/pages/Tournaments.tsx` — pyramid layout
+- `src/pages/Play.tsx` — redirect or simplified mirror
+- `src/pages/MatchDetail.tsx` — header polish, player cards from `match_rosters` for queue matches, ELO delta display
+- `src/components/competitive/QueueLobby.tsx` — minor copy alignment
+
+## Out of scope (explicitly NOT doing)
+
+Team ELO, seasons, decay, map veto, BO3/BO5, prize pools, dodge cooldown, party queue, full team queue, switching to 5v5, Challenger/Championship backends, ELO formula changes, RLS changes, fake data.
+
+## Deliverable after implementation
+
+A single message answering all 18 output points from the request. Approved.
+
+Keep this implementation scoped exactly as planned.
+
+Extra requirements before shipping:
+
+1. Do not break the current working queue → match → submit → confirm → ELO flow.
+
+2. Do not change ELO formula.
 
 3. Do not switch to 5v5 yet.
 
-4. Keep teamSize = 1 for testing.
+4. Do not implement party/full team queue yet.
 
-5. Do not reintroduce fake teams or write fake IDs into [matches.team](http://matches.team)_a_id/team_b_id.
+5. Do not add fake data.
 
-6. Queue matches must continue using match_rosters.side = A/B.
+6. Do not write temporary team IDs into [matches.team](http://matches.team)_a_id/team_b_id.
 
-7. If a user is already queued, never show an error toast. Show the Queue Lobby instead.
+7. Queue matches must keep using match_rosters.side = A/B.
 
-8. If a user has an active match, show Open Match.
+8. /play should redirect to /tournaments to avoid splitting Ranked from Open Cup.
 
-9. Dispute must work for queue matches, including 1v1.
+9. Ranked copy should say: “PeakGG ranked progression happens through Open Cup.”
 
-10. Match Chat should only be visible to participants/admins.
+10. GlobalActiveBar must appear across the site when queued/match active, but not duplicate inside Match Room.
 
-11. Notifications must always link to /matches/:id.
+11. If user is already queued, never show a raw error; show lobby/active session state.
 
-12. Admin Resolve must not double-process ELO.
+12. If user has active match, show Open Match.
 
-13. Profile recent match must show Open Cup 1v1 / Ranked 1v1 Beta, not Unknown Map.
+13. MatchDetail must render queue matches from match_rosters, not Team A / Team B.
 
-14. Mobile must be tested carefully.
+14. ELO delta should only show real elo_history data, no fake deltas.
 
-After implementation, give me exact QA steps for:
+15. Mobile must be checked at 375px.
 
-- normal result confirm
+After implementation, provide:
 
-- dispute flow
+- exact files updated
 
-- admin resolve
+- whether /play redirects to /tournaments
 
-- already queued state
+- how GlobalActiveBar behaves
 
-- active match state
+- how one-active-state guard works
 
-- mobile match room
+- queue/match/result/ELO QA result
 
-&nbsp;
+- remaining blockers before Phase 2/5v5

@@ -260,13 +260,16 @@ export default function TournamentsPage() {
           />
           <div className="relative max-w-3xl">
             <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase tracking-widest text-[10px] mb-4">
-              Season 0 Beta
+              Season 0 Beta · Unified Competitive Path
             </Badge>
             <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
-              Tournaments
+              Start in Open Cup. <span className="text-primary">Climb with ELO.</span><br />Unlock Challenger. Qualify for Championship.
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground font-body mt-4">
-              Compete solo. <span className="text-foreground">Increase your ELO.</span> Unlock higher cups.
+              One ladder. Three tiers. Every match moves you closer to the top.
+            </p>
+            <p className="text-xs text-muted-foreground/80 font-body mt-2 italic">
+              PeakGG ranked progression happens through Open Cup. There is no separate Ranked mode.
             </p>
 
             {/* Open Cup Queue widget */}
