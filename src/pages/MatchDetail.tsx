@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info } from "lucide-react";
+import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info, AlertTriangle, Trophy, Clock, FileWarning, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -50,6 +50,19 @@ interface PlayerInfo {
 }
 interface EloDelta { user_id: string; delta: number; elo_after: number; }
 interface RosterRow { user_id: string; team_id: string | null; side: "A" | "B" | null; }
+interface DisputeRow {
+  id: string;
+  match_id: string;
+  opened_by: string | null;
+  reason: string | null;
+  evidence_url: string | null;
+  status: string;
+  resolved_by: string | null;
+  resolution_note: string | null;
+  created_at: string;
+  resolved_at: string | null;
+  opener?: { username: string | null; display_name: string | null } | null;
+}
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -64,6 +77,8 @@ export default function MatchDetailPage() {
   const [rosterB, setRosterB] = useState<PlayerInfo[]>([]);
   const [rosterRows, setRosterRows] = useState<RosterRow[]>([]);
   const [eloDeltas, setEloDeltas] = useState<EloDelta[]>([]);
+  const [disputes, setDisputes] = useState<DisputeRow[]>([]);
+  const [submitterProfile, setSubmitterProfile] = useState<{ username: string | null; display_name: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [disputeOpen, setDisputeOpen] = useState(false);
@@ -78,6 +93,13 @@ export default function MatchDetailPage() {
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  // Admin resolve modal state
+  const [adminWinner, setAdminWinner] = useState<"a" | "b">("a");
+  const [adminScoreA, setAdminScoreA] = useState(0);
+  const [adminScoreB, setAdminScoreB] = useState(0);
+  const [adminReason, setAdminReason] = useState<string>("dispute_resolved");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [adminConfirmStep, setAdminConfirmStep] = useState(false);
 
   const isOpenCup = match?.kind === "open_cup";
   const isQueueMatch = match?.kind === "open_cup" || match?.kind === "ranked";
@@ -174,7 +196,36 @@ export default function MatchDetailPage() {
     setLoading(false);
   };
 
+  const loadDisputes = async (mId: string) => {
+    const { data } = await supabase
+      .from("match_disputes")
+      .select("id, match_id, opened_by, reason, evidence_url, status, resolved_by, resolution_note, created_at, resolved_at")
+      .eq("match_id", mId)
+      .order("created_at", { ascending: false });
+    const rows = (data ?? []) as DisputeRow[];
+    const ids = [...new Set(rows.map(r => r.opened_by).filter(Boolean) as string[])];
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, username, display_name").in("id", ids);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      rows.forEach(r => { if (r.opened_by) r.opener = map.get(r.opened_by) ?? null; });
+    }
+    setDisputes(rows);
+  };
+
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [matchId]);
+
+  // Load disputes & submitter profile whenever match changes
+  useEffect(() => {
+    if (!match) return;
+    loadDisputes(match.id);
+    if (match.submitted_by) {
+      supabase.from("profiles").select("username, display_name").eq("id", match.submitted_by).maybeSingle()
+        .then(({ data }) => setSubmitterProfile(data ?? null));
+    } else {
+      setSubmitterProfile(null);
+    }
+    // eslint-disable-next-line
+  }, [match?.id, match?.submitted_by, match?.result_status]);
 
   // Realtime: re-load when this match row changes (status/score/elo_processed_at)
   useEffect(() => {
@@ -300,17 +351,45 @@ export default function MatchDetailPage() {
     toast.success("Dispute opened. An admin will review this match.");
     setDisputeOpen(false); setReason(""); setEvidenceUrl(""); setEvidenceFile(null); load();
   };
+  const openAdminResolve = () => {
+    setAdminScoreA(match?.score_a ?? 0);
+    setAdminScoreB(match?.score_b ?? 0);
+    setAdminWinner(((match?.score_b ?? 0) > (match?.score_a ?? 0)) ? "b" : "a");
+    setAdminReason(match?.result_status === "disputed" ? "dispute_resolved" : "admin_correction");
+    setAdminNotes("");
+    setAdminConfirmStep(false);
+    setAdminOpen(true);
+  };
+
   const adminResolve = async () => {
     if (!match) return;
+    if (adminScoreA < 0 || adminScoreB < 0) return toast.error("Scores must be ≥ 0");
+    if (!adminReason) return toast.error("Reason required");
+    if (adminScoreA === adminScoreB) return toast.error("Scores cannot be tied — pick a winner score");
+    const winnerByScore = adminScoreA > adminScoreB ? "a" : "b";
+    if (winnerByScore !== adminWinner) {
+      return toast.error("Selected winner doesn't match the score. Adjust score or winner.");
+    }
     setBusy(true);
+    let winnerUserId: string | null = null;
+    if (isQueueMatch && is1v1) {
+      winnerUserId = adminWinner === "a" ? (playerA?.user_id ?? null) : (playerB?.user_id ?? null);
+    }
     const { error } = isQueueMatch
-      ? await supabase.rpc("admin_resolve_open_cup_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB })
-      : await supabase.rpc("admin_resolve_match", { _match_id: match.id, _score_a: scoreA, _score_b: scoreB });
+      ? await supabase.rpc("admin_resolve_open_cup_match", {
+          _match_id: match.id,
+          _score_a: adminScoreA,
+          _score_b: adminScoreB,
+          _winner_user_id: winnerUserId,
+          _reason: adminReason,
+          _notes: adminNotes || null,
+        })
+      : await supabase.rpc("admin_resolve_match", { _match_id: match.id, _score_a: adminScoreA, _score_b: adminScoreB });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Match resolved");
-    if (isQueueMatch) await triggerEloUpdate(match.id);
-    setAdminOpen(false); load();
+    if (isQueueMatch && !match.elo_processed_at) await triggerEloUpdate(match.id);
+    setAdminOpen(false); setAdminConfirmStep(false); load();
   };
 
   if (loading) return <div className="min-h-screen bg-background"><Navbar /><div className="container py-10"><Skeleton className="h-64" /></div></div>;
