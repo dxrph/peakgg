@@ -605,6 +605,7 @@ function VetoPanel({
           </ul>
         </div>
       )}
+      </div>
     </Card>
   );
 }
