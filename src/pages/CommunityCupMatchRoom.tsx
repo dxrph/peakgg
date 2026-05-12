@@ -1,0 +1,906 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
+import SEO from "@/components/SEO";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  ArrowLeft, Loader2, Send, ShieldAlert, Swords, Trophy, MapPin,
+  Lock, Unlock, AlertTriangle, CheckCircle2, RotateCcw, Play, Crown,
+} from "lucide-react";
+import { toast } from "sonner";
+import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
+import { cn } from "@/lib/utils";
+
+type MatchRow = {
+  id: string;
+  tournament_id: string | null;
+  round: number | null;
+  bracket_position: number | null;
+  status: string;
+  result_status: string;
+  signup_a_id: string | null;
+  signup_b_id: string | null;
+  team_a_id: string | null;
+  team_b_id: string | null;
+  score_a: number | null;
+  score_b: number | null;
+  winner_id: string | null;
+  selected_map: string | null;
+  map: string | null;
+  veto_status: string | null;
+  bo_format: string | null;
+  map_selection_mode: string | null;
+  chat_locked: boolean | null;
+  admin_note: string | null;
+  result_screenshot_url: string | null;
+  result_notes: string | null;
+  reported_by_user_id: string | null;
+  dispute_status: string | null;
+  dispute_reason: string | null;
+};
+
+type Veto = {
+  id: string;
+  mode: string;
+  status: string;
+  current_turn_signup_id: string | null;
+  selected_map: string | null;
+  banned_maps: string[];
+  picked_maps: { map: string; by: string }[];
+  veto_log: { action: string; map?: string; by?: string; at?: string }[];
+};
+
+type SignupLite = {
+  id: string;
+  team_name: string;
+  team_tag: string | null;
+  community_name: string | null;
+  team_logo_url: string | null;
+  status: string;
+};
+
+type MapPoolMap = { map_name: string; is_active: boolean; image_url: string | null; display_order: number };
+
+type ChatMsg = {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  is_system_message: boolean;
+  sender_role: string | null;
+  profile?: { username: string; avatar_url: string | null } | null;
+};
+
+const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+  pending: { label: "Scheduled", cls: "bg-muted text-muted-foreground" },
+  scheduled: { label: "Scheduled", cls: "bg-muted text-muted-foreground" },
+  in_progress: { label: "Live", cls: "bg-primary/15 text-primary border-primary/30" },
+  live: { label: "Live", cls: "bg-primary/15 text-primary border-primary/30" },
+  pending_confirmation: { label: "Pending Staff Confirmation", cls: "bg-warning/15 text-warning border-warning/30" },
+  disputed: { label: "Under Staff Review", cls: "bg-destructive/15 text-destructive border-destructive/30" },
+  completed: { label: "Completed", cls: "bg-success/15 text-success border-success/30" },
+  admin_resolved: { label: "Completed", cls: "bg-success/15 text-success border-success/30" },
+};
+
+export default function CommunityCupMatchRoom() {
+  const { matchId, slug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin, isModerator } = useUserRoles();
+  const isStaff = isAdmin || isModerator;
+
+  const [match, setMatch] = useState<MatchRow | null>(null);
+  const [veto, setVeto] = useState<Veto | null>(null);
+  const [sa, setSa] = useState<SignupLite | null>(null);
+  const [sb, setSb] = useState<SignupLite | null>(null);
+  const [pool, setPool] = useState<MapPoolMap[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tournamentName, setTournamentName] = useState<string>("");
+
+  const load = async () => {
+    if (!matchId) return;
+    setLoading(true);
+    const { data: mRaw, error } = await (supabase
+      .from("matches")
+      .select("*") as any)
+      .eq("id", matchId)
+      .maybeSingle();
+    const m = mRaw as MatchRow | null;
+    if (error || !m) {
+      toast.error("Match not found.");
+      setLoading(false);
+      return;
+    }
+    setMatch(m as MatchRow);
+
+    const ids = [m.signup_a_id, m.signup_b_id].filter(Boolean) as string[];
+    if (ids.length) {
+      const { data: sg } = await supabase
+        .from("tournament_team_signups_public")
+        .select("id, team_name, team_tag, community_name, team_logo_url, status")
+        .in("id", ids);
+      const map = new Map((sg ?? []).map((s: any) => [s.id, s as SignupLite]));
+      setSa(m.signup_a_id ? map.get(m.signup_a_id) ?? null : null);
+      setSb(m.signup_b_id ? map.get(m.signup_b_id) ?? null : null);
+    }
+
+    const [{ data: vetoRow }, { data: poolRows }, { data: tour }] = await Promise.all([
+      supabase.from("match_map_veto").select("*").eq("match_id", matchId).maybeSingle(),
+      m.tournament_id
+        ? supabase
+            .from("tournament_map_pool")
+            .select("map_name, is_active, image_url, display_order")
+            .eq("tournament_id", m.tournament_id)
+            .order("display_order")
+        : Promise.resolve({ data: [] as MapPoolMap[] } as any),
+      m.tournament_id
+        ? supabase.from("tournaments").select("name, slug").eq("id", m.tournament_id).maybeSingle()
+        : Promise.resolve({ data: null } as any),
+    ]);
+
+    if (vetoRow) {
+      setVeto({
+        ...(vetoRow as any),
+        banned_maps: ((vetoRow as any).banned_maps ?? []) as string[],
+        picked_maps: ((vetoRow as any).picked_maps ?? []) as any[],
+        veto_log: ((vetoRow as any).veto_log ?? []) as any[],
+      });
+    } else {
+      setVeto(null);
+    }
+    setPool(((poolRows as any[]) ?? []) as MapPoolMap[]);
+    setTournamentName((tour as any)?.name ?? "Community Cup");
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    // realtime: refresh match + veto on changes
+    const ch = supabase
+      .channel(`mr-${matchId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches", filter: `id=eq.${matchId}` }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "match_map_veto", filter: `match_id=eq.${matchId}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line
+  }, [matchId]);
+
+  // captain side determination
+  const captainSide = useMemo<"A" | "B" | null>(() => {
+    // We can't read captain_user_id from the public view; instead check signup directly
+    return null; // resolved separately below via captainSideAsync
+  }, []);
+  const [resolvedSide, setResolvedSide] = useState<"A" | "B" | null>(null);
+  useEffect(() => {
+    if (!user || !match) { setResolvedSide(null); return; }
+    (async () => {
+      const ids = [match.signup_a_id, match.signup_b_id].filter(Boolean) as string[];
+      if (!ids.length) return;
+      const { data } = await supabase
+        .from("tournament_team_signups")
+        .select("id, captain_user_id")
+        .in("id", ids);
+      const a = (data ?? []).find((x: any) => x.id === match.signup_a_id);
+      const b = (data ?? []).find((x: any) => x.id === match.signup_b_id);
+      if (a?.captain_user_id === user.id) setResolvedSide("A");
+      else if (b?.captain_user_id === user.id) setResolvedSide("B");
+      else setResolvedSide(null);
+    })();
+  }, [user, match]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+  if (!match) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Match not found.</p>
+      </div>
+    );
+  }
+
+  const cupSlug = slug ?? "community-cup-1";
+  const status = match.result_status === "disputed"
+    ? "disputed"
+    : match.status === "completed"
+    ? "completed"
+    : match.result_status === "pending_confirmation"
+    ? "pending_confirmation"
+    : match.status === "in_progress" || match.result_status === "live"
+    ? "live"
+    : "scheduled";
+  const sb_meta = STATUS_BADGE[status];
+
+  const canCaptainAct = !!resolvedSide;
+  const isCaptainOrStaff = canCaptainAct || isStaff;
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <SEO title={`Match Room — ${tournamentName}`} description="PeakGG Community Cup match room" />
+      <Navbar />
+      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full">
+        <Button variant="ghost" size="sm" className="mb-3" onClick={() => navigate(`/tournaments/${cupSlug}`)}>
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back to tournament
+        </Button>
+
+        {/* HEADER */}
+        <Card className="p-5 mb-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-wider">
+                <Swords className="h-3.5 w-3.5" />
+                {tournamentName}
+                {match.round != null && <span>· Round {match.round}</span>}
+                {match.bracket_position != null && <span>· Match #{match.bracket_position}</span>}
+              </div>
+              <h1 className="font-display text-2xl mt-2">
+                {sa?.team_name ?? "TBD"} <span className="text-muted-foreground">vs</span> {sb?.team_name ?? "TBD"}
+              </h1>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <Badge className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>
+                <Badge variant="outline">{match.bo_format ?? "BO1"}</Badge>
+                <Badge variant="outline">Map mode: {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</Badge>
+                {match.selected_map && (
+                  <Badge variant="outline" className="border-primary/40 text-primary">
+                    <MapPin className="h-3 w-3 mr-1" /> {match.selected_map}
+                  </Badge>
+                )}
+                {match.chat_locked && <Badge variant="outline" className="border-destructive/40 text-destructive"><Lock className="h-3 w-3 mr-1" />Chat locked</Badge>}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-display text-3xl">
+                {match.score_a ?? "—"} <span className="text-muted-foreground">:</span> {match.score_b ?? "—"}
+              </div>
+              {match.winner_id && (
+                <div className="text-xs text-success mt-1 flex items-center gap-1 justify-end">
+                  <Trophy className="h-3 w-3" /> Winner declared
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Teams */}
+          <div className="grid sm:grid-cols-2 gap-3 mt-4">
+            <TeamCard side="A" signup={sa} winnerId={match.winner_id} teamId={match.team_a_id} />
+            <TeamCard side="B" signup={sb} winnerId={match.winner_id} teamId={match.team_b_id} />
+          </div>
+        </Card>
+
+        {/* GRID */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <VetoPanel
+              match={match}
+              veto={veto}
+              pool={pool}
+              sa={sa}
+              sb={sb}
+              myCaptainSide={resolvedSide}
+              isStaff={isStaff}
+              onChanged={load}
+            />
+
+            {isCaptainOrStaff && (
+              <ResultPanel match={match} myCaptainSide={resolvedSide} isStaff={isStaff} onChanged={load} />
+            )}
+
+            {isStaff && (
+              <AdminPanel match={match} onChanged={load} />
+            )}
+          </div>
+
+          <div className="lg:col-span-1">
+            <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+function TeamCard({ side, signup, winnerId, teamId }: { side: "A" | "B"; signup: SignupLite | null; winnerId: string | null; teamId: string | null }) {
+  const isWinner = !!winnerId && teamId === winnerId;
+  return (
+    <div className={cn(
+      "rounded-lg border p-3 flex items-center gap-3",
+      isWinner ? "border-primary/40 bg-primary/5" : "border-border"
+    )}>
+      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center overflow-hidden">
+        {signup?.team_logo_url ? <img src={signup.team_logo_url} alt="" className="w-full h-full object-cover" /> : <Swords className="h-4 w-4 text-muted-foreground" />}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-display uppercase text-muted-foreground">Team {side}</span>
+          {isWinner && <Crown className="h-3 w-3 text-primary" />}
+        </div>
+        <div className="font-display text-sm truncate">
+          {signup?.team_tag && <span className="text-muted-foreground mr-1">[{signup.team_tag}]</span>}
+          {signup?.team_name ?? "TBD"}
+        </div>
+        {signup?.community_name && <div className="text-xs text-muted-foreground truncate">{signup.community_name}</div>}
+      </div>
+    </div>
+  );
+}
+
+function VetoPanel({
+  match, veto, pool, sa, sb, myCaptainSide, isStaff, onChanged,
+}: {
+  match: MatchRow; veto: Veto | null; pool: MapPoolMap[]; sa: SignupLite | null; sb: SignupLite | null;
+  myCaptainSide: "A" | "B" | null; isStaff: boolean; onChanged: () => void;
+}) {
+  const activeMaps = pool.filter((p) => p.is_active).map((p) => p.map_name);
+  const banned = veto?.banned_maps ?? [];
+  const picked = veto?.picked_maps?.map((p) => p.map) ?? [];
+  const used = new Set([...banned, ...picked]);
+
+  const myTurn = !!myCaptainSide && !!veto && veto.status === "in_progress" &&
+    ((myCaptainSide === "A" && veto.current_turn_signup_id === match.signup_a_id) ||
+     (myCaptainSide === "B" && veto.current_turn_signup_id === match.signup_b_id));
+
+  const turnSide = veto?.current_turn_signup_id === match.signup_a_id ? "A"
+    : veto?.current_turn_signup_id === match.signup_b_id ? "B" : null;
+
+  const [busy, setBusy] = useState(false);
+
+  const action = veto?.mode === "bo3_veto" ? nextBo3Action(banned, picked) : null;
+
+  const ban = async (mapName: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("captain_ban_map", { _match_id: match.id, _map: mapName } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Banned ${mapName}`);
+    onChanged();
+  };
+  const pick = async (mapName: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("captain_pick_map", { _match_id: match.id, _map: mapName } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Picked ${mapName}`);
+    onChanged();
+  };
+
+  const startVeto = async (mode: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("start_match_veto", { _match_id: match.id, _mode: mode } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Veto started");
+    onChanged();
+  };
+  const reset = async () => {
+    if (!confirm("Reset map veto?")) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("reset_match_veto", { _match_id: match.id } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Veto reset");
+    onChanged();
+  };
+  const forceComplete = async () => {
+    const m = prompt("Force selected map (leave blank to keep current):", match.selected_map ?? "");
+    if (m === null) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("complete_match_veto", { _match_id: match.id, _selected_map: m || null } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Veto completed");
+    onChanged();
+  };
+
+  const canAct = (myTurn && veto?.status === "in_progress") || isStaff;
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h2 className="font-display uppercase tracking-wider text-sm">Map Veto</h2>
+          <p className="text-xs text-muted-foreground">
+            {veto ? `Mode: ${VETO_MODE_LABEL[veto.mode] ?? veto.mode} · Status: ${veto.status}` : "Veto has not started yet."}
+          </p>
+        </div>
+        {isStaff && (
+          <div className="flex flex-wrap gap-1.5">
+            {!veto || veto.status === "completed" ? (
+              <>
+                <Select onValueChange={(v) => startVeto(v)}>
+                  <SelectTrigger className="h-8 w-[180px]"><SelectValue placeholder="Start veto…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="random">Random</SelectItem>
+                    <SelectItem value="bo1_veto">Captain Veto BO1</SelectItem>
+                    <SelectItem value="bo3_veto">Captain Veto BO3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>
+            ) : null}
+            {veto && (
+              <>
+                <Button size="sm" variant="outline" onClick={forceComplete} disabled={busy}><CheckCircle2 className="h-3.5 w-3.5 mr-1" />Force complete</Button>
+                <Button size="sm" variant="outline" onClick={reset} disabled={busy}><RotateCcw className="h-3.5 w-3.5 mr-1" />Reset</Button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {!veto && !isStaff && (
+        <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+          Waiting for tournament staff to start the veto.
+        </div>
+      )}
+
+      {veto && veto.status === "in_progress" && (
+        <div className="mb-3 p-3 rounded-md border border-primary/30 bg-primary/5 text-sm">
+          {turnSide ? (
+            <>
+              <span className="font-display uppercase text-primary">Team {turnSide}</span>'s turn
+              {action && <span className="text-muted-foreground"> · {action.label}</span>}
+              {myTurn && <span className="ml-2 text-success">— it's your turn</span>}
+              {!myTurn && myCaptainSide && <span className="ml-2 text-muted-foreground">— it is not your turn to act.</span>}
+            </>
+          ) : (
+            <>Awaiting next action…</>
+          )}
+        </div>
+      )}
+
+      {/* Map grid */}
+      {activeMaps.length === 0 ? (
+        <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+          <AlertTriangle className="h-4 w-4 inline mr-1 text-warning" />
+          No active maps in pool. Admin must adjust the map pool.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {activeMaps.map((m) => {
+            const isBanned = banned.includes(m);
+            const isPicked = picked.includes(m);
+            const isSelected = match.selected_map === m;
+            const disabled = used.has(m) || busy || !canAct || (veto?.status !== "in_progress");
+            return (
+              <div key={m} className={cn(
+                "rounded-md border p-3 text-center text-sm transition",
+                isSelected ? "border-primary bg-primary/10" :
+                isBanned ? "border-destructive/40 bg-destructive/5 line-through opacity-60" :
+                isPicked ? "border-success/40 bg-success/5" :
+                "border-border"
+              )}>
+                <div className="font-display">{m}</div>
+                {isBanned && <div className="text-[10px] uppercase text-destructive">Banned</div>}
+                {isPicked && <div className="text-[10px] uppercase text-success">Picked</div>}
+                {isSelected && <div className="text-[10px] uppercase text-primary">Selected</div>}
+                {!used.has(m) && veto?.status === "in_progress" && (
+                  <div className="flex gap-1 mt-2 justify-center">
+                    {(veto.mode === "bo1_veto" || veto.mode === "bo3_veto") && (
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => ban(m)}>Ban</Button>
+                    )}
+                    {veto.mode === "bo3_veto" && action?.type === "pick" && (
+                      <Button size="sm" variant="neon" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => pick(m)}>Pick</Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Veto log */}
+      {veto && (veto.veto_log?.length ?? 0) > 0 && (
+        <div className="mt-4 border-t border-border pt-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Veto log</p>
+          <ul className="space-y-1 text-xs">
+            {veto.veto_log.map((l, i) => (
+              <li key={i} className="text-muted-foreground">
+                <span className="text-foreground">{l.action}</span> {l.map ? `· ${l.map}` : ""} {l.by ? `· ${l.by}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
+  match: MatchRow; myCaptainSide: "A" | "B" | null; isStaff: boolean; onChanged: () => void;
+}) {
+  const [a, setA] = useState<string>(match.score_a?.toString() ?? "");
+  const [b, setB] = useState<string>(match.score_b?.toString() ?? "");
+  const [screenshot, setScreenshot] = useState(match.result_screenshot_url ?? "");
+  const [notes, setNotes] = useState(match.result_notes ?? "");
+  const [confirm1, setConfirm1] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [disputeOpen, setDisputeOpen] = useState(false);
+
+  useEffect(() => {
+    setA(match.score_a?.toString() ?? "");
+    setB(match.score_b?.toString() ?? "");
+    setScreenshot(match.result_screenshot_url ?? "");
+    setNotes(match.result_notes ?? "");
+  }, [match.id, match.score_a, match.score_b, match.result_screenshot_url, match.result_notes]);
+
+  const submit = async () => {
+    if (!myCaptainSide) return toast.error("Only team captains can submit results.");
+    const sa = Number(a), sb = Number(b);
+    if (!Number.isFinite(sa) || !Number.isFinite(sb)) return toast.error("Enter both scores.");
+    if (!confirm1) return toast.error("Please confirm the result is correct.");
+    setBusy(true);
+    const { error } = await supabase.rpc("submit_cup_match_result", {
+      _match_id: match.id,
+      _score_a: sa,
+      _score_b: sb,
+      _screenshot: screenshot || null,
+      _notes: notes || null,
+    } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Result submitted. Awaiting staff confirmation.");
+    setConfirm1(false);
+    onChanged();
+  };
+
+  const disabled = match.status === "completed" || match.result_status === "admin_resolved";
+
+  return (
+    <Card className="p-5">
+      <h2 className="font-display uppercase tracking-wider text-sm mb-3">Result Reporting</h2>
+      {match.result_status === "pending_confirmation" && (
+        <div className="mb-3 p-3 rounded-md border border-warning/40 bg-warning/5 text-sm text-warning">
+          Result submitted. Waiting for staff confirmation.
+        </div>
+      )}
+      {disabled && (
+        <div className="mb-3 p-3 rounded-md border border-success/40 bg-success/5 text-sm text-success">
+          Match completed. Final score {match.score_a}–{match.score_b}.
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Score Team A</Label>
+          <Input value={a} onChange={(e) => setA(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
+        </div>
+        <div>
+          <Label className="text-xs">Score Team B</Label>
+          <Input value={b} onChange={(e) => setB(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
+        </div>
+      </div>
+      <div className="mt-3">
+        <Label className="text-xs">Screenshot URL (optional)</Label>
+        <Input value={screenshot} onChange={(e) => setScreenshot(e.target.value)} placeholder="https://…" disabled={disabled || !myCaptainSide} />
+      </div>
+      <div className="mt-3">
+        <Label className="text-xs">Notes (optional)</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={disabled || !myCaptainSide} />
+      </div>
+      {myCaptainSide && !disabled && (
+        <label className="flex items-center gap-2 mt-3 text-xs">
+          <input type="checkbox" checked={confirm1} onChange={(e) => setConfirm1(e.target.checked)} />
+          I confirm this result is correct.
+        </label>
+      )}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {myCaptainSide && (
+          <Button size="sm" variant="neon" disabled={busy || disabled || !confirm1} onClick={submit}>
+            {busy && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
+            Submit Result
+          </Button>
+        )}
+        {myCaptainSide && (
+          <Button size="sm" variant="outline" onClick={() => setDisputeOpen(true)} disabled={disabled}>
+            <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Open Dispute
+          </Button>
+        )}
+        {!myCaptainSide && !isStaff && (
+          <p className="text-xs text-muted-foreground">Only the team captains involved can submit a result.</p>
+        )}
+      </div>
+
+      <DisputeDialog open={disputeOpen} onOpenChange={setDisputeOpen} matchId={match.id} onChanged={onChanged} />
+    </Card>
+  );
+}
+
+const DISPUTE_REASONS = [
+  "Wrong score",
+  "No-show",
+  "Unauthorized substitute",
+  "Player eligibility issue",
+  "Toxic behavior",
+  "Rule violation",
+  "Technical issue",
+  "Other",
+];
+
+function DisputeDialog({ open, onOpenChange, matchId, onChanged }: { open: boolean; onOpenChange: (v: boolean) => void; matchId: string; onChanged: () => void }) {
+  const [reason, setReason] = useState(DISPUTE_REASONS[0]);
+  const [description, setDescription] = useState("");
+  const [evidence, setEvidence] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("open_cup_match_dispute", {
+      _match_id: matchId,
+      _reason: reason,
+      _description: description || null,
+      _evidence: evidence || null,
+    } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Dispute opened. Tournament staff will review.");
+    onOpenChange(false);
+    onChanged();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Open a dispute</DialogTitle>
+          <DialogDescription>Tournament staff will review the match.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs">Reason</Label>
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DISPUTE_REASONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} />
+          </div>
+          <div>
+            <Label className="text-xs">Evidence URL (optional)</Label>
+            <Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder="https://…" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
+          <Button variant="neon" onClick={submit} disabled={busy}>
+            {busy && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
+            Submit dispute
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => void }) {
+  const [a, setA] = useState<string>(match.score_a?.toString() ?? "");
+  const [b, setB] = useState<string>(match.score_b?.toString() ?? "");
+  const [boFormat, setBoFormat] = useState(match.bo_format ?? "BO1");
+  const [adminNote, setAdminNote] = useState(match.admin_note ?? "");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setA(match.score_a?.toString() ?? "");
+    setB(match.score_b?.toString() ?? "");
+    setBoFormat(match.bo_format ?? "BO1");
+    setAdminNote(match.admin_note ?? "");
+  }, [match.id, match.score_a, match.score_b, match.bo_format, match.admin_note]);
+
+  const confirmResult = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_confirm_cup_match_result", {
+      _match_id: match.id,
+      _score_a: a ? Number(a) : null,
+      _score_b: b ? Number(b) : null,
+    } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Result confirmed and bracket advanced.");
+    onChanged();
+  };
+
+  const updateMatch = async (patch: Record<string, any>) => {
+    setBusy(true);
+    const { error } = await supabase.from("matches").update(patch as any).eq("id", match.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Updated");
+    onChanged();
+  };
+
+  const lockChat = async (locked: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("set_cup_match_chat_locked", { _match_id: match.id, _locked: locked } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(locked ? "Chat locked" : "Chat unlocked");
+    onChanged();
+  };
+
+  return (
+    <Card className="p-5 border-primary/30">
+      <h2 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
+        <ShieldAlert className="h-4 w-4 text-primary" /> Admin Controls
+      </h2>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Score A</Label>
+          <Input type="number" value={a} onChange={(e) => setA(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Score B</Label>
+          <Input type="number" value={b} onChange={(e) => setB(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">BO format (per match override)</Label>
+          <Select value={boFormat} onValueChange={(v) => { setBoFormat(v); updateMatch({ bo_format: v }); }}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {["BO1","BO2","BO3","BO5"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Selected map (manual override)</Label>
+          <Input
+            value={match.selected_map ?? ""}
+            onChange={(e) => updateMatch({ selected_map: e.target.value, map: e.target.value, veto_status: e.target.value ? "map_selected" : "not_started" })}
+            placeholder="Map name…"
+          />
+        </div>
+      </div>
+      <div className="mt-3">
+        <Label className="text-xs">Admin note (private)</Label>
+        <Textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} onBlur={() => updateMatch({ admin_note: adminNote })} />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button size="sm" variant="neon" onClick={confirmResult} disabled={busy}>
+          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Confirm Result
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => updateMatch({ status: "in_progress", result_status: "live" })}>
+          <Play className="h-3.5 w-3.5 mr-1" /> Mark Live
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => updateMatch({ result_status: "disputed", dispute_status: "open" })}>
+          <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Mark Disputed
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => updateMatch({ dispute_status: "resolved", result_status: "scheduled" })}>
+          Resolve Dispute
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => lockChat(!match.chat_locked)}>
+          {match.chat_locked ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Lock className="h-3.5 w-3.5 mr-1" />}
+          {match.chat_locked ? "Unlock chat" : "Lock chat"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string; chatLocked: boolean; canChat: boolean; isStaff: boolean }) {
+  const { user } = useAuth();
+  const [msgs, setMsgs] = useState<ChatMsg[]>([]);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  const hydrate = async (rows: any[]): Promise<ChatMsg[]> => {
+    if (!rows.length) return [];
+    const ids = [...new Set(rows.filter((r) => !r.is_system_message).map((r) => r.user_id))].filter(Boolean);
+    if (!ids.length) return rows as ChatMsg[];
+    const { data: profs } = await supabase.from("profiles").select("id, username, avatar_url").in("id", ids);
+    const m = new Map((profs ?? []).map((p: any) => [p.id, p]));
+    return rows.map((r) => ({ ...r, profile: m.get(r.user_id) ?? null }));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("match_chat_messages")
+        .select("id, user_id, content, created_at, is_system_message, sender_role")
+        .eq("match_id", matchId)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (cancelled) return;
+      setMsgs(await hydrate((data as any[]) ?? []));
+    })();
+    const ch = supabase
+      .channel(`mc-${matchId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "match_chat_messages", filter: `match_id=eq.${matchId}` }, async (payload) => {
+        const [hyd] = await hydrate([payload.new]);
+        setMsgs((prev) => prev.some((m) => m.id === (payload.new as any).id) ? prev : [...prev, hyd]);
+      })
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [matchId]);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs.length]);
+
+  const send = async () => {
+    if (!user || !text.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("match_chat_messages").insert({
+      match_id: matchId,
+      user_id: user.id,
+      content: text.trim().slice(0, 500),
+      is_system_message: false,
+      sender_role: isStaff ? "admin" : "captain",
+    } as any);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setText("");
+  };
+
+  return (
+    <Card className="p-0 overflow-hidden flex flex-col h-[600px]">
+      <div className="px-4 py-2 border-b border-border bg-card/60 flex items-center justify-between">
+        <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground">Match Chat</h3>
+        {chatLocked && <Badge variant="outline" className="border-destructive/40 text-destructive text-[10px]"><Lock className="h-3 w-3 mr-1" />Locked</Badge>}
+      </div>
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+        {msgs.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-8">No messages yet.</p>
+        ) : msgs.map((m) => (
+          <div key={m.id} className={cn("text-sm", m.is_system_message && "text-center")}>
+            {m.is_system_message ? (
+              <div className="inline-block text-[11px] px-2 py-1 rounded bg-muted text-muted-foreground">{m.content}</div>
+            ) : (
+              <div className="flex items-start gap-2">
+                {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover mt-0.5" /> : <div className="w-6 h-6 rounded-full bg-muted mt-0.5" />}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("font-display uppercase text-xs", m.sender_role === "admin" ? "text-primary" : "text-foreground")}>
+                      {m.profile?.username ?? "Player"} {m.sender_role === "admin" && "· STAFF"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <p className="break-words">{m.content}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        <div ref={endRef} />
+      </div>
+      {canChat && !chatLocked && user && (
+        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="border-t border-border p-2 flex gap-2">
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" maxLength={500} disabled={busy} />
+          <Button type="submit" size="sm" disabled={busy || !text.trim()}><Send className="h-4 w-4" /></Button>
+        </form>
+      )}
+      {chatLocked && !isStaff && (
+        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
+          Match chat is locked by tournament staff.
+        </div>
+      )}
+      {!canChat && !chatLocked && (
+        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
+          Only captains involved in this match and staff can write here.
+        </div>
+      )}
+    </Card>
+  );
+}
