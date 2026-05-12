@@ -948,21 +948,27 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_system_message: boolean
           match_id: string
+          sender_role: string | null
           user_id: string
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
+          is_system_message?: boolean
           match_id: string
+          sender_role?: string | null
           user_id: string
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
+          is_system_message?: boolean
           match_id?: string
+          sender_role?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1022,10 +1028,12 @@ export type Database = {
           banned_maps: Json
           completed_at: string | null
           created_at: string
+          current_turn_signup_id: string | null
           current_turn_team_id: string | null
           id: string
           match_id: string
           mode: string
+          pick_count: number
           picked_maps: Json
           selected_map: string | null
           started_at: string | null
@@ -1038,10 +1046,12 @@ export type Database = {
           banned_maps?: Json
           completed_at?: string | null
           created_at?: string
+          current_turn_signup_id?: string | null
           current_turn_team_id?: string | null
           id?: string
           match_id: string
           mode?: string
+          pick_count?: number
           picked_maps?: Json
           selected_map?: string | null
           started_at?: string | null
@@ -1054,10 +1064,12 @@ export type Database = {
           banned_maps?: Json
           completed_at?: string | null
           created_at?: string
+          current_turn_signup_id?: string | null
           current_turn_team_id?: string | null
           id?: string
           match_id?: string
           mode?: string
+          pick_count?: number
           picked_maps?: Json
           selected_map?: string | null
           started_at?: string | null
@@ -1067,6 +1079,20 @@ export type Database = {
           veto_log?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "match_map_veto_current_turn_signup_id_fkey"
+            columns: ["current_turn_signup_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_map_veto_current_turn_signup_id_fkey"
+            columns: ["current_turn_signup_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "match_map_veto_match_id_fkey"
             columns: ["match_id"]
@@ -1206,11 +1232,16 @@ export type Database = {
       }
       matches: {
         Row: {
+          admin_note: string | null
+          bo_format: string | null
           bracket_position: number | null
           bracket_side: string | null
+          chat_locked: boolean
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          dispute_reason: string | null
+          dispute_status: string | null
           division_id: string | null
           elo_processed_at: string | null
           game: string
@@ -1225,27 +1256,39 @@ export type Database = {
           played_at: string | null
           player_a_id: string | null
           player_b_id: string | null
+          reported_by_user_id: string | null
+          result_notes: string | null
+          result_screenshot_url: string | null
           result_status: string | null
           round: number | null
           scheduled_at: string | null
           score_a: number | null
           score_b: number | null
           season_id: string | null
+          selected_map: string | null
           server_info: string | null
+          signup_a_id: string | null
+          signup_b_id: string | null
           status: string
           submitted_at: string | null
           submitted_by: string | null
           team_a_id: string | null
           team_b_id: string | null
           tournament_id: string | null
+          veto_status: string
           winner_id: string | null
         }
         Insert: {
+          admin_note?: string | null
+          bo_format?: string | null
           bracket_position?: number | null
           bracket_side?: string | null
+          chat_locked?: boolean
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          dispute_reason?: string | null
+          dispute_status?: string | null
           division_id?: string | null
           elo_processed_at?: string | null
           game?: string
@@ -1260,27 +1303,39 @@ export type Database = {
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          reported_by_user_id?: string | null
+          result_notes?: string | null
+          result_screenshot_url?: string | null
           result_status?: string | null
           round?: number | null
           scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
           season_id?: string | null
+          selected_map?: string | null
           server_info?: string | null
+          signup_a_id?: string | null
+          signup_b_id?: string | null
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
           team_a_id?: string | null
           team_b_id?: string | null
           tournament_id?: string | null
+          veto_status?: string
           winner_id?: string | null
         }
         Update: {
+          admin_note?: string | null
+          bo_format?: string | null
           bracket_position?: number | null
           bracket_side?: string | null
+          chat_locked?: boolean
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          dispute_reason?: string | null
+          dispute_status?: string | null
           division_id?: string | null
           elo_processed_at?: string | null
           game?: string
@@ -1295,19 +1350,26 @@ export type Database = {
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          reported_by_user_id?: string | null
+          result_notes?: string | null
+          result_screenshot_url?: string | null
           result_status?: string | null
           round?: number | null
           scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
           season_id?: string | null
+          selected_map?: string | null
           server_info?: string | null
+          signup_a_id?: string | null
+          signup_b_id?: string | null
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
           team_a_id?: string | null
           team_b_id?: string | null
           tournament_id?: string | null
+          veto_status?: string
           winner_id?: string | null
         }
         Relationships: [
@@ -1344,6 +1406,34 @@ export type Database = {
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "league_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_signup_a_id_fkey"
+            columns: ["signup_a_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_signup_a_id_fkey"
+            columns: ["signup_a_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_signup_b_id_fkey"
+            columns: ["signup_b_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_signup_b_id_fkey"
+            columns: ["signup_b_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups_public"
             referencedColumns: ["id"]
           },
           {
@@ -3036,7 +3126,20 @@ export type Database = {
       }
     }
     Functions: {
+      _cup_finalize_bo1_remaining: {
+        Args: { _match_id: string }
+        Returns: undefined
+      }
+      _cup_random_pick_map: { Args: { _match_id: string }; Returns: undefined }
+      _post_match_system_message: {
+        Args: { _match_id: string; _msg: string }
+        Returns: undefined
+      }
       accept_scrim_request: { Args: { _request_id: string }; Returns: string }
+      admin_confirm_cup_match_result: {
+        Args: { _match_id: string; _score_a?: number; _score_b?: number }
+        Returns: undefined
+      }
       admin_resolve_match: {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
@@ -3090,10 +3193,22 @@ export type Database = {
       }
       cancel_open_cup_queue: { Args: never; Returns: undefined }
       cancel_queue_group: { Args: { _group_id: string }; Returns: undefined }
+      captain_ban_map: {
+        Args: { _map: string; _match_id: string }
+        Returns: undefined
+      }
+      captain_pick_map: {
+        Args: { _map: string; _match_id: string }
+        Returns: undefined
+      }
       claim_match_for_elo: { Args: { _match_id: string }; Returns: boolean }
       close_season: { Args: { _season_id: string }; Returns: undefined }
       community_cup_checkin: {
         Args: { _signup_id: string }
+        Returns: undefined
+      }
+      complete_match_veto: {
+        Args: { _match_id: string; _selected_map?: string }
         Returns: undefined
       }
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
@@ -3132,6 +3247,10 @@ export type Database = {
       }
       enqueue_solo: { Args: { _game: string; _mode: string }; Returns: Json }
       generate_bracket: { Args: { _tournament_id: string }; Returns: undefined }
+      generate_community_cup_bracket: {
+        Args: { _tournament_id: string }
+        Returns: number
+      }
       generate_round_robin_fixtures: {
         Args: {
           _days_between?: number
@@ -3147,6 +3266,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_cup_match_captain: {
+        Args: { _match_id: string; _user_id: string }
+        Returns: string
       }
       is_disposable_email: { Args: { _email: string }; Returns: boolean }
       is_muted: {
@@ -3174,6 +3297,15 @@ export type Database = {
         }
         Returns: number
       }
+      open_cup_match_dispute: {
+        Args: {
+          _description?: string
+          _evidence?: string
+          _match_id: string
+          _reason: string
+        }
+        Returns: undefined
+      }
       rank_name_from_elo: { Args: { _elo: number }; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -3196,16 +3328,35 @@ export type Database = {
         Args: { _registration_id: string }
         Returns: undefined
       }
+      reset_match_veto: { Args: { _match_id: string }; Returns: undefined }
       resolve_notification: { Args: { _id: string }; Returns: undefined }
       seed_demo_teams_for_league: {
         Args: { _count?: number; _league_id: string }
         Returns: number
       }
+      set_cup_match_chat_locked: {
+        Args: { _locked: boolean; _match_id: string }
+        Returns: undefined
+      }
       set_match_ready: {
         Args: { _match_id: string; _ready: boolean }
         Returns: undefined
       }
+      start_match_veto: {
+        Args: { _match_id: string; _mode: string }
+        Returns: undefined
+      }
       start_playoffs: { Args: { _season_id: string }; Returns: undefined }
+      submit_cup_match_result: {
+        Args: {
+          _match_id: string
+          _notes?: string
+          _score_a: number
+          _score_b: number
+          _screenshot?: string
+        }
+        Returns: undefined
+      }
       submit_match_result: {
         Args: {
           _map?: string
