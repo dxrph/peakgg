@@ -225,6 +225,41 @@ export default function TournamentsPage() {
     },
   });
 
+  // Featured tournament — PeakGG Community Cup #1 (the current flagship event).
+  const { data: featured } = useQuery({
+    queryKey: ["featured-community-cup", selectedGame],
+    queryFn: async () => {
+      const { data: t } = await supabase
+        .from("tournaments")
+        .select("id, slug, name, format, start_date, max_teams, status, tier_label, short_description, tournament_type, game")
+        .eq("slug", "community-cup-1")
+        .maybeSingle();
+      if (!t || t.game !== selectedGame) return null;
+      const { count } = await supabase
+        .from("tournament_team_signups")
+        .select("id", { count: "exact", head: true })
+        .eq("tournament_id", t.id)
+        .eq("status", "approved");
+      return { ...t, approved_count: count ?? 0 };
+    },
+  });
+
+  // Hide featured tournament from the lower team tournaments grid to avoid duplication.
+  const otherTeamTournaments = teamTournaments.filter(
+    (t: any) => !featured || t.id !== featured.id,
+  );
+
+  const featuredStatusLabel =
+    featured?.status === "registration_open" ? "Registration Open"
+    : featured?.status === "checkin" ? "Check-in Open"
+    : featured?.status === "live" ? "Live Now"
+    : featured?.status === "completed" ? "Completed"
+    : "Coming Soon";
+
+  const daysUntilStart = featured?.start_date
+    ? Math.ceil((new Date(featured.start_date).getTime() - Date.now()) / 86400000)
+    : null;
+
   const seo = (
     <SEO
       title="Tournaments — PeakGG | Solo Queue Cups & Team Tournaments"
