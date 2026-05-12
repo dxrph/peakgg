@@ -1017,6 +1017,72 @@ export type Database = {
           },
         ]
       }
+      match_map_veto: {
+        Row: {
+          banned_maps: Json
+          completed_at: string | null
+          created_at: string
+          current_turn_team_id: string | null
+          id: string
+          match_id: string
+          mode: string
+          picked_maps: Json
+          selected_map: string | null
+          started_at: string | null
+          status: string
+          tournament_id: string | null
+          updated_at: string
+          veto_log: Json
+        }
+        Insert: {
+          banned_maps?: Json
+          completed_at?: string | null
+          created_at?: string
+          current_turn_team_id?: string | null
+          id?: string
+          match_id: string
+          mode?: string
+          picked_maps?: Json
+          selected_map?: string | null
+          started_at?: string | null
+          status?: string
+          tournament_id?: string | null
+          updated_at?: string
+          veto_log?: Json
+        }
+        Update: {
+          banned_maps?: Json
+          completed_at?: string | null
+          created_at?: string
+          current_turn_team_id?: string | null
+          id?: string
+          match_id?: string
+          mode?: string
+          picked_maps?: Json
+          selected_map?: string | null
+          started_at?: string | null
+          status?: string
+          tournament_id?: string | null
+          updated_at?: string
+          veto_log?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_map_veto_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: true
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_map_veto_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_ready_checks: {
         Row: {
           id: string
@@ -2346,6 +2412,47 @@ export type Database = {
           },
         ]
       }
+      tournament_map_pool: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          map_name: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          map_name: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          map_name?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_map_pool_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_registrations: {
         Row: {
           id: string
@@ -2461,6 +2568,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          permanent_team_request_note: string | null
           player_1_riot_id: string
           player_2_riot_id: string
           player_3_riot_id: string
@@ -2474,6 +2582,7 @@ export type Database = {
           team_tag: string | null
           tournament_id: string
           updated_at: string
+          wants_permanent_team: boolean
         }
         Insert: {
           admin_note?: string | null
@@ -2494,6 +2603,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          permanent_team_request_note?: string | null
           player_1_riot_id: string
           player_2_riot_id: string
           player_3_riot_id: string
@@ -2507,6 +2617,7 @@ export type Database = {
           team_tag?: string | null
           tournament_id: string
           updated_at?: string
+          wants_permanent_team?: boolean
         }
         Update: {
           admin_note?: string | null
@@ -2527,6 +2638,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          permanent_team_request_note?: string | null
           player_1_riot_id?: string
           player_2_riot_id?: string
           player_3_riot_id?: string
@@ -2540,6 +2652,7 @@ export type Database = {
           team_tag?: string | null
           tournament_id?: string
           updated_at?: string
+          wants_permanent_team?: boolean
         }
         Relationships: [
           {
@@ -2582,14 +2695,17 @@ export type Database = {
           bracket_type: string
           checkin_close_at: string | null
           checkin_open_at: string | null
+          countdown_enabled: boolean
           created_at: string
           created_by: string | null
           description: string | null
+          discord_url: string | null
           end_date: string | null
           entry_cost_coins: number
           entry_type: string
           featured: boolean
           fixed_map: string | null
+          forfeit_grace_minutes: number
           format: string
           game: string
           id: string
@@ -2597,6 +2713,9 @@ export type Database = {
           logo_url: string | null
           map_mode: string
           map_pool: string[] | null
+          map_selection_mode: string
+          match_format_default: string
+          match_format_final: string
           max_teams: number
           min_elo: number | null
           min_teams: number | null
@@ -2608,6 +2727,7 @@ export type Database = {
           rank_max: number | null
           registration_close_at: string | null
           registration_open_at: string | null
+          result_confirmation_mode: string
           reward_badge: string | null
           reward_banner: string | null
           reward_trophies: number
@@ -2618,7 +2738,9 @@ export type Database = {
           slug: string | null
           start_date: string | null
           status: string
+          tagline: string | null
           team_size: string | null
+          third_place_enabled: boolean
           tier: number
           tier_label: string | null
           timezone: string | null
@@ -2632,14 +2754,17 @@ export type Database = {
           bracket_type?: string
           checkin_close_at?: string | null
           checkin_open_at?: string | null
+          countdown_enabled?: boolean
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discord_url?: string | null
           end_date?: string | null
           entry_cost_coins?: number
           entry_type?: string
           featured?: boolean
           fixed_map?: string | null
+          forfeit_grace_minutes?: number
           format?: string
           game?: string
           id?: string
@@ -2647,6 +2772,9 @@ export type Database = {
           logo_url?: string | null
           map_mode?: string
           map_pool?: string[] | null
+          map_selection_mode?: string
+          match_format_default?: string
+          match_format_final?: string
           max_teams?: number
           min_elo?: number | null
           min_teams?: number | null
@@ -2658,6 +2786,7 @@ export type Database = {
           rank_max?: number | null
           registration_close_at?: string | null
           registration_open_at?: string | null
+          result_confirmation_mode?: string
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
@@ -2668,7 +2797,9 @@ export type Database = {
           slug?: string | null
           start_date?: string | null
           status?: string
+          tagline?: string | null
           team_size?: string | null
+          third_place_enabled?: boolean
           tier?: number
           tier_label?: string | null
           timezone?: string | null
@@ -2682,14 +2813,17 @@ export type Database = {
           bracket_type?: string
           checkin_close_at?: string | null
           checkin_open_at?: string | null
+          countdown_enabled?: boolean
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discord_url?: string | null
           end_date?: string | null
           entry_cost_coins?: number
           entry_type?: string
           featured?: boolean
           fixed_map?: string | null
+          forfeit_grace_minutes?: number
           format?: string
           game?: string
           id?: string
@@ -2697,6 +2831,9 @@ export type Database = {
           logo_url?: string | null
           map_mode?: string
           map_pool?: string[] | null
+          map_selection_mode?: string
+          match_format_default?: string
+          match_format_final?: string
           max_teams?: number
           min_elo?: number | null
           min_teams?: number | null
@@ -2708,6 +2845,7 @@ export type Database = {
           rank_max?: number | null
           registration_close_at?: string | null
           registration_open_at?: string | null
+          result_confirmation_mode?: string
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
@@ -2718,7 +2856,9 @@ export type Database = {
           slug?: string | null
           start_date?: string | null
           status?: string
+          tagline?: string | null
           team_size?: string | null
+          third_place_enabled?: boolean
           tier?: number
           tier_label?: string | null
           timezone?: string | null

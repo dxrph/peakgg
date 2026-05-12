@@ -26,6 +26,7 @@ import { openCupPublicQueueEnabled, openCupTeamSize } from "@/lib/feature-flags"
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 import RankBadge from "@/components/RankBadge";
 import QueueLobby from "@/components/competitive/QueueLobby";
+import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
@@ -231,7 +232,7 @@ export default function TournamentsPage() {
     queryFn: async () => {
       const { data: t } = await supabase
         .from("tournaments")
-        .select("id, slug, name, format, start_date, max_teams, status, tier_label, short_description, tournament_type, game")
+        .select("id, slug, name, format, start_date, max_teams, status, tier_label, short_description, tournament_type, game, registration_close_at, checkin_close_at, countdown_enabled")
         .eq("slug", "community-cup-1")
         .maybeSingle();
       if (!t || t.game !== selectedGame) return null;
@@ -609,13 +610,16 @@ export default function TournamentsPage() {
                         <div className="text-sm font-body text-foreground mt-1">
                           {fmtDate(new Date(featured.start_date), "EEE, MMM d, yyyy — HH:mm")}
                         </div>
-                        {daysUntilStart !== null && daysUntilStart > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono mt-1">
-                            <Clock className="h-3 w-3" />Starts in {daysUntilStart} day{daysUntilStart === 1 ? "" : "s"}
-                          </div>
-                        )}
                       </div>
                     )}
+
+                    <TournamentCountdown
+                      startsAt={featured.start_date ?? null}
+                      registrationClosesAt={featured.registration_close_at ?? null}
+                      checkinClosesAt={featured.checkin_close_at ?? null}
+                      countdownEnabled={featured.countdown_enabled ?? true}
+                      status={featured.status}
+                    />
                   </div>
                 </div>
               </div>
