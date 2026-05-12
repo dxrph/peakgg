@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star } from "lucide-react";
+import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import {
   DEFAULT_VALORANT_MAP_POOL,
