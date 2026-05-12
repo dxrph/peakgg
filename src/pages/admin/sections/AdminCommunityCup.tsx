@@ -664,6 +664,12 @@ function MatchesTab({ tournament, matches, signups, mapPool, onChanged }: {
 function MatchRow2({ m, maps, onMap, onScore }: { m: MatchRow; maps: string[]; onMap: (id: string, map: string) => void; onScore: (id: string, m: MatchRow, a: number, b: number) => void }) {
   const [a, setA] = useState<string>(String(m.score_a ?? 0));
   const [b, setB] = useState<string>(String(m.score_b ?? 0));
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    setSaving(true);
+    try { await onScore(m.id, m, Number(a) || 0, Number(b) || 0); }
+    finally { setSaving(false); }
+  };
   return (
     <tr className="border-t border-border">
       <td className="p-3">{m.round ?? "—"}</td>
@@ -685,7 +691,9 @@ function MatchRow2({ m, maps, onMap, onScore }: { m: MatchRow; maps: string[]; o
       </td>
       <td className="p-3"><Badge variant="secondary" className="font-display">{m.status}</Badge></td>
       <td className="p-3 text-right">
-        <Button size="sm" variant="outline" onClick={() => onScore(m.id, m, Number(a) || 0, Number(b) || 0)}>Save Result</Button>
+        <Button size="sm" variant="outline" onClick={save} disabled={saving || !m.team_a_id || !m.team_b_id}>
+          {saving && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}Save Result
+        </Button>
       </td>
     </tr>
   );
