@@ -610,13 +610,16 @@ export default function TournamentsPage() {
                         <div className="text-sm font-body text-foreground mt-1">
                           {fmtDate(new Date(featured.start_date), "EEE, MMM d, yyyy — HH:mm")}
                         </div>
-                        {daysUntilStart !== null && daysUntilStart > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono mt-1">
-                            <Clock className="h-3 w-3" />Starts in {daysUntilStart} day{daysUntilStart === 1 ? "" : "s"}
-                          </div>
-                        )}
                       </div>
                     )}
+
+                    <TournamentCountdown
+                      startsAt={featured.start_date ?? null}
+                      registrationClosesAt={featured.registration_close_at ?? null}
+                      checkinClosesAt={featured.checkin_close_at ?? null}
+                      countdownEnabled={featured.countdown_enabled ?? true}
+                      status={featured.status}
+                    />
                   </div>
                 </div>
               </div>
