@@ -864,58 +864,101 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
   };
 
   return (
-    <Card className="p-5 border-primary/30">
-      <h2 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
-        <ShieldAlert className="h-4 w-4 text-primary" /> Admin Controls
-      </h2>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div>
-          <Label className="text-xs">Score A</Label>
-          <Input type="number" value={a} onChange={(e) => setA(e.target.value)} />
+    <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-b from-primary/[0.03] to-transparent">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-1 flex-wrap">
+          <div>
+            <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-primary" /> Admin Controls
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">Staff-only controls for match management. Use these tools to override settings, confirm results and manage the match.</p>
+          </div>
+          <Badge variant="outline" className="border-primary/40 text-primary font-display text-[10px]">STAFF ONLY</Badge>
         </div>
-        <div>
-          <Label className="text-xs">Score B</Label>
-          <Input type="number" value={b} onChange={(e) => setB(e.target.value)} />
-        </div>
-        <div>
-          <Label className="text-xs">BO format (per match override)</Label>
-          <Select value={boFormat} onValueChange={(v) => { setBoFormat(v); updateMatch({ bo_format: v }); }}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {["BO1","BO2","BO3","BO5"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs">Selected map (manual override)</Label>
-          <Input
-            value={match.selected_map ?? ""}
-            onChange={(e) => updateMatch({ selected_map: e.target.value, map: e.target.value, veto_status: e.target.value ? "map_selected" : "not_started" })}
-            placeholder="Map name…"
-          />
-        </div>
-      </div>
-      <div className="mt-3">
-        <Label className="text-xs">Admin note (private)</Label>
-        <Textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} onBlur={() => updateMatch({ admin_note: adminNote })} />
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" variant="neon" onClick={confirmResult} disabled={busy}>
-          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Confirm Result
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ status: "in_progress", result_status: "live" })}>
-          <Play className="h-3.5 w-3.5 mr-1" /> Mark Live
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ result_status: "disputed", dispute_status: "open" })}>
-          <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Mark Disputed
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ dispute_status: "resolved", result_status: "scheduled" })}>
-          Resolve Dispute
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => lockChat(!match.chat_locked)}>
-          {match.chat_locked ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Lock className="h-3.5 w-3.5 mr-1" />}
-          {match.chat_locked ? "Unlock chat" : "Lock chat"}
-        </Button>
+
+        <Accordion type="multiple" defaultValue={["result"]} className="mt-4">
+          <AccordionItem value="result" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />Match Result</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score A</Label>
+                  <Input type="number" value={a} onChange={(e) => setA(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score B</Label>
+                  <Input type="number" value={b} onChange={(e) => setB(e.target.value)} />
+                </div>
+              </div>
+              <Button size="sm" variant="neon" onClick={confirmResult} disabled={busy}>
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Confirm Result & Advance Bracket
+              </Button>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="format" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><Settings2 className="h-4 w-4 text-primary" />Match Format</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">BO format (override)</Label>
+                  <Select value={boFormat} onValueChange={(v) => { setBoFormat(v); updateMatch({ bo_format: v }); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["BO1","BO2","BO3","BO5"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Selected map (manual override)</Label>
+                  <Input
+                    value={match.selected_map ?? ""}
+                    onChange={(e) => updateMatch({ selected_map: e.target.value, map: e.target.value, veto_status: e.target.value ? "map_selected" : "not_started" })}
+                    placeholder="Map name…"
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="notes" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Staff Notes</span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin note (private)</Label>
+              <Textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} onBlur={() => updateMatch({ admin_note: adminNote })} rows={3} />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="actions" className="border-border/60 border-b-0">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><Hammer className="h-4 w-4 text-primary" />Match Actions</span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ status: "in_progress", result_status: "live" })}>
+                  <Play className="h-3.5 w-3.5 mr-1" /> Mark Live
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ result_status: "disputed", dispute_status: "open" })}>
+                  <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Mark Disputed
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ dispute_status: "resolved", result_status: "scheduled" })}>
+                  Resolve Dispute
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => lockChat(!match.chat_locked)}>
+                  {match.chat_locked ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Lock className="h-3.5 w-3.5 mr-1" />}
+                  {match.chat_locked ? "Unlock chat" : "Lock chat"}
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </Card>
   );
