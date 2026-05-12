@@ -138,7 +138,7 @@ export default function AdminCommunityCup() {
             <RegistrationsTab signups={signups} counts={counts} onChanged={load} onOpen={setDetail} />
           </TabsContent>
           <TabsContent value="map-pool" className="mt-6">
-            <MapPoolTab tournamentId={tournament.id} pool={mapPool} onChanged={load} />
+            <MapPoolTab tournament={tournament} pool={mapPool} onChanged={load} />
           </TabsContent>
           <TabsContent value="matches" className="mt-6">
             <MatchesTab tournament={tournament} matches={matches} signups={signups} mapPool={mapPool} onChanged={load} />
