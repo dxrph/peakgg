@@ -594,11 +594,11 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
               <tr key={m.id} className="border-t border-border">
                 <td className="p-3 text-muted-foreground">{i + 1}</td>
                 <td className="p-3 font-display">{m.map_name}</td>
-                <td className="p-3"><Switch checked={m.is_active} onCheckedChange={(v) => toggleActive(m.id, v)} /></td>
+                <td className="p-3"><Switch checked={m.is_active} onCheckedChange={(v) => toggleActive(m.id, v)} disabled={busy} /></td>
                 <td className="p-3 text-right whitespace-nowrap space-x-1">
-                  <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === pool.length - 1}><ChevronDown className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={busy || i === 0}><ChevronUp className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={busy || i === pool.length - 1}><ChevronDown className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remove(m.id)} disabled={busy}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
             ))}
