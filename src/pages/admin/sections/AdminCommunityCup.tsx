@@ -1059,3 +1059,231 @@ function KV({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
+
+/* ──────────────── SANDBOX TAB ──────────────── */
+
+type SbxMatch = {
+  id: string;
+  status: string;
+  result_status: string | null;
+  veto_status: string | null;
+  selected_map: string | null;
+  score_a: number | null;
+  score_b: number | null;
+  dispute_status: string | null;
+  signup_a_id: string | null;
+  signup_b_id: string | null;
+  tournament_id: string;
+};
+type SbxVeto = {
+  status: string;
+  mode: string;
+  banned_maps: string[];
+  picked_maps: string[];
+  selected_map: string | null;
+  current_turn_signup_id: string | null;
+};
+
+function SandboxTab() {
+  const [match, setMatch] = useState<SbxMatch | null>(null);
+  const [veto, setVeto] = useState<SbxVeto | null>(null);
+  const [pool, setPool] = useState<string[]>([]);
+  const [chat, setChat] = useState<Array<{ id: string; content: string; created_at: string; is_system_message: boolean }>>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [mode, setMode] = useState<string>("bo1_veto");
+  const [scoreA, setScoreA] = useState("13");
+  const [scoreB, setScoreB] = useState("9");
+
+  const refresh = useCallback(async () => {
+    const { data: t } = await supabase.from("tournaments").select("id").eq("slug", "sandbox-test-cup").maybeSingle();
+    if (!t) { setMatch(null); setVeto(null); setPool([]); setChat([]); return; }
+    const { data: m } = await supabase
+      .from("matches")
+      .select("id, status, result_status, veto_status, selected_map, score_a, score_b, dispute_status, signup_a_id, signup_b_id, tournament_id")
+      .eq("tournament_id", t.id)
+      .eq("is_demo", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setMatch((m as SbxMatch) ?? null);
+    if (m) {
+      const [vRes, pRes, cRes] = await Promise.all([
+        supabase.from("match_map_veto").select("status, mode, banned_maps, picked_maps, selected_map, current_turn_signup_id").eq("match_id", m.id).maybeSingle(),
+        supabase.from("tournament_map_pool" as never).select("map_name, is_active").eq("tournament_id", t.id).order("display_order"),
+        supabase.from("match_chat_messages").select("id, content, created_at, is_system_message").eq("match_id", m.id).order("created_at", { ascending: true }).limit(50),
+      ]);
+      setVeto(vRes.data ? {
+        ...(vRes.data as { status: string; mode: string; selected_map: string | null; current_turn_signup_id: string | null }),
+        banned_maps: ((vRes.data as { banned_maps?: unknown }).banned_maps as string[] | undefined) ?? [],
+        picked_maps: ((vRes.data as { picked_maps?: unknown }).picked_maps as string[] | undefined) ?? [],
+      } : null);
+      setPool((((pRes.data ?? []) as Array<{ map_name: string; is_active: boolean }>).filter((x) => x.is_active).map((x) => x.map_name)));
+      setChat(((cRes.data ?? []) as Array<{ id: string; content: string; created_at: string; is_system_message: boolean }>));
+    } else {
+      setVeto(null); setPool([]); setChat([]);
+    }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const run = async (label: string, fn: () => Promise<unknown>) => {
+    setBusy(label);
+    try {
+      const { error } = (await fn()) as { error: { message: string } | null } ?? { error: null };
+      if (error) throw new Error(error.message);
+      toast.success(label + " ✓");
+      await refresh();
+    } catch (e) {
+      toast.error((e as Error).message || "Failed");
+    } finally { setBusy(null); }
+  };
+
+  const remaining = pool.filter((m) => !veto?.banned_maps.includes(m) && !veto?.picked_maps.includes(m));
+  const turnSide: "A" | "B" | null = !match || !veto?.current_turn_signup_id ? null : (veto.current_turn_signup_id === match.signup_a_id ? "A" : "B");
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border/50 bg-card/40 p-4">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2"><FlaskConical className="h-5 w-5 text-primary" /> Match-Day Sandbox</h3>
+            <p className="text-sm text-muted-foreground mt-1">Simulate a full match (veto → result → confirm → dispute) on isolated demo data. Real Community Cup data is never touched.</p>
+          </div>
+          <div className="flex gap-2">
+            {!match && (
+              <>
+                <Select value={mode} onValueChange={setMode}>
+                  <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bo1_veto">BO1 Veto</SelectItem>
+                    <SelectItem value="bo3_veto">BO3 Veto</SelectItem>
+                    <SelectItem value="random">Random</SelectItem>
+                    <SelectItem value="admin_manual">Admin Manual</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => run("Sandbox match created", async () => await supabase.rpc("admin_create_sandbox_match", { _mode: mode } as never))} disabled={!!busy}>
+                  {busy === "Sandbox match created" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Create sandbox match
+                </Button>
+              </>
+            )}
+            {match && (
+              <Button variant="outline" onClick={() => run("Sandbox cleaned", async () => await supabase.rpc("admin_cleanup_sandbox" as never))} disabled={!!busy}>
+                <Trash2 className="h-4 w-4 mr-1" /> Cleanup
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {!match && (
+        <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">
+          No sandbox match yet. Pick a mode and click <strong>Create sandbox match</strong> to spawn an isolated demo with two test teams.
+        </div>
+      )}
+
+      {match && (
+        <>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-lg border border-border/50 p-4 space-y-2">
+              <div className="text-xs uppercase text-muted-foreground">State</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <KV k="Status" v={match.status} />
+                <KV k="Result" v={match.result_status ?? "—"} />
+                <KV k="Veto" v={match.veto_status ?? "—"} />
+                <KV k="Selected map" v={match.selected_map ?? "—"} />
+                <KV k="Score" v={`${match.score_a ?? "—"} : ${match.score_b ?? "—"}`} />
+                <KV k="Dispute" v={match.dispute_status ?? "—"} />
+              </div>
+              <Link to={`/tournaments/sandbox-test-cup/matches/${match.id}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2">
+                Open public match room <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
+
+            <div className="rounded-lg border border-border/50 p-4 space-y-3">
+              <div className="text-xs uppercase text-muted-foreground">1 · Map Veto</div>
+              {!veto || veto.status === "not_started" ? (
+                <Button size="sm" onClick={() => run("Veto started", async () => await supabase.rpc("start_match_veto", { _match_id: match.id, _mode: mode } as never))} disabled={!!busy}>
+                  <Play className="h-4 w-4 mr-1" /> Start veto ({mode})
+                </Button>
+              ) : (
+                <>
+                  <div className="text-xs text-muted-foreground">Mode: {veto.mode} · Status: {veto.status} {turnSide && veto.status === "in_progress" && <Badge variant="outline" className="ml-2">Turn: Team {turnSide}</Badge>}</div>
+                  {veto.status === "in_progress" && (
+                    <div className="space-y-2">
+                      <div className="text-xs text-muted-foreground">Click a map to ban / pick on behalf of the active team:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {remaining.map((mp) => (
+                          <div key={mp} className="flex gap-1">
+                            <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("Banned " + mp, async () => await supabase.rpc("captain_ban_map", { _match_id: match.id, _map: mp } as never))}>
+                              Ban {mp}
+                            </Button>
+                            {veto.mode === "bo3_veto" && (
+                              <Button size="sm" disabled={!!busy} onClick={() => run("Picked " + mp, async () => await supabase.rpc("captain_pick_map", { _match_id: match.id, _map: mp } as never))}>
+                                Pick {mp}
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="text-xs">
+                    <div><span className="text-muted-foreground">Banned:</span> {veto.banned_maps.join(", ") || "—"}</div>
+                    <div><span className="text-muted-foreground">Picked:</span> {veto.picked_maps.join(", ") || "—"}</div>
+                    <div><span className="text-muted-foreground">Selected:</span> {veto.selected_map ?? "—"}</div>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => run("Veto reset", async () => await supabase.rpc("reset_match_veto", { _match_id: match.id } as never))} disabled={!!busy}>
+                    <RotateCcw className="h-3 w-3 mr-1" /> Reset veto
+                  </Button>
+                </>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border/50 p-4 space-y-3">
+              <div className="text-xs uppercase text-muted-foreground">2 · Submit Result (as captain)</div>
+              <div className="flex gap-2 items-center">
+                <Input className="w-20" type="number" value={scoreA} onChange={(e) => setScoreA(e.target.value)} />
+                <span className="text-muted-foreground">:</span>
+                <Input className="w-20" type="number" value={scoreB} onChange={(e) => setScoreB(e.target.value)} />
+                <Button size="sm" disabled={!!busy} onClick={() => run("Result submitted (A)", async () => await supabase.rpc("admin_simulate_cup_match_result", { _match_id: match.id, _score_a: Number(scoreA), _score_b: Number(scoreB), _as_side: "A" } as never))}>
+                  Submit as A
+                </Button>
+                <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("Result submitted (B)", async () => await supabase.rpc("admin_simulate_cup_match_result", { _match_id: match.id, _score_a: Number(scoreA), _score_b: Number(scoreB), _as_side: "B" } as never))}>
+                  Submit as B
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border/50 p-4 space-y-3">
+              <div className="text-xs uppercase text-muted-foreground">3 · Admin Confirm / 4 · Dispute</div>
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" disabled={!!busy} onClick={() => run("Result confirmed", async () => await supabase.rpc("admin_confirm_cup_match_result", { _match_id: match.id, _score_a: Number(scoreA), _score_b: Number(scoreB) } as never))}>
+                  Confirm result
+                </Button>
+                <Button size="sm" variant="destructive" disabled={!!busy} onClick={() => run("Dispute opened (B)", async () => await supabase.rpc("admin_simulate_cup_match_dispute", { _match_id: match.id, _reason: "score_mismatch", _as_side: "B" } as never))}>
+                  Open dispute (B)
+                </Button>
+              </div>
+              {match.dispute_status === "open" && (
+                <div className="text-xs text-amber-500 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Dispute open — resolve from Admin → Disputes.</div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border/50 p-4">
+            <div className="text-xs uppercase text-muted-foreground mb-2">Match chat (system + user)</div>
+            <div className="max-h-64 overflow-y-auto space-y-1 text-xs">
+              {chat.length === 0 && <div className="text-muted-foreground">No messages yet.</div>}
+              {chat.map((c) => (
+                <div key={c.id} className={cn("px-2 py-1 rounded", c.is_system_message ? "bg-primary/5 text-primary" : "bg-muted/30")}>
+                  <span className="text-muted-foreground mr-2">{new Date(c.created_at).toLocaleTimeString()}</span>
+                  {c.content}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
