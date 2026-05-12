@@ -381,12 +381,15 @@ function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
   signups: Signup[]; counts: Record<string, number>; onChanged: () => void; onOpen: (s: Signup) => void;
 }) {
   const [filter, setFilter] = useState("all");
+  const [actingId, setActingId] = useState<string | null>(null);
   const filtered = filter === "all" ? signups : signups.filter((s) => s.status === filter);
 
   const setStatus = async (id: string, status: string) => {
+    setActingId(id);
     const { error } = await supabase.from("tournament_team_signups" as never)
       .update({ status, ...(status === "checked_in" ? { checked_in_at: new Date().toISOString() } : {}) } as never)
       .eq("id", id);
+    setActingId(null);
     if (error) return toast.error(error.message);
     toast.success(`Status: ${status}`);
     onChanged();
@@ -463,9 +466,11 @@ function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
                 </td>
                 <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(s.created_at).toLocaleString()}</td>
                 <td className="p-3 text-right space-x-1 whitespace-nowrap">
-                  <Button size="sm" variant="ghost" onClick={() => onOpen(s)}>View</Button>
-                  {s.status !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "approved")}>Approve</Button>}
-                  {s.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "rejected")}>Reject</Button>}
+                  <Button size="sm" variant="ghost" onClick={() => onOpen(s)} disabled={actingId === s.id}>View</Button>
+                  {s.status !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "approved")} disabled={actingId === s.id}>Approve</Button>}
+                  {s.status !== "waitlisted" && s.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "waitlisted")} disabled={actingId === s.id}>Waitlist</Button>}
+                  {s.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "checked_in")} disabled={actingId === s.id}>Check-in</Button>}
+                  {s.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "rejected")} disabled={actingId === s.id}>Reject</Button>}
                 </td>
               </tr>
             ))}
