@@ -239,52 +239,67 @@ export default function CommunityCupMatchRoom() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SEO title={`Match Room — ${tournamentName}`} description="PeakGG Community Cup match room" />
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
         <Button variant="ghost" size="sm" className="mb-3" onClick={() => navigate(`/tournaments/${cupSlug}`)}>
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to tournament
         </Button>
 
-        {/* HEADER */}
-        <Card className="p-5 mb-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-wider">
-                <Swords className="h-3.5 w-3.5" />
-                {tournamentName}
-                {match.round != null && <span>· Round {match.round}</span>}
-                {match.bracket_position != null && <span>· Match #{match.bracket_position}</span>}
+        {/* HERO HEADER */}
+        <Card className="relative overflow-hidden mb-4 border-border/60 bg-gradient-to-br from-card via-card to-background/40">
+          <div className="absolute inset-0 pointer-events-none opacity-60 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_55%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="relative p-5 sm:p-6">
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-display uppercase tracking-[0.18em]">
+              <Swords className="h-3.5 w-3.5 text-primary" />
+              <span>{tournamentName}</span>
+              {match.round != null && <span className="text-muted-foreground/70">· Round {match.round}</span>}
+              {match.bracket_position != null && <span className="text-muted-foreground/70">· Match #{match.bracket_position}</span>}
+              {status === "live" && (
+                <span className="ml-2 inline-flex items-center gap-1 text-primary">
+                  <span className="relative flex h-2 w-2"><span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" /><span className="relative h-2 w-2 rounded-full bg-primary" /></span>
+                  LIVE
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 grid lg:grid-cols-[1fr_auto] gap-5 items-center">
+              {/* Team vs Team */}
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
+                <HeroTeam side="A" signup={sa} winnerId={match.winner_id} teamId={match.team_a_id} score={match.score_a} status={status} />
+                <div className="flex flex-col items-center gap-1">
+                  <div className="font-display text-xs text-muted-foreground tracking-[0.2em]">VS</div>
+                  <div className="h-10 w-px bg-gradient-to-b from-transparent via-primary/40 to-transparent" />
+                  {(match.score_a != null || match.score_b != null) && (
+                    <div className="font-display text-2xl sm:text-3xl tabular-nums">
+                      <span className={cn(match.winner_id && match.team_a_id === match.winner_id && "text-primary")}>{match.score_a ?? "—"}</span>
+                      <span className="text-muted-foreground mx-1">:</span>
+                      <span className={cn(match.winner_id && match.team_b_id === match.winner_id && "text-primary")}>{match.score_b ?? "—"}</span>
+                    </div>
+                  )}
+                </div>
+                <HeroTeam side="B" signup={sb} winnerId={match.winner_id} teamId={match.team_b_id} score={match.score_b} status={status} alignRight />
               </div>
-              <h1 className="font-display text-2xl mt-2">
-                {sa?.team_name ?? "TBD"} <span className="text-muted-foreground">vs</span> {sb?.team_name ?? "TBD"}
-              </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <Badge className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>
-                <Badge variant="outline">{match.bo_format ?? "BO1"}</Badge>
-                <Badge variant="outline">Map mode: {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</Badge>
+
+              {/* Status badges */}
+              <div className="flex lg:flex-col flex-wrap gap-1.5 lg:items-end justify-start lg:justify-center">
+                <Badge className={cn("border font-display tracking-wider", sb_meta?.cls)}>{sb_meta?.label}</Badge>
+                <Badge variant="outline" className="font-display">{match.bo_format ?? "BO1"}</Badge>
+                <Badge variant="outline" className="font-display">
+                  <Target className="h-3 w-3 mr-1" />
+                  {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}
+                </Badge>
                 {match.selected_map && (
-                  <Badge variant="outline" className="border-primary/40 text-primary">
+                  <Badge variant="outline" className="border-primary/50 text-primary bg-primary/5">
                     <MapPin className="h-3 w-3 mr-1" /> {match.selected_map}
                   </Badge>
                 )}
-                {match.chat_locked && <Badge variant="outline" className="border-destructive/40 text-destructive"><Lock className="h-3 w-3 mr-1" />Chat locked</Badge>}
+                {match.chat_locked && (
+                  <Badge variant="outline" className="border-destructive/40 text-destructive">
+                    <Lock className="h-3 w-3 mr-1" />Chat locked
+                  </Badge>
+                )}
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-display text-3xl">
-                {match.score_a ?? "—"} <span className="text-muted-foreground">:</span> {match.score_b ?? "—"}
-              </div>
-              {match.winner_id && (
-                <div className="text-xs text-success mt-1 flex items-center gap-1 justify-end">
-                  <Trophy className="h-3 w-3" /> Winner declared
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Teams */}
-          <div className="grid sm:grid-cols-2 gap-3 mt-4">
-            <TeamCard side="A" signup={sa} winnerId={match.winner_id} teamId={match.team_a_id} />
-            <TeamCard side="B" signup={sb} winnerId={match.winner_id} teamId={match.team_b_id} />
           </div>
         </Card>
 
@@ -311,7 +326,8 @@ export default function CommunityCupMatchRoom() {
             )}
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
+            <MatchSummary match={match} status={status} sb_meta={sb_meta} />
             <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
           </div>
         </div>
@@ -321,28 +337,85 @@ export default function CommunityCupMatchRoom() {
   );
 }
 
-function TeamCard({ side, signup, winnerId, teamId }: { side: "A" | "B"; signup: SignupLite | null; winnerId: string | null; teamId: string | null }) {
+function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }: {
+  side: "A" | "B"; signup: SignupLite | null; winnerId: string | null; teamId: string | null;
+  score: number | null; status: string; alignRight?: boolean;
+}) {
   const isWinner = !!winnerId && teamId === winnerId;
+  const isLoser = !!winnerId && teamId !== winnerId && !!signup;
   return (
     <div className={cn(
-      "rounded-lg border p-3 flex items-center gap-3",
-      isWinner ? "border-primary/40 bg-primary/5" : "border-border"
+      "rounded-xl border p-3 sm:p-4 transition-all",
+      isWinner ? "border-primary/60 bg-primary/5 shadow-[0_0_30px_-12px_hsl(var(--primary)/0.5)]"
+        : isLoser ? "border-border/40 bg-card/40 opacity-70"
+        : "border-border/60 bg-card/60 hover:border-border",
+      alignRight && "text-right"
     )}>
-      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center overflow-hidden">
-        {signup?.team_logo_url ? <img src={signup.team_logo_url} alt="" className="w-full h-full object-cover" /> : <Swords className="h-4 w-4 text-muted-foreground" />}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-display uppercase text-muted-foreground">Team {side}</span>
-          {isWinner && <Crown className="h-3 w-3 text-primary" />}
+      <div className={cn("flex items-center gap-3", alignRight && "flex-row-reverse")}>
+        <div className={cn(
+          "w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50 shrink-0",
+          isWinner && "border-primary/60"
+        )}>
+          {signup?.team_logo_url
+            ? <img src={signup.team_logo_url} alt="" className="w-full h-full object-cover" />
+            : <Swords className="h-5 w-5 text-muted-foreground" />}
         </div>
-        <div className="font-display text-sm truncate">
-          {signup?.team_tag && <span className="text-muted-foreground mr-1">[{signup.team_tag}]</span>}
-          {signup?.team_name ?? "TBD"}
+        <div className="min-w-0 flex-1">
+          <div className={cn("flex items-center gap-1.5 text-[10px] font-display uppercase tracking-[0.18em] text-muted-foreground", alignRight && "justify-end")}>
+            <span>Team {side}</span>
+            {isWinner && <Crown className="h-3 w-3 text-primary" />}
+          </div>
+          <div className="font-display text-base sm:text-lg leading-tight truncate mt-0.5">
+            {signup?.team_tag && <span className="text-primary/80 mr-1">[{signup.team_tag}]</span>}
+            {signup?.team_name ?? "TBD"}
+          </div>
+          {signup?.community_name && (
+            <div className={cn("text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5", alignRight && "justify-end")}>
+              <Users className="h-3 w-3" />
+              <span className="truncate">{signup.community_name}</span>
+            </div>
+          )}
         </div>
-        {signup?.community_name && <div className="text-xs text-muted-foreground truncate">{signup.community_name}</div>}
       </div>
+      {isWinner && (
+        <div className={cn("mt-2 text-[10px] font-display uppercase tracking-wider text-primary flex items-center gap-1", alignRight && "justify-end")}>
+          <Trophy className="h-3 w-3" /> Winner
+        </div>
+      )}
     </div>
+  );
+}
+
+function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
+  const rows: Array<[string, React.ReactNode]> = [
+    ["Status", <Badge key="s" className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>],
+    ["Format", <span key="f" className="font-display">{match.bo_format ?? "BO1"}</span>],
+    ["Map mode", <span key="m">{VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</span>],
+    ["Selected map", match.selected_map
+      ? <span key="sm" className="text-primary font-display">{match.selected_map}</span>
+      : <span key="sm" className="text-muted-foreground">Not selected</span>],
+    ["Result", <span key="r" className="text-muted-foreground">{match.result_status ?? "—"}</span>],
+    ["Score", <span key="sc" className="font-display tabular-nums">{match.score_a ?? "—"} : {match.score_b ?? "—"}</span>],
+  ];
+  return (
+    <Card className="p-4 border-border/60">
+      <h3 className="font-display uppercase tracking-[0.18em] text-xs text-muted-foreground flex items-center gap-2 mb-3">
+        <Info className="h-3.5 w-3.5 text-primary" /> Match Summary
+      </h3>
+      <dl className="space-y-2 text-xs">
+        {rows.map(([k, v]) => (
+          <div key={k} className="flex items-center justify-between gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+            <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
+            <dd className="text-right">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {status === "live" && (
+        <div className="mt-3 rounded-md border border-primary/30 bg-primary/5 p-2 text-[11px] text-primary flex items-center gap-1.5">
+          <Radio className="h-3 w-3" /> Match in progress.
+        </div>
+      )}
+    </Card>
   );
 }
 
