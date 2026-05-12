@@ -65,7 +65,12 @@ interface DisputeRow {
 }
 
 export default function MatchDetailPage() {
-  const { matchId } = useParams();
+  const { matchId: rawMatchId } = useParams();
+  // Treat literal "undefined"/"null" strings (from broken upstream links) as missing.
+  const matchId =
+    rawMatchId && rawMatchId !== "undefined" && rawMatchId !== "null"
+      ? rawMatchId
+      : undefined;
   const { user } = useAuth();
   const { isAdmin, isModerator } = useUserRoles();
   const [match, setMatch] = useState<MatchRow | null>(null);
