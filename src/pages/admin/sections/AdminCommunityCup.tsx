@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import RoleGuard from "@/components/RoleGuard";
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star } from "lucide-react";
+import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import {
   DEFAULT_VALORANT_MAP_POOL,
@@ -138,7 +139,7 @@ export default function AdminCommunityCup() {
             <RegistrationsTab signups={signups} counts={counts} onChanged={load} onOpen={setDetail} />
           </TabsContent>
           <TabsContent value="map-pool" className="mt-6">
-            <MapPoolTab tournamentId={tournament.id} pool={mapPool} onChanged={load} />
+            <MapPoolTab tournament={tournament} pool={mapPool} onChanged={load} />
           </TabsContent>
           <TabsContent value="matches" className="mt-6">
             <MatchesTab tournament={tournament} matches={matches} signups={signups} mapPool={mapPool} onChanged={load} />
@@ -483,9 +484,18 @@ function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
 
 /* ──────────────── MAP POOL ──────────────── */
 
-function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; pool: MapPoolRow[]; onChanged: () => void }) {
+function MapPoolTab({ tournament, pool, onChanged }: { tournament: Tournament; pool: MapPoolRow[]; onChanged: () => void }) {
+  const tournamentId = tournament.id;
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const totalMaps = pool.length;
+  const activeMaps = pool.filter((m) => m.is_active).length;
+  const inactiveMaps = totalMaps - activeMaps;
+  const modeLabel = MAP_SELECTION_MODE_LABEL[tournament.map_selection_mode ?? "admin_manual"] ?? "Admin selects map manually";
+  const hasCustomPool = totalMaps > 0;
+  const hasActiveMaps = activeMaps > 0;
 
   const initDefault = async () => {
     setBusy(true);
@@ -517,6 +527,7 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
     setBusy(false);
     if (error) return toast.error(error.message);
     setNewName("");
+    toast.success(`"${name}" added to pool`);
     onChanged();
   };
 
@@ -530,9 +541,11 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
 
   const remove = async (id: string) => {
     if (!confirm("Remove this map from the pool?")) return;
+    setRemovingId(id);
     setBusy(true);
     const { error } = await supabase.from("tournament_map_pool" as never).delete().eq("id", id);
     setBusy(false);
+    setRemovingId(null);
     if (error) return toast.error(error.message);
     toast.success("Map removed");
     onChanged();
@@ -549,62 +562,247 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
     onChanged();
   };
 
+  const poolStatusLabel = hasCustomPool
+    ? (hasActiveMaps ? "Custom pool active" : "Custom pool — no active maps")
+    : "Default fallback";
+  const poolStatusColor = hasCustomPool
+    ? (hasActiveMaps ? "text-emerald-400" : "text-amber-400")
+    : "text-muted-foreground";
+
   return (
-    <div className="space-y-4">
-      <div className="rounded-lg border border-border bg-card p-4 flex flex-wrap items-center gap-2 justify-between">
-        <div>
-          <p className="font-display uppercase tracking-wide text-sm">Map Pool</p>
-          <p className="text-xs text-muted-foreground">If empty, the public page falls back to the default VALORANT pool.</p>
-        </div>
-        <div className="flex gap-2">
-          {pool.length === 0 && (
-            <Button size="sm" variant="neon" onClick={initDefault} disabled={busy}>
-              <Sparkles className="h-3.5 w-3.5 mr-1" />Initialize VALORANT default
-            </Button>
-          )}
-          {pool.length > 0 && (
-            <Button size="sm" variant="outline" onClick={resetDefault} disabled={busy}>
-              <RotateCcw className="h-3.5 w-3.5 mr-1" />Reset to default
-            </Button>
-          )}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="rounded-lg border border-border bg-card p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-md bg-primary/10 p-2">
+            <MapIcon className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-display uppercase tracking-wide text-base">Map Pool &amp; Veto Control</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage the active VALORANT maps used for PeakGG Community Cup #1. These maps will be used for admin map selection, random map draw or future captain veto.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4 flex gap-2">
-        <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Add map name" maxLength={40} />
-        <Button onClick={addMap} disabled={busy || !newName.trim()}>
-          <Plus className="h-4 w-4 mr-1" />Add
+      {/* Status Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard label="Total maps" value={String(totalMaps)} />
+        <StatCard label="Active maps" value={String(activeMaps)} />
+        <StatCard label="Inactive maps" value={String(inactiveMaps)} />
+        <StatCard label="Map selection" value={modeLabel.split(" ")[0]} />
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">Pool status</p>
+          <p className={cn("font-display text-sm mt-1", poolStatusColor)}>{poolStatusLabel}</p>
+        </div>
+      </div>
+
+      {/* Warnings */}
+      {!hasCustomPool && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-200">No custom map pool configured</p>
+            <p className="text-xs text-amber-200/70 mt-1">
+              The public page will fall back to the default VALORANT pool until you initialize or add maps.
+            </p>
+          </div>
+        </div>
+      )}
+      {hasCustomPool && !hasActiveMaps && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-destructive-foreground">Warning: no active maps</p>
+            <p className="text-xs text-destructive-foreground/70 mt-1">
+              Matches cannot draw maps until at least one map is active.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="neon" onClick={initDefault} disabled={busy}>
+          <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+          Initialize VALORANT Default Pool
+        </Button>
+        <Button size="sm" variant="outline" onClick={resetDefault} disabled={busy || !hasCustomPool}>
+          <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+          Reset to Default VALORANT Pool
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-xs uppercase font-display text-muted-foreground">
-            <tr>
-              <th className="text-left p-3">#</th>
-              <th className="text-left p-3">Map</th>
-              <th className="text-left p-3">Active</th>
-              <th className="text-right p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pool.length === 0 ? (
-              <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">No custom maps yet.</td></tr>
-            ) : pool.map((m, i) => (
-              <tr key={m.id} className="border-t border-border">
-                <td className="p-3 text-muted-foreground">{i + 1}</td>
-                <td className="p-3 font-display">{m.map_name}</td>
-                <td className="p-3"><Switch checked={m.is_active} onCheckedChange={(v) => toggleActive(m.id, v)} disabled={busy} /></td>
-                <td className="p-3 text-right whitespace-nowrap space-x-1">
-                  <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={busy || i === 0}><ChevronUp className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={busy || i === pool.length - 1}><ChevronDown className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remove(m.id)} disabled={busy}><Trash2 className="h-4 w-4" /></Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Add Map Card */}
+      <div className="rounded-lg border border-border bg-card p-5">
+        <p className="font-display uppercase tracking-wide text-sm mb-3">Add Map</p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Example: Ascent"
+            maxLength={40}
+            className="flex-1"
+            onKeyDown={(e) => { if (e.key === "Enter") addMap(); }}
+          />
+          <Button onClick={addMap} disabled={busy || !newName.trim()} className="shrink-0">
+            <Plus className="h-4 w-4 mr-1.5" />
+            Add Map
+          </Button>
+        </div>
       </div>
+
+      {/* Map Pool Table */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-muted/30">
+          <p className="font-display uppercase tracking-wide text-sm">Map Pool</p>
+          <p className="text-xs text-muted-foreground">{activeMaps} of {totalMaps} active</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-xs uppercase font-display text-muted-foreground">
+              <tr>
+                <th className="text-left p-3 w-12">Order</th>
+                <th className="text-left p-3">Map</th>
+                <th className="text-left p-3 w-20">Active</th>
+                <th className="text-left p-3 w-24">Visibility</th>
+                <th className="text-right p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pool.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center gap-2">
+                      <LayoutGrid className="h-6 w-6 text-muted-foreground/50" />
+                      <p>No custom maps yet.</p>
+                      <Button size="sm" variant="neon" onClick={initDefault} disabled={busy} className="mt-1">
+                        <Sparkles className="h-3.5 w-3.5 mr-1" />Initialize Default Pool
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                pool.map((m, i) => (
+                  <tr key={m.id} className="border-t border-border hover:bg-muted/20 transition-colors">
+                    <td className="p-3 text-muted-foreground tabular-nums">{i + 1}</td>
+                    <td className="p-3 font-display">{m.map_name}</td>
+                    <td className="p-3">
+                      <Switch
+                        checked={m.is_active}
+                        onCheckedChange={(v) => toggleActive(m.id, v)}
+                        disabled={busy}
+                      />
+                    </td>
+                    <td className="p-3">
+                      {m.is_active ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+                          <Eye className="h-3.5 w-3.5" /> Public
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <EyeOff className="h-3.5 w-3.5" /> Hidden
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={busy || i === 0} className="h-8 w-8">
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={busy || i === pool.length - 1} className="h-8 w-8">
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive h-8 w-8"
+                          onClick={() => remove(m.id)}
+                          disabled={busy}
+                        >
+                          {removingId === m.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Map Selection Mode Preview */}
+      <div className="rounded-lg border border-border bg-card p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Info className="h-4 w-4 text-accent" />
+          <p className="font-display uppercase tracking-wide text-sm">Map Selection Mode</p>
+        </div>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {Object.entries(MAP_SELECTION_MODE_LABEL).map(([k, v]) => (
+            <Badge
+              key={k}
+              variant={tournament.map_selection_mode === k ? "default" : "outline"}
+              className={cn(
+                "font-display text-xs",
+                tournament.map_selection_mode === k ? "bg-primary/90" : "border-border text-muted-foreground"
+              )}
+            >
+              {v}
+            </Badge>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Map selection mode can be changed in <span className="font-display text-foreground">Settings</span>.
+        </p>
+      </div>
+
+      {/* Public Preview */}
+      <div className="rounded-lg border border-border bg-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Eye className="h-4 w-4 text-primary" />
+          <p className="font-display uppercase tracking-wide text-sm">Public Preview</p>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          These are the active maps for PeakGG Community Cup #1. Match maps will be selected based on the current tournament map selection mode.
+        </p>
+        {hasActiveMaps ? (
+          <div className="flex flex-wrap gap-2">
+            {pool.filter((m) => m.is_active).map((m) => (
+              <div
+                key={m.id}
+                className="inline-flex items-center rounded-md border border-border bg-secondary/40 px-3 py-1.5 text-sm font-display"
+              >
+                {m.map_name}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-sm text-muted-foreground">
+            No active maps to display. Activate maps above or initialize the default pool.
+          </div>
+        )}
+        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+          <MapIcon className="h-3.5 w-3.5 text-accent" />
+          <span>
+            Mode: <span className="font-display text-foreground">{modeLabel}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">{label}</p>
+      <p className="font-display text-lg mt-1">{value}</p>
     </div>
   );
 }
