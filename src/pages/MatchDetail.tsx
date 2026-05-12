@@ -139,7 +139,7 @@ export default function MatchDetailPage() {
   };
 
   const load = async () => {
-    if (!matchId) return;
+    if (!matchId) { setLoading(false); return; }
     const { data: m } = await supabase
       .from("matches")
       .select("id, game, map, team_a_id, team_b_id, player_a_id, player_b_id, score_a, score_b, result_status, status, matchday, scheduled_at, season_id, division_id, submitted_by, confirmed_by, lobby_code, server_info, kind, winner_id, elo_processed_at")
