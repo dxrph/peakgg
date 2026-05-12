@@ -1,0 +1,1 @@
+ALTER VIEW public.tournament_team_signups_public SET (security_invoker = true);

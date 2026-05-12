@@ -2441,6 +2441,116 @@ export type Database = {
           },
         ]
       }
+      tournament_team_signups: {
+        Row: {
+          admin_note: string | null
+          agreement_available: boolean
+          agreement_discord: boolean
+          agreement_forfeit: boolean
+          agreement_rules: boolean
+          average_rank: string | null
+          captain_discord: string
+          captain_email: string
+          captain_name: string
+          captain_riot_id: string
+          captain_user_id: string | null
+          checked_in_at: string | null
+          community_discord_url: string | null
+          community_name: string
+          country_language: string
+          created_at: string
+          id: string
+          notes: string | null
+          player_1_riot_id: string
+          player_2_riot_id: string
+          player_3_riot_id: string
+          player_4_riot_id: string
+          player_5_riot_id: string
+          status: string
+          substitute_1_riot_id: string | null
+          substitute_2_riot_id: string | null
+          team_logo_url: string | null
+          team_name: string
+          team_tag: string | null
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          agreement_available?: boolean
+          agreement_discord?: boolean
+          agreement_forfeit?: boolean
+          agreement_rules?: boolean
+          average_rank?: string | null
+          captain_discord: string
+          captain_email: string
+          captain_name: string
+          captain_riot_id: string
+          captain_user_id?: string | null
+          checked_in_at?: string | null
+          community_discord_url?: string | null
+          community_name: string
+          country_language: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          player_1_riot_id: string
+          player_2_riot_id: string
+          player_3_riot_id: string
+          player_4_riot_id: string
+          player_5_riot_id: string
+          status?: string
+          substitute_1_riot_id?: string | null
+          substitute_2_riot_id?: string | null
+          team_logo_url?: string | null
+          team_name: string
+          team_tag?: string | null
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          agreement_available?: boolean
+          agreement_discord?: boolean
+          agreement_forfeit?: boolean
+          agreement_rules?: boolean
+          average_rank?: string | null
+          captain_discord?: string
+          captain_email?: string
+          captain_name?: string
+          captain_riot_id?: string
+          captain_user_id?: string | null
+          checked_in_at?: string | null
+          community_discord_url?: string | null
+          community_name?: string
+          country_language?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          player_1_riot_id?: string
+          player_2_riot_id?: string
+          player_3_riot_id?: string
+          player_4_riot_id?: string
+          player_5_riot_id?: string
+          status?: string
+          substitute_1_riot_id?: string | null
+          substitute_2_riot_id?: string | null
+          team_logo_url?: string | null
+          team_name?: string
+          team_tag?: string | null
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_team_signups_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_waitlist: {
         Row: {
           created_at: string
@@ -2734,7 +2844,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tournament_team_signups_public: {
+        Row: {
+          average_rank: string | null
+          checked_in_at: string | null
+          community_name: string | null
+          country_language: string | null
+          created_at: string | null
+          id: string | null
+          status: string | null
+          team_logo_url: string | null
+          team_name: string | null
+          team_tag: string | null
+          tournament_id: string | null
+        }
+        Insert: {
+          average_rank?: string | null
+          checked_in_at?: string | null
+          community_name?: string | null
+          country_language?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: string | null
+          team_logo_url?: string | null
+          team_name?: string | null
+          team_tag?: string | null
+          tournament_id?: string | null
+        }
+        Update: {
+          average_rank?: string | null
+          checked_in_at?: string | null
+          community_name?: string | null
+          country_language?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: string | null
+          team_logo_url?: string | null
+          team_name?: string | null
+          team_tag?: string | null
+          tournament_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_team_signups_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_scrim_request: { Args: { _request_id: string }; Returns: string }
@@ -2793,6 +2952,10 @@ export type Database = {
       cancel_queue_group: { Args: { _group_id: string }; Returns: undefined }
       claim_match_for_elo: { Args: { _match_id: string }; Returns: boolean }
       close_season: { Args: { _season_id: string }; Returns: undefined }
+      community_cup_checkin: {
+        Args: { _signup_id: string }
+        Returns: undefined
+      }
       confirm_match_result: { Args: { _match_id: string }; Returns: undefined }
       confirm_open_cup_result: {
         Args: { _match_id: string }

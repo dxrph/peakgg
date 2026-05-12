@@ -1,6 +1,7 @@
 import Navbar from "@/components/landing/Navbar";
 import SEO from "@/components/SEO";
 import HeroSection from "@/components/landing/HeroSection";
+import CommunityCupBanner from "@/components/landing/CommunityCupBanner";
 import PlatformStatsStrip from "@/components/landing/PlatformStatsStrip";
 import StartCompetingSection from "@/components/landing/StartCompetingSection";
 import PreLaunchCTA from "@/components/landing/PreLaunchCTA";
@@ -49,6 +50,7 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
+        <CommunityCupBanner />
         <PreLaunchCTA />
         <StartCompetingSection />
         <PlatformStatsStrip />
