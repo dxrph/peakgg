@@ -112,7 +112,13 @@ export default function CommunityCupSignupDialog({ open, onOpenChange, tournamen
   const close = () => {
     if (busy) return;
     onOpenChange(false);
-    setTimeout(() => { setDone(false); setStep(0); }, 300);
+    setTimeout(() => {
+      setDone(false);
+      setStep(0);
+      setForm({ captain_email: user?.email ?? "" });
+      setAgreements({ a: false, b: false, c: false, d: false, e: false });
+      setWantsPermanent(false);
+    }, 300);
   };
 
   return (
