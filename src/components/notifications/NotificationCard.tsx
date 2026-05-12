@@ -68,8 +68,20 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
   const Icon = typeMeta.Icon;
   const isResolved = n.status === "resolved";
 
+  // Match-related notifications may store the match id either in meta.match_id
+  // OR in the top-level entity_id column. Always prefer meta, then fall back.
+  const matchId: string | null =
+    (meta.match_id as string | undefined) ??
+    (n.entity_type === "match" ? n.entity_id ?? null : null);
+  const matchUrl = matchId ? `/matches/${matchId}` : null;
+  const teamId: string | null =
+    (meta.team_id as string | undefined) ??
+    (n.entity_type === "team" ? n.entity_id ?? null : null);
+
   const go = (url?: string | null) => {
     if (!url) return;
+    // Defensive: never navigate to a broken URL produced by stale notifications.
+    if (url.includes("/undefined") || url.includes("/null")) return;
     if (!n.is_read) onMarkRead(n.id);
     navigate(url);
   };
@@ -107,9 +119,9 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
   };
 
   const handleConfirmResult = async () => {
-    if (!meta.match_id) return;
+    if (!matchId) return;
     setBusy("confirm");
-    const { error } = await supabase.rpc("confirm_match_result", { _match_id: meta.match_id });
+    const { error } = await supabase.rpc("confirm_match_result", { _match_id: matchId });
     setBusy(null);
     if (error) {
       toast.error(error.message?.includes("captain") ? "Only opposing captain can confirm" : "Could not confirm result");
@@ -170,11 +182,11 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
             <Button
               size="sm"
               variant="outline"
-              onClick={() => go(`/matches/${meta.match_id}?action=dispute`)}
+              onClick={() => go(matchUrl ? `${matchUrl}?action=dispute` : null)}
             >
               Dispute
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" variant="ghost" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match
             </Button>
           </div>
@@ -182,7 +194,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_disputed":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match
             </Button>
           </div>
@@ -190,7 +202,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_scheduled":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match Room
             </Button>
           </div>
@@ -230,7 +242,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_chat_message":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(n.action_url || (meta.match_id ? `/matches/${meta.match_id}` : null))}>
+            <Button size="sm" onClick={() => go(n.action_url || matchUrl)}>
               Open Chat
             </Button>
             {!n.is_read && (
