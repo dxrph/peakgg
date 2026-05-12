@@ -231,7 +231,7 @@ export default function TournamentsPage() {
     queryFn: async () => {
       const { data: t } = await supabase
         .from("tournaments")
-        .select("id, slug, name, format, start_date, max_teams, status, tier_label, short_description, tournament_type, game")
+        .select("id, slug, name, format, start_date, max_teams, status, tier_label, short_description, tournament_type, game, registration_close_at, checkin_close_at, countdown_enabled")
         .eq("slug", "community-cup-1")
         .maybeSingle();
       if (!t || t.game !== selectedGame) return null;
