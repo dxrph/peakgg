@@ -122,17 +122,16 @@ export default function AdminCommunityCup() {
 
   return (
     <RoleGuard allow={["admin","moderator"]}>
-      <AdminLayout>
-        <div className="space-y-6">
-          <header className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-2xl font-display font-bold">Community Cup #1 — Signups</h1>
-              <p className="text-sm text-muted-foreground">Review, approve and manage team registrations.</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
+      <AdminLayout
+        title="Community Cup #1 — Signups"
+        description="Review, approve and manage team registrations."
+        actions={
+          <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
               <Download className="h-4 w-4 mr-2" />Export CSV
             </Button>
-          </header>
+        }
+      >
+        <div className="space-y-6">
 
           {loading ? (
             <div className="py-16 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
