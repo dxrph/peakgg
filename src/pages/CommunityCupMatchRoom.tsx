@@ -537,17 +537,25 @@ function VetoPanel({
       )}
 
       {veto && veto.status === "in_progress" && (
-        <div className="mb-3 p-3 rounded-md border border-primary/30 bg-primary/5 text-sm">
-          {turnSide ? (
-            <>
-              <span className="font-display uppercase text-primary">Team {turnSide}</span>'s turn
-              {action && <span className="text-muted-foreground"> · {action.label}</span>}
-              {myTurn && <span className="ml-2 text-success">— it's your turn</span>}
-              {!myTurn && myCaptainSide && <span className="ml-2 text-muted-foreground">— it is not your turn to act.</span>}
-            </>
-          ) : (
-            <>Awaiting next action…</>
-          )}
+        <div className="mb-4 p-3 rounded-lg border border-primary/40 bg-gradient-to-r from-primary/10 to-transparent flex items-center gap-3">
+          <div className="relative flex h-2.5 w-2.5">
+            <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" />
+            <span className="relative h-2.5 w-2.5 rounded-full bg-primary" />
+          </div>
+          <div className="text-sm flex-1">
+            {turnSide ? (
+              <>
+                <span className="font-display uppercase text-primary tracking-wider">Team {turnSide}</span>
+                <span className="text-muted-foreground"> turn</span>
+                {action && <span className="text-foreground/80"> · {action.label}</span>}
+                {myTurn && <span className="ml-2 inline-flex items-center gap-1 text-success font-display uppercase text-xs">— Your move</span>}
+                {!myTurn && myCaptainSide && <span className="ml-2 text-muted-foreground text-xs">— waiting for the other captain</span>}
+              </>
+            ) : (
+              <>Awaiting next action…</>
+            )}
+          </div>
+          <Badge variant="outline" className="font-display text-[10px]">{VETO_MODE_LABEL[veto.mode] ?? veto.mode}</Badge>
         </div>
       )}
 
@@ -558,7 +566,7 @@ function VetoPanel({
           No active maps in pool. Admin must adjust the map pool.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
           {activeMaps.map((m) => {
             const isBanned = banned.includes(m);
             const isPicked = picked.includes(m);
@@ -566,23 +574,35 @@ function VetoPanel({
             const disabled = used.has(m) || busy || !canAct || (veto?.status !== "in_progress");
             return (
               <div key={m} className={cn(
-                "rounded-md border p-3 text-center text-sm transition",
-                isSelected ? "border-primary bg-primary/10" :
-                isBanned ? "border-destructive/40 bg-destructive/5 line-through opacity-60" :
+                "group relative rounded-lg border overflow-hidden transition-all",
+                isSelected ? "border-primary bg-gradient-to-b from-primary/20 to-primary/5 shadow-[0_0_24px_-8px_hsl(var(--primary)/0.6)]" :
+                isBanned ? "border-destructive/30 bg-destructive/5 opacity-60" :
                 isPicked ? "border-success/40 bg-success/5" :
-                "border-border"
+                "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
-                <div className="font-display">{m}</div>
-                {isBanned && <div className="text-[10px] uppercase text-destructive">Banned</div>}
-                {isPicked && <div className="text-[10px] uppercase text-success">Picked</div>}
-                {isSelected && <div className="text-[10px] uppercase text-primary">Selected</div>}
+                <div className="aspect-[4/3] relative">
+                  {pool.find((p) => p.map_name === m)?.image_url ? (
+                    <img src={pool.find((p) => p.map_name === m)!.image_url!} alt={m} className={cn("absolute inset-0 w-full h-full object-cover", isBanned && "grayscale", !isSelected && !isPicked && "opacity-70 group-hover:opacity-90 transition")} />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-muted/40 to-muted/10 flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  <div className="absolute bottom-1.5 left-2 right-2">
+                    <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
+                    {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
+                    {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
+                    {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
+                  </div>
+                </div>
                 {!used.has(m) && veto?.status === "in_progress" && (
-                  <div className="flex gap-1 mt-2 justify-center">
+                  <div className="flex gap-1 p-1.5 border-t border-border/40 bg-card/60">
                     {(veto.mode === "bo1_veto" || veto.mode === "bo3_veto") && (
-                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => ban(m)}>Ban</Button>
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" disabled={disabled} onClick={() => ban(m)}>Ban</Button>
                     )}
                     {veto.mode === "bo3_veto" && action?.type === "pick" && (
-                      <Button size="sm" variant="neon" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => pick(m)}>Pick</Button>
+                      <Button size="sm" variant="neon" className="h-6 px-2 text-[10px] flex-1" disabled={disabled} onClick={() => pick(m)}>Pick</Button>
                     )}
                   </div>
                 )}
