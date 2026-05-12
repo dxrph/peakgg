@@ -26,6 +26,7 @@ import { openCupPublicQueueEnabled, openCupTeamSize } from "@/lib/feature-flags"
 import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 import RankBadge from "@/components/RankBadge";
 import QueueLobby from "@/components/competitive/QueueLobby";
+import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
