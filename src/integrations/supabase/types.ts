@@ -3136,10 +3136,12 @@ export type Database = {
         Returns: undefined
       }
       accept_scrim_request: { Args: { _request_id: string }; Returns: string }
+      admin_cleanup_sandbox: { Args: never; Returns: undefined }
       admin_confirm_cup_match_result: {
         Args: { _match_id: string; _score_a?: number; _score_b?: number }
         Returns: undefined
       }
+      admin_create_sandbox_match: { Args: { _mode?: string }; Returns: string }
       admin_resolve_match: {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
@@ -3160,6 +3162,19 @@ export type Database = {
             }
             Returns: undefined
           }
+      admin_simulate_cup_match_dispute: {
+        Args: { _as_side?: string; _match_id: string; _reason: string }
+        Returns: undefined
+      }
+      admin_simulate_cup_match_result: {
+        Args: {
+          _as_side?: string
+          _match_id: string
+          _score_a: number
+          _score_b: number
+        }
+        Returns: undefined
+      }
       apply_elo_decay: {
         Args: never
         Returns: {
