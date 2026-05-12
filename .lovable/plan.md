@@ -1,131 +1,110 @@
-# Community Cup #1 — Today's Scope
+## Phase 2 — Community Cup #1 Match-Day System
 
-You asked for a massive upgrade. To make it **usable today**, I'm splitting it into **Phase 1 (today)** and **Phase 2 (later)**. Phase 1 covers everything you marked as priority. Phase 2 holds advanced/automated features that risk breaking the live tournament.
+Build on top of Phase 1 (no rewrites). Goal: every bracket match becomes a playable match room with veto, chat, result reporting, disputes, and full admin override.
 
----
+### Scope summary
 
-## Phase 1 — Ship today
+1. **Match Room page** at `/tournaments/community-cup-1/matches/:matchId`
+2. **Captain map veto** (admin manual / random / BO1 / BO3) on top of `match_map_veto`
+3. **Match chat** (`match_chat_messages`) — captains + admin + system events
+4. **Captain result reporting** + admin confirm/override
+5. **Disputes** from match room
+6. **Admin Matches tab upgrade** (full per-match controls)
+7. **Per-round BO format overrides** (per-match minimum)
+8. **Public live bracket polish** (status badges, View Match button)
 
-### A. Database (one migration)
+### Database changes
 
-Add to `tournaments`:
+`**matches` (add columns)**
 
-- `starts_at`, `ends_at`, `timezone` (default `Europe/Brussels`)
-- `registration_opens_at`, `registration_closes_at`
-- `checkin_opens_at`, `checkin_closes_at`
-- `countdown_enabled` (bool, default true)
-- `match_format_default` (text, default `BO1`)
-- `match_format_final` (text, default `BO3`)
-- `map_selection_mode` (text, default `admin_manual`)
-- `result_confirmation_mode` (text, default `admin_manual`)
-- `third_place_enabled` (bool), `forfeit_grace_minutes` (int, default 10)
-- `tagline`, `rules_url`, `discord_url` (if missing)
+- `selected_map text`, `map_selection_mode text`, `veto_status text` (`not_started|veto_pending|map_selected|locked`)
+- `result_screenshot_url text`, `result_notes text`, `reported_by_user_id uuid`
+- `chat_locked boolean default false`, `admin_note text`
+- `bo_format text` (per-match override; falls back to tournament default)
 
-Add to `tournament_team_signups`:
+`**match_map_veto**` — verify columns: `mode, status, current_turn_team_id, current_turn_signup_id, selected_map, banned_maps jsonb, picked_maps jsonb, veto_log jsonb, started_at, completed_at`. Add what's missing.
 
-- `wants_permanent_team` (bool)
-- `permanent_team_request_note` (text)
-- `admin_note` (text, admin-only via RLS)
+`**match_chat_messages**` — already exists for queue chat. Verify it supports tournament matches (`match_id` FK to `matches`). Add `is_system_message bool`, `sender_role text` if missing.
 
-New table `tournament_map_pool`:
-`id, tournament_id, map_name, is_active, display_order, image_url, created_at, updated_at`
-RLS: public read of `is_active=true`; admin full write.
+**RPCs (SECURITY DEFINER, server-side validation)**
 
-New table `match_map_veto`:
-`id, match_id, tournament_id, mode, status, current_turn_team_id, selected_map, banned_maps jsonb, picked_maps jsonb, veto_log jsonb, started_at, completed_at`
-RLS: public read; admin write; captains write only for their match (Phase 2 — for now admin-only writes).
+- `start_match_veto(_match_id, _mode)` — admin only
+- `captain_ban_map(_match_id, _map)` — checks current turn = caller's team's signup
+- `captain_pick_map(_match_id, _map)` — same
+- `complete_match_veto(_match_id, _selected_map)` — admin or auto when 1 left
+- `reset_match_veto(_match_id)` — admin
+- `submit_tournament_match_result(_match_id, _score_a, _score_b, _screenshot, _notes)` — captain of A or B
+- `admin_confirm_tournament_result(_match_id)` — admin; advances winner via existing bracket logic
+- `open_tournament_match_dispute(_match_id, _reason, _description, _evidence)` — captain
+- `set_match_chat_locked(_match_id, _locked)` — admin
 
-(Match chat: skipped today — see Phase 2.)
+**RLS**
 
-### B. Registration form redesign (`CommunityCupSignupDialog.tsx`)
+- `matches`: captains (signup approved + member of team_a/team_b) can SELECT their match details; public sees basic fields via existing patterns
+- `match_map_veto`: SELECT public for the match; UPDATE only via RPC
+- `match_chat_messages`: SELECT for captains+admins of that match (or all if `chat_locked=false` and admin allows public); INSERT for captains+admin via RPC/policy
 
-- Convert to a **4-step wizard** with progress indicator: Team → Captain → Players → Rules.
-- Section cards, better spacing, helper text, sticky footer with Back/Next/Submit.
-- Add **temporary roster explanation banner** at top + new agreement checkbox (`I understand this registration does not create a permanent PeakGG team`).
-- Add optional **"interested in permanent team"** checkbox + note textarea.
-- Mobile-responsive, scroll-friendly.
-- Persist `wants_permanent_team` and `permanent_team_request_note`.
+### Frontend
 
-### C. Countdown
+**New files**
 
-New `<TournamentCountdown />` component:
+- `src/pages/CommunityCupMatchRoom.tsx` — match room page
+- `src/components/tournaments/match-room/MatchHeader.tsx`
+- `src/components/tournaments/match-room/MapVetoPanel.tsx` (active pool, banned, picked, current turn, log, captain action buttons)
+- `src/components/tournaments/match-room/MatchChatPanel.tsx` (reuses chat patterns from `MatchChat.tsx`)
+- `src/components/tournaments/match-room/ResultReportForm.tsx`
+- `src/components/tournaments/match-room/DisputeDialog.tsx`
+- `src/components/tournaments/match-room/AdminMatchControls.tsx`
+- `src/lib/match-veto.ts` — client helpers (turn calc, BO3 step machine)
 
-- Picks the most relevant target: check-in close > registration close > tournament start.
-- Shows `Days · Hours · Minutes · Seconds` with a contextual label.
-- Falls back to `"Date and time will be announced soon."` if `starts_at` is null.
-- Mounted on `CommunityCupDetail` hero and on `Tournaments.tsx` featured card.
+**Edits**
 
-### D. Public page additions (`CommunityCupDetail.tsx`)
+- `src/pages/CommunityCupDetail.tsx` — bracket cards get "View Match" button + status badges (LIVE / Veto / Pending / Disputed)
+- `src/components/tournaments/BracketView.tsx` — link match cards to match room
+- `src/pages/admin/sections/AdminCommunityCup.tsx` — Matches tab gets per-match: Open Room / Start Veto / Reset / Force Map / Set Status / Edit Score / Confirm / Forfeit / Dispute / Lock Chat / BO override
+- `src/App.tsx` — add route
 
-- Countdown block in hero.
-- New **"Map Pool & Veto"** section: lists active maps from `tournament_map_pool`; if empty, shows the default VALORANT pool with label *"Default VALORANT map pool"*. Shows the configured `map_selection_mode` in human-readable form.
-- Temporary roster explanation paragraph in the About / sidebar.
+### Microcopy & states
 
-### E. Admin panel (`AdminCommunityCup.tsx` upgrade)
+- Disabled buttons + tooltips: "Not your turn", "Veto not started yet", "Only your team's captain can act"
+- Toasts on every mutation
+- Loading skeletons, empty states, error boundaries
 
-Tabs (today): **Overview · Settings · Registrations · Map Pool · Matches**.
+### Out of scope (deferred again)
 
-- **Overview**: status cards (registrations by status, slots, countdown preview, map pool status, bracket status) + quick actions (open/close registration, open/close check-in, start, complete, generate bracket button — bracket button calls existing `generate_bracket` RPC).
-- **Settings**: edit all new tournament fields above (dates, formats, modes, tagline, etc.) with save button. Status switcher kept.
-- **Registrations**: keep existing approve/reject/waitlist; add column for "Wants permanent team" + note + admin_note editor + CSV export (already exists).
-- **Map Pool**: list maps, add/remove/toggle active, reorder (up/down), reset to default VALORANT pool button. If no rows exist, "Initialize with VALORANT default" CTA.
-- **Matches**: list tournament matches; per match → set map manually, set scores, pick winner, mark forfeit, advance winner. (Veto handled admin-manual today; auto captain veto in Phase 2.)
+- Both-captains-confirm result mode (kept admin-confirm)
+- Automated permanent-team conversion
+- Veto timers (soft only, no auto-action)
+- Per-round (vs per-match) BO/veto-mode editor — per-match override is enough for today
 
-### F. Map veto — admin-manual today
+### Migration order
 
-Per your instruction *"If something is too complex, make it admin-manual first"*: today the admin selects the map per match from the active pool. The `match_map_veto` row is written so we can swap to captain veto in Phase 2 without schema changes.
+1. Migration: add columns + tables + RPCs + RLS
+2. Build Match Room shell + routing
+3. Veto panel + RPCs wired
+4. Chat panel
+5. Result reporting + dispute
+6. Admin controls upgrade
+7. Public bracket polish + status badges
 
----
+Approve and I'll start with the migration.Approve this plan.
 
-## Phase 2 — Later (explicitly deferred)
+Important priorities:
 
-- Captain-driven map veto UI (BO1 ban-until-one, BO3/BO5 pick-ban flows)
-- Per-round format overrides
-- Match chat + admin chat moderation tab
-- Disputes tab dedicated to this tournament (existing global Disputes already works)
-- Public Page customization tab, Rules & Rewards CMS tab, Logs/Audit tab
-- Automated convert-roster-to-permanent-team flow
-- Both-captains-confirm result mode
+1. Build additively on Phase 1.
 
----
+2. Do not rewrite the existing tournament, registration, admin, countdown or map pool systems.
 
-## Technical notes
+3. Keep admin override available for every match action.
 
-- All new tables: RLS enabled, admin via existing `has_role(auth.uid(),'admin')`.
-- Default VALORANT pool list lives in a TS constant + a "reset" admin action that upserts into `tournament_map_pool`.
-- i18n: new strings added to EN/FR/IT translation files.
-- No existing flow (registration insert, approval, bracket, RLS) is altered — only additive.
+4. If captain-driven veto is too complex, ship admin-manual + BO1 veto first.
 
----
+5. Match room, result reporting and admin confirmation are more important than advanced BO3/BO5 veto.
 
-**Confirm and I'll execute Phase 1 in one pass** (1 migration + form rewrite + countdown + admin upgrades + public page section). Phase 2 stays queued. Yes, approve this plan.
+6. Keep all private captain/admin data protected.
 
-Priority order:
+7. Do not create fake/demo teams.
 
-1. Admin control panel for Community Cup #1
+8. Keep the build stable and usable today.
 
-2. Countdown controlled by admin start date/time
-
-3. Improved registration modal UX
-
-4. Temporary tournament roster explanation + permanent team interest option
-
-5. Map pool system with default VALORANT maps if no custom pool exists
-
-6. Admin-manual map selection/veto first
-
-7. Public map pool section on tournament page
-
-8. Match settings controlled by admin: BO1/BO2/BO3/BO5, final format, forfeit time, result confirmation mode
-
-Important:
-
-Do not spend time on complex automation yet.
-
-If something is too complex, make it admin-manual but clean and usable.
-
-Do not break existing tournament registration, bracket, admin actions, or public tournament page.
-
-Do not create fake/demo teams.
-
-Make sure everything is usable today.
+&nbsp;
