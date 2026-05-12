@@ -23,6 +23,7 @@ import AdminSecurityPage from "./pages/admin/Security";
 import AdminDashboard from "./pages/admin/sections/AdminDashboard";
 import AdminTournaments from "./pages/admin/sections/AdminTournaments";
 import AdminCommunityCup from "./pages/admin/sections/AdminCommunityCup";
+import CommunityCupMatchRoom from "./pages/CommunityCupMatchRoom";
 import AdminMatches from "./pages/admin/sections/AdminMatches";
 import AdminTickets from "./pages/admin/sections/AdminTickets";
 import AdminPlayers from "./pages/admin/sections/AdminPlayers";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/play/legacy" element={<ProtectedRoute><PlayPage /></ProtectedRoute>} />
               <Route path="/scrims" element={<ProtectedRoute><ScrimsPage /></ProtectedRoute>} />
               <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetailPage /></ProtectedRoute>} />
+              <Route path="/tournaments/:slug/matches/:matchId" element={<ProtectedRoute><CommunityCupMatchRoom /></ProtectedRoute>} />
               <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
               <Route path="/teams/:teamId/manage" element={<ProtectedRoute><TeamDashboardPage /></ProtectedRoute>} />
               <Route path="/teams/:teamId/dashboard" element={<ProtectedRoute><TeamDashboardPage /></ProtectedRoute>} />
