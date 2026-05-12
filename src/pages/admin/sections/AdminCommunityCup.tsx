@@ -11,7 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff } from "lucide-react";
+import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff, FlaskConical, Play, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   DEFAULT_VALORANT_MAP_POOL,
@@ -127,6 +128,7 @@ export default function AdminCommunityCup() {
             <TabsTrigger value="registrations">Registrations ({counts.all})</TabsTrigger>
             <TabsTrigger value="map-pool">Map Pool</TabsTrigger>
             <TabsTrigger value="matches">Matches ({matches.length})</TabsTrigger>
+            <TabsTrigger value="sandbox"><FlaskConical className="h-3.5 w-3.5 mr-1" />Sandbox</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -143,6 +145,9 @@ export default function AdminCommunityCup() {
           </TabsContent>
           <TabsContent value="matches" className="mt-6">
             <MatchesTab tournament={tournament} matches={matches} signups={signups} mapPool={mapPool} onChanged={load} />
+          </TabsContent>
+          <TabsContent value="sandbox" className="mt-6">
+            <SandboxTab />
           </TabsContent>
         </Tabs>
 
