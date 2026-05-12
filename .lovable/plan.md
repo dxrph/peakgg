@@ -1,176 +1,131 @@
-# PeakGG Competitive Finalization — Implementation Plan
+# Community Cup #1 — Today's Scope
 
-Three phases. No DB schema changes unless required for a bug. Keep `teamSize = 1`. No fake data, no ELO formula changes.
+You asked for a massive upgrade. To make it **usable today**, I'm splitting it into **Phase 1 (today)** and **Phase 2 (later)**. Phase 1 covers everything you marked as priority. Phase 2 holds advanced/automated features that risk breaking the live tournament.
 
-## Phase 1 — Stabilize the current 1v1 loop
+---
 
-### 1.1 Queue state hook (`src/hooks/useCompetitiveSession.ts`, new)
+## Phase 1 — Ship today
 
-Single source of truth for the user's competitive session. Polls every 5s + reacts to realtime on `open_cup_queue` and `match_rosters`. Returns:
+### A. Database (one migration)
 
-```
-{ status, mode, game, teamSize, queueRow, activeMatchId, joinedAt, refresh, cancel }
-status ∈ idle | queued | match_found | in_match | pending_confirmation | disputed | completed
-```
+Add to `tournaments`:
 
-- `queued` = row exists in `open_cup_queue` for user
-- `match_found` / `in_match` / `pending_confirmation` / `disputed` = derived from latest `matches` row joined via `match_rosters` where `user_id = me` and `status != completed`
-- `cancel()` calls `cancel_open_cup_queue` RPC
-- Used by `Play`, `Tournaments`, `GlobalActiveBar`, `MatchDetail`
+- `starts_at`, `ends_at`, `timezone` (default `Europe/Brussels`)
+- `registration_opens_at`, `registration_closes_at`
+- `checkin_opens_at`, `checkin_closes_at`
+- `countdown_enabled` (bool, default true)
+- `match_format_default` (text, default `BO1`)
+- `match_format_final` (text, default `BO3`)
+- `map_selection_mode` (text, default `admin_manual`)
+- `result_confirmation_mode` (text, default `admin_manual`)
+- `third_place_enabled` (bool), `forfeit_grace_minutes` (int, default 10)
+- `tagline`, `rules_url`, `discord_url` (if missing)
 
-### 1.2 Queue Lobby polish (`Play.tsx`, `Tournaments.tsx`)
+Add to `tournament_team_signups`:
 
-- Already using `QueueLobby`. Wire it through `useCompetitiveSession`.
-- "Join" button while `status === 'queued'` → no-op + toast "Already searching" instead of error.
-- Refresh-safe (driven by polled hook, not local state).
+- `wants_permanent_team` (bool)
+- `permanent_team_request_note` (text)
+- `admin_note` (text, admin-only via RLS)
 
-### 1.3 Global Active Session Bar (`src/components/competitive/GlobalActiveBar.tsx`, new)
+New table `tournament_map_pool`:
+`id, tournament_id, map_name, is_active, display_order, image_url, created_at, updated_at`
+RLS: public read of `is_active=true`; admin full write.
 
-- Sticky bar above content (below navbar) on all authed routes except the Match Room itself.
-- Visible when `status !== idle`.
-- Variants:
-  - queued → "Open Cup Queue · {Game} · Searching {mm:ss}" + Cancel + Open
-  - match_found → "Match Found" + Open Match (pulse animation)
-  - in_match / pending_confirmation / disputed → "Open Cup Match · {status copy}" + Open Match
-- Mounted once in `App.tsx` inside `<AuthProvider>`.
+New table `match_map_veto`:
+`id, match_id, tournament_id, mode, status, current_turn_team_id, selected_map, banned_maps jsonb, picked_maps jsonb, veto_log jsonb, started_at, completed_at`
+RLS: public read; admin write; captains write only for their match (Phase 2 — for now admin-only writes).
 
-### 1.4 Match Room polish (`MatchDetail.tsx`)
+(Match chat: skipped today — see Phase 2.)
 
-Existing layout is mostly there. Adjustments:
+### B. Registration form redesign (`CommunityCupSignupDialog.tsx`)
 
-- Header: kind badge ("Open Cup Beta" / "Ranked Beta"), "1v1 Test Queue" badge, game, status pill, short id (`#${id.slice(0,8)}`), created-at relative.
-- For queue matches (kind in open_cup/ranked) with null teams: render Player A / Player B cards from `match_rosters` (avatar, username, rank badge, ELO) instead of "Team A / Team B".
-- Show ELO delta after `elo_processed_at` is set (read from `elo_history`).
-- Remove dead empty space; chat panel always rendered for queue matches.
+- Convert to a **4-step wizard** with progress indicator: Team → Captain → Players → Rules.
+- Section cards, better spacing, helper text, sticky footer with Back/Next/Submit.
+- Add **temporary roster explanation banner** at top + new agreement checkbox (`I understand this registration does not create a permanent PeakGG team`).
+- Add optional **"interested in permanent team"** checkbox + note textarea.
+- Mobile-responsive, scroll-friendly.
+- Persist `wants_permanent_team` and `permanent_team_request_note`.
 
-### 1.5 Submit / Confirm / Dispute state machine (already mostly in place)
+### C. Countdown
 
-Verify:
+New `<TournamentCountdown />` component:
 
-- `result_status = 'pending_confirmation'` → submitter sees waiting card; opponent sees Confirm + Dispute + Open Ticket.
-- Confirm result button always present when applicable, never "nothing to confirm".
-- Submit modal: winner cards, disabled until pick, loading + toast.
+- Picks the most relevant target: check-in close > registration close > tournament start.
+- Shows `Days · Hours · Minutes · Seconds` with a contextual label.
+- Falls back to `"Date and time will be announced soon."` if `starts_at` is null.
+- Mounted on `CommunityCupDetail` hero and on `Tournaments.tsx` featured card.
 
-### 1.6 Centralized status copy (`src/lib/competitive-status.ts`, new)
+### D. Public page additions (`CommunityCupDetail.tsx`)
 
-Map `result_status` + `status` → label, color, helper text. Used by Match Room, GlobalActiveBar, QueueLobby.
+- Countdown block in hero.
+- New **"Map Pool & Veto"** section: lists active maps from `tournament_map_pool`; if empty, shows the default VALORANT pool with label *"Default VALORANT map pool"*. Shows the configured `map_selection_mode` in human-readable form.
+- Temporary roster explanation paragraph in the About / sidebar.
 
-## Phase 2 — Competitive Pyramid Page
+### E. Admin panel (`AdminCommunityCup.tsx` upgrade)
 
-### 2.1 Repurpose `Tournaments.tsx` as the unified competitive hub
+Tabs (today): **Overview · Settings · Registrations · Map Pool · Matches**.
 
-Sections (top → bottom):
+- **Overview**: status cards (registrations by status, slots, countdown preview, map pool status, bracket status) + quick actions (open/close registration, open/close check-in, start, complete, generate bracket button — bracket button calls existing `generate_bracket` RPC).
+- **Settings**: edit all new tournament fields above (dates, formats, modes, tagline, etc.) with save button. Status switcher kept.
+- **Registrations**: keep existing approve/reject/waitlist; add column for "Wants permanent team" + note + admin_note editor + CSV export (already exists).
+- **Map Pool**: list maps, add/remove/toggle active, reorder (up/down), reset to default VALORANT pool button. If no rows exist, "Initialize with VALORANT default" CTA.
+- **Matches**: list tournament matches; per match → set map manually, set scores, pick winner, mark forfeit, advance winner. (Veto handled admin-manual today; auto captain veto in Phase 2.)
 
-1. **Hero** — "Start in Open Cup. Climb with ELO. Unlock Challenger. Qualify for Championship." + subtitle.
-2. **My Progress card** — current ELO, RankBadge, current tier, progress bar to next tier, ELO needed, leaderboard rank if available. Hidden for logged-out.
-3. **GlobalActiveBar context** (if active) — already global, but reinforced here with bigger card.
-4. **Tier 1 — Open Cup** card: Open Beta badge, "1v1 Test Queue" sub-label, CTA "Join Open Cup Queue" → wires existing `enqueue_solo` RPC. Future-format note.
-5. **Tier 2 — Challenger Series** card: Locked / 1200 ELO requirement. If user ELO ≥ 1200: "Eligible · Coming Soon" green state with "Join Discord" CTA. Else locked state with progress mini-bar.
-6. **Tier 3 — Peak Championship** card: Invite-only, 1800 ELO. Same eligibility logic.
-7. **How it works** — 3 short steps.
+### F. Map veto — admin-manual today
 
-### 2.2 `Play.tsx` route
+Per your instruction *"If something is too complex, make it admin-manual first"*: today the admin selects the map per match from the active pool. The `match_map_veto` row is written so we can swap to captain veto in Phase 2 without schema changes.
 
-- Redirect `/play` → `/tournaments` (using `<Navigate replace>`), OR keep as the Open Cup-only quick-queue surface that mirrors the Tier 1 card. Choose redirect to enforce single hub.
-- The existing "Ranked" UI: remove. Replace any "Ranked" CTA with copy "PeakGG ranked progression happens through Open Cup."
+---
 
-## Phase 3 — One active competitive state
+## Phase 2 — Later (explicitly deferred)
 
-### 3.1 Guard in `useCompetitiveSession.enqueue()` wrapper
+- Captain-driven map veto UI (BO1 ban-until-one, BO3/BO5 pick-ban flows)
+- Per-round format overrides
+- Match chat + admin chat moderation tab
+- Disputes tab dedicated to this tournament (existing global Disputes already works)
+- Public Page customization tab, Rules & Rewards CMS tab, Logs/Audit tab
+- Automated convert-roster-to-permanent-team flow
+- Both-captains-confirm result mode
 
-- Before calling `enqueue_solo`, check current `status`. If not `idle`:
-  - status `queued` → toast "Already in queue" + open lobby
-  - status `match_found`/`in_match`/etc → modal "You already have an active competitive session" with Open Match / Cancel Queue actions.
-- Catch PG `23505` and treat as already-queued (already done).
+---
 
-### 3.2 Modal `ActiveSessionModal.tsx` (new)
+## Technical notes
 
-Reusable, opened by guard. Two CTAs based on status.
+- All new tables: RLS enabled, admin via existing `has_role(auth.uid(),'admin')`.
+- Default VALORANT pool list lives in a TS constant + a "reset" admin action that upserts into `tournament_map_pool`.
+- i18n: new strings added to EN/FR/IT translation files.
+- No existing flow (registration insert, approval, bracket, RLS) is altered — only additive.
 
-## Phase 4 — 5v5 readiness (no behavior change)
+---
 
-- Keep `competitiveQueues` config-driven. Add code comment block in `feature-flags.ts` listing the exact switch points: `teamSize: 1 → 5`, `requiredPlayers: 2 → 10`, `allowParty/allowFullTeam` flags.
-- Make `MatchDetail` render N player cards per side from `match_rosters` (already a list-driven render — verify it doesn't hardcode `[0]`).
-- No DB or RPC change.
+**Confirm and I'll execute Phase 1 in one pass** (1 migration + form rewrite + countdown + admin upgrades + public page section). Phase 2 stays queued. Yes, approve this plan.
 
-## Mobile QA
+Priority order:
 
-After implementation, verify with viewport 375 wide:
+1. Admin control panel for Community Cup #1
 
-- GlobalActiveBar wraps gracefully (stacks Cancel below text)
-- Pyramid tier cards: 1 column, no overflow
-- Match Room: player cards stack, action panel full-width
-- Submit / Dispute modals: scrollable, max-height 90vh
+2. Countdown controlled by admin start date/time
 
-## Files to add
+3. Improved registration modal UX
 
-- `src/hooks/useCompetitiveSession.ts`
-- `src/components/competitive/GlobalActiveBar.tsx`
-- `src/components/competitive/ActiveSessionModal.tsx`
-- `src/components/competitive/TierCard.tsx`
-- `src/components/competitive/MyProgressCard.tsx`
-- `src/lib/competitive-status.ts`
+4. Temporary tournament roster explanation + permanent team interest option
 
-## Files to edit
+5. Map pool system with default VALORANT maps if no custom pool exists
 
-- `src/App.tsx` — mount `GlobalActiveBar`
-- `src/pages/Tournaments.tsx` — pyramid layout
-- `src/pages/Play.tsx` — redirect or simplified mirror
-- `src/pages/MatchDetail.tsx` — header polish, player cards from `match_rosters` for queue matches, ELO delta display
-- `src/components/competitive/QueueLobby.tsx` — minor copy alignment
+6. Admin-manual map selection/veto first
 
-## Out of scope (explicitly NOT doing)
+7. Public map pool section on tournament page
 
-Team ELO, seasons, decay, map veto, BO3/BO5, prize pools, dodge cooldown, party queue, full team queue, switching to 5v5, Challenger/Championship backends, ELO formula changes, RLS changes, fake data.
+8. Match settings controlled by admin: BO1/BO2/BO3/BO5, final format, forfeit time, result confirmation mode
 
-## Deliverable after implementation
+Important:
 
-A single message answering all 18 output points from the request. Approved.
+Do not spend time on complex automation yet.
 
-Keep this implementation scoped exactly as planned.
+If something is too complex, make it admin-manual but clean and usable.
 
-Extra requirements before shipping:
+Do not break existing tournament registration, bracket, admin actions, or public tournament page.
 
-1. Do not break the current working queue → match → submit → confirm → ELO flow.
+Do not create fake/demo teams.
 
-2. Do not change ELO formula.
-
-3. Do not switch to 5v5 yet.
-
-4. Do not implement party/full team queue yet.
-
-5. Do not add fake data.
-
-6. Do not write temporary team IDs into [matches.team](http://matches.team)_a_id/team_b_id.
-
-7. Queue matches must keep using match_rosters.side = A/B.
-
-8. /play should redirect to /tournaments to avoid splitting Ranked from Open Cup.
-
-9. Ranked copy should say: “PeakGG ranked progression happens through Open Cup.”
-
-10. GlobalActiveBar must appear across the site when queued/match active, but not duplicate inside Match Room.
-
-11. If user is already queued, never show a raw error; show lobby/active session state.
-
-12. If user has active match, show Open Match.
-
-13. MatchDetail must render queue matches from match_rosters, not Team A / Team B.
-
-14. ELO delta should only show real elo_history data, no fake deltas.
-
-15. Mobile must be checked at 375px.
-
-After implementation, provide:
-
-- exact files updated
-
-- whether /play redirects to /tournaments
-
-- how GlobalActiveBar behaves
-
-- how one-active-state guard works
-
-- queue/match/result/ELO QA result
-
-- remaining blockers before Phase 2/5v5
+Make sure everything is usable today.
