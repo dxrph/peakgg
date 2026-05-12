@@ -84,21 +84,8 @@ export default function TournamentDetailPage() {
 
   const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
   const isTeamTournament = (t.tournament_type ?? "team_bracket") !== "solo_queue";
-  const isCommunityCup = t.tournament_type === "community_cup";
   const startDate = t.start_date ? fmtDate(new Date(t.start_date), "MMM d, yyyy — HH:mm") + " " + (t.timezone || "") : "TBD";
   const rules = (t.rules || "").split("\n").map(s => s.trim()).filter(Boolean);
-
-  const ccCtaLabel = (() => {
-    switch (t.status) {
-      case "registration_open": return "Register Your Team";
-      case "registration_closed": return "Registrations Closed";
-      case "checkin":
-      case "checkin_open": return "Check In";
-      case "live": return "View Bracket";
-      case "completed": return "View Results";
-      default: return "View Tournament";
-    }
-  })();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -158,13 +145,7 @@ export default function TournamentDetailPage() {
               </div>
             </div>
             <div className="flex flex-col gap-3 md:items-end shrink-0">
-              {isCommunityCup ? (
-                <a href="#community-cup">
-                  <Button variant="neon" size="lg" className="uppercase tracking-wider" disabled={t.status === "registration_closed"}>
-                    {ccCtaLabel}
-                  </Button>
-                </a>
-              ) : isTeamTournament ? (
+              {isTeamTournament ? (
                 <Link to="/teams"><Button variant="neon" size="lg" className="uppercase tracking-wider">Register Team</Button></Link>
               ) : (
                 <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
@@ -182,25 +163,11 @@ export default function TournamentDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            {isCommunityCup && (
-              <div id="community-cup">
-                <CommunityCupPanel tournamentId={t.id} tournamentStatus={t.status} />
-              </div>
-            )}
-
             <div className="rounded-lg border border-border bg-card p-6">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />Bracket
               </h2>
-              {isCommunityCup ? (
-                t.status === "live" || t.status === "completed" ? (
-                  <BracketView tournamentId={t.id} />
-                ) : (
-                  <p className="text-sm text-muted-foreground font-body py-8 text-center">
-                    Bracket is not live yet. Teams are still being reviewed.
-                  </p>
-                )
-              ) : realParticipantsCount > 0 ? (
+              {realParticipantsCount > 0 ? (
                 <BracketView tournamentId={t.id} />
               ) : (
                 <p className="text-sm text-muted-foreground font-body py-8 text-center">
@@ -209,7 +176,7 @@ export default function TournamentDetailPage() {
               )}
             </div>
 
-            {!isCommunityCup && <div className="rounded-lg border border-border bg-card p-6">
+            <div className="rounded-lg border border-border bg-card p-6">
               <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />Participants
               </h2>
@@ -222,7 +189,7 @@ export default function TournamentDetailPage() {
                   No participants registered yet. Be the first to {isTeamTournament ? "register your team" : "sign up"}.
                 </p>
               )}
-            </div>}
+            </div>
           </div>
 
           <div className="space-y-6">
