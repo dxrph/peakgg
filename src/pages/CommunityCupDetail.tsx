@@ -9,17 +9,22 @@ import { Button } from "@/components/ui/button";
 import {
   Trophy, Calendar, Users, MapPin, Globe, ChevronRight, ArrowLeft,
   ShieldCheck, Swords, Flag, Star, CheckCircle2, Megaphone, ListChecks,
-  ScrollText, Server, Languages, Layers, Award, Sparkles,
+  ScrollText, Server, Languages, Layers, Award, Sparkles, Map as MapIcon, Info,
 } from "lucide-react";
 import BracketView from "@/components/tournaments/BracketView";
 import CommunityCupPanel from "@/components/tournaments/CommunityCupPanel";
 import CommunityCupSignupDialog from "@/components/tournaments/CommunityCupSignupDialog";
+import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
+import MapPoolSection from "@/components/tournaments/MapPoolSection";
 import { DISCORD_INVITE } from "@/lib/links";
 import { useAuth } from "@/hooks/useAuth";
 
 type Tournament = {
   id: string; slug: string | null; name: string; status: string;
   start_date: string | null; timezone: string | null;
+  registration_close_at?: string | null; checkin_close_at?: string | null;
+  countdown_enabled?: boolean | null; map_selection_mode?: string | null;
+  match_format_default?: string | null; match_format_final?: string | null;
   max_teams: number; min_teams: number | null;
   short_description: string | null; description: string | null;
   prize_pool: string | null;
