@@ -115,13 +115,12 @@ export default function CommunityCupMatchRoom() {
   const load = async () => {
     if (!matchId) return;
     setLoading(true);
-    const { data: m, error } = await supabase
+    const { data: mRaw, error } = await (supabase
       .from("matches")
-      .select(
-        "id, tournament_id, round, bracket_position, status, result_status, signup_a_id, signup_b_id, team_a_id, team_b_id, score_a, score_b, winner_id, selected_map, map, veto_status, bo_format, map_selection_mode, chat_locked, admin_note, result_screenshot_url, result_notes, reported_by_user_id, dispute_status, dispute_reason"
-      )
+      .select("*") as any)
       .eq("id", matchId)
       .maybeSingle();
+    const m = mRaw as MatchRow | null;
     if (error || !m) {
       toast.error("Match not found.");
       setLoading(false);
