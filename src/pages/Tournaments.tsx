@@ -461,6 +461,168 @@ export default function TournamentsPage() {
           </div>
         </section>
 
+        {/* FEATURED TOURNAMENT — PeakGG Community Cup #1 (current flagship) */}
+        {featured && (
+          <section className="mb-16">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="outline" className="border-accent/50 text-accent font-display uppercase tracking-widest text-[10px]">
+                <Star className="h-3 w-3 mr-1" />Featured Event
+              </Badge>
+              <span className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">
+                First Official PeakGG Community Event
+              </span>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20">
+              {/* Glow layers */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-80"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at top left, hsl(352 100% 62% / 0.18), transparent 55%), radial-gradient(ellipse at bottom right, hsl(24 100% 63% / 0.15), transparent 55%)",
+                }}
+              />
+              <div
+                className="absolute inset-0 opacity-[0.05] pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
+                  backgroundSize: "44px 44px",
+                }}
+              />
+              {/* Top accent stripe */}
+              <div
+                className="absolute top-0 left-0 right-0 h-1 pointer-events-none"
+                style={{ background: "linear-gradient(90deg, hsl(352 100% 62%), hsl(24 100% 63%))" }}
+              />
+
+              <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-8 md:p-10">
+                {/* LEFT — main info */}
+                <div className="lg:col-span-8">
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <Badge className="bg-success/15 text-success border border-success/40 font-display uppercase tracking-wider text-[10px] hover:bg-success/15">
+                      <Flame className="h-3 w-3 mr-1" />{featuredStatusLabel}
+                    </Badge>
+                    <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase tracking-wider text-[10px]">
+                      VALORANT
+                    </Badge>
+                    <Badge variant="outline" className="border-border text-foreground font-display uppercase tracking-wider text-[10px]">
+                      <Globe className="h-3 w-3 mr-1" />EU
+                    </Badge>
+                    <Badge variant="outline" className="border-border text-foreground font-display uppercase tracking-wider text-[10px]">
+                      5v5
+                    </Badge>
+                    <Badge variant="outline" className="border-accent/40 text-accent font-display uppercase tracking-wider text-[10px]">
+                      Community Cup
+                    </Badge>
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold uppercase tracking-tight leading-[1.05]">
+                    PeakGG <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Community Cup #1</span>
+                  </h2>
+                  <p className="text-sm sm:text-base text-foreground/90 font-body mt-3 max-w-2xl">
+                    Free EU VALORANT tournament for community teams, amateur players and rising 5-stacks.
+                  </p>
+                  <p className="text-base sm:text-lg font-display uppercase tracking-tight text-accent mt-3 max-w-2xl">
+                    “Bring your 5-stack. Represent your community. Fight for the first PeakGG Community Cup title.”
+                  </p>
+                  <p className="text-sm text-muted-foreground font-body mt-4 max-w-2xl">
+                    The PeakGG Community Cup is the first official community tournament on PeakGG, built to bring together EU VALORANT communities, amateur teams and rising players in a clean competitive event.
+                  </p>
+
+                  {/* Mini info row */}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {[
+                      { icon: CheckCircle2, label: "Free Entry" },
+                      { icon: Globe, label: "EU Servers" },
+                      { icon: MessageCircle, label: "English" },
+                      { icon: Shield, label: "Staff-reviewed signups" },
+                      { icon: Users, label: "8–16 Teams" },
+                    ].map(({ icon: Icon, label }) => (
+                      <span
+                        key={label}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/40 px-2.5 py-1 text-[11px] font-body text-foreground/90"
+                      >
+                        <Icon className="h-3 w-3 text-primary" />{label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <Button variant="neon" size="lg" asChild className="shadow-xl shadow-primary/30">
+                      <Link to={`/tournaments/${featured.slug || featured.id}`}>
+                        <Trophy className="h-4 w-4 mr-1" />Register Your Team<ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="neonOutline" size="lg" asChild>
+                      <Link to={`/tournaments/${featured.slug || featured.id}`}>
+                        View Tournament Details
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* RIGHT — stats panel */}
+                <div className="lg:col-span-4">
+                  <div className="rounded-xl border border-primary/30 bg-background/60 backdrop-blur p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Slots</span>
+                      <span className="font-mono text-sm text-foreground">
+                        {featured.approved_count}/{featured.max_teams ?? 16} teams
+                      </span>
+                    </div>
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, Math.round(((featured.approved_count ?? 0) / (featured.max_teams ?? 16)) * 100))}%`,
+                          background: "linear-gradient(90deg, hsl(352 100% 62%), hsl(24 100% 63%))",
+                        }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <div className="rounded-md border border-border bg-secondary/40 p-2.5">
+                        <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Entry</div>
+                        <div className="text-sm font-display uppercase mt-0.5 text-success">Free</div>
+                      </div>
+                      <div className="rounded-md border border-border bg-secondary/40 p-2.5">
+                        <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Format</div>
+                        <div className="text-sm font-display uppercase mt-0.5">BO1</div>
+                      </div>
+                      <div className="rounded-md border border-border bg-secondary/40 p-2.5">
+                        <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Grand Final</div>
+                        <div className="text-sm font-display uppercase mt-0.5">BO3</div>
+                      </div>
+                      <div className="rounded-md border border-border bg-secondary/40 p-2.5">
+                        <div className="text-[10px] font-display uppercase text-muted-foreground tracking-widest">Region</div>
+                        <div className="text-sm font-display uppercase mt-0.5">EU</div>
+                      </div>
+                    </div>
+
+                    {featured.start_date && (
+                      <div className="rounded-md border border-accent/30 bg-accent/5 p-3">
+                        <div className="flex items-center gap-2 text-[10px] font-display uppercase tracking-widest text-accent">
+                          <Calendar className="h-3 w-3" />Starts
+                        </div>
+                        <div className="text-sm font-body text-foreground mt-1">
+                          {fmtDate(new Date(featured.start_date), "EEE, MMM d, yyyy — HH:mm")}
+                        </div>
+                        {daysUntilStart !== null && daysUntilStart > 0 && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono mt-1">
+                            <Clock className="h-3 w-3" />Starts in {daysUntilStart} day{daysUntilStart === 1 ? "" : "s"}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* COMPETITIVE PATH — 3 connected tier cards */}
         <section id="solo-path" className="mb-16">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
