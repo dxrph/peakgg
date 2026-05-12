@@ -72,13 +72,11 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
   // OR in the top-level entity_id column. Always prefer meta, then fall back.
   const matchId: string | null =
     (meta.match_id as string | undefined) ??
-    (n.entity_type === "match" ? (n.entity_id ?? null) : null) ??
-    null;
+    (n.entity_type === "match" ? n.entity_id ?? null : null);
   const matchUrl = matchId ? `/matches/${matchId}` : null;
   const teamId: string | null =
     (meta.team_id as string | undefined) ??
-    (n.entity_type === "team" ? (n.entity_id ?? null) : null) ??
-    null;
+    (n.entity_type === "team" ? n.entity_id ?? null : null);
 
   const go = (url?: string | null) => {
     if (!url) return;
@@ -182,11 +180,11 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
             <Button
               size="sm"
               variant="outline"
-              onClick={() => go(`/matches/${meta.match_id}?action=dispute`)}
+              onClick={() => go(matchUrl ? `${matchUrl}?action=dispute` : null)}
             >
               Dispute
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" variant="ghost" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match
             </Button>
           </div>
@@ -194,7 +192,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_disputed":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match
             </Button>
           </div>
@@ -202,7 +200,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_scheduled":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(`/matches/${meta.match_id}`)}>
+            <Button size="sm" onClick={() => go(matchUrl)} disabled={!matchUrl}>
               Open Match Room
             </Button>
           </div>
@@ -242,7 +240,7 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
       case "match_chat_message":
         return (
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => go(n.action_url || (meta.match_id ? `/matches/${meta.match_id}` : null))}>
+            <Button size="sm" onClick={() => go(n.action_url || matchUrl)}>
               Open Chat
             </Button>
             {!n.is_read && (
