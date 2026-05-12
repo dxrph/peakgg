@@ -489,12 +489,20 @@ function VetoPanel({
   const canAct = (myTurn && veto?.status === "in_progress") || isStaff;
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between mb-3">
+    <Card className="relative overflow-hidden border-border/60">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="p-5">
+      <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
         <div>
-          <h2 className="font-display uppercase tracking-wider text-sm">Map Veto</h2>
-          <p className="text-xs text-muted-foreground">
-            {veto ? `Mode: ${VETO_MODE_LABEL[veto.mode] ?? veto.mode} · Status: ${veto.status}` : "Veto has not started yet."}
+          <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" /> Map Veto
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            {veto
+              ? <>Manage bans and picks for this match. <span className="text-foreground/80">Mode: {VETO_MODE_LABEL[veto.mode] ?? veto.mode}</span></>
+              : match.map_selection_mode === "admin_manual"
+                ? "Map will be selected manually by tournament staff unless veto is started."
+                : "Map veto has not started yet. Once staff or the system starts the veto, captains will be able to ban or pick maps here."}
           </p>
         </div>
         {isStaff && (
@@ -522,7 +530,8 @@ function VetoPanel({
       </div>
 
       {!veto && !isStaff && (
-        <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 p-6 text-center text-sm text-muted-foreground">
+          <Target className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
           Waiting for tournament staff to start the veto.
         </div>
       )}
