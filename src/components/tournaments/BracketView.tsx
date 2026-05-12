@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Match = {
   id: string;
@@ -9,25 +11,29 @@ type Match = {
   bracket_position: number;
   team_a_id: string | null;
   team_b_id: string | null;
+  signup_a_id?: string | null;
+  signup_b_id?: string | null;
+  selected_map?: string | null;
   score_a: number | null;
   score_b: number | null;
   winner_id: string | null;
   status: string;
 };
 
-interface Props { tournamentId: string }
+interface Props { tournamentId: string; tournamentSlug?: string }
 
-export default function BracketView({ tournamentId }: Props) {
+export default function BracketView({ tournamentId, tournamentSlug }: Props) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Record<string, { name: string; tag: string }>>({});
+  const [signups, setSignups] = useState<Record<string, { name: string; tag: string | null }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from("matches")
-        .select("id, round, bracket_position, team_a_id, team_b_id, score_a, score_b, winner_id, status")
+        .select("*") as any)
         .eq("tournament_id", tournamentId)
         .not("round", "is", null)
         .order("round", { ascending: true })
@@ -42,6 +48,13 @@ export default function BracketView({ tournamentId }: Props) {
         for (const t of ts ?? []) map[t.id] = { name: t.name, tag: t.tag };
         setTeams(map);
       }
+      const sids = [...new Set(rows.flatMap(m => [m.signup_a_id, m.signup_b_id]).filter(Boolean) as string[])];
+      if (sids.length) {
+        const { data: ss } = await supabase.from("tournament_team_signups_public").select("id, team_name, team_tag").in("id", sids);
+        const sm: Record<string, { name: string; tag: string | null }> = {};
+        for (const s of (ss ?? []) as any[]) sm[s.id] = { name: s.team_name, tag: s.team_tag };
+        setSignups(sm);
+      }
       setLoading(false);
     })();
     return () => { active = false; };
@@ -52,10 +65,18 @@ export default function BracketView({ tournamentId }: Props) {
 
   const rounds = [...new Set(matches.map(m => m.round))].sort((a, b) => a - b);
 
-  const teamLabel = (id: string | null) => {
-    if (!id) return <span className="text-muted-foreground italic">TBD</span>;
-    const t = teams[id];
-    return t ? <span className="font-display">{t.tag}<span className="text-muted-foreground"> · {t.name}</span></span> : <span className="text-xs">{id.slice(0,8)}</span>;
+  const sideLabel = (m: Match, side: "a" | "b") => {
+    const sid = side === "a" ? m.signup_a_id : m.signup_b_id;
+    const tid = side === "a" ? m.team_a_id : m.team_b_id;
+    if (sid && signups[sid]) {
+      const s = signups[sid];
+      return <span className="font-display">{s.tag ?? ""}<span className="text-muted-foreground"> · {s.name}</span></span>;
+    }
+    if (tid && teams[tid]) {
+      const t = teams[tid];
+      return <span className="font-display">{t.tag}<span className="text-muted-foreground"> · {t.name}</span></span>;
+    }
+    return <span className="text-muted-foreground italic">TBD</span>;
   };
 
   return (
@@ -73,15 +94,27 @@ export default function BracketView({ tournamentId }: Props) {
                 {ms.map(m => (
                   <div key={m.id} className="rounded-lg border border-border bg-card overflow-hidden">
                     <div className={cn("flex items-center justify-between px-3 py-2 border-b border-border",
-                      m.winner_id === m.team_a_id && "bg-primary/10")}>
-                      <span className="text-sm">{teamLabel(m.team_a_id)}</span>
+                      m.winner_id && m.winner_id === m.team_a_id && "bg-primary/10")}>
+                      <span className="text-sm">{sideLabel(m, "a")}</span>
                       <span className="font-mono text-sm">{m.score_a ?? "—"}</span>
                     </div>
                     <div className={cn("flex items-center justify-between px-3 py-2",
-                      m.winner_id === m.team_b_id && "bg-primary/10")}>
-                      <span className="text-sm">{teamLabel(m.team_b_id)}</span>
+                      m.winner_id && m.winner_id === m.team_b_id && "bg-primary/10")}>
+                      <span className="text-sm">{sideLabel(m, "b")}</span>
                       <span className="font-mono text-sm">{m.score_b ?? "—"}</span>
                     </div>
+                    {m.selected_map && (
+                      <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground border-t border-border">Map: {m.selected_map}</div>
+                    )}
+                    {tournamentSlug && (
+                      <div className="px-2 py-2 border-t border-border">
+                        <Button asChild size="sm" variant="outline" className="w-full h-7 text-xs">
+                          <Link to={`/tournaments/${tournamentSlug}/matches/${m.id}`}>
+                            <ExternalLink className="h-3 w-3 mr-1" /> View Match
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
