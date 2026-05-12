@@ -21,10 +21,12 @@ import {
 import {
   ArrowLeft, Loader2, Send, ShieldAlert, Swords, Trophy, MapPin,
   Lock, Unlock, AlertTriangle, CheckCircle2, RotateCcw, Play, Crown,
+  Users, MessageSquare, Target, Info, Settings2, FileText, Hammer, Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
 import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type MatchRow = {
   id: string;
