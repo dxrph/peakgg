@@ -22,6 +22,7 @@ import TeamDetailPage from "./pages/TeamDetail";
 import AdminSecurityPage from "./pages/admin/Security";
 import AdminDashboard from "./pages/admin/sections/AdminDashboard";
 import AdminTournaments from "./pages/admin/sections/AdminTournaments";
+import AdminCommunityCup from "./pages/admin/sections/AdminCommunityCup";
 import AdminMatches from "./pages/admin/sections/AdminMatches";
 import AdminTickets from "./pages/admin/sections/AdminTickets";
 import AdminPlayers from "./pages/admin/sections/AdminPlayers";
@@ -100,6 +101,7 @@ const App = () => (
                 }
               />
               <Route path="/admin/tournaments" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminTournaments /></RoleGuard></ProtectedRoute>} />
+              <Route path="/admin/community-cup" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator", "organizer"]}><AdminCommunityCup /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/matches" element={<ProtectedRoute><RoleGuard allow={["admin", "organizer"]}><AdminMatches /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/tickets" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminTickets /></RoleGuard></ProtectedRoute>} />
               <Route path="/admin/disputes" element={<ProtectedRoute><RoleGuard allow={["admin", "moderator"]}><AdminDisputes /></RoleGuard></ProtectedRoute>} />
