@@ -155,6 +155,16 @@ export default function CommunityCupDetail({ tournament }: { tournament: Tournam
                 <p className="text-xs text-muted-foreground mt-3 font-body">
                   Free entry. Staff reviews every signup before approval.
                 </p>
+
+                <div className="mt-6 max-w-md">
+                  <TournamentCountdown
+                    startsAt={t.start_date}
+                    registrationClosesAt={t.registration_close_at ?? null}
+                    checkinClosesAt={t.checkin_close_at ?? null}
+                    countdownEnabled={t.countdown_enabled ?? true}
+                    status={t.status}
+                  />
+                </div>
               </div>
             </div>
           </div>
