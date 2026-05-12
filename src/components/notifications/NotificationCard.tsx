@@ -80,6 +80,8 @@ export default function NotificationCard({ n, onResolve, onMarkRead, onDismiss, 
 
   const go = (url?: string | null) => {
     if (!url) return;
+    // Defensive: never navigate to a broken URL produced by stale notifications.
+    if (url.includes("/undefined") || url.includes("/null")) return;
     if (!n.is_read) onMarkRead(n.id);
     navigate(url);
   };
