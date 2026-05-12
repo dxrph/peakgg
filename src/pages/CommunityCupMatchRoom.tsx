@@ -1020,31 +1020,55 @@ function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string;
   };
 
   return (
-    <Card className="p-0 overflow-hidden flex flex-col h-[600px]">
-      <div className="px-4 py-2 border-b border-border bg-card/60 flex items-center justify-between">
-        <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground">Match Chat</h3>
+    <Card className="relative p-0 overflow-hidden flex flex-col h-[640px] border-border/60">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="px-4 py-3 border-b border-border/60 bg-card/60 backdrop-blur flex items-center justify-between">
+        <div>
+          <h3 className="font-display uppercase tracking-[0.18em] text-sm flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" /> Match Chat
+          </h3>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Coordination between captains and staff.</p>
+        </div>
         {chatLocked && <Badge variant="outline" className="border-destructive/40 text-destructive text-[10px]"><Lock className="h-3 w-3 mr-1" />Locked</Badge>}
       </div>
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
         {msgs.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-8">No messages yet.</p>
+          <div className="h-full flex flex-col items-center justify-center text-center px-6 py-8">
+            <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
+              <MessageSquare className="h-5 w-5 text-muted-foreground/50" />
+            </div>
+            <p className="text-sm font-display uppercase tracking-wider text-foreground/80">No messages yet</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-[220px]">
+              Captains and staff can use this chat for coordination during the match.
+            </p>
+          </div>
         ) : msgs.map((m) => (
-          <div key={m.id} className={cn("text-sm", m.is_system_message && "text-center")}>
+          <div key={m.id} className={cn("text-sm", m.is_system_message && "flex justify-center")}>
             {m.is_system_message ? (
-              <div className="inline-block text-[11px] px-2 py-1 rounded bg-muted text-muted-foreground">{m.content}</div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary/90">
+                <Radio className="h-3 w-3" />{m.content}
+              </div>
             ) : (
-              <div className="flex items-start gap-2">
-                {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover mt-0.5" /> : <div className="w-6 h-6 rounded-full bg-muted mt-0.5" />}
+              <div className={cn(
+                "flex items-start gap-2 rounded-lg p-2",
+                m.sender_role === "admin" ? "bg-primary/[0.04] border border-primary/15" : "hover:bg-muted/20"
+              )}>
+                {m.profile?.avatar_url
+                  ? <img src={m.profile.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover mt-0.5 border border-border/40" />
+                  : <div className="w-7 h-7 rounded-full bg-muted mt-0.5 flex items-center justify-center text-[10px] font-display text-muted-foreground">{(m.profile?.username ?? "P")[0].toUpperCase()}</div>}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <span className={cn("font-display uppercase text-xs", m.sender_role === "admin" ? "text-primary" : "text-foreground")}>
-                      {m.profile?.username ?? "Player"} {m.sender_role === "admin" && "· STAFF"}
+                    <span className={cn("font-display uppercase text-xs tracking-wider", m.sender_role === "admin" ? "text-primary" : "text-foreground")}>
+                      {m.profile?.username ?? "Player"}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    {m.sender_role === "admin" && (
+                      <Badge variant="outline" className="border-primary/40 text-primary text-[9px] py-0 h-4 px-1">STAFF</Badge>
+                    )}
+                    <span className="text-[10px] text-muted-foreground ml-auto">
                       {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="break-words">{m.content}</p>
+                  <p className="break-words text-sm mt-0.5 text-foreground/90">{m.content}</p>
                 </div>
               </div>
             )}
@@ -1053,18 +1077,18 @@ function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string;
         <div ref={endRef} />
       </div>
       {canChat && !chatLocked && user && (
-        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="border-t border-border p-2 flex gap-2">
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" maxLength={500} disabled={busy} />
-          <Button type="submit" size="sm" disabled={busy || !text.trim()}><Send className="h-4 w-4" /></Button>
+        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="border-t border-border/60 p-2 flex gap-2 bg-card/40">
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" maxLength={500} disabled={busy} className="bg-background/60" />
+          <Button type="submit" size="sm" variant="neon" disabled={busy || !text.trim()}><Send className="h-4 w-4" /></Button>
         </form>
       )}
       {chatLocked && !isStaff && (
-        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
-          Match chat is locked by tournament staff.
+        <div className="border-t border-border/60 p-3 text-center text-xs text-muted-foreground bg-destructive/5 flex items-center justify-center gap-2">
+          <Lock className="h-3.5 w-3.5" /> Match chat is locked by tournament staff.
         </div>
       )}
       {!canChat && !chatLocked && (
-        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
+        <div className="border-t border-border/60 p-3 text-center text-xs text-muted-foreground">
           Only captains involved in this match and staff can write here.
         </div>
       )}
