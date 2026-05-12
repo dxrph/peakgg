@@ -381,12 +381,15 @@ function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
   signups: Signup[]; counts: Record<string, number>; onChanged: () => void; onOpen: (s: Signup) => void;
 }) {
   const [filter, setFilter] = useState("all");
+  const [actingId, setActingId] = useState<string | null>(null);
   const filtered = filter === "all" ? signups : signups.filter((s) => s.status === filter);
 
   const setStatus = async (id: string, status: string) => {
+    setActingId(id);
     const { error } = await supabase.from("tournament_team_signups" as never)
       .update({ status, ...(status === "checked_in" ? { checked_in_at: new Date().toISOString() } : {}) } as never)
       .eq("id", id);
+    setActingId(null);
     if (error) return toast.error(error.message);
     toast.success(`Status: ${status}`);
     onChanged();
@@ -463,9 +466,11 @@ function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
                 </td>
                 <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(s.created_at).toLocaleString()}</td>
                 <td className="p-3 text-right space-x-1 whitespace-nowrap">
-                  <Button size="sm" variant="ghost" onClick={() => onOpen(s)}>View</Button>
-                  {s.status !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "approved")}>Approve</Button>}
-                  {s.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "rejected")}>Reject</Button>}
+                  <Button size="sm" variant="ghost" onClick={() => onOpen(s)} disabled={actingId === s.id}>View</Button>
+                  {s.status !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "approved")} disabled={actingId === s.id}>Approve</Button>}
+                  {s.status !== "waitlisted" && s.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "waitlisted")} disabled={actingId === s.id}>Waitlist</Button>}
+                  {s.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(s.id, "checked_in")} disabled={actingId === s.id}>Check-in</Button>}
+                  {s.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "rejected")} disabled={actingId === s.id}>Reject</Button>}
                 </td>
               </tr>
             ))}
@@ -516,23 +521,31 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
   };
 
   const toggleActive = async (id: string, is_active: boolean) => {
+    setBusy(true);
     const { error } = await supabase.from("tournament_map_pool" as never).update({ is_active } as never).eq("id", id);
+    setBusy(false);
     if (error) return toast.error(error.message);
     onChanged();
   };
 
   const remove = async (id: string) => {
+    if (!confirm("Remove this map from the pool?")) return;
+    setBusy(true);
     const { error } = await supabase.from("tournament_map_pool" as never).delete().eq("id", id);
+    setBusy(false);
     if (error) return toast.error(error.message);
+    toast.success("Map removed");
     onChanged();
   };
 
   const move = async (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= pool.length) return;
+    setBusy(true);
     const a = pool[i]; const b = pool[j];
     await supabase.from("tournament_map_pool" as never).update({ display_order: b.display_order } as never).eq("id", a.id);
     await supabase.from("tournament_map_pool" as never).update({ display_order: a.display_order } as never).eq("id", b.id);
+    setBusy(false);
     onChanged();
   };
 
@@ -581,11 +594,11 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
               <tr key={m.id} className="border-t border-border">
                 <td className="p-3 text-muted-foreground">{i + 1}</td>
                 <td className="p-3 font-display">{m.map_name}</td>
-                <td className="p-3"><Switch checked={m.is_active} onCheckedChange={(v) => toggleActive(m.id, v)} /></td>
+                <td className="p-3"><Switch checked={m.is_active} onCheckedChange={(v) => toggleActive(m.id, v)} disabled={busy} /></td>
                 <td className="p-3 text-right whitespace-nowrap space-x-1">
-                  <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === pool.length - 1}><ChevronDown className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={busy || i === 0}><ChevronUp className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={busy || i === pool.length - 1}><ChevronDown className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remove(m.id)} disabled={busy}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
             ))}
@@ -659,6 +672,12 @@ function MatchesTab({ tournament, matches, signups, mapPool, onChanged }: {
 function MatchRow2({ m, maps, onMap, onScore }: { m: MatchRow; maps: string[]; onMap: (id: string, map: string) => void; onScore: (id: string, m: MatchRow, a: number, b: number) => void }) {
   const [a, setA] = useState<string>(String(m.score_a ?? 0));
   const [b, setB] = useState<string>(String(m.score_b ?? 0));
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    setSaving(true);
+    try { await onScore(m.id, m, Number(a) || 0, Number(b) || 0); }
+    finally { setSaving(false); }
+  };
   return (
     <tr className="border-t border-border">
       <td className="p-3">{m.round ?? "—"}</td>
@@ -680,7 +699,9 @@ function MatchRow2({ m, maps, onMap, onScore }: { m: MatchRow; maps: string[]; o
       </td>
       <td className="p-3"><Badge variant="secondary" className="font-display">{m.status}</Badge></td>
       <td className="p-3 text-right">
-        <Button size="sm" variant="outline" onClick={() => onScore(m.id, m, Number(a) || 0, Number(b) || 0)}>Save Result</Button>
+        <Button size="sm" variant="outline" onClick={save} disabled={saving || !m.team_a_id || !m.team_b_id}>
+          {saving && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}Save Result
+        </Button>
       </td>
     </tr>
   );

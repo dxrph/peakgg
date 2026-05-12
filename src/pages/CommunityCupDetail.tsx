@@ -350,7 +350,7 @@ export default function CommunityCupDetail({ tournament }: { tournament: Tournam
               kicker="Single elimination"
             >
               <div className="rounded-lg border border-border bg-card p-6">
-                {t.status === "live" || t.status === "completed" ? (
+                {t.status === "live" || t.status === "completed" || t.status === "checkin" || t.status === "checkin_open" ? (
                   <BracketView tournamentId={t.id} />
                 ) : (
                   <div className="text-center py-10">
