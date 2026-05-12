@@ -351,7 +351,7 @@ export default function CommunityCupDetail({ tournament }: { tournament: Tournam
             >
               <div className="rounded-lg border border-border bg-card p-6">
                 {t.status === "live" || t.status === "completed" || t.status === "checkin" || t.status === "checkin_open" ? (
-                  <BracketView tournamentId={t.id} />
+                  <BracketView tournamentId={t.id} tournamentSlug={t.slug ?? t.id} />
                 ) : (
                   <div className="text-center py-10">
                     <Trophy className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
