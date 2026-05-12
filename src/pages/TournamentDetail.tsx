@@ -9,6 +9,7 @@ import {
 import { useParams, Link } from "react-router-dom";
 import BracketView from "@/components/tournaments/BracketView";
 import CommunityCupPanel from "@/components/tournaments/CommunityCupPanel";
+import CommunityCupDetail from "./CommunityCupDetail";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
@@ -76,6 +77,10 @@ export default function TournamentDetailPage() {
         <Footer />
       </div>
     );
+  }
+
+  if (t.tournament_type === "community_cup") {
+    return <CommunityCupDetail tournament={t as never} />;
   }
 
   const tierColors: Record<number, string> = { 1: "text-success", 2: "text-accent", 3: "text-primary" };
