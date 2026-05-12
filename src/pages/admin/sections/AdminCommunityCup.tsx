@@ -521,23 +521,31 @@ function MapPoolTab({ tournamentId, pool, onChanged }: { tournamentId: string; p
   };
 
   const toggleActive = async (id: string, is_active: boolean) => {
+    setBusy(true);
     const { error } = await supabase.from("tournament_map_pool" as never).update({ is_active } as never).eq("id", id);
+    setBusy(false);
     if (error) return toast.error(error.message);
     onChanged();
   };
 
   const remove = async (id: string) => {
+    if (!confirm("Remove this map from the pool?")) return;
+    setBusy(true);
     const { error } = await supabase.from("tournament_map_pool" as never).delete().eq("id", id);
+    setBusy(false);
     if (error) return toast.error(error.message);
+    toast.success("Map removed");
     onChanged();
   };
 
   const move = async (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= pool.length) return;
+    setBusy(true);
     const a = pool[i]; const b = pool[j];
     await supabase.from("tournament_map_pool" as never).update({ display_order: b.display_order } as never).eq("id", a.id);
     await supabase.from("tournament_map_pool" as never).update({ display_order: a.display_order } as never).eq("id", b.id);
+    setBusy(false);
     onChanged();
   };
 
