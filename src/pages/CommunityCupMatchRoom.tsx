@@ -671,43 +671,60 @@ function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
   const disabled = match.status === "completed" || match.result_status === "admin_resolved";
 
   return (
-    <Card className="p-5">
-      <h2 className="font-display uppercase tracking-wider text-sm mb-3">Result Reporting</h2>
+    <Card className="p-5 border-border/60">
+      <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+        <div>
+          <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" /> Result Reporting
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">Submit the final score for staff review. Staff confirmation required before the result becomes official.</p>
+        </div>
+      </div>
       {match.result_status === "pending_confirmation" && (
-        <div className="mb-3 p-3 rounded-md border border-warning/40 bg-warning/5 text-sm text-warning">
+        <div className="mb-4 p-3 rounded-lg border border-warning/40 bg-warning/5 text-sm text-warning flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           Result submitted. Waiting for staff confirmation.
         </div>
       )}
       {disabled && (
-        <div className="mb-3 p-3 rounded-md border border-success/40 bg-success/5 text-sm text-success">
+        <div className="mb-4 p-3 rounded-lg border border-success/40 bg-success/5 text-sm text-success flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           Match completed. Final score {match.score_a}–{match.score_b}.
         </div>
       )}
+      {!myCaptainSide && !isStaff && !disabled && (
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 p-5 text-center text-sm text-muted-foreground">
+          <Info className="h-5 w-5 mx-auto mb-2 text-muted-foreground/50" />
+          Only the team captains involved in this match can submit a result.
+        </div>
+      )}
+      {(myCaptainSide || isStaff) && (
+      <>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs">Score Team A</Label>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score Team A</Label>
           <Input value={a} onChange={(e) => setA(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
         </div>
         <div>
-          <Label className="text-xs">Score Team B</Label>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score Team B</Label>
           <Input value={b} onChange={(e) => setB(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
         </div>
       </div>
       <div className="mt-3">
-        <Label className="text-xs">Screenshot URL (optional)</Label>
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Screenshot URL (optional)</Label>
         <Input value={screenshot} onChange={(e) => setScreenshot(e.target.value)} placeholder="https://…" disabled={disabled || !myCaptainSide} />
       </div>
       <div className="mt-3">
-        <Label className="text-xs">Notes (optional)</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={disabled || !myCaptainSide} />
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={disabled || !myCaptainSide} rows={3} />
       </div>
       {myCaptainSide && !disabled && (
-        <label className="flex items-center gap-2 mt-3 text-xs">
-          <input type="checkbox" checked={confirm1} onChange={(e) => setConfirm1(e.target.checked)} />
+        <label className="flex items-center gap-2 mt-4 text-xs cursor-pointer">
+          <input type="checkbox" checked={confirm1} onChange={(e) => setConfirm1(e.target.checked)} className="accent-primary" />
           I confirm this result is correct.
         </label>
       )}
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2 items-center">
         {myCaptainSide && (
           <Button size="sm" variant="neon" disabled={busy || disabled || !confirm1} onClick={submit}>
             {busy && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
@@ -719,10 +736,12 @@ function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
             <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Open Dispute
           </Button>
         )}
-        {!myCaptainSide && !isStaff && (
-          <p className="text-xs text-muted-foreground">Only the team captains involved can submit a result.</p>
+        {myCaptainSide && !disabled && (
+          <p className="text-[11px] text-muted-foreground ml-auto">Submitting does not finalize the match. Staff will review and confirm.</p>
         )}
       </div>
+      </>
+      )}
 
       <DisputeDialog open={disputeOpen} onOpenChange={setDisputeOpen} matchId={match.id} onChanged={onChanged} />
     </Card>
