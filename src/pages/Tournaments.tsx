@@ -831,7 +831,7 @@ export default function TournamentsPage() {
             </Link>
           </div>
 
-          {teamTournaments.length === 0 ? (
+          {otherTeamTournaments.length === 0 ? (
             <EmptyState
               icon={Trophy}
               title="Team tournaments will open after Season 0 Beta begins"
@@ -843,7 +843,7 @@ export default function TournamentsPage() {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {teamTournaments.map(t => (
+              {otherTeamTournaments.map(t => (
                 <div key={t.id} className="rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-all flex flex-col">
                   <div className="flex items-start justify-between mb-3 gap-2">
                     <Badge variant="outline" className="font-display text-[10px] uppercase tracking-wider border-primary/40 text-primary">
