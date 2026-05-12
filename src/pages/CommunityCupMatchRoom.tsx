@@ -21,10 +21,12 @@ import {
 import {
   ArrowLeft, Loader2, Send, ShieldAlert, Swords, Trophy, MapPin,
   Lock, Unlock, AlertTriangle, CheckCircle2, RotateCcw, Play, Crown,
+  Users, MessageSquare, Target, Info, Settings2, FileText, Hammer, Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
 import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type MatchRow = {
   id: string;
@@ -237,52 +239,67 @@ export default function CommunityCupMatchRoom() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SEO title={`Match Room — ${tournamentName}`} description="PeakGG Community Cup match room" />
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-6 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
         <Button variant="ghost" size="sm" className="mb-3" onClick={() => navigate(`/tournaments/${cupSlug}`)}>
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to tournament
         </Button>
 
-        {/* HEADER */}
-        <Card className="p-5 mb-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-display uppercase tracking-wider">
-                <Swords className="h-3.5 w-3.5" />
-                {tournamentName}
-                {match.round != null && <span>· Round {match.round}</span>}
-                {match.bracket_position != null && <span>· Match #{match.bracket_position}</span>}
+        {/* HERO HEADER */}
+        <Card className="relative overflow-hidden mb-4 border-border/60 bg-gradient-to-br from-card via-card to-background/40">
+          <div className="absolute inset-0 pointer-events-none opacity-60 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_55%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="relative p-5 sm:p-6">
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-display uppercase tracking-[0.18em]">
+              <Swords className="h-3.5 w-3.5 text-primary" />
+              <span>{tournamentName}</span>
+              {match.round != null && <span className="text-muted-foreground/70">· Round {match.round}</span>}
+              {match.bracket_position != null && <span className="text-muted-foreground/70">· Match #{match.bracket_position}</span>}
+              {status === "live" && (
+                <span className="ml-2 inline-flex items-center gap-1 text-primary">
+                  <span className="relative flex h-2 w-2"><span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" /><span className="relative h-2 w-2 rounded-full bg-primary" /></span>
+                  LIVE
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 grid lg:grid-cols-[1fr_auto] gap-5 items-center">
+              {/* Team vs Team */}
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
+                <HeroTeam side="A" signup={sa} winnerId={match.winner_id} teamId={match.team_a_id} score={match.score_a} status={status} />
+                <div className="flex flex-col items-center gap-1">
+                  <div className="font-display text-xs text-muted-foreground tracking-[0.2em]">VS</div>
+                  <div className="h-10 w-px bg-gradient-to-b from-transparent via-primary/40 to-transparent" />
+                  {(match.score_a != null || match.score_b != null) && (
+                    <div className="font-display text-2xl sm:text-3xl tabular-nums">
+                      <span className={cn(match.winner_id && match.team_a_id === match.winner_id && "text-primary")}>{match.score_a ?? "—"}</span>
+                      <span className="text-muted-foreground mx-1">:</span>
+                      <span className={cn(match.winner_id && match.team_b_id === match.winner_id && "text-primary")}>{match.score_b ?? "—"}</span>
+                    </div>
+                  )}
+                </div>
+                <HeroTeam side="B" signup={sb} winnerId={match.winner_id} teamId={match.team_b_id} score={match.score_b} status={status} alignRight />
               </div>
-              <h1 className="font-display text-2xl mt-2">
-                {sa?.team_name ?? "TBD"} <span className="text-muted-foreground">vs</span> {sb?.team_name ?? "TBD"}
-              </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <Badge className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>
-                <Badge variant="outline">{match.bo_format ?? "BO1"}</Badge>
-                <Badge variant="outline">Map mode: {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</Badge>
+
+              {/* Status badges */}
+              <div className="flex lg:flex-col flex-wrap gap-1.5 lg:items-end justify-start lg:justify-center">
+                <Badge className={cn("border font-display tracking-wider", sb_meta?.cls)}>{sb_meta?.label}</Badge>
+                <Badge variant="outline" className="font-display">{match.bo_format ?? "BO1"}</Badge>
+                <Badge variant="outline" className="font-display">
+                  <Target className="h-3 w-3 mr-1" />
+                  {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}
+                </Badge>
                 {match.selected_map && (
-                  <Badge variant="outline" className="border-primary/40 text-primary">
+                  <Badge variant="outline" className="border-primary/50 text-primary bg-primary/5">
                     <MapPin className="h-3 w-3 mr-1" /> {match.selected_map}
                   </Badge>
                 )}
-                {match.chat_locked && <Badge variant="outline" className="border-destructive/40 text-destructive"><Lock className="h-3 w-3 mr-1" />Chat locked</Badge>}
+                {match.chat_locked && (
+                  <Badge variant="outline" className="border-destructive/40 text-destructive">
+                    <Lock className="h-3 w-3 mr-1" />Chat locked
+                  </Badge>
+                )}
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-display text-3xl">
-                {match.score_a ?? "—"} <span className="text-muted-foreground">:</span> {match.score_b ?? "—"}
-              </div>
-              {match.winner_id && (
-                <div className="text-xs text-success mt-1 flex items-center gap-1 justify-end">
-                  <Trophy className="h-3 w-3" /> Winner declared
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Teams */}
-          <div className="grid sm:grid-cols-2 gap-3 mt-4">
-            <TeamCard side="A" signup={sa} winnerId={match.winner_id} teamId={match.team_a_id} />
-            <TeamCard side="B" signup={sb} winnerId={match.winner_id} teamId={match.team_b_id} />
           </div>
         </Card>
 
@@ -309,7 +326,8 @@ export default function CommunityCupMatchRoom() {
             )}
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
+            <MatchSummary match={match} status={status} sb_meta={sb_meta} />
             <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
           </div>
         </div>
@@ -319,28 +337,85 @@ export default function CommunityCupMatchRoom() {
   );
 }
 
-function TeamCard({ side, signup, winnerId, teamId }: { side: "A" | "B"; signup: SignupLite | null; winnerId: string | null; teamId: string | null }) {
+function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }: {
+  side: "A" | "B"; signup: SignupLite | null; winnerId: string | null; teamId: string | null;
+  score: number | null; status: string; alignRight?: boolean;
+}) {
   const isWinner = !!winnerId && teamId === winnerId;
+  const isLoser = !!winnerId && teamId !== winnerId && !!signup;
   return (
     <div className={cn(
-      "rounded-lg border p-3 flex items-center gap-3",
-      isWinner ? "border-primary/40 bg-primary/5" : "border-border"
+      "rounded-xl border p-3 sm:p-4 transition-all",
+      isWinner ? "border-primary/60 bg-primary/5 shadow-[0_0_30px_-12px_hsl(var(--primary)/0.5)]"
+        : isLoser ? "border-border/40 bg-card/40 opacity-70"
+        : "border-border/60 bg-card/60 hover:border-border",
+      alignRight && "text-right"
     )}>
-      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center overflow-hidden">
-        {signup?.team_logo_url ? <img src={signup.team_logo_url} alt="" className="w-full h-full object-cover" /> : <Swords className="h-4 w-4 text-muted-foreground" />}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-display uppercase text-muted-foreground">Team {side}</span>
-          {isWinner && <Crown className="h-3 w-3 text-primary" />}
+      <div className={cn("flex items-center gap-3", alignRight && "flex-row-reverse")}>
+        <div className={cn(
+          "w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50 shrink-0",
+          isWinner && "border-primary/60"
+        )}>
+          {signup?.team_logo_url
+            ? <img src={signup.team_logo_url} alt="" className="w-full h-full object-cover" />
+            : <Swords className="h-5 w-5 text-muted-foreground" />}
         </div>
-        <div className="font-display text-sm truncate">
-          {signup?.team_tag && <span className="text-muted-foreground mr-1">[{signup.team_tag}]</span>}
-          {signup?.team_name ?? "TBD"}
+        <div className="min-w-0 flex-1">
+          <div className={cn("flex items-center gap-1.5 text-[10px] font-display uppercase tracking-[0.18em] text-muted-foreground", alignRight && "justify-end")}>
+            <span>Team {side}</span>
+            {isWinner && <Crown className="h-3 w-3 text-primary" />}
+          </div>
+          <div className="font-display text-base sm:text-lg leading-tight truncate mt-0.5">
+            {signup?.team_tag && <span className="text-primary/80 mr-1">[{signup.team_tag}]</span>}
+            {signup?.team_name ?? "TBD"}
+          </div>
+          {signup?.community_name && (
+            <div className={cn("text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5", alignRight && "justify-end")}>
+              <Users className="h-3 w-3" />
+              <span className="truncate">{signup.community_name}</span>
+            </div>
+          )}
         </div>
-        {signup?.community_name && <div className="text-xs text-muted-foreground truncate">{signup.community_name}</div>}
       </div>
+      {isWinner && (
+        <div className={cn("mt-2 text-[10px] font-display uppercase tracking-wider text-primary flex items-center gap-1", alignRight && "justify-end")}>
+          <Trophy className="h-3 w-3" /> Winner
+        </div>
+      )}
     </div>
+  );
+}
+
+function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
+  const rows: Array<[string, React.ReactNode]> = [
+    ["Status", <Badge key="s" className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>],
+    ["Format", <span key="f" className="font-display">{match.bo_format ?? "BO1"}</span>],
+    ["Map mode", <span key="m">{VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</span>],
+    ["Selected map", match.selected_map
+      ? <span key="sm" className="text-primary font-display">{match.selected_map}</span>
+      : <span key="sm" className="text-muted-foreground">Not selected</span>],
+    ["Result", <span key="r" className="text-muted-foreground">{match.result_status ?? "—"}</span>],
+    ["Score", <span key="sc" className="font-display tabular-nums">{match.score_a ?? "—"} : {match.score_b ?? "—"}</span>],
+  ];
+  return (
+    <Card className="p-4 border-border/60">
+      <h3 className="font-display uppercase tracking-[0.18em] text-xs text-muted-foreground flex items-center gap-2 mb-3">
+        <Info className="h-3.5 w-3.5 text-primary" /> Match Summary
+      </h3>
+      <dl className="space-y-2 text-xs">
+        {rows.map(([k, v]) => (
+          <div key={k} className="flex items-center justify-between gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+            <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
+            <dd className="text-right">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {status === "live" && (
+        <div className="mt-3 rounded-md border border-primary/30 bg-primary/5 p-2 text-[11px] text-primary flex items-center gap-1.5">
+          <Radio className="h-3 w-3" /> Match in progress.
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -414,12 +489,20 @@ function VetoPanel({
   const canAct = (myTurn && veto?.status === "in_progress") || isStaff;
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between mb-3">
+    <Card className="relative overflow-hidden border-border/60">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="p-5">
+      <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
         <div>
-          <h2 className="font-display uppercase tracking-wider text-sm">Map Veto</h2>
-          <p className="text-xs text-muted-foreground">
-            {veto ? `Mode: ${VETO_MODE_LABEL[veto.mode] ?? veto.mode} · Status: ${veto.status}` : "Veto has not started yet."}
+          <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" /> Map Veto
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            {veto
+              ? <>Manage bans and picks for this match. <span className="text-foreground/80">Mode: {VETO_MODE_LABEL[veto.mode] ?? veto.mode}</span></>
+              : match.map_selection_mode === "admin_manual"
+                ? "Map will be selected manually by tournament staff unless veto is started."
+                : "Map veto has not started yet. Once staff or the system starts the veto, captains will be able to ban or pick maps here."}
           </p>
         </div>
         {isStaff && (
@@ -447,23 +530,32 @@ function VetoPanel({
       </div>
 
       {!veto && !isStaff && (
-        <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 p-6 text-center text-sm text-muted-foreground">
+          <Target className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
           Waiting for tournament staff to start the veto.
         </div>
       )}
 
       {veto && veto.status === "in_progress" && (
-        <div className="mb-3 p-3 rounded-md border border-primary/30 bg-primary/5 text-sm">
-          {turnSide ? (
-            <>
-              <span className="font-display uppercase text-primary">Team {turnSide}</span>'s turn
-              {action && <span className="text-muted-foreground"> · {action.label}</span>}
-              {myTurn && <span className="ml-2 text-success">— it's your turn</span>}
-              {!myTurn && myCaptainSide && <span className="ml-2 text-muted-foreground">— it is not your turn to act.</span>}
-            </>
-          ) : (
-            <>Awaiting next action…</>
-          )}
+        <div className="mb-4 p-3 rounded-lg border border-primary/40 bg-gradient-to-r from-primary/10 to-transparent flex items-center gap-3">
+          <div className="relative flex h-2.5 w-2.5">
+            <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" />
+            <span className="relative h-2.5 w-2.5 rounded-full bg-primary" />
+          </div>
+          <div className="text-sm flex-1">
+            {turnSide ? (
+              <>
+                <span className="font-display uppercase text-primary tracking-wider">Team {turnSide}</span>
+                <span className="text-muted-foreground"> turn</span>
+                {action && <span className="text-foreground/80"> · {action.label}</span>}
+                {myTurn && <span className="ml-2 inline-flex items-center gap-1 text-success font-display uppercase text-xs">— Your move</span>}
+                {!myTurn && myCaptainSide && <span className="ml-2 text-muted-foreground text-xs">— waiting for the other captain</span>}
+              </>
+            ) : (
+              <>Awaiting next action…</>
+            )}
+          </div>
+          <Badge variant="outline" className="font-display text-[10px]">{VETO_MODE_LABEL[veto.mode] ?? veto.mode}</Badge>
         </div>
       )}
 
@@ -474,7 +566,7 @@ function VetoPanel({
           No active maps in pool. Admin must adjust the map pool.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
           {activeMaps.map((m) => {
             const isBanned = banned.includes(m);
             const isPicked = picked.includes(m);
@@ -482,23 +574,35 @@ function VetoPanel({
             const disabled = used.has(m) || busy || !canAct || (veto?.status !== "in_progress");
             return (
               <div key={m} className={cn(
-                "rounded-md border p-3 text-center text-sm transition",
-                isSelected ? "border-primary bg-primary/10" :
-                isBanned ? "border-destructive/40 bg-destructive/5 line-through opacity-60" :
+                "group relative rounded-lg border overflow-hidden transition-all",
+                isSelected ? "border-primary bg-gradient-to-b from-primary/20 to-primary/5 shadow-[0_0_24px_-8px_hsl(var(--primary)/0.6)]" :
+                isBanned ? "border-destructive/30 bg-destructive/5 opacity-60" :
                 isPicked ? "border-success/40 bg-success/5" :
-                "border-border"
+                "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
-                <div className="font-display">{m}</div>
-                {isBanned && <div className="text-[10px] uppercase text-destructive">Banned</div>}
-                {isPicked && <div className="text-[10px] uppercase text-success">Picked</div>}
-                {isSelected && <div className="text-[10px] uppercase text-primary">Selected</div>}
+                <div className="aspect-[4/3] relative">
+                  {pool.find((p) => p.map_name === m)?.image_url ? (
+                    <img src={pool.find((p) => p.map_name === m)!.image_url!} alt={m} className={cn("absolute inset-0 w-full h-full object-cover", isBanned && "grayscale", !isSelected && !isPicked && "opacity-70 group-hover:opacity-90 transition")} />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-muted/40 to-muted/10 flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  <div className="absolute bottom-1.5 left-2 right-2">
+                    <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
+                    {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
+                    {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
+                    {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
+                  </div>
+                </div>
                 {!used.has(m) && veto?.status === "in_progress" && (
-                  <div className="flex gap-1 mt-2 justify-center">
+                  <div className="flex gap-1 p-1.5 border-t border-border/40 bg-card/60">
                     {(veto.mode === "bo1_veto" || veto.mode === "bo3_veto") && (
-                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => ban(m)}>Ban</Button>
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" disabled={disabled} onClick={() => ban(m)}>Ban</Button>
                     )}
                     {veto.mode === "bo3_veto" && action?.type === "pick" && (
-                      <Button size="sm" variant="neon" className="h-6 px-2 text-[10px]" disabled={disabled} onClick={() => pick(m)}>Pick</Button>
+                      <Button size="sm" variant="neon" className="h-6 px-2 text-[10px] flex-1" disabled={disabled} onClick={() => pick(m)}>Pick</Button>
                     )}
                   </div>
                 )}
@@ -521,6 +625,7 @@ function VetoPanel({
           </ul>
         </div>
       )}
+      </div>
     </Card>
   );
 }
@@ -566,43 +671,60 @@ function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
   const disabled = match.status === "completed" || match.result_status === "admin_resolved";
 
   return (
-    <Card className="p-5">
-      <h2 className="font-display uppercase tracking-wider text-sm mb-3">Result Reporting</h2>
+    <Card className="p-5 border-border/60">
+      <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+        <div>
+          <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" /> Result Reporting
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">Submit the final score for staff review. Staff confirmation required before the result becomes official.</p>
+        </div>
+      </div>
       {match.result_status === "pending_confirmation" && (
-        <div className="mb-3 p-3 rounded-md border border-warning/40 bg-warning/5 text-sm text-warning">
+        <div className="mb-4 p-3 rounded-lg border border-warning/40 bg-warning/5 text-sm text-warning flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           Result submitted. Waiting for staff confirmation.
         </div>
       )}
       {disabled && (
-        <div className="mb-3 p-3 rounded-md border border-success/40 bg-success/5 text-sm text-success">
+        <div className="mb-4 p-3 rounded-lg border border-success/40 bg-success/5 text-sm text-success flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           Match completed. Final score {match.score_a}–{match.score_b}.
         </div>
       )}
+      {!myCaptainSide && !isStaff && !disabled && (
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 p-5 text-center text-sm text-muted-foreground">
+          <Info className="h-5 w-5 mx-auto mb-2 text-muted-foreground/50" />
+          Only the team captains involved in this match can submit a result.
+        </div>
+      )}
+      {(myCaptainSide || isStaff) && (
+      <>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs">Score Team A</Label>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score Team A</Label>
           <Input value={a} onChange={(e) => setA(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
         </div>
         <div>
-          <Label className="text-xs">Score Team B</Label>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score Team B</Label>
           <Input value={b} onChange={(e) => setB(e.target.value)} type="number" disabled={disabled || !myCaptainSide} />
         </div>
       </div>
       <div className="mt-3">
-        <Label className="text-xs">Screenshot URL (optional)</Label>
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Screenshot URL (optional)</Label>
         <Input value={screenshot} onChange={(e) => setScreenshot(e.target.value)} placeholder="https://…" disabled={disabled || !myCaptainSide} />
       </div>
       <div className="mt-3">
-        <Label className="text-xs">Notes (optional)</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={disabled || !myCaptainSide} />
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={disabled || !myCaptainSide} rows={3} />
       </div>
       {myCaptainSide && !disabled && (
-        <label className="flex items-center gap-2 mt-3 text-xs">
-          <input type="checkbox" checked={confirm1} onChange={(e) => setConfirm1(e.target.checked)} />
+        <label className="flex items-center gap-2 mt-4 text-xs cursor-pointer">
+          <input type="checkbox" checked={confirm1} onChange={(e) => setConfirm1(e.target.checked)} className="accent-primary" />
           I confirm this result is correct.
         </label>
       )}
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2 items-center">
         {myCaptainSide && (
           <Button size="sm" variant="neon" disabled={busy || disabled || !confirm1} onClick={submit}>
             {busy && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
@@ -614,10 +736,12 @@ function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
             <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Open Dispute
           </Button>
         )}
-        {!myCaptainSide && !isStaff && (
-          <p className="text-xs text-muted-foreground">Only the team captains involved can submit a result.</p>
+        {myCaptainSide && !disabled && (
+          <p className="text-[11px] text-muted-foreground ml-auto">Submitting does not finalize the match. Staff will review and confirm.</p>
         )}
       </div>
+      </>
+      )}
 
       <DisputeDialog open={disputeOpen} onOpenChange={setDisputeOpen} matchId={match.id} onChanged={onChanged} />
     </Card>
@@ -740,58 +864,101 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
   };
 
   return (
-    <Card className="p-5 border-primary/30">
-      <h2 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
-        <ShieldAlert className="h-4 w-4 text-primary" /> Admin Controls
-      </h2>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div>
-          <Label className="text-xs">Score A</Label>
-          <Input type="number" value={a} onChange={(e) => setA(e.target.value)} />
+    <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-b from-primary/[0.03] to-transparent">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-1 flex-wrap">
+          <div>
+            <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-primary" /> Admin Controls
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">Staff-only controls for match management. Use these tools to override settings, confirm results and manage the match.</p>
+          </div>
+          <Badge variant="outline" className="border-primary/40 text-primary font-display text-[10px]">STAFF ONLY</Badge>
         </div>
-        <div>
-          <Label className="text-xs">Score B</Label>
-          <Input type="number" value={b} onChange={(e) => setB(e.target.value)} />
-        </div>
-        <div>
-          <Label className="text-xs">BO format (per match override)</Label>
-          <Select value={boFormat} onValueChange={(v) => { setBoFormat(v); updateMatch({ bo_format: v }); }}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {["BO1","BO2","BO3","BO5"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs">Selected map (manual override)</Label>
-          <Input
-            value={match.selected_map ?? ""}
-            onChange={(e) => updateMatch({ selected_map: e.target.value, map: e.target.value, veto_status: e.target.value ? "map_selected" : "not_started" })}
-            placeholder="Map name…"
-          />
-        </div>
-      </div>
-      <div className="mt-3">
-        <Label className="text-xs">Admin note (private)</Label>
-        <Textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} onBlur={() => updateMatch({ admin_note: adminNote })} />
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" variant="neon" onClick={confirmResult} disabled={busy}>
-          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Confirm Result
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ status: "in_progress", result_status: "live" })}>
-          <Play className="h-3.5 w-3.5 mr-1" /> Mark Live
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ result_status: "disputed", dispute_status: "open" })}>
-          <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Mark Disputed
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => updateMatch({ dispute_status: "resolved", result_status: "scheduled" })}>
-          Resolve Dispute
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => lockChat(!match.chat_locked)}>
-          {match.chat_locked ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Lock className="h-3.5 w-3.5 mr-1" />}
-          {match.chat_locked ? "Unlock chat" : "Lock chat"}
-        </Button>
+
+        <Accordion type="multiple" defaultValue={["result"]} className="mt-4">
+          <AccordionItem value="result" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />Match Result</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score A</Label>
+                  <Input type="number" value={a} onChange={(e) => setA(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Score B</Label>
+                  <Input type="number" value={b} onChange={(e) => setB(e.target.value)} />
+                </div>
+              </div>
+              <Button size="sm" variant="neon" onClick={confirmResult} disabled={busy}>
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Confirm Result & Advance Bracket
+              </Button>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="format" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><Settings2 className="h-4 w-4 text-primary" />Match Format</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">BO format (override)</Label>
+                  <Select value={boFormat} onValueChange={(v) => { setBoFormat(v); updateMatch({ bo_format: v }); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["BO1","BO2","BO3","BO5"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Selected map (manual override)</Label>
+                  <Input
+                    value={match.selected_map ?? ""}
+                    onChange={(e) => updateMatch({ selected_map: e.target.value, map: e.target.value, veto_status: e.target.value ? "map_selected" : "not_started" })}
+                    placeholder="Map name…"
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="notes" className="border-border/60">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Staff Notes</span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin note (private)</Label>
+              <Textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} onBlur={() => updateMatch({ admin_note: adminNote })} rows={3} />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="actions" className="border-border/60 border-b-0">
+            <AccordionTrigger className="text-sm font-display uppercase tracking-wider hover:no-underline">
+              <span className="flex items-center gap-2"><Hammer className="h-4 w-4 text-primary" />Match Actions</span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2">
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ status: "in_progress", result_status: "live" })}>
+                  <Play className="h-3.5 w-3.5 mr-1" /> Mark Live
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ result_status: "disputed", dispute_status: "open" })}>
+                  <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Mark Disputed
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => updateMatch({ dispute_status: "resolved", result_status: "scheduled" })}>
+                  Resolve Dispute
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => lockChat(!match.chat_locked)}>
+                  {match.chat_locked ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Lock className="h-3.5 w-3.5 mr-1" />}
+                  {match.chat_locked ? "Unlock chat" : "Lock chat"}
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </Card>
   );
@@ -853,31 +1020,55 @@ function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string;
   };
 
   return (
-    <Card className="p-0 overflow-hidden flex flex-col h-[600px]">
-      <div className="px-4 py-2 border-b border-border bg-card/60 flex items-center justify-between">
-        <h3 className="font-display uppercase tracking-wider text-xs text-muted-foreground">Match Chat</h3>
+    <Card className="relative p-0 overflow-hidden flex flex-col h-[640px] border-border/60">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="px-4 py-3 border-b border-border/60 bg-card/60 backdrop-blur flex items-center justify-between">
+        <div>
+          <h3 className="font-display uppercase tracking-[0.18em] text-sm flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" /> Match Chat
+          </h3>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Coordination between captains and staff.</p>
+        </div>
         {chatLocked && <Badge variant="outline" className="border-destructive/40 text-destructive text-[10px]"><Lock className="h-3 w-3 mr-1" />Locked</Badge>}
       </div>
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
         {msgs.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-8">No messages yet.</p>
+          <div className="h-full flex flex-col items-center justify-center text-center px-6 py-8">
+            <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
+              <MessageSquare className="h-5 w-5 text-muted-foreground/50" />
+            </div>
+            <p className="text-sm font-display uppercase tracking-wider text-foreground/80">No messages yet</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-[220px]">
+              Captains and staff can use this chat for coordination during the match.
+            </p>
+          </div>
         ) : msgs.map((m) => (
-          <div key={m.id} className={cn("text-sm", m.is_system_message && "text-center")}>
+          <div key={m.id} className={cn("text-sm", m.is_system_message && "flex justify-center")}>
             {m.is_system_message ? (
-              <div className="inline-block text-[11px] px-2 py-1 rounded bg-muted text-muted-foreground">{m.content}</div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary/90">
+                <Radio className="h-3 w-3" />{m.content}
+              </div>
             ) : (
-              <div className="flex items-start gap-2">
-                {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover mt-0.5" /> : <div className="w-6 h-6 rounded-full bg-muted mt-0.5" />}
+              <div className={cn(
+                "flex items-start gap-2 rounded-lg p-2",
+                m.sender_role === "admin" ? "bg-primary/[0.04] border border-primary/15" : "hover:bg-muted/20"
+              )}>
+                {m.profile?.avatar_url
+                  ? <img src={m.profile.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover mt-0.5 border border-border/40" />
+                  : <div className="w-7 h-7 rounded-full bg-muted mt-0.5 flex items-center justify-center text-[10px] font-display text-muted-foreground">{(m.profile?.username ?? "P")[0].toUpperCase()}</div>}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <span className={cn("font-display uppercase text-xs", m.sender_role === "admin" ? "text-primary" : "text-foreground")}>
-                      {m.profile?.username ?? "Player"} {m.sender_role === "admin" && "· STAFF"}
+                    <span className={cn("font-display uppercase text-xs tracking-wider", m.sender_role === "admin" ? "text-primary" : "text-foreground")}>
+                      {m.profile?.username ?? "Player"}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    {m.sender_role === "admin" && (
+                      <Badge variant="outline" className="border-primary/40 text-primary text-[9px] py-0 h-4 px-1">STAFF</Badge>
+                    )}
+                    <span className="text-[10px] text-muted-foreground ml-auto">
                       {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="break-words">{m.content}</p>
+                  <p className="break-words text-sm mt-0.5 text-foreground/90">{m.content}</p>
                 </div>
               </div>
             )}
@@ -886,18 +1077,18 @@ function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string;
         <div ref={endRef} />
       </div>
       {canChat && !chatLocked && user && (
-        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="border-t border-border p-2 flex gap-2">
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" maxLength={500} disabled={busy} />
-          <Button type="submit" size="sm" disabled={busy || !text.trim()}><Send className="h-4 w-4" /></Button>
+        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="border-t border-border/60 p-2 flex gap-2 bg-card/40">
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" maxLength={500} disabled={busy} className="bg-background/60" />
+          <Button type="submit" size="sm" variant="neon" disabled={busy || !text.trim()}><Send className="h-4 w-4" /></Button>
         </form>
       )}
       {chatLocked && !isStaff && (
-        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
-          Match chat is locked by tournament staff.
+        <div className="border-t border-border/60 p-3 text-center text-xs text-muted-foreground bg-destructive/5 flex items-center justify-center gap-2">
+          <Lock className="h-3.5 w-3.5" /> Match chat is locked by tournament staff.
         </div>
       )}
       {!canChat && !chatLocked && (
-        <div className="border-t border-border p-3 text-center text-xs text-muted-foreground">
+        <div className="border-t border-border/60 p-3 text-center text-xs text-muted-foreground">
           Only captains involved in this match and staff can write here.
         </div>
       )}
