@@ -320,6 +320,29 @@ export default function CommunityCupDetail({ tournament }: { tournament: Tournam
               </div>
             </Section>
 
+            {/* Map Pool & Veto */}
+            <Section
+              icon={<MapIcon className="h-5 w-5 text-primary" />}
+              title="Map Pool & Veto"
+              kicker="Active maps for this tournament"
+            >
+              <MapPoolSection
+                tournamentId={t.id}
+                mapSelectionMode={t.map_selection_mode ?? "admin_manual"}
+              />
+            </Section>
+
+            {/* Temporary roster note */}
+            <div className="rounded-xl border border-accent/30 bg-accent/5 p-5 flex gap-3">
+              <Info className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+              <div>
+                <p className="font-display uppercase tracking-wide text-sm text-accent">Temporary Tournament Roster</p>
+                <p className="text-sm text-muted-foreground font-body mt-1.5 leading-relaxed">
+                  Registering for the Community Cup creates a <strong>temporary roster for this tournament only</strong>. It does not create a permanent PeakGG team profile. Teams that want to stay on PeakGG after the cup can request conversion from staff.
+                </p>
+              </div>
+            </div>
+
             {/* Bracket */}
             <Section
               icon={<Trophy className="h-5 w-5 text-primary" />}
