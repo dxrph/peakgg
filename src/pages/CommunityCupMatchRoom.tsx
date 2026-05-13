@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
-import { getValorantMapImage, DEFAULT_VALORANT_MAP_POOL, VALORANT_MAP_SPLASH } from "@/lib/valorant-maps";
+import { getValorantMapImage, DEFAULT_VALORANT_MAP_POOL, VALORANT_MAP_SPLASH, getEffectiveValorantMapPool } from "@/lib/valorant-maps";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import SignupRosterCard from "@/components/community-cup/SignupRosterCard";
@@ -171,21 +171,9 @@ export default function CommunityCupMatchRoom() {
     } else {
       setVeto(null);
     }
-    const fetched = ((poolRows as any[]) ?? []) as MapPoolMap[];
-    if (fetched.length === 0) {
-      // Fallback to the full default Valorant map pool so the match room
-      // never shows an empty grid when admins haven't seeded a pool yet.
-      setPool(
-        DEFAULT_VALORANT_MAP_POOL.map((name, idx) => ({
-          map_name: name,
-          is_active: true,
-          image_url: VALORANT_MAP_SPLASH[name] ?? null,
-          display_order: idx,
-        })),
-      );
-    } else {
-      setPool(fetched);
-    }
+    // Always merge with the canonical default pool so partial/old per-tournament
+    // pools (e.g. legacy 7-map seeds) still display the full Valorant map list.
+    setPool(getEffectiveValorantMapPool((poolRows as any[]) ?? []) as MapPoolMap[]);
     setTournamentName((tour as any)?.name ?? "Community Cup");
     setLoading(false);
   };
@@ -422,6 +410,43 @@ function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }:
           <Trophy className="h-3 w-3" /> Winner
         </div>
       )}
+    </div>
+  );
+}
+
+function MapCardArt({ name, imgUrl, isBanned, isPicked, isSelected }: {
+  name: string; imgUrl: string | null; isBanned: boolean; isPicked: boolean; isSelected: boolean;
+}) {
+  const [errored, setErrored] = useState(false);
+  const showImg = !!imgUrl && !errored;
+  return (
+    <div className="aspect-[4/3] relative">
+      {/* Always-on premium fallback: visible map name + icon, never a blank dark box. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-card to-muted/10 flex flex-col items-center justify-center gap-1">
+        <MapPin className="h-7 w-7 text-primary/60" />
+        <span className="font-display text-xs uppercase tracking-[0.2em] text-foreground/70">{name}</span>
+      </div>
+      {showImg && (
+        <img
+          src={imgUrl!}
+          alt={name}
+          loading="lazy"
+          onError={() => setErrored(true)}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            isBanned && "grayscale",
+            !isSelected && !isPicked && "opacity-90 group-hover:opacity-100 transition",
+          )}
+        />
+      )}
+      {/* Bottom-up scrim ensures map name stays readable but never fully hides the fallback. */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
+      <div className="absolute bottom-1.5 left-2 right-2">
+        <div className={cn("font-display text-sm leading-tight drop-shadow", isBanned && "line-through")}>{name}</div>
+        {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
+        {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
+        {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
+      </div>
     </div>
   );
 }
@@ -792,6 +817,7 @@ function VetoPanel({
             const isPicked = picked.includes(m);
             const isSelected = match.selected_map === m;
             const disabled = used.has(m) || busy || !canAct || (veto?.status !== "in_progress");
+            const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
             return (
               <div key={m} className={cn(
                 "group relative rounded-lg border overflow-hidden transition-all",
@@ -800,40 +826,13 @@ function VetoPanel({
                 isPicked ? "border-success/40 bg-success/5" :
                 "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
-                <div className="aspect-[4/3] relative">
-                  {/* Always-on backdrop so missing/broken map splashes still look intentional */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-card to-muted/10" />
-                  {(() => {
-                    const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
-                    return imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={m}
-                        loading="lazy"
-                        onError={(e) => {
-                          // Hide broken image; the gradient overlay below remains as the fallback look.
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                        }}
-                        className={cn(
-                          "absolute inset-0 w-full h-full object-cover",
-                          isBanned && "grayscale",
-                          !isSelected && !isPicked && "opacity-80 group-hover:opacity-100 transition",
-                        )}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-card to-muted/10 flex items-center justify-center">
-                        <MapPin className="h-7 w-7 text-primary/50" />
-                      </div>
-                    );
-                  })()}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                  <div className="absolute bottom-1.5 left-2 right-2">
-                    <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
-                    {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
-                    {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
-                    {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
-                  </div>
-                </div>
+                <MapCardArt
+                  name={m}
+                  imgUrl={imgUrl}
+                  isBanned={isBanned}
+                  isPicked={isPicked}
+                  isSelected={isSelected}
+                />
                 {!used.has(m) && veto?.status === "in_progress" && (
                   <div className="flex gap-1 p-1.5 border-t border-border/40 bg-card/60">
                     {(veto.mode === "bo1_veto" || veto.mode === "bo3_veto") && (
