@@ -746,6 +746,8 @@ function VetoPanel({
                 "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
                 <div className="aspect-[4/3] relative">
+                  {/* Always-on backdrop so missing/broken map splashes still look intentional */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-card to-muted/10" />
                   {(() => {
                     const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
                     return imgUrl ? (
@@ -769,8 +771,6 @@ function VetoPanel({
                       </div>
                     );
                   })()}
-                  {/* Always-on subtle backdrop so failed image loads still look intentional */}
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-card to-muted/10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute bottom-1.5 left-2 right-2">
                     <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
