@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { buildMatchUrl } from "@/lib/match-url";
 import StatusPill from "./StatusPill";
 import { Crown, Trophy } from "lucide-react";
 import TeamLogo from "@/components/teams/TeamLogo";
@@ -80,7 +81,7 @@ function BracketMatch({ m, teamMap, highlight }: { m: PlayoffMatch; teamMap: Rec
   const bWin = m.winner_id && m.winner_id === m.team_b_id;
   return (
     <Link
-      to={`/matches/${m.id}`}
+      to={(buildMatchUrl(m.id) ?? "#")}
       className={`block rounded-md border p-3 hover:border-primary/60 transition-colors ${highlight ? "border-primary/40 bg-primary/5" : "border-border bg-card/40"}`}
     >
       <div className="flex items-center justify-between mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">

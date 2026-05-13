@@ -1,4 +1,5 @@
 import Navbar from "@/components/landing/Navbar";
+import { buildMatchUrl } from "@/lib/match-url";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -248,7 +249,7 @@ export default function PlayPage() {
                 const r = data as any;
                 if (r?.status === "matched" && r.match_id) {
                   toast.success("Match found!");
-                  navigate(`/matches/${r.match_id}`);
+                  navigate((buildMatchUrl(r.match_id) ?? "#"));
                 } else {
                   toast.success(`You're in the Ranked queue (${rankedCfg.teamSize}v${rankedCfg.teamSize}).`);
                   setQueueRow({ joined_at: new Date().toISOString(), team_size: rankedCfg.teamSize });

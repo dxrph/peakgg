@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { buildMatchUrl } from "@/lib/match-url";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/landing/Navbar";
@@ -195,7 +196,7 @@ export default function TournamentsPage() {
     const result = data as any;
     if (result?.status === "matched" && result.match_id) {
       toast.success("Match found!");
-      navigate(`/matches/${result.match_id}`);
+      navigate((buildMatchUrl(result.match_id) ?? "#"));
     } else {
       toast.success("You're in the queue. Waiting for opponents…");
       refetchQueue();
@@ -355,7 +356,7 @@ export default function TournamentsPage() {
                 )}
                 {activeMatch?.id && (
                   <Button variant="neon" size="lg" asChild>
-                    <Link to={`/matches/${activeMatch.id}`}>
+                    <Link to={(buildMatchUrl(activeMatch.id) ?? "#")}>
                       <Swords className="h-4 w-4 mr-1" />Open Match<ArrowRight className="ml-1 h-4 w-4" />
                     </Link>
                   </Button>
@@ -731,7 +732,7 @@ export default function TournamentsPage() {
                       queueEnabled ? (
                         activeMatch?.id ? (
                           <Button variant="neon" className="w-full" asChild>
-                            <Link to={`/matches/${activeMatch.id}`}>Open Match<ArrowRight className="ml-1 h-3 w-3" /></Link>
+                            <Link to={(buildMatchUrl(activeMatch.id) ?? "#")}>Open Match<ArrowRight className="ml-1 h-3 w-3" /></Link>
                           </Button>
                         ) : queueEntry ? (
                           <Button variant="neonOutline" className="w-full" disabled>
