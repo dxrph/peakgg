@@ -394,6 +394,9 @@ export default function TeamDetailPage() {
               </p>
               <Link to="/leagues"><Button variant="neonOutline">View Peak League</Button></Link>
             </div>
+            <div className="mt-6">
+              <CommunityCupHistory userId={(members.find((m: any) => m.role === "captain")?.user_id) ?? team.created_by} />
+            </div>
           </TabsContent>
 
           {/* ROSTER */}
