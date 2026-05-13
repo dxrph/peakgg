@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { buildMatchUrl } from "@/lib/match-url";
 import { Link } from "react-router-dom";
 import { Loader2, X, ArrowRight, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ export default function QueueLobby({
             <p className="text-sm text-muted-foreground font-body">{modeLabel} · {teamSize}v{teamSize} · {game.toUpperCase()}</p>
           </div>
           <Button asChild variant="neon" className="uppercase tracking-wider">
-            <Link to={`/matches/${activeMatchId}`}>Open Match<ArrowRight className="ml-2 h-3 w-3" /></Link>
+            <Link to={(buildMatchUrl(activeMatchId) ?? "#")}>Open Match<ArrowRight className="ml-2 h-3 w-3" /></Link>
           </Button>
         </div>
       </div>

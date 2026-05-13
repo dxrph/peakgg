@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { buildMatchUrl } from "@/lib/match-url";
 import StatusPill from "./StatusPill";
 import TeamLogo from "@/components/teams/TeamLogo";
 
@@ -31,7 +32,7 @@ export default function MatchCard({ m }: { m: MatchCardData }) {
   const showScore = ["confirmed", "admin_resolved", "pending_confirmation", "live"].includes(m.result_status);
   return (
     <Link
-      to={`/matches/${m.id}`}
+      to={(buildMatchUrl(m.id) ?? "#")}
       className="block border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors"
     >
       <div className="flex items-center justify-between mb-3">

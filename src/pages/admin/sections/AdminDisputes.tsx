@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { buildMatchUrl } from "@/lib/match-url";
 import { Link } from "react-router-dom";
 import { Loader2, Gavel, RefreshCw, ExternalLink, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -185,7 +186,7 @@ export default function AdminDisputes() {
                   <TableCell><Badge className={`${STATUS_COLORS[d.status] ?? ""} text-xs uppercase`}>{d.status}</Badge></TableCell>
                   <TableCell className="text-right">
                     <Button asChild size="sm" variant="outline">
-                      <Link to={`/matches/${d.match_id}`}>
+                      <Link to={(buildMatchUrl(d.match_id) ?? "#")}>
                         <Gavel className="h-3.5 w-3.5 mr-1.5" /> Open
                       </Link>
                     </Button>
@@ -220,7 +221,7 @@ export default function AdminDisputes() {
                   <TableCell className="text-xs">{m.score_a ?? "—"} – {m.score_b ?? "—"}</TableCell>
                   <TableCell className="text-right">
                     <Button asChild size="sm" variant="outline">
-                      <Link to={`/matches/${m.id}`}>
+                      <Link to={(buildMatchUrl(m.id) ?? "#")}>
                         <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Resolve
                       </Link>
                     </Button>

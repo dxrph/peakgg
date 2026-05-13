@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { buildMatchUrl } from "@/lib/match-url";
 import { Link, useLocation } from "react-router-dom";
 import { Loader2, Swords, ArrowRight, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,7 @@ export default function GlobalActiveBar() {
         <span className="text-xs text-muted-foreground hidden sm:inline">· {modeLabel}</span>
         <div className="ml-auto">
           <Button size="sm" variant="neon" asChild>
-            <Link to={`/matches/${session.activeMatchId}`}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
+            <Link to={(buildMatchUrl(session.activeMatchId) ?? "#")}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
           </Button>
         </div>
       </>
@@ -102,7 +103,7 @@ export default function GlobalActiveBar() {
         <span className="text-xs text-muted-foreground hidden sm:inline">· Awaiting admin review</span>
         <div className="ml-auto">
           <Button size="sm" variant="outline" asChild>
-            <Link to={`/matches/${session.activeMatchId}`}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
+            <Link to={(buildMatchUrl(session.activeMatchId) ?? "#")}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
           </Button>
         </div>
       </>
@@ -116,7 +117,7 @@ export default function GlobalActiveBar() {
         <span className="font-display uppercase tracking-wider text-xs text-primary">{modeLabel} · {label}</span>
         <div className="ml-auto">
           <Button size="sm" variant="neon" asChild>
-            <Link to={`/matches/${session.activeMatchId}`}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
+            <Link to={(buildMatchUrl(session.activeMatchId) ?? "#")}>Open Match<ArrowRight className="ml-1.5 h-3 w-3" /></Link>
           </Button>
         </div>
       </>

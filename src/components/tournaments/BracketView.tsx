@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { buildMatchUrl, buildTournamentMatchUrl } from "@/lib/match-url";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ExternalLink } from "lucide-react";
@@ -109,7 +110,7 @@ export default function BracketView({ tournamentId, tournamentSlug }: Props) {
                     {tournamentSlug && (
                       <div className="px-2 py-2 border-t border-border">
                         <Button asChild size="sm" variant="outline" className="w-full h-7 text-xs">
-                          <Link to={`/tournaments/${tournamentSlug}/matches/${m.id}`}>
+                          <Link to={(buildTournamentMatchUrl(tournamentSlug, m.id) ?? "#")}>
                             <ExternalLink className="h-3 w-3 mr-1" /> View Match
                           </Link>
                         </Button>

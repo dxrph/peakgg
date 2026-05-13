@@ -118,6 +118,9 @@ const App = () => (
               <Route path="/admin/leagues" element={<ProtectedRoute><RoleGuard allow={["admin"]}><AdminLeagues /></RoleGuard></ProtectedRoute>} />
               <Route path="/leagues" element={<LeaguesPage />} />
               <Route path="/leagues/:leagueId" element={<LeagueDetailPage />} />
+              {/* Hard guard: never let /matches/undefined or /matches/null render */}
+              <Route path="/matches/undefined" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/matches/null" element={<Navigate to="/dashboard" replace />} />
               <Route path="/matches/:matchId" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
               <Route
                 path="/admin/security"

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { buildMatchUrl } from "@/lib/match-url";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -309,7 +310,7 @@ export default function TeamDashboard() {
                     const oppName = (isA ? m.team_b : m.team_a)?.name ?? "TBD";
                     const won = myScore > opp;
                     return (
-                      <Link key={m.id} to={`/matches/${m.id}`} className="flex items-center justify-between text-sm hover:text-primary">
+                      <Link key={m.id} to={(buildMatchUrl(m.id) ?? "#")} className="flex items-center justify-between text-sm hover:text-primary">
                         <span className="truncate">vs {oppName}</span>
                         <span className={`font-display ${won ? "text-success" : "text-destructive"}`}>{myScore}-{opp}</span>
                       </Link>

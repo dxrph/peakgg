@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { buildMatchUrl } from "@/lib/match-url";
 import { Link } from "react-router-dom";
 import { Loader2, ExternalLink, RefreshCw, Swords } from "lucide-react";
 import { toast } from "sonner";
@@ -163,7 +164,7 @@ export default function AdminMatches() {
                   <TableCell className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</TableCell>
                   <TableCell className="text-right">
                     <Button asChild size="sm" variant="outline">
-                      <Link to={`/matches/${m.id}`}>
+                      <Link to={(buildMatchUrl(m.id) ?? "#")}>
                         <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open
                       </Link>
                     </Button>
