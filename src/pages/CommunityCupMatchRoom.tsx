@@ -1117,6 +1117,33 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
                   />
                 </div>
               </div>
+              <div className="pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    let pool: string[] = [];
+                    if (match.tournament_id) {
+                      const { data } = await supabase
+                        .from("tournament_map_pool" as never)
+                        .select("map_name, is_active")
+                        .eq("tournament_id", match.tournament_id)
+                        .eq("is_active", true);
+                      pool = ((data as any[]) ?? []).map((r: any) => r.map_name);
+                    }
+                    if (pool.length === 0) {
+                      const { DEFAULT_VALORANT_MAP_POOL } = await import("@/lib/valorant-maps");
+                      pool = [...DEFAULT_VALORANT_MAP_POOL];
+                    }
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    await updateMatch({ selected_map: pick, map: pick, veto_status: "map_selected" });
+                  }}
+                >
+                  <Shuffle className="h-3.5 w-3.5 mr-1" /> Randomize Map from Pool
+                </Button>
+              </div>
             </AccordionContent>
           </AccordionItem>
 
