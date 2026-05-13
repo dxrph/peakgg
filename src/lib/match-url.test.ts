@@ -60,7 +60,11 @@ describe("repo guard: no hardcoded /matches/undefined or /matches/null", () => {
     for (const file of walk(SRC)) {
       const rel = relative(process.cwd(), file).replace(/\\/g, "/");
       if (ALLOWLIST.has(rel)) continue;
-      const content = readFileSync(file, "utf8");
+      // Strip line + block comments so doc references don't trip the guard.
+      const content = readFileSync(file, "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/^\s*\/\/.*$/gm, "")
+        .replace(/\s\/\/.*$/gm, "");
       if (/\/matches\/undefined|\/matches\/null/.test(content)) {
         offenders.push(rel);
       }
