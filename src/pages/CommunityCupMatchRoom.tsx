@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
-import { getValorantMapImage, DEFAULT_VALORANT_MAP_POOL, VALORANT_MAP_SPLASH } from "@/lib/valorant-maps";
+import { getValorantMapImage, DEFAULT_VALORANT_MAP_POOL, VALORANT_MAP_SPLASH, getEffectiveValorantMapPool } from "@/lib/valorant-maps";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import SignupRosterCard from "@/components/community-cup/SignupRosterCard";
@@ -171,21 +171,9 @@ export default function CommunityCupMatchRoom() {
     } else {
       setVeto(null);
     }
-    const fetched = ((poolRows as any[]) ?? []) as MapPoolMap[];
-    if (fetched.length === 0) {
-      // Fallback to the full default Valorant map pool so the match room
-      // never shows an empty grid when admins haven't seeded a pool yet.
-      setPool(
-        DEFAULT_VALORANT_MAP_POOL.map((name, idx) => ({
-          map_name: name,
-          is_active: true,
-          image_url: VALORANT_MAP_SPLASH[name] ?? null,
-          display_order: idx,
-        })),
-      );
-    } else {
-      setPool(fetched);
-    }
+    // Always merge with the canonical default pool so partial/old per-tournament
+    // pools (e.g. legacy 7-map seeds) still display the full Valorant map list.
+    setPool(getEffectiveValorantMapPool((poolRows as any[]) ?? []) as MapPoolMap[]);
     setTournamentName((tour as any)?.name ?? "Community Cup");
     setLoading(false);
   };
