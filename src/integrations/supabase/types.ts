@@ -2579,6 +2579,67 @@ export type Database = {
           },
         ]
       }
+      tournament_roster_members: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          declined_at: string | null
+          id: string
+          invited_by: string
+          role: string
+          signup_id: string
+          status: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          id?: string
+          invited_by: string
+          role?: string
+          signup_id: string
+          status?: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          id?: string
+          invited_by?: string
+          role?: string
+          signup_id?: string
+          status?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_roster_members_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_roster_members_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_team_signups_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_roster_members_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_settings: {
         Row: {
           admin_notes: string | null
@@ -2664,6 +2725,8 @@ export type Database = {
           player_3_riot_id: string
           player_4_riot_id: string
           player_5_riot_id: string
+          ready_at: string | null
+          roster_locked_at: string | null
           status: string
           substitute_1_riot_id: string | null
           substitute_2_riot_id: string | null
@@ -2699,6 +2762,8 @@ export type Database = {
           player_3_riot_id: string
           player_4_riot_id: string
           player_5_riot_id: string
+          ready_at?: string | null
+          roster_locked_at?: string | null
           status?: string
           substitute_1_riot_id?: string | null
           substitute_2_riot_id?: string | null
@@ -2734,6 +2799,8 @@ export type Database = {
           player_3_riot_id?: string
           player_4_riot_id?: string
           player_5_riot_id?: string
+          ready_at?: string | null
+          roster_locked_at?: string | null
           status?: string
           substitute_1_riot_id?: string | null
           substitute_2_riot_id?: string | null
@@ -3231,6 +3298,25 @@ export type Database = {
         Args: { _match_id: string }
         Returns: undefined
       }
+      cup_admin_lock_roster: {
+        Args: { _signup_id: string }
+        Returns: undefined
+      }
+      cup_admin_unlock_roster: {
+        Args: { _signup_id: string }
+        Returns: undefined
+      }
+      cup_cancel_invite: { Args: { _member_id: string }; Returns: undefined }
+      cup_invite_player: {
+        Args: { _role?: string; _signup_id: string; _user_id: string }
+        Returns: string
+      }
+      cup_mark_team_ready: { Args: { _signup_id: string }; Returns: undefined }
+      cup_remove_member: { Args: { _member_id: string }; Returns: undefined }
+      cup_respond_invite: {
+        Args: { _accept: boolean; _member_id: string }
+        Returns: undefined
+      }
       decline_scrim_request: {
         Args: { _request_id: string }
         Returns: undefined
@@ -3289,6 +3375,10 @@ export type Database = {
       is_disposable_email: { Args: { _email: string }; Returns: boolean }
       is_muted: {
         Args: { _scope: string; _team_id?: string; _user_id: string }
+        Returns: boolean
+      }
+      is_signup_captain: {
+        Args: { _signup_id: string; _user_id: string }
         Returns: boolean
       }
       is_team_captain: {

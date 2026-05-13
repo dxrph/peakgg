@@ -21,6 +21,7 @@ import {
 import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import TeamLogo from "@/components/teams/TeamLogo";
+import CommunityCupHistory from "@/components/community-cup/CommunityCupHistory";
 
 interface TeamRow {
   id: string;
@@ -393,6 +394,9 @@ export default function TeamDetailPage() {
                 Match history will appear once {team.name} plays its first official match.
               </p>
               <Link to="/leagues"><Button variant="neonOutline">View Peak League</Button></Link>
+            </div>
+            <div className="mt-6">
+              <CommunityCupHistory userId={(members.find((m: any) => m.role === "captain")?.user_id)} />
             </div>
           </TabsContent>
 

@@ -18,6 +18,7 @@ import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Aw
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import CommunityCupHistory from "@/components/community-cup/CommunityCupHistory";
 /* ------------------------------------------------------------------ */
 /* Banner upload — validation + friendly error mapping                */
 /* ------------------------------------------------------------------ */
@@ -707,6 +708,9 @@ export default function ProfilePage() {
             <SectionCard title={t("profile_v2.matches")} icon={Swords}>
               <RecentMatchesList matches={matches} profileId={profile.id} />
             </SectionCard>
+            <div className="mt-6">
+              <CommunityCupHistory userId={profile.id} />
+            </div>
           </TabsContent>
 
           {/* TROPHIES */}

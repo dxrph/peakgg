@@ -7,12 +7,15 @@ import { Loader2, Users, ShieldCheck, Trophy, CheckCircle2, Clock, XCircle } fro
 import { toast } from "sonner";
 import CommunityCupSignupDialog from "./CommunityCupSignupDialog";
 import { DISCORD_INVITE } from "@/lib/links";
+import RosterManager from "@/components/community-cup/RosterManager";
+import MyInvites from "@/components/community-cup/MyInvites";
+import SignupRosterCard from "@/components/community-cup/SignupRosterCard";
 
 type PublicSignup = {
   id: string; team_name: string; team_tag: string | null; team_logo_url: string | null;
   community_name: string; country_language: string; average_rank: string | null; status: string;
 };
-type MySignup = PublicSignup & { captain_name: string; captain_discord: string; admin_note: string | null; checked_in_at: string | null; created_at: string };
+type MySignup = PublicSignup & { captain_name: string; captain_discord: string; admin_note: string | null; checked_in_at: string | null; created_at: string; captain_user_id: string | null; ready_at: string | null; roster_locked_at: string | null };
 
 interface Props { tournamentId: string; tournamentStatus: string }
 
@@ -43,7 +46,7 @@ export default function CommunityCupPanel({ tournamentId, tournamentStatus }: Pr
         .order("created_at", { ascending: true }),
       user
         ? supabase.from("tournament_team_signups" as never)
-            .select("id, team_name, team_tag, team_logo_url, community_name, country_language, average_rank, status, captain_name, captain_discord, admin_note, checked_in_at, created_at")
+            .select("id, team_name, team_tag, team_logo_url, community_name, country_language, average_rank, status, captain_name, captain_discord, admin_note, checked_in_at, created_at, captain_user_id, ready_at, roster_locked_at, tournament_id")
             .eq("tournament_id", tournamentId)
             .eq("captain_user_id", user.id)
             .order("created_at", { ascending: false })
@@ -79,8 +82,12 @@ export default function CommunityCupPanel({ tournamentId, tournamentStatus }: Pr
 
   return (
     <div className="space-y-6">
+      {/* Pending invites for the current user */}
+      <MyInvites tournamentId={tournamentId} onChanged={load} />
+
       {/* MY TEAM */}
       {user && mine && (
+        <>
         <div className="rounded-lg border border-primary/40 bg-card p-6 neon-border">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
@@ -112,6 +119,23 @@ export default function CommunityCupPanel({ tournamentId, tournamentStatus }: Pr
             </a>
           </div>
         </div>
+
+        {/* Captain roster management */}
+        <RosterManager
+          signup={{
+            id: mine.id,
+            tournament_id: tournamentId,
+            captain_user_id: mine.captain_user_id,
+            team_name: mine.team_name,
+            team_tag: mine.team_tag,
+            team_logo_url: mine.team_logo_url,
+            status: mine.status,
+            ready_at: mine.ready_at,
+            roster_locked_at: mine.roster_locked_at,
+          }}
+          onChanged={load}
+        />
+        </>
       )}
 
       {/* REGISTER CTA when no signup */}
@@ -144,15 +168,18 @@ export default function CommunityCupPanel({ tournamentId, tournamentStatus }: Pr
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {publicTeams.map((t) => (
-              <div key={t.id} className="rounded-lg border border-border bg-background/40 p-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    {t.team_tag && <span className="font-mono text-xs text-muted-foreground">[{t.team_tag}]</span>}
-                    <p className="font-display truncate">{t.team_name}</p>
+              <div key={t.id} className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      {t.team_tag && <span className="font-mono text-xs text-muted-foreground">[{t.team_tag}]</span>}
+                      <p className="font-display truncate">{t.team_name}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{t.community_name} · {t.country_language}{t.average_rank ? ` · ${t.average_rank}` : ""}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{t.community_name} · {t.country_language}{t.average_rank ? ` · ${t.average_rank}` : ""}</p>
+                  <StatusBadge status={t.status} />
                 </div>
-                <StatusBadge status={t.status} />
+                <SignupRosterCard signupId={t.id} compact />
               </div>
             ))}
           </div>
