@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Crown, Users, Loader2, ShieldCheck, Lock } from "lucide-react";
+import { Crown, Users, Loader2, ShieldCheck, Lock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RosterMember } from "./types";
 
@@ -76,7 +76,15 @@ export default function SignupRosterCard({ signupId, teamName, compact, classNam
         )}
       </div>
       {members.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic">No accepted players yet.</p>
+        <div className="rounded-md border border-dashed border-border/60 bg-muted/10 p-2.5 space-y-1">
+          <p className="text-[11px] text-warning font-display uppercase tracking-wider flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" /> Roster not synced yet
+          </p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            The captain must invite players from the team page and mark the roster ready.
+            Once 5 players accept, they will appear here automatically.
+          </p>
+        </div>
       ) : (
         <ul className="space-y-1.5">
           {members.map(m => (
