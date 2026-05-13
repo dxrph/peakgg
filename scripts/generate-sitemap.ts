@@ -101,7 +101,7 @@ async function fetchDynamicRoutes(): Promise<SitemapEntry[]> {
     if (profiles && profiles.length > 0) {
       for (const p of profiles) {
         entries.push({
-          path: `/profile/${p.username}`,
+          path: `/profile/${encodeURIComponent(p.username as string)}`,
           lastmod: (p.updated_at as string)?.split("T")[0] || today,
           changefreq: "weekly",
           priority: "0.5",
