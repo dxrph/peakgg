@@ -18,6 +18,7 @@ import { Coins, Pencil, UserPlus, Upload, Loader2, Trophy, Swords, ImagePlus, Aw
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import CommunityCupHistory from "@/components/community-cup/CommunityCupHistory";
 /* ------------------------------------------------------------------ */
 /* Banner upload — validation + friendly error mapping                */
 /* ------------------------------------------------------------------ */
