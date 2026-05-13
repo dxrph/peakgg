@@ -22,6 +22,7 @@ import {
   ArrowLeft, Loader2, Send, ShieldAlert, Swords, Trophy, MapPin,
   Lock, Unlock, AlertTriangle, CheckCircle2, RotateCcw, Play, Crown,
   Users, MessageSquare, Target, Info, Settings2, FileText, Hammer, Radio,
+  Shuffle, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
@@ -57,6 +58,7 @@ type MatchRow = {
   dispute_reason: string | null;
   lobby_code: string | null;
   server_info: string | null;
+  elo_processed_at: string | null;
 };
 
 type Veto = {
@@ -332,6 +334,7 @@ export default function CommunityCupMatchRoom() {
           <div className="lg:col-span-1 space-y-4">
             <MatchSummary match={match} status={status} sb_meta={sb_meta} />
             <LobbyPanel match={match} canSeeCode={isCaptainOrStaff} canEdit={isStaff} onChanged={load} />
+            <EloStatusPanel match={match} />
             <RulesPanel />
             <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
           </div>
@@ -398,7 +401,13 @@ function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: str
     ["Map mode", <span key="m">{VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</span>],
     ["Selected map", match.selected_map
       ? <span key="sm" className="text-primary font-display">{match.selected_map}</span>
-      : <span key="sm" className="text-muted-foreground">Not selected</span>],
+      : <span key="sm" className="text-muted-foreground italic text-[11px]">Pending — staff to select or randomize</span>],
+    ["Lobby code", match.lobby_code
+      ? <span key="lc" className="font-mono text-primary">{match.lobby_code}</span>
+      : <span key="lc" className="text-muted-foreground italic text-[11px]">Pending</span>],
+    ["Server", match.server_info
+      ? <span key="sv" className="font-display">{match.server_info}</span>
+      : <span key="sv" className="text-muted-foreground italic text-[11px]">Not set</span>],
     ["Result", <span key="r" className="text-muted-foreground">{match.result_status ?? "—"}</span>],
     ["Score", <span key="sc" className="font-display tabular-nums">{match.score_a ?? "—"} : {match.score_b ?? "—"}</span>],
   ];
@@ -737,6 +746,8 @@ function VetoPanel({
                 "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
                 <div className="aspect-[4/3] relative">
+                  {/* Always-on backdrop so missing/broken map splashes still look intentional */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-card to-muted/10" />
                   {(() => {
                     const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
                     return imgUrl ? (
@@ -760,8 +771,6 @@ function VetoPanel({
                       </div>
                     );
                   })()}
-                  {/* Always-on subtle backdrop so failed image loads still look intentional */}
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-card to-muted/10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute bottom-1.5 left-2 right-2">
                     <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
@@ -1016,6 +1025,17 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Result confirmed and bracket advanced.");
+    // Trigger ELO processing (idempotent via claim_match_for_elo).
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("update-match-result", {
+        body: { match_id: match.id },
+      });
+      if (fnErr) console.warn("ELO update warning:", fnErr.message);
+      else if ((data as any)?.already_processed) toast.message("ELO already processed for this match.");
+      else if ((data as any)?.ok) toast.success("ELO updated for participants.");
+    } catch (e) {
+      console.warn("ELO update skipped:", e);
+    }
     onChanged();
   };
 
@@ -1096,6 +1116,33 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
                     placeholder="Map name…"
                   />
                 </div>
+              </div>
+              <div className="pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    let pool: string[] = [];
+                    if (match.tournament_id) {
+                      const { data } = await supabase
+                        .from("tournament_map_pool" as never)
+                        .select("map_name, is_active")
+                        .eq("tournament_id", match.tournament_id)
+                        .eq("is_active", true);
+                      pool = ((data as any[]) ?? []).map((r: any) => r.map_name);
+                    }
+                    if (pool.length === 0) {
+                      const { DEFAULT_VALORANT_MAP_POOL } = await import("@/lib/valorant-maps");
+                      pool = [...DEFAULT_VALORANT_MAP_POOL];
+                    }
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    await updateMatch({ selected_map: pick, map: pick, veto_status: "map_selected" });
+                  }}
+                >
+                  <Shuffle className="h-3.5 w-3.5 mr-1" /> Randomize Map from Pool
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -1266,6 +1313,91 @@ function ChatPanel({ matchId, chatLocked, canChat, isStaff }: { matchId: string;
           Only captains involved in this match and staff can write here.
         </div>
       )}
+    </Card>
+  );
+}
+
+type EloRow = { user_id: string; delta: number; elo_before: number; elo_after: number; reason: string };
+
+function EloStatusPanel({ match }: { match: MatchRow }) {
+  const [rows, setRows] = useState<EloRow[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, { username: string; avatar_url: string | null }>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [hasRosters, setHasRosters] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [{ data: hist }, { data: rosters }] = await Promise.all([
+        supabase.from("elo_history").select("user_id, delta, elo_before, elo_after, reason").eq("match_id", match.id),
+        supabase.from("match_rosters").select("user_id").eq("match_id", match.id).limit(1),
+      ]);
+      if (cancelled) return;
+      const eloRows = ((hist as any[]) ?? []) as EloRow[];
+      setRows(eloRows);
+      setHasRosters(((rosters as any[]) ?? []).length > 0);
+      const ids = [...new Set(eloRows.map((r) => r.user_id))];
+      if (ids.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, username, avatar_url").in("id", ids);
+        if (!cancelled) {
+          setProfiles(new Map((profs ?? []).map((p: any) => [p.id, { username: p.username, avatar_url: p.avatar_url }])));
+        }
+      }
+      setLoading(false);
+    })();
+  }, [match.id, match.elo_processed_at, match.status]);
+
+  const isDisputed = match.result_status === "disputed" || match.dispute_status === "open";
+  const isCompleted = match.status === "completed";
+  const processed = !!(match as any).elo_processed_at || rows.length > 0;
+
+  let banner: { tone: "muted" | "warning" | "success" | "info"; label: string; hint?: string };
+  if (isDisputed) banner = { tone: "warning", label: "ELO Frozen", hint: "Match is disputed — ELO will process after staff resolves it." };
+  else if (processed) banner = { tone: "success", label: "ELO Updated", hint: "Per-game ELO and history have been written." };
+  else if (isCompleted) banner = { tone: "info", label: "Processing…", hint: "ELO update is in progress for participants." };
+  else if (hasRosters === false) banner = { tone: "muted", label: "ELO Not Applicable", hint: "ELO will apply once registered players are attached to this match roster." };
+  else banner = { tone: "info", label: "ELO Pending", hint: "ELO updates after the result is officially confirmed by staff." };
+
+  const toneCls = {
+    muted: "border-border/60 bg-muted/10 text-muted-foreground",
+    warning: "border-warning/40 bg-warning/5 text-warning",
+    success: "border-success/40 bg-success/5 text-success",
+    info: "border-primary/30 bg-primary/5 text-primary",
+  }[banner.tone];
+
+  return (
+    <Card className="p-4 border-border/60">
+      <h3 className="font-display uppercase tracking-[0.18em] text-xs text-muted-foreground flex items-center gap-2 mb-3">
+        <TrendingUp className="h-3.5 w-3.5 text-primary" /> ELO Status
+        <Badge className="ml-auto bg-primary/10 text-primary border-primary/30 text-[10px]">Community Cup</Badge>
+      </h3>
+      <div className={cn("rounded-md border p-2.5 text-xs", toneCls)}>
+        <div className="font-display uppercase tracking-wider">{banner.label}</div>
+        {banner.hint && <div className="text-[11px] opacity-80 mt-0.5">{banner.hint}</div>}
+      </div>
+      {loading ? (
+        <div className="mt-3 text-[11px] text-muted-foreground">Loading…</div>
+      ) : rows.length > 0 ? (
+        <ul className="mt-3 space-y-1.5 text-xs">
+          {rows.map((r) => {
+            const p = profiles.get(r.user_id);
+            const positive = r.delta >= 0;
+            return (
+              <li key={r.user_id} className="flex items-center gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+                {p?.avatar_url
+                  ? <img src={p.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                  : <div className="w-5 h-5 rounded-full bg-muted" />}
+                <span className="truncate flex-1">{p?.username ?? r.user_id.slice(0, 6)}</span>
+                <span className="text-muted-foreground tabular-nums">{r.elo_before} → {r.elo_after}</span>
+                <span className={cn("font-display tabular-nums", positive ? "text-success" : "text-destructive")}>
+                  {positive ? "+" : ""}{r.delta}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
     </Card>
   );
 }
