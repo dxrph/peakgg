@@ -729,7 +729,7 @@ export default function TournamentsPage() {
                   <div className="relative mt-5">
                     {isOpen ? (
                       queueEnabled ? (
-                        activeMatch ? (
+                        activeMatch?.id ? (
                           <Button variant="neon" className="w-full" asChild>
                             <Link to={`/matches/${activeMatch.id}`}>Open Match<ArrowRight className="ml-1 h-3 w-3" /></Link>
                           </Button>
