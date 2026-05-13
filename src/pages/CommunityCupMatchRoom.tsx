@@ -780,6 +780,7 @@ function VetoPanel({
             const isPicked = picked.includes(m);
             const isSelected = match.selected_map === m;
             const disabled = used.has(m) || busy || !canAct || (veto?.status !== "in_progress");
+            const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
             return (
               <div key={m} className={cn(
                 "group relative rounded-lg border overflow-hidden transition-all",
@@ -788,40 +789,13 @@ function VetoPanel({
                 isPicked ? "border-success/40 bg-success/5" :
                 "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
-                <div className="aspect-[4/3] relative">
-                  {/* Always-on backdrop so missing/broken map splashes still look intentional */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-card to-muted/10" />
-                  {(() => {
-                    const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
-                    return imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={m}
-                        loading="lazy"
-                        onError={(e) => {
-                          // Hide broken image; the gradient overlay below remains as the fallback look.
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                        }}
-                        className={cn(
-                          "absolute inset-0 w-full h-full object-cover",
-                          isBanned && "grayscale",
-                          !isSelected && !isPicked && "opacity-80 group-hover:opacity-100 transition",
-                        )}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-card to-muted/10 flex items-center justify-center">
-                        <MapPin className="h-7 w-7 text-primary/50" />
-                      </div>
-                    );
-                  })()}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                  <div className="absolute bottom-1.5 left-2 right-2">
-                    <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
-                    {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
-                    {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
-                    {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
-                  </div>
-                </div>
+                <MapCardArt
+                  name={m}
+                  imgUrl={imgUrl}
+                  isBanned={isBanned}
+                  isPicked={isPicked}
+                  isSelected={isSelected}
+                />
                 {!used.has(m) && veto?.status === "in_progress" && (
                   <div className="flex gap-1 p-1.5 border-t border-border/40 bg-card/60">
                     {(veto.mode === "bo1_veto" || veto.mode === "bo3_veto") && (
