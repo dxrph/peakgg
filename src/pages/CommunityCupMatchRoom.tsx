@@ -29,6 +29,7 @@ import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
 import { getValorantMapImage } from "@/lib/valorant-maps";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import SignupRosterCard from "@/components/community-cup/SignupRosterCard";
 
 type MatchRow = {
   id: string;
@@ -336,6 +337,20 @@ export default function CommunityCupMatchRoom() {
 
           <div className="lg:col-span-1 space-y-4">
             <MatchSummary match={match} status={status} sb_meta={sb_meta} />
+            <div className="grid grid-cols-1 gap-3">
+              <div>
+                <p className="text-[10px] font-display uppercase tracking-[0.18em] text-muted-foreground mb-1.5">
+                  {sa?.team_name ?? "Team A"}
+                </p>
+                <SignupRosterCard signupId={match.signup_a_id} teamName={sa?.team_name} />
+              </div>
+              <div>
+                <p className="text-[10px] font-display uppercase tracking-[0.18em] text-muted-foreground mb-1.5">
+                  {sb?.team_name ?? "Team B"}
+                </p>
+                <SignupRosterCard signupId={match.signup_b_id} teamName={sb?.team_name} />
+              </div>
+            </div>
             <LobbyPanel match={match} canSeeCode={isCaptainOrStaff} canEdit={isStaff} onChanged={load} />
             <EloStatusPanel match={match} />
             <RulesPanel />
