@@ -289,6 +289,9 @@ export default function CommunityCupMatchRoom() {
               <div className="flex lg:flex-col flex-wrap gap-1.5 lg:items-end justify-start lg:justify-center">
                 <Badge className={cn("border font-display tracking-wider", sb_meta?.cls)}>{sb_meta?.label}</Badge>
                 <Badge variant="outline" className="font-display">{match.bo_format ?? "BO1"}</Badge>
+                <Badge variant="outline" className="border-muted-foreground/40 text-muted-foreground font-display">
+                  No ELO
+                </Badge>
                 <Badge variant="outline" className="font-display">
                   <Target className="h-3 w-3 mr-1" />
                   {VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}
