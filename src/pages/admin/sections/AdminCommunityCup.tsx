@@ -1194,7 +1194,7 @@ function SandboxTab() {
                 <KV k="Score" v={`${match.score_a ?? "—"} : ${match.score_b ?? "—"}`} />
                 <KV k="Dispute" v={match.dispute_status ?? "—"} />
               </div>
-              <Link to={`/tournaments/sandbox-test-cup/matches/${match.id}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2">
+              <Link to={buildTournamentMatchUrl("sandbox-test-cup", match.id) ?? "#"} className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2">
                 Open public match room <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
