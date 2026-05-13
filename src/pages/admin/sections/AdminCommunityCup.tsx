@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { buildTournamentMatchUrl } from "@/lib/match-url";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import RoleGuard from "@/components/RoleGuard";
