@@ -58,6 +58,7 @@ type MatchRow = {
   dispute_reason: string | null;
   lobby_code: string | null;
   server_info: string | null;
+  elo_processed_at: string | null;
 };
 
 type Veto = {
