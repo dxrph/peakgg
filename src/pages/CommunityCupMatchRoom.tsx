@@ -863,7 +863,12 @@ function ResultPanel({ match, myCaptainSide, isStaff, onChanged }: {
           <h2 className="font-display uppercase tracking-[0.18em] text-base flex items-center gap-2">
             <FileText className="h-4 w-4 text-primary" /> Result Reporting
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">Submit the final score for staff review. Staff confirmation required before the result becomes official.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Submit the final score for staff review. Staff confirmation required before the result becomes official.
+          </p>
+          <p className="text-[11px] text-muted-foreground/80 mt-1 italic">
+            Community Cup results do not affect ELO.
+          </p>
         </div>
       </div>
       {match.result_status === "pending_confirmation" && (
