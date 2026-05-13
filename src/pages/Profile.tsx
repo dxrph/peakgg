@@ -707,6 +707,9 @@ export default function ProfilePage() {
             <SectionCard title={t("profile_v2.matches")} icon={Swords}>
               <RecentMatchesList matches={matches} profileId={profile.id} />
             </SectionCard>
+            <div className="mt-6">
+              <CommunityCupHistory userId={profile.id} />
+            </div>
           </TabsContent>
 
           {/* TROPHIES */}
