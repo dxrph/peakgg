@@ -1,110 +1,66 @@
-## Phase 2 — Community Cup #1 Match-Day System
+## Community Cup Match Room — Polish, Map Pool, ELO Integration
 
-Build on top of Phase 1 (no rewrites). Goal: every bracket match becomes a playable match room with veto, chat, result reporting, disputes, and full admin override.
+Large multi-area request. This plan groups the work into safe, shippable phases so we can land the highest-impact items first without breaking Open Cup, ELO, or RLS.
 
-### Scope summary
+### Phase 1 — ELO integration for Community Cup (highest priority)
 
-1. **Match Room page** at `/tournaments/community-cup-1/matches/:matchId`
-2. **Captain map veto** (admin manual / random / BO1 / BO3) on top of `match_map_veto`
-3. **Match chat** (`match_chat_messages`) — captains + admin + system events
-4. **Captain result reporting** + admin confirm/override
-5. **Disputes** from match room
-6. **Admin Matches tab upgrade** (full per-match controls)
-7. **Per-round BO format overrides** (per-match minimum)
-8. **Public live bracket polish** (status badges, View Match button)
+- Reuse the existing `update-match-result` edge function. No new formula.
+- Extend the function's allowed `match.kind` set to also process `tournament` / `community_cup` matches (currently it processes any `completed` match with `winner_id`, but `source_type` in `elo_history` is set to `match.kind` — we ensure `kind` is set to `community_cup` for these matches).
+- Trigger: when staff confirms a Community Cup result and the match transitions to `status='completed'` with a `winner_id`, call `update-match-result` from the client (admin confirm action) the same way Open Cup does.
+- Participant resolution: function already falls back to `match_rosters` (queue path), then `team_a_id/team_b_id` → `team_members`. Community Cup signups are not real `teams`, so we add a third fallback: if `signup_a_id`/`signup_b_id` are set, read users from `tournament_team_signup_members` (or equivalent roster table) and tag them with side A/B based on which signup won.
+- If no real users are attached → function returns early without faking ELO. UI shows "ELO will apply when registered players are attached".
+- Idempotency preserved via `claim_match_for_elo` RPC + `elo_processed_at`.
+- Frontend: new `EloStatusPanel` showing Pending / Frozen (disputed) / Processed / Not applicable, reading `elo_processed_at` and `elo_history` rows for `match_id`.
 
-### Database changes
+### Phase 2 — Map pool & images completion
 
-`**matches` (add columns)**
+- Audit `VALORANT_MAP_SPLASH` keys vs the default map pool. Bind URL appears stale — refresh splash URLs from valorant-api.com and add `Corrode` placeholder slot.
+- Map card fallback: gradient + map name centered (no broken-image icon). `onError` already swaps to fallback — confirm and tighten styles.
+- Make pool fully data-driven from `tournament_map_pool` with `DEFAULT_VALORANT_MAP_POOL` fallback. Already largely in place; just ensure ordering and `is_active` filter.
 
-- `selected_map text`, `map_selection_mode text`, `veto_status text` (`not_started|veto_pending|map_selected|locked`)
-- `result_screenshot_url text`, `result_notes text`, `reported_by_user_id uuid`
-- `chat_locked boolean default false`, `admin_note text`
-- `bo_format text` (per-match override; falls back to tournament default)
+### Phase 3 — Map mode actions (admin manual + random)
 
-`**match_map_veto**` — verify columns: `mode, status, current_turn_team_id, current_turn_signup_id, selected_map, banned_maps jsonb, picked_maps jsonb, veto_log jsonb, started_at, completed_at`. Add what's missing.
+- Admin Manual: existing select-map flow remains. Add clear "Selected" highlight on the map card and persist to `matches.selected_map`.
+- Random Map: new "Randomize Map" button (staff only) — picks random active pool entry, writes `selected_map`, logs admin action.
+- Captain Veto BO1: keep dropdown option but show disabled state with copy "Captain veto requires veto-phase RPCs — coming soon" if mode is selected without backing implementation.
 
-`**match_chat_messages**` — already exists for queue chat. Verify it supports tournament matches (`match_id` FK to `matches`). Add `is_system_message bool`, `sender_role text` if missing.
+### Phase 4 — Match Setup / Lobby polish
 
-**RPCs (SECURITY DEFINER, server-side validation)**
+- LobbyPanel already exists. Add: copy-to-clipboard toast, locked/private state for non-participants (mask code as `••••••`), staff edit form for `lobby_code` + `server_info`.
+- "Host assignment not implemented yet" hint when staff opens edit panel.
 
-- `start_match_veto(_match_id, _mode)` — admin only
-- `captain_ban_map(_match_id, _map)` — checks current turn = caller's team's signup
-- `captain_pick_map(_match_id, _map)` — same
-- `complete_match_veto(_match_id, _selected_map)` — admin or auto when 1 left
-- `reset_match_veto(_match_id)` — admin
-- `submit_tournament_match_result(_match_id, _score_a, _score_b, _screenshot, _notes)` — captain of A or B
-- `admin_confirm_tournament_result(_match_id)` — admin; advances winner via existing bracket logic
-- `open_tournament_match_dispute(_match_id, _reason, _description, _evidence)` — captain
-- `set_match_chat_locked(_match_id, _locked)` — admin
+### Phase 5 — Result reporting + dispute visibility
 
-**RLS**
+- Result panel: pre-fill selected map, show submitter + timestamp + screenshot link + status pill.
+- After staff confirms, call `update-match-result` (Phase 1) and surface success.
+- Dispute button visible to participants in result panel + a dedicated "Report Issue" button with reason dropdown (wrong score / no-show / lobby / map / toxicity / cheating / technical / other). Inserts into `match_disputes` and notifies admins (existing flow).
+- Disputed → ELO frozen banner.
 
-- `matches`: captains (signup approved + member of team_a/team_b) can SELECT their match details; public sees basic fields via existing patterns
-- `match_map_veto`: SELECT public for the match; UPDATE only via RPC
-- `match_chat_messages`: SELECT for captains+admins of that match (or all if `chat_locked=false` and admin allows public); INSERT for captains+admin via RPC/policy
+### Phase 6 — Match Summary + Rules polish
 
-### Frontend
+- Replace generic "Not selected" with actionable empty states ("Map not selected — staff must select or randomize").
+- Rules: keep accordion, tighten copy into 4 sections (Lobby, Reporting, Disputes, Conduct), add "VCT-inspired competitive rules" subtitle + Riot disclaimer.
 
-**New files**
+### Phase 7 — UI polish + mobile QA
 
-- `src/pages/CommunityCupMatchRoom.tsx` — match room page
-- `src/components/tournaments/match-room/MatchHeader.tsx`
-- `src/components/tournaments/match-room/MapVetoPanel.tsx` (active pool, banned, picked, current turn, log, captain action buttons)
-- `src/components/tournaments/match-room/MatchChatPanel.tsx` (reuses chat patterns from `MatchChat.tsx`)
-- `src/components/tournaments/match-room/ResultReportForm.tsx`
-- `src/components/tournaments/match-room/DisputeDialog.tsx`
-- `src/components/tournaments/match-room/AdminMatchControls.tsx`
-- `src/lib/match-veto.ts` — client helpers (turn calc, BO3 step machine)
+- Map grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4`, consistent aspect ratio, gradient overlay, status ring (selected = primary, banned = muted/strike, picked = accent).
+- Tighten hero spacing, status badges, right column density.
+- 375px sweep: stacked hero, map grid 2-col, lobby copy full-width, dispute dialog scrollable.
 
-**Edits**
+### Out of scope / deferred
 
-- `src/pages/CommunityCupDetail.tsx` — bracket cards get "View Match" button + status badges (LIVE / Veto / Pending / Disputed)
-- `src/components/tournaments/BracketView.tsx` — link match cards to match room
-- `src/pages/admin/sections/AdminCommunityCup.tsx` — Matches tab gets per-match: Open Room / Start Veto / Reset / Force Map / Set Status / Edit Score / Confirm / Forfeit / Dispute / Lock Chat / BO override
-- `src/App.tsx` — add route
+- True captain BO1/BO3 veto phase (requires new RPCs + turn enforcement). Shown as disabled with copy.
+- Host assignment flow.
+- Switching Open Cup public queue to 5v5.
 
-### Microcopy & states
+### Technical notes
 
-- Disabled buttons + tooltips: "Not your turn", "Veto not started yet", "Only your team's captain can act"
-- Toasts on every mutation
-- Loading skeletons, empty states, error boundaries
+- No new ELO formula. No schema migration in Phase 1 (uses existing `elo_processed_at`, `elo_history`, `match_rosters`). If Community Cup signups don't have a roster table, we treat them as "not applicable yet".
+- All write actions go through existing RLS (admin-only for setup edits, captain/staff for results, captain for disputes).
+- All new strings added to EN/FR/IT i18n files.
 
-### Out of scope (deferred again)
+### Recommended shipping order this turn
 
-- Both-captains-confirm result mode (kept admin-confirm)
-- Automated permanent-team conversion
-- Veto timers (soft only, no auto-action)
-- Per-round (vs per-match) BO/veto-mode editor — per-match override is enough for today
+Given credit constraints, ship **Phase 1 + Phase 2 + Phase 3 (admin manual + random only)** + minimal Phase 4 polish (copy, masked code) and Phase 5 dispute button. Defer remaining UI polish + captain veto implementation to a follow-up.
 
-### Migration order
-
-1. Migration: add columns + tables + RPCs + RLS
-2. Build Match Room shell + routing
-3. Veto panel + RPCs wired
-4. Chat panel
-5. Result reporting + dispute
-6. Admin controls upgrade
-7. Public bracket polish + status badges
-
-Approve and I'll start with the migration.Approve this plan.
-
-Important priorities:
-
-1. Build additively on Phase 1.
-
-2. Do not rewrite the existing tournament, registration, admin, countdown or map pool systems.
-
-3. Keep admin override available for every match action.
-
-4. If captain-driven veto is too complex, ship admin-manual + BO1 veto first.
-
-5. Match room, result reporting and admin confirmation are more important than advanced BO3/BO5 veto.
-
-6. Keep all private captain/admin data protected.
-
-7. Do not create fake/demo teams.
-
-8. Keep the build stable and usable today.
-
-&nbsp;
+Reply with **approve** to proceed, or tell me which phases to drop/add.
