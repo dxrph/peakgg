@@ -353,7 +353,7 @@ export default function TournamentsPage() {
                     <Button variant="neon" size="lg"><MessageCircle className="h-4 w-4 mr-1" />Join Discord for Beta</Button>
                   </a>
                 )}
-                {activeMatch && (
+                {activeMatch?.id && (
                   <Button variant="neon" size="lg" asChild>
                     <Link to={`/matches/${activeMatch.id}`}>
                       <Swords className="h-4 w-4 mr-1" />Open Match<ArrowRight className="ml-1 h-4 w-4" />
@@ -729,7 +729,7 @@ export default function TournamentsPage() {
                   <div className="relative mt-5">
                     {isOpen ? (
                       queueEnabled ? (
-                        activeMatch ? (
+                        activeMatch?.id ? (
                           <Button variant="neon" className="w-full" asChild>
                             <Link to={`/matches/${activeMatch.id}`}>Open Match<ArrowRight className="ml-1 h-3 w-3" /></Link>
                           </Button>

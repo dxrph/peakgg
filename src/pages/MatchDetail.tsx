@@ -398,11 +398,31 @@ export default function MatchDetailPage() {
   };
 
   if (loading) return <div className="min-h-screen bg-background"><Navbar /><div className="container py-10"><Skeleton className="h-64" /></div></div>;
+  if (!matchId) return (
+    <div className="min-h-screen bg-background"><Navbar />
+      <div className="container py-20 text-center max-w-lg mx-auto">
+        <h1 className="font-display text-3xl uppercase">Invalid match link</h1>
+        <p className="text-muted-foreground mt-3 font-body">
+          The link you followed is missing a match ID. This usually means a stale notification or an outdated bookmark.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <Button asChild variant="neon"><Link to="/tournaments">Back to Competitive</Link></Button>
+          <Button asChild variant="outline"><Link to="/dashboard">My Dashboard</Link></Button>
+        </div>
+      </div>
+    </div>
+  );
   if (!match) return (
     <div className="min-h-screen bg-background"><Navbar />
-      <div className="container py-20 text-center">
+      <div className="container py-20 text-center max-w-lg mx-auto">
         <h1 className="font-display text-3xl uppercase">Match not found</h1>
-        <Button asChild variant="outline" className="mt-4"><Link to="/leagues">Back</Link></Button>
+        <p className="text-muted-foreground mt-3 font-body">
+          This match may have been removed or you don't have access. Completed matches normally remain viewable here.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <Button asChild variant="neon"><Link to="/tournaments">Back to Competitive</Link></Button>
+          <Button asChild variant="outline"><Link to="/dashboard">My Dashboard</Link></Button>
+        </div>
       </div>
     </div>
   );

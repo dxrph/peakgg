@@ -335,8 +335,13 @@ export default function DashboardPage() {
               </p>
             ) : (
               <div className="space-y-3">
-                {notifications.map((n) => (
-                  <Link key={n.id} to={n.action_url || "/notifications"} className="block">
+                {notifications.map((n) => {
+                  // Guard against stale notifications that contain literal
+                  // "/matches/undefined" or "/matches/null" strings.
+                  const raw = n.action_url || "/notifications";
+                  const safe = raw.includes("/undefined") || raw.includes("/null") ? "/notifications" : raw;
+                  return (
+                  <Link key={n.id} to={safe} className="block">
                     <div className="py-3 border-b border-border last:border-0 hover:bg-muted/20 -mx-2 px-2 rounded transition-colors">
                       <p className="text-sm font-display font-semibold">{n.title}</p>
                       {n.message && <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>}
@@ -345,7 +350,8 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

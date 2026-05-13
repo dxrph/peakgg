@@ -30,6 +30,15 @@ export default function GlobalActiveBar() {
 
   if (!user) return null;
   if (session.status === "idle" || session.loading) return null;
+  // Defensive: a non-idle status with no activeMatchId should never render a
+  // link to /matches/undefined. Suppress the bar entirely until the next poll
+  // resolves a real match id.
+  const needsMatchId =
+    session.status === "match_found" ||
+    session.status === "in_match" ||
+    session.status === "pending_confirmation" ||
+    session.status === "disputed";
+  if (needsMatchId && !session.activeMatchId) return null;
 
   // Don't duplicate inside Match Room or login/register
   const path = location.pathname;
