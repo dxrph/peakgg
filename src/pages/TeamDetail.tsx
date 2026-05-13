@@ -21,6 +21,7 @@ import {
 import { DISCORD_INVITE } from "@/lib/links";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
 import TeamLogo from "@/components/teams/TeamLogo";
+import CommunityCupHistory from "@/components/community-cup/CommunityCupHistory";
 
 interface TeamRow {
   id: string;
@@ -395,7 +396,7 @@ export default function TeamDetailPage() {
               <Link to="/leagues"><Button variant="neonOutline">View Peak League</Button></Link>
             </div>
             <div className="mt-6">
-              <CommunityCupHistory userId={(members.find((m: any) => m.role === "captain")?.user_id) ?? team.created_by} />
+              <CommunityCupHistory userId={(members.find((m: any) => m.role === "captain")?.user_id)} />
             </div>
           </TabsContent>
 
