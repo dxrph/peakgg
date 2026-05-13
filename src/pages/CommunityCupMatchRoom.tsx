@@ -22,6 +22,7 @@ import {
   ArrowLeft, Loader2, Send, ShieldAlert, Swords, Trophy, MapPin,
   Lock, Unlock, AlertTriangle, CheckCircle2, RotateCcw, Play, Crown,
   Users, MessageSquare, Target, Info, Settings2, FileText, Hammer, Radio,
+  Shuffle, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
@@ -332,6 +333,7 @@ export default function CommunityCupMatchRoom() {
           <div className="lg:col-span-1 space-y-4">
             <MatchSummary match={match} status={status} sb_meta={sb_meta} />
             <LobbyPanel match={match} canSeeCode={isCaptainOrStaff} canEdit={isStaff} onChanged={load} />
+            <EloStatusPanel match={match} />
             <RulesPanel />
             <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
           </div>
@@ -398,7 +400,13 @@ function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: str
     ["Map mode", <span key="m">{VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</span>],
     ["Selected map", match.selected_map
       ? <span key="sm" className="text-primary font-display">{match.selected_map}</span>
-      : <span key="sm" className="text-muted-foreground">Not selected</span>],
+      : <span key="sm" className="text-muted-foreground italic text-[11px]">Pending — staff to select or randomize</span>],
+    ["Lobby code", match.lobby_code
+      ? <span key="lc" className="font-mono text-primary">{match.lobby_code}</span>
+      : <span key="lc" className="text-muted-foreground italic text-[11px]">Pending</span>],
+    ["Server", match.server_info
+      ? <span key="sv" className="font-display">{match.server_info}</span>
+      : <span key="sv" className="text-muted-foreground italic text-[11px]">Not set</span>],
     ["Result", <span key="r" className="text-muted-foreground">{match.result_status ?? "—"}</span>],
     ["Score", <span key="sc" className="font-display tabular-nums">{match.score_a ?? "—"} : {match.score_b ?? "—"}</span>],
   ];
