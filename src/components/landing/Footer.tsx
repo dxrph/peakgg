@@ -1,12 +1,22 @@
 import { Link } from "react-router-dom";
-import { Mountain, MessageCircle } from "lucide-react";
+import { Mountain, MessageCircle, Instagram, Youtube, Twitch, Music2, Twitter } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { footerByCategory, resolvePath, type NavItem } from "@/config/navigation";
-import { DISCORD_INVITE } from "@/lib/links";
+import { getActiveSocials, type SocialKey } from "@/lib/links";
+
+const SOCIAL_ICON: Record<SocialKey, React.ComponentType<{ className?: string }>> = {
+  discord: MessageCircle,
+  x: Twitter,
+  instagram: Instagram,
+  tiktok: Music2,
+  youtube: Youtube,
+  twitch: Twitch,
+};
 
 export default function Footer() {
   const { t } = useI18n();
   const tr = (item: NavItem) => t(item.labelKey, { defaultValue: item.label });
+  const socials = getActiveSocials();
 
   const renderItem = (item: NavItem) => (
     <li key={item.key} className="flex items-center gap-2">
@@ -42,14 +52,24 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
               {t("footer.tagline")}
             </p>
-            <a
-              href={DISCORD_INVITE}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs font-display uppercase tracking-wider text-[#a8b0f7] hover:text-white transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" /> {t("footer.discord", { defaultValue: "Discord" })}
-            </a>
+            <div className="flex items-center gap-2">
+              {socials.map((s) => {
+                const Icon = SOCIAL_ICON[s.key];
+                return (
+                  <a
+                    key={s.key}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className="w-8 h-8 rounded-md border border-border bg-background/40 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
           {sections.filter(sec => sec.items.length > 0).map((sec) => (
             <div key={sec.key}>
