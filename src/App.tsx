@@ -55,6 +55,7 @@ import ChatWidget from "./components/chat/ChatWidget";
 import GlobalActiveBar from "./components/competitive/GlobalActiveBar";
 import Analytics from "./components/Analytics";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import RoleGuard from "./components/RoleGuard";
@@ -66,6 +67,7 @@ const App = () => (
    <HelmetProvider>
     <TooltipProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <I18nProvider>
           <GameProvider>
