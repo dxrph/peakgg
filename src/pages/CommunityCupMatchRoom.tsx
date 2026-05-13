@@ -414,10 +414,6 @@ function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }:
   );
 }
 
-function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
-  // ...
-}
-
 function MapCardArt({ name, imgUrl, isBanned, isPicked, isSelected }: {
   name: string; imgUrl: string | null; isBanned: boolean; isPicked: boolean; isSelected: boolean;
 }) {
@@ -455,7 +451,7 @@ function MapCardArt({ name, imgUrl, isBanned, isPicked, isSelected }: {
   );
 }
 
-function _MatchSummaryEnd_unused() {
+function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
   const selectedImg = match.selected_map ? getValorantMapImage(match.selected_map, null) : null;
   const resultLabel =
     match.result_status === "completed" ? "Completed"
