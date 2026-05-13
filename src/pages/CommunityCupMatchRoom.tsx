@@ -424,6 +424,157 @@ function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: str
   );
 }
 
+function LobbyPanel({
+  match, canSeeCode, canEdit, onChanged,
+}: { match: MatchRow; canSeeCode: boolean; canEdit: boolean; onChanged: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [code, setCode] = useState(match.lobby_code ?? "");
+  const [server, setServer] = useState(match.server_info ?? "");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setCode(match.lobby_code ?? "");
+    setServer(match.server_info ?? "");
+  }, [match.lobby_code, match.server_info]);
+
+  const save = async () => {
+    setBusy(true);
+    const { error } = await supabase
+      .from("matches")
+      .update({ lobby_code: code.trim() || null, server_info: server.trim() || null } as any)
+      .eq("id", match.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Lobby info updated");
+    setEditing(false);
+    onChanged();
+  };
+
+  const copy = async () => {
+    if (!match.lobby_code) return;
+    try {
+      await navigator.clipboard.writeText(match.lobby_code);
+      toast.success("Lobby code copied");
+    } catch {
+      toast.error("Could not copy");
+    }
+  };
+
+  return (
+    <Card className="p-4 border-border/60">
+      <h3 className="font-display uppercase tracking-[0.18em] text-xs text-muted-foreground flex items-center gap-2 mb-3">
+        <Lock className="h-3.5 w-3.5 text-primary" /> Match Setup
+      </h3>
+
+      {!canSeeCode ? (
+        <p className="text-xs text-muted-foreground">
+          The lobby code is visible to participants and staff only.
+        </p>
+      ) : editing && canEdit ? (
+        <div className="space-y-2">
+          <div>
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Lobby code</Label>
+            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="e.g. PEAK-1234" maxLength={32} />
+          </div>
+          <div>
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Server / region</Label>
+            <Input value={server} onChange={(e) => setServer(e.target.value)} placeholder="e.g. EU Frankfurt" maxLength={64} />
+          </div>
+          <div className="flex gap-2 pt-1">
+            <Button size="sm" variant="neon" disabled={busy} onClick={save}>
+              {busy && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}Save
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-1.5">
+            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Lobby code</span>
+            {match.lobby_code ? (
+              <button
+                type="button"
+                onClick={copy}
+                className="font-mono text-sm text-primary hover:underline"
+                title="Click to copy"
+              >
+                {match.lobby_code}
+              </button>
+            ) : (
+              <span className="text-muted-foreground italic">Lobby code pending</span>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-1.5">
+            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Server</span>
+            <span className="font-display">{match.server_info || <span className="text-muted-foreground italic">Not set</span>}</span>
+          </div>
+          {canEdit && (
+            <div className="pt-1">
+              <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="w-full">
+                <Settings2 className="h-3 w-3 mr-1.5" />
+                {match.lobby_code ? "Edit lobby info" : "Set lobby code"}
+              </Button>
+            </div>
+          )}
+          {!canEdit && !match.lobby_code && (
+            <p className="text-[11px] text-muted-foreground italic pt-1">Waiting for staff to provide the lobby code.</p>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function RulesPanel() {
+  return (
+    <Card className="p-4 border-border/60">
+      <h3 className="font-display uppercase tracking-[0.18em] text-xs text-muted-foreground flex items-center gap-2 mb-2">
+        <FileText className="h-3.5 w-3.5 text-primary" /> Ruleset
+        <Badge className="ml-auto bg-primary/10 text-primary border-primary/30 text-[10px]">VCT-inspired</Badge>
+      </h3>
+      <p className="text-[11px] text-muted-foreground mb-3">
+        Competitive rules inspired by the VCT format. Not affiliated with Riot Games.
+      </p>
+      <Accordion type="multiple" className="text-xs">
+        <AccordionItem value="lobby" className="border-border/40">
+          <AccordionTrigger className="text-xs py-2">Lobby & gameplay</AccordionTrigger>
+          <AccordionContent>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li>Custom Game · Tournament Mode ON</li>
+              <li>Cheats OFF · Overtime ON · Win by 2</li>
+              <li>Server: EU preferred</li>
+              <li>Map(s): selected via the veto / admin assignment</li>
+              <li>Agents: current official competitive pool</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="result" className="border-border/40">
+          <AccordionTrigger className="text-xs py-2">Reporting & disputes</AccordionTrigger>
+          <AccordionContent>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li>Screenshot of the final scoreboard recommended</li>
+              <li>Both sides must confirm the result before it becomes official</li>
+              <li>If the score is wrong, open a dispute with evidence</li>
+              <li>Admins resolve disputes; their decision is final</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="conduct" className="border-border/40">
+          <AccordionTrigger className="text-xs py-2">No-show, DC & conduct</AccordionTrigger>
+          <AccordionContent>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li>Players must be present within 15 minutes of the match start</li>
+              <li>Disconnects: standard pause rules apply where supported</li>
+              <li>Toxicity / cheating: report via dispute or ticket</li>
+              <li>Repeated no-shows or violations may incur ELO penalties</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card>
+  );
+}
+
 function VetoPanel({
   match, veto, pool, sa, sb, myCaptainSide, isStaff, onChanged,
 }: {
