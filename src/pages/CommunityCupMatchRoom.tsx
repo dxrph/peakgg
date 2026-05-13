@@ -55,6 +55,8 @@ type MatchRow = {
   reported_by_user_id: string | null;
   dispute_status: string | null;
   dispute_reason: string | null;
+  lobby_code: string | null;
+  server_info: string | null;
 };
 
 type Veto = {
@@ -329,6 +331,8 @@ export default function CommunityCupMatchRoom() {
 
           <div className="lg:col-span-1 space-y-4">
             <MatchSummary match={match} status={status} sb_meta={sb_meta} />
+            <LobbyPanel match={match} canSeeCode={isCaptainOrStaff} canEdit={isStaff} onChanged={load} />
+            <RulesPanel />
             <ChatPanel matchId={match.id} chatLocked={!!match.chat_locked} canChat={isCaptainOrStaff} isStaff={isStaff} />
           </div>
         </div>
