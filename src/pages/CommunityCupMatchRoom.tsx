@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VETO_MODE_LABEL, nextBo3Action } from "@/lib/match-veto";
+import { getValorantMapImage } from "@/lib/valorant-maps";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -581,13 +582,31 @@ function VetoPanel({
                 "border-border/60 bg-card/40 hover:border-primary/40 hover:bg-card/70"
               )}>
                 <div className="aspect-[4/3] relative">
-                  {pool.find((p) => p.map_name === m)?.image_url ? (
-                    <img src={pool.find((p) => p.map_name === m)!.image_url!} alt={m} className={cn("absolute inset-0 w-full h-full object-cover", isBanned && "grayscale", !isSelected && !isPicked && "opacity-70 group-hover:opacity-90 transition")} />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-muted/40 to-muted/10 flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-muted-foreground/40" />
-                    </div>
-                  )}
+                  {(() => {
+                    const imgUrl = getValorantMapImage(m, pool.find((p) => p.map_name === m)?.image_url ?? null);
+                    return imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={m}
+                        loading="lazy"
+                        onError={(e) => {
+                          // Hide broken image; the gradient overlay below remains as the fallback look.
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                        className={cn(
+                          "absolute inset-0 w-full h-full object-cover",
+                          isBanned && "grayscale",
+                          !isSelected && !isPicked && "opacity-80 group-hover:opacity-100 transition",
+                        )}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-card to-muted/10 flex items-center justify-center">
+                        <MapPin className="h-7 w-7 text-primary/50" />
+                      </div>
+                    );
+                  })()}
+                  {/* Always-on subtle backdrop so failed image loads still look intentional */}
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-card to-muted/10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute bottom-1.5 left-2 right-2">
                     <div className={cn("font-display text-sm leading-tight", isBanned && "line-through")}>{m}</div>
