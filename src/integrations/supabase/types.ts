@@ -1250,6 +1250,7 @@ export type Database = {
           kind: string
           lobby_code: string | null
           map: string | null
+          map_selection_mode: string
           matchday: number | null
           next_match_id: string | null
           next_match_slot: string | null
@@ -1297,6 +1298,7 @@ export type Database = {
           kind?: string
           lobby_code?: string | null
           map?: string | null
+          map_selection_mode?: string
           matchday?: number | null
           next_match_id?: string | null
           next_match_slot?: string | null
@@ -1344,6 +1346,7 @@ export type Database = {
           kind?: string
           lobby_code?: string | null
           map?: string | null
+          map_selection_mode?: string
           matchday?: number | null
           next_match_id?: string | null
           next_match_slot?: string | null
