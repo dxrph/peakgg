@@ -350,7 +350,8 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
