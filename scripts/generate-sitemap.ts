@@ -69,7 +69,7 @@ async function fetchDynamicRoutes(): Promise<SitemapEntry[]> {
       .in("status", ["active", "open_registration", "in_progress", "completed"]);
     if (tournaments && tournaments.length > 0) {
       for (const t of tournaments) {
-        const path = t.slug ? `/tournaments/${t.slug}` : `/tournaments/${t.id}`;
+        const path = t.slug ? `/tournaments/${encodeURIComponent(t.slug as string)}` : `/tournaments/${t.id}`;
         entries.push({
           path,
           lastmod: (t.updated_at as string)?.split("T")[0] || today,
