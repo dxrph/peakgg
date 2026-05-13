@@ -1025,17 +1025,8 @@ function AdminPanel({ match, onChanged }: { match: MatchRow; onChanged: () => vo
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Result confirmed and bracket advanced.");
-    // Trigger ELO processing (idempotent via claim_match_for_elo).
-    try {
-      const { data, error: fnErr } = await supabase.functions.invoke("update-match-result", {
-        body: { match_id: match.id },
-      });
-      if (fnErr) console.warn("ELO update warning:", fnErr.message);
-      else if ((data as any)?.already_processed) toast.message("ELO already processed for this match.");
-      else if ((data as any)?.ok) toast.success("ELO updated for participants.");
-    } catch (e) {
-      console.warn("ELO update skipped:", e);
-    }
+    // Community Cup does NOT affect ELO. We intentionally do not call
+    // update-match-result here. ELO is reserved for Open Cup / ranked queue.
     onChanged();
   };
 
