@@ -50,7 +50,7 @@ async function fetchDynamicRoutes(): Promise<SitemapEntry[]> {
     const { data: leagues } = await supabase.from("leagues").select("id, slug, updated_at");
     if (leagues && leagues.length > 0) {
       for (const l of leagues) {
-        const path = l.slug ? `/leagues/${l.slug}` : `/leagues/${l.id}`;
+        const path = l.slug ? `/leagues/${encodeURIComponent(l.slug as string)}` : `/leagues/${l.id}`;
         entries.push({
           path,
           lastmod: (l.updated_at as string)?.split("T")[0] || today,
