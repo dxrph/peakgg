@@ -21,25 +21,29 @@ export default function SignupRosterCard({ signupId, teamName, compact, classNam
   useEffect(() => {
     if (!signupId) { setMembers([]); return; }
     let cancelled = false;
-    (async () => {
-      const { data } = await supabase
+    const fetchAll = async () => {
+      const { data: rows } = await supabase
         .from("tournament_roster_members")
-        .select("id, tournament_id, signup_id, user_id, invited_by, role, status, created_at, accepted_at, declined_at, profile:profiles!tournament_roster_members_user_id_fkey(id, username, display_name, avatar_url, rank)")
+        .select("id, tournament_id, signup_id, user_id, invited_by, role, status, created_at, accepted_at, declined_at")
         .eq("signup_id", signupId)
         .in("status", ["accepted", "locked"])
         .order("role", { ascending: true });
-      if (!cancelled) setMembers((data as any) ?? []);
-    })();
+      const list = (rows as any[]) ?? [];
+      const ids = Array.from(new Set(list.map(r => r.user_id)));
+      let profMap: Record<string, any> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, username, display_name, avatar_url, rank")
+          .in("id", ids);
+        profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
+      }
+      if (!cancelled) setMembers(list.map(r => ({ ...r, profile: profMap[r.user_id] ?? null })));
+    };
+    fetchAll();
     const ch = supabase.channel(`roster-${signupId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "tournament_roster_members", filter: `signup_id=eq.${signupId}` },
-        async () => {
-          const { data } = await supabase
-            .from("tournament_roster_members")
-            .select("id, tournament_id, signup_id, user_id, invited_by, role, status, created_at, accepted_at, declined_at, profile:profiles!tournament_roster_members_user_id_fkey(id, username, display_name, avatar_url, rank)")
-            .eq("signup_id", signupId)
-            .in("status", ["accepted", "locked"]);
-          if (!cancelled) setMembers((data as any) ?? []);
-        })
+        () => { fetchAll(); })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [signupId]);
