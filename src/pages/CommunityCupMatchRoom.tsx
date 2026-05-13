@@ -427,20 +427,31 @@ function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }:
 }
 
 function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
+  const selectedImg = match.selected_map ? getValorantMapImage(match.selected_map, null) : null;
+  const resultLabel =
+    match.result_status === "completed" ? "Completed"
+    : match.result_status === "live" ? "Live"
+    : match.result_status === "disputed" ? "Disputed"
+    : match.result_status === "pending_confirmation" ? "Awaiting staff confirmation"
+    : match.score_a != null || match.score_b != null ? "Reported — pending"
+    : "Not submitted yet";
   const rows: Array<[string, React.ReactNode]> = [
     ["Status", <Badge key="s" className={cn("border", sb_meta?.cls)}>{sb_meta?.label}</Badge>],
     ["Format", <span key="f" className="font-display">{match.bo_format ?? "BO1"}</span>],
     ["Map mode", <span key="m">{VETO_MODE_LABEL[match.map_selection_mode ?? "admin_manual"] ?? match.map_selection_mode}</span>],
     ["Selected map", match.selected_map
-      ? <span key="sm" className="text-primary font-display">{match.selected_map}</span>
-      : <span key="sm" className="text-muted-foreground italic text-[11px]">Pending — staff to select or randomize</span>],
+      ? <span key="sm" className="inline-flex items-center gap-1.5 text-primary font-display">
+          {selectedImg && <img src={selectedImg} alt="" className="h-4 w-6 rounded object-cover border border-primary/30" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none';}} />}
+          {match.selected_map}
+        </span>
+      : <span key="sm" className="text-muted-foreground italic text-[11px]">Map not selected yet</span>],
     ["Lobby code", match.lobby_code
       ? <span key="lc" className="font-mono text-primary">{match.lobby_code}</span>
-      : <span key="lc" className="text-muted-foreground italic text-[11px]">Pending</span>],
+      : <span key="lc" className="text-muted-foreground italic text-[11px]">Lobby code pending</span>],
     ["Server", match.server_info
       ? <span key="sv" className="font-display">{match.server_info}</span>
-      : <span key="sv" className="text-muted-foreground italic text-[11px]">Not set</span>],
-    ["Result", <span key="r" className="text-muted-foreground">{match.result_status ?? "—"}</span>],
+      : <span key="sv" className="text-muted-foreground italic text-[11px]">Server not set</span>],
+    ["Result", <span key="r" className="text-muted-foreground text-[11px]">{resultLabel}</span>],
     ["Score", <span key="sc" className="font-display tabular-nums">{match.score_a ?? "—"} : {match.score_b ?? "—"}</span>],
   ];
   return (
@@ -456,6 +467,9 @@ function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: str
           </div>
         ))}
       </dl>
+      <div className="mt-3 rounded-md border border-border/60 bg-muted/10 p-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground text-center font-display">
+        Community Cup · No ELO
+      </div>
       {status === "live" && (
         <div className="mt-3 rounded-md border border-primary/30 bg-primary/5 p-2 text-[11px] text-primary flex items-center gap-1.5">
           <Radio className="h-3 w-3" /> Match in progress.
