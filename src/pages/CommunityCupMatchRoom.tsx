@@ -415,6 +415,47 @@ function HeroTeam({ side, signup, winnerId, teamId, score, status, alignRight }:
 }
 
 function MatchSummary({ match, status, sb_meta }: { match: MatchRow; status: string; sb_meta: { label: string; cls: string } | undefined }) {
+  // ...
+}
+
+function MapCardArt({ name, imgUrl, isBanned, isPicked, isSelected }: {
+  name: string; imgUrl: string | null; isBanned: boolean; isPicked: boolean; isSelected: boolean;
+}) {
+  const [errored, setErrored] = useState(false);
+  const showImg = !!imgUrl && !errored;
+  return (
+    <div className="aspect-[4/3] relative">
+      {/* Always-on premium fallback: visible map name + icon, never a blank dark box. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-card to-muted/10 flex flex-col items-center justify-center gap-1">
+        <MapPin className="h-7 w-7 text-primary/60" />
+        <span className="font-display text-xs uppercase tracking-[0.2em] text-foreground/70">{name}</span>
+      </div>
+      {showImg && (
+        <img
+          src={imgUrl!}
+          alt={name}
+          loading="lazy"
+          onError={() => setErrored(true)}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            isBanned && "grayscale",
+            !isSelected && !isPicked && "opacity-90 group-hover:opacity-100 transition",
+          )}
+        />
+      )}
+      {/* Bottom-up scrim ensures map name stays readable but never fully hides the fallback. */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
+      <div className="absolute bottom-1.5 left-2 right-2">
+        <div className={cn("font-display text-sm leading-tight drop-shadow", isBanned && "line-through")}>{name}</div>
+        {isBanned && <div className="text-[10px] uppercase tracking-wider text-destructive font-display">Banned</div>}
+        {isPicked && <div className="text-[10px] uppercase tracking-wider text-success font-display">Picked</div>}
+        {isSelected && <div className="text-[10px] uppercase tracking-wider text-primary font-display flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Selected</div>}
+      </div>
+    </div>
+  );
+}
+
+function _MatchSummaryEnd_unused() {
   const selectedImg = match.selected_map ? getValorantMapImage(match.selected_map, null) : null;
   const resultLabel =
     match.result_status === "completed" ? "Completed"
