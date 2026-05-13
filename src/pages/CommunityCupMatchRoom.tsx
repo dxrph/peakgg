@@ -578,7 +578,16 @@ function RulesPanel() {
               <li>Players must be present within 15 minutes of the match start</li>
               <li>Disconnects: standard pause rules apply where supported</li>
               <li>Toxicity / cheating: report via dispute or ticket</li>
-              <li>Repeated no-shows or violations may incur ELO penalties</li>
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="elo" className="border-border/40">
+          <AccordionTrigger className="text-xs py-2">ELO & ranked progression</AccordionTrigger>
+          <AccordionContent>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li><strong className="text-foreground">ELO: Disabled</strong> for Community Cup matches</li>
+              <li>Community Cup matches are used for event progression only</li>
+              <li>Ranked progression happens through Open Cup &amp; the competitive queue</li>
             </ul>
           </AccordionContent>
         </AccordionItem>
