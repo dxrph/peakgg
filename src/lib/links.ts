@@ -17,7 +17,7 @@ const pick = (key: string, fallback: string): string => {
   return typeof v === "string" && v.trim().length > 0 ? v.trim() : fallback;
 };
 
-export const DISCORD_INVITE = pick("VITE_DISCORD_INVITE", "https://discord.gg/knkEkkTSA");
+export const DISCORD_INVITE = pick("VITE_DISCORD_INVITE", "https://discord.gg/KMmAYb3P3w");
 
 export type SocialKey = "x" | "instagram" | "tiktok" | "youtube" | "twitch" | "discord";
 
