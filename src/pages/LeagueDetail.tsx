@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { DISCORD_INVITE } from "@/lib/links";
 
 interface League { id: string; name: string; slug: string; game: string; description: string | null; rules_md: string | null; reward_text: string | null; banner_url: string | null; status: string; max_teams: number; min_roster_size: number; }
-interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; }
+interface Season { id: string; name: string; format: string; starts_at: string | null; ends_at: string | null; registration_deadline: string | null; playoff_size: number; status: string; playoffs_started_at: string | null; champion_team_id: string | null; generated_format?: any; min_team_count?: number; recommended_min_teams?: number; recommended_max_teams?: number; schedule_status?: string; format_status?: string; }
 interface Division { id: string; name: string; tier: number; capacity: number; }
 interface TeamLite { id: string; name: string; tag: string | null; avatar_url: string | null; owner_id: string; game?: string | null; is_founding?: boolean; color?: string | null; }
 
