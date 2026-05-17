@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, ArrowRight, Mountain, Sparkles, MessageCircle,
-  Shield, Star, CalendarClock, Flag,
+  Shield, Star, CalendarClock, Flag, ListChecks, CheckCircle2, Hourglass, CalendarRange, Crown, Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -158,9 +158,13 @@ export default function LeaguesPage() {
   const renderCard = (l: LeagueListItem, isFeatured = false) => {
     const status = l.current_season?.status ?? l.status;
     const isOpen = status === "registration_open";
-    const slotsLeft = Math.max(0, (l.max_teams || 0) - (l.team_count || 0));
-    const isFull = isOpen && slotsLeft === 0;
-    const pct = l.max_teams ? Math.min(100, (l.team_count / l.max_teams) * 100) : 0;
+    const minTeams = l.current_season?.min_team_count ?? 4;
+    const recMin = l.current_season?.recommended_min_teams ?? 8;
+    const recMax = l.current_season?.recommended_max_teams ?? 12;
+    const fmt = l.current_season?.generated_format;
+    const formatGenerated = l.current_season?.format_status === "generated" && !!fmt;
+    const scheduleGenerated = l.current_season?.schedule_status === "generated";
+    const pct = Math.min(100, ((l.team_count || 0) / Math.max(1, recMax)) * 100);
     const gameName = GAMES.find(g => g.id === l.game)?.name ?? l.game;
 
     return (
@@ -203,23 +207,64 @@ export default function LeaguesPage() {
             </p>
           )}
 
-          {l.max_teams > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" />{l.team_count}/{l.max_teams} teams
-                </span>
-                {isOpen && !isFull && (
-                  <span className="text-success font-semibold">{slotsLeft} slots left</span>
+          {l.current_season && (
+            <div className="mb-4 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Stat icon={CheckCircle2} tone="success" label="Approved" value={l.team_count} />
+                <Stat icon={Hourglass} tone="accent" label="Pending" value={l.pending_count} />
+                <Stat icon={Shield} tone="muted" label="Min required" value={minTeams} />
+                <Stat icon={CalendarRange} tone="muted" label="Recommended" value={`${recMin}–${recMax}`} />
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <span>Approved teams</span>
+                  <span>{l.team_count} / {recMax} target</span>
+                </div>
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+                {l.team_count < minTeams && (
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    Minimum {minTeams} approved teams required to start.
+                  </p>
                 )}
-                {isFull && <span className="text-accent font-semibold">Full</span>}
               </div>
-              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${isFull ? "bg-accent" : "bg-primary"}`}
-                  style={{ width: `${pct}%` }}
-                />
+              <div className="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-wider">
+                <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${formatGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
+                  <ListChecks className="h-3 w-3" />
+                  Format: {formatGenerated ? "Generated" : "Pending"}
+                </div>
+                <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${scheduleGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
+                  <CalendarClock className="h-3 w-3" />
+                  Schedule: {scheduleGenerated ? "Generated" : "Locked"}
+                </div>
               </div>
+              {formatGenerated && fmt && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-[11px] space-y-1">
+                  <div className="font-display uppercase tracking-wider text-[10px] text-primary flex items-center gap-1.5">
+                    <Crown className="h-3 w-3" /> Generated format
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-foreground/90">
+                    <span className="text-muted-foreground">Teams</span><span>{fmt.teams}</span>
+                    <span className="text-muted-foreground">Mode</span><span className="uppercase">{String(fmt.mode ?? "").replace(/_/g, " ")}</span>
+                    {fmt.matchdays != null && (<><span className="text-muted-foreground">Matchdays</span><span>{fmt.matchdays}</span></>)}
+                    {fmt.total_matches != null && (<><span className="text-muted-foreground">Total matches</span><span>{fmt.total_matches}</span></>)}
+                    {fmt.playoff_label && (<><span className="text-muted-foreground">Playoffs</span><span>{fmt.playoff_label}</span></>)}
+                    {fmt.regular_match_format && (<><span className="text-muted-foreground">Regular</span><span>{fmt.regular_match_format}</span></>)}
+                    {fmt.playoff_match_format && (<><span className="text-muted-foreground">Playoff</span><span>{fmt.playoff_match_format}</span></>)}
+                    {typeof fmt.teams === "number" && fmt.teams % 2 === 1 && (<><span className="text-muted-foreground">Bye weeks</span><span>Enabled</span></>)}
+                  </div>
+                </div>
+              )}
+              {!l.current_season && (
+                <p className="text-xs text-muted-foreground">No active season yet.</p>
+              )}
+              {l.current_season && l.team_count === 0 && (
+                <p className="text-xs text-muted-foreground">No teams approved yet. Applications are open.</p>
+              )}
+              {isOpen && !formatGenerated && l.team_count >= minTeams && (
+                <p className="text-xs text-muted-foreground">Final format will be generated once registrations close.</p>
+              )}
             </div>
           )}
 
@@ -236,12 +281,12 @@ export default function LeaguesPage() {
                 View League<ArrowRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
-            {isFull && (
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="neonOutline" className="w-full uppercase tracking-wider">
-                  <MessageCircle className="h-4 w-4 mr-1" />Next Season
-                </Button>
-              </a>
+            {isFeatured && isOpen && (
+              <Button asChild variant="neonOutline" className="flex-1 uppercase tracking-wider">
+                <Link to={`/leagues/${l.slug ?? l.id}#teams`}>
+                  <Users className="h-4 w-4 mr-1" />Apply With Team
+                </Link>
+              </Button>
             )}
             {status === "draft" && (
               <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="flex-1">
@@ -280,19 +325,35 @@ export default function LeaguesPage() {
           />
           <div className="container relative py-12 md:py-16">
             <div className="flex items-center gap-2 text-xs font-display uppercase tracking-widest text-primary mb-3">
-              <Mountain className="h-4 w-4" /> PeakGG / League Hub
+              <Mountain className="h-4 w-4" /> PeakGG / Peak League
             </div>
             <h1 className="font-display font-bold text-4xl md:text-6xl uppercase tracking-tight">
-              PeakGG <span className="text-primary">Leagues</span>
+              Peak <span className="text-primary">League</span>
             </h1>
             <p className="mt-4 text-muted-foreground max-w-2xl">
-              Find your team's path into competitive FPS. Join active seasons, register for upcoming leagues and climb toward playoffs.
+              Europe's community-driven Valorant league. Teams apply. Admins approve. The season format is generated from the final approved teams.
             </p>
+
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 max-w-5xl">
+              {[
+                { icon: Users, label: "Dynamic Team Count" },
+                { icon: CheckCircle2, label: "Admin-Approved Teams" },
+                { icon: CalendarClock, label: "Auto Schedule" },
+                { icon: ListChecks, label: "Live Standings" },
+                { icon: Trophy, label: "Public Results" },
+                { icon: Crown, label: "Playoffs + Champion" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-md border border-border bg-card/60 px-3 py-2.5 flex items-center gap-2">
+                  <s.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span className="text-[11px] font-display uppercase tracking-wider text-foreground/80 leading-tight">{s.label}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="flex flex-wrap gap-3 mt-6">
               <a href="#leagues-list">
                 <Button variant="neon" size="lg" className="uppercase tracking-wider">
-                  <Trophy className="h-4 w-4 mr-2" />View Active Leagues
+                  <Trophy className="h-4 w-4 mr-2" />Current Season
                 </Button>
               </a>
               <Link to="/teams">
@@ -306,35 +367,6 @@ export default function LeaguesPage() {
                 </Button>
               </a>
             </div>
-
-            {(showStat(stats.active) || showStat(stats.regOpen) || showStat(stats.teamsRegistered) || showStat(stats.openSlots)) && (
-              <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl">
-                {showStat(stats.active) && (
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <div className="text-2xl font-display font-bold">{stats.active}</div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mt-1">Active leagues</div>
-                  </div>
-                )}
-                {showStat(stats.regOpen) && (
-                  <div className="rounded-lg border border-success/30 bg-card p-4">
-                    <div className="text-2xl font-display font-bold text-success">{stats.regOpen}</div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mt-1">Registration open</div>
-                  </div>
-                )}
-                {showStat(stats.teamsRegistered) && (
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <div className="text-2xl font-display font-bold">{stats.teamsRegistered}</div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mt-1">Teams registered</div>
-                  </div>
-                )}
-                {showStat(stats.openSlots) && (
-                  <div className="rounded-lg border border-primary/30 bg-card p-4">
-                    <div className="text-2xl font-display font-bold text-primary">{stats.openSlots}</div>
-                    <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mt-1">Open slots</div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </section>
 
