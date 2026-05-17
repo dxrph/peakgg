@@ -334,16 +334,28 @@ export default function LeagueDetailPage() {
                 <Card className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <StatusPill status={season?.status ?? league.status} />
-                    <span className="text-xs text-muted-foreground font-display uppercase">{teams.length}/{league.max_teams} teams</span>
+                    <span className="text-xs text-muted-foreground font-display uppercase">{teams.length} approved</span>
                   </div>
                   <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (teams.length / Math.max(1, league.max_teams)) * 100)}%` }} />
+                    <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (teams.length / Math.max(1, recMax)) * 100)}%` }} />
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                    <div><div className="font-display text-lg">{teams.length}</div><div className="text-[10px] uppercase text-muted-foreground">Registered</div></div>
-                    <div><div className="font-display text-lg">{Math.max(0, league.max_teams - teams.length)}</div><div className="text-[10px] uppercase text-muted-foreground">Open slots</div></div>
-                    <div><div className="font-display text-lg">{league.min_roster_size}</div><div className="text-[10px] uppercase text-muted-foreground">Min roster</div></div>
+                  <div className="grid grid-cols-2 gap-2 mt-4 text-center">
+                    <div><div className="font-display text-lg text-success">{teams.length}</div><div className="text-[10px] uppercase text-muted-foreground">Approved</div></div>
+                    <div><div className="font-display text-lg text-accent">{pendingCount}</div><div className="text-[10px] uppercase text-muted-foreground">Pending</div></div>
+                    <div><div className="font-display text-lg">{minTeams}</div><div className="text-[10px] uppercase text-muted-foreground">Min required</div></div>
+                    <div><div className="font-display text-lg">{recMin}–{recMax}</div><div className="text-[10px] uppercase text-muted-foreground">Recommended</div></div>
                   </div>
+                  <div className="grid grid-cols-2 gap-2 mt-3 text-[10px] uppercase tracking-wider">
+                    <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${formatGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
+                      <ListChecks className="h-3 w-3" /> Format: {formatGenerated ? "Ready" : "Pending"}
+                    </div>
+                    <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${scheduleGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
+                      <CalendarClock className="h-3 w-3" /> Schedule: {scheduleGenerated ? "Ready" : "Locked"}
+                    </div>
+                  </div>
+                  {teams.length < minTeams && (
+                    <p className="text-[11px] text-muted-foreground mt-2">Minimum {minTeams} approved teams required to start Peak League.</p>
+                  )}
                 </Card>
                 {league.reward_text && (
                   <Card className="p-4 border-primary/30">
