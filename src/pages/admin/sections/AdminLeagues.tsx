@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash, Swords } from "lucide-react";
+import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash, Swords, Wand2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import StatusPill from "@/components/leagues/StatusPill";
 
@@ -19,6 +19,28 @@ interface Season { id: string; league_id: string; name: string; status: string; 
 interface Registration { id: string; team_id: string; status: string; created_at: string; }
 
 export default function AdminLeagues() {
+  // helpers
+  return <AdminLeaguesInner />;
+}
+
+function Stat({ label, value }: { label: string; value: any }) {
+  return (
+    <div className="rounded border border-border bg-card/40 p-3">
+      <div className="text-xl font-display font-bold">{value ?? "—"}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
+    </div>
+  );
+}
+function Info({ label, value }: { label: string; value: any }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="font-display">{value ?? "—"}</div>
+    </div>
+  );
+}
+
+function AdminLeaguesInner() {
   const [leagues, setLeagues] = useState<League[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [activeLeague, setActiveLeague] = useState<League | null>(null);
@@ -33,6 +55,9 @@ export default function AdminLeagues() {
   const [lForm, setLForm] = useState({ name: "", slug: "", game: "valorant", description: "", reward_text: "", max_teams: 8, min_roster_size: 5 });
   const [sForm, setSForm] = useState({ name: "Season 0 Beta", season_number: 0, format: "round_robin", starts_at: "", ends_at: "", registration_deadline: "", playoff_size: 4, status: "draft" });
   const [fixtureStart, setFixtureStart] = useState("");
+  const [generatedFormat, setGeneratedFormat] = useState<any>(null);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const loadLeagues = async () => {
     const { data } = await supabase.from("leagues").select("*").order("created_at", { ascending: false });
@@ -59,6 +84,45 @@ export default function AdminLeagues() {
   useEffect(() => { loadLeagues(); }, []);
   useEffect(() => { if (activeLeague) loadSeasons(activeLeague.id); else { setSeasons([]); setActiveSeason(null); } }, [activeLeague]);
   useEffect(() => { if (activeSeason) loadRegs(activeSeason.id); else setRegistrations([]); }, [activeSeason]);
+
+  useEffect(() => {
+    setGeneratedFormat((activeSeason as any)?.generated_format ?? null);
+    setApprovedCount(registrations.filter(r => r.status === "approved").length);
+    setPendingCount(registrations.filter(r => r.status === "pending").length);
+  }, [activeSeason, registrations]);
+
+  const buildFormat = async () => {
+    if (!activeSeason) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_format", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setGeneratedFormat(data);
+    toast.success("Format generated");
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
+
+  const buildSchedule = async () => {
+    if (!activeSeason) return;
+    if (!confirm("Generate the full schedule from approved teams? Existing non-completed matches will be cleared.")) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_schedule", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Generated ${data} matches`);
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
+
+  const buildPlayoffs = async () => {
+    if (!activeSeason) return;
+    if (!confirm("Generate the playoff bracket from current standings?")) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_playoffs", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Playoffs created (${data} matches)`);
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
 
   const createLeague = async () => {
     if (!lForm.name || !lForm.slug) return toast.error("Name and slug required");
@@ -319,6 +383,7 @@ export default function AdminLeagues() {
                 <TabsList>
                   <TabsTrigger value="seasons">Seasons</TabsTrigger>
                   <TabsTrigger value="registrations">Registrations</TabsTrigger>
+                  <TabsTrigger value="format">Format</TabsTrigger>
                   <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                   <TabsTrigger value="standings">Standings</TabsTrigger>
                 </TabsList>
@@ -407,6 +472,62 @@ export default function AdminLeagues() {
                 </TabsContent>
 
                 <TabsContent value="fixtures" className="mt-4 space-y-3">
+                </TabsContent>
+
+                <TabsContent value="format" className="mt-4 space-y-3">
+                  {!activeSeason ? <p className="text-sm text-muted-foreground">Select a season.</p> : (
+                    <Card className="p-4 space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <Stat label="Approved teams" value={approvedCount} />
+                        <Stat label="Pending apps" value={pendingCount} />
+                        <Stat label="Min required" value={(activeSeason as any).min_team_count ?? 4} />
+                        <Stat label="Recommended" value={`${(activeSeason as any).recommended_min_teams ?? 8}–${(activeSeason as any).recommended_max_teams ?? 12}`} />
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" onClick={buildFormat} disabled={busy}>
+                          <Wand2 className="h-4 w-4 mr-1" /> Generate format from approved teams
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={buildPlayoffs} disabled={busy || !generatedFormat}>
+                          <Swords className="h-4 w-4 mr-1" /> Generate playoffs
+                        </Button>
+                      </div>
+                      {generatedFormat ? (
+                        <div className="rounded border border-border bg-card/40 p-3 space-y-2">
+                          <div className="text-xs font-display uppercase tracking-wider text-muted-foreground">Recommended format</div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                            <Info label="Teams" value={generatedFormat.teams} />
+                            <Info label="Mode" value={String(generatedFormat.mode ?? "").replace(/_/g, " ")} />
+                            <Info label="Reg. format" value={generatedFormat.regular_match_format} />
+                            <Info label="Playoff format" value={generatedFormat.playoff_match_format} />
+                            <Info label="Playoffs" value={generatedFormat.playoff_label} />
+                            <Info label="Matchdays" value={generatedFormat.matchdays} />
+                            <Info label="Total matches" value={generatedFormat.total_matches} />
+                          </div>
+                          {generatedFormat.recommendation && (
+                            <p className="text-xs text-amber-400">{generatedFormat.recommendation}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No format generated yet. Generate it once registrations close.</p>
+                      )}
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="fixtures-legacy-placeholder" className="hidden">
+                  {!activeSeason ? null : (
+                    <Card className="p-4 border-primary/30">
+                      <h3 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
+                        <Wand2 className="h-4 w-4 text-primary" /> Dynamic Schedule (recommended)
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Uses the generated format and the list of approved teams. Supports 4–20 teams, even or odd counts (bye weeks).
+                      </p>
+                      <Button size="sm" onClick={buildSchedule} disabled={busy || !generatedFormat}>
+                        <Calendar className="h-4 w-4 mr-1" /> Generate dynamic schedule
+                      </Button>
+                    </Card>
+                  )}
                   {!activeSeason ? <p className="text-sm text-muted-foreground">Select a season.</p> : (
                     <Card className="p-4">
                       <h3 className="font-display uppercase tracking-wider text-sm mb-3">Generate Round Robin</h3>
