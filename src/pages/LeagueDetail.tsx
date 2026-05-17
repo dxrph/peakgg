@@ -453,15 +453,66 @@ export default function LeagueDetailPage() {
           <Tabs defaultValue="overview">
             <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="teams">Teams</TabsTrigger>
               <TabsTrigger value="standings">Standings</TabsTrigger>
               <TabsTrigger value="schedule">Schedule</TabsTrigger>
-              <TabsTrigger value="teams">Teams</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
               <TabsTrigger value="playoffs">Playoffs</TabsTrigger>
+              <TabsTrigger value="hof">Hall of Fame</TabsTrigger>
               <TabsTrigger value="rules">Rules</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6 grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
+                <Card className="p-6 border-primary/30">
+                  <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" /> Season format
+                  </h2>
+                  {!formatGenerated ? (
+                    <div className="space-y-3">
+                      <p className="text-sm leading-relaxed">
+                        Peak League adapts to the teams that register. Once registrations close, admins generate the final format automatically.
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                        <div className="rounded-md border border-border bg-card/40 p-3">
+                          <div className="text-muted-foreground uppercase tracking-wider text-[9px]">Approved</div>
+                          <div className="font-display text-lg text-success">{teams.length}</div>
+                        </div>
+                        <div className="rounded-md border border-border bg-card/40 p-3">
+                          <div className="text-muted-foreground uppercase tracking-wider text-[9px]">Pending</div>
+                          <div className="font-display text-lg text-accent">{pendingCount}</div>
+                        </div>
+                        <div className="rounded-md border border-border bg-card/40 p-3">
+                          <div className="text-muted-foreground uppercase tracking-wider text-[9px]">Min required</div>
+                          <div className="font-display text-lg">{minTeams}</div>
+                        </div>
+                        <div className="rounded-md border border-border bg-card/40 p-3">
+                          <div className="text-muted-foreground uppercase tracking-wider text-[9px]">Recommended</div>
+                          <div className="font-display text-lg">{recMin}–{recMax}</div>
+                        </div>
+                      </div>
+                      {teams.length < minTeams && (
+                        <p className="text-xs text-muted-foreground">Minimum {minTeams} approved teams required before the format can be generated.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                        <FormatStat label="Approved teams" value={fmt.teams} />
+                        <FormatStat label="Format" value={String(fmt.mode ?? "").replace(/_/g, " ")} />
+                        {fmt.matchdays != null && <FormatStat label="Matchdays" value={fmt.matchdays} />}
+                        {fmt.total_matches != null && <FormatStat label="Total matches" value={fmt.total_matches} />}
+                        {fmt.playoff_label && <FormatStat label="Playoff structure" value={fmt.playoff_label} />}
+                        {fmt.regular_match_format && <FormatStat label="Regular" value={fmt.regular_match_format} />}
+                        {fmt.playoff_match_format && <FormatStat label="Playoffs" value={fmt.playoff_match_format} />}
+                        {typeof fmt.teams === "number" && fmt.teams % 2 === 1 && <FormatStat label="Bye weeks" value="Enabled" />}
+                      </div>
+                      {!scheduleGenerated && (
+                        <p className="text-xs text-muted-foreground">Schedule unlocks after admins generate the fixtures from this format.</p>
+                      )}
+                    </div>
+                  )}
+                </Card>
                 <Card className="p-6">
                   <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">About</h2>
                   <p className="text-sm leading-relaxed whitespace-pre-line">
@@ -510,10 +561,16 @@ export default function LeagueDetailPage() {
                 <div className="border border-dashed border-border rounded-md p-12 text-center">
                   <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
                   <p className="font-display uppercase tracking-wider text-sm">No standings yet</p>
-                  <p className="text-xs text-muted-foreground mt-2">Standings will appear once official matches begin.</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {teams.length === 0
+                      ? "No teams approved yet. Applications are open."
+                      : "Standings appear once teams are approved and matches are confirmed."}
+                  </p>
                 </div>
               ) : (
-                <StandingsTable rows={standings} playoffSize={season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+                <div className="overflow-x-auto -mx-4 px-4">
+                  <StandingsTable rows={standings} playoffSize={fmt?.playoff_size ?? season?.playoff_size ?? 4} currentUserTeamId={myCurrentStandingTeam} />
+                </div>
               )}
             </TabsContent>
 
@@ -521,7 +578,12 @@ export default function LeagueDetailPage() {
               {Object.keys(matchdayGroups).length === 0 ? (
                 <div className="border border-dashed border-border rounded-md p-12 text-center">
                   <Calendar className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground">Fixtures will appear once registrations close and the admin generates the schedule.</p>
+                  <p className="font-display uppercase tracking-wider text-sm mb-2">Schedule not generated yet</p>
+                  <p className="text-xs text-muted-foreground">
+                    {!formatGenerated
+                      ? "Schedule unlocks after admins generate the format."
+                      : "Fixtures will appear once admins generate the schedule from the approved teams."}
+                  </p>
                 </div>
               ) : (
                 Object.entries(matchdayGroups)
@@ -532,79 +594,85 @@ export default function LeagueDetailPage() {
                       <div className="grid md:grid-cols-2 gap-3">
                         {ms.map(m => <MatchCard key={m.id} m={m} />)}
                       </div>
+                      {matchdayByes[Number(md)]?.length > 0 && (
+                        <div className="mt-2 rounded-md border border-dashed border-border bg-card/30 px-3 py-2 text-xs text-muted-foreground">
+                          <span className="font-display uppercase tracking-wider text-[10px] mr-2">Bye Week:</span>
+                          {matchdayByes[Number(md)].map(t => t.name).join(", ")}
+                        </div>
+                      )}
                     </div>
                   ))
               )}
             </TabsContent>
 
+            <TabsContent value="results" className="mt-6 space-y-6">
+              {completedMatches.length === 0 ? (
+                <div className="border border-dashed border-border rounded-md p-12 text-center">
+                  <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">No results yet</p>
+                  <p className="text-xs text-muted-foreground mt-2">Confirmed results will appear here so everyone can see who won each match.</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-3">
+                  {completedMatches
+                    .slice()
+                    .sort((a, b) => (b.matchday ?? 0) - (a.matchday ?? 0))
+                    .map(m => <MatchCard key={m.id} m={m} />)}
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="teams" className="mt-6">
-              {teams.length === 0 && (
+              {teams.length === 0 ? (
                 <div className="mb-4 border border-dashed border-primary/30 bg-primary/5 rounded-md p-6 text-center">
-                  <p className="font-display uppercase tracking-wider text-sm text-primary">Founding team slots are open</p>
-                  <p className="text-xs text-muted-foreground mt-2">Be among the first {league.max_teams} teams to lock in a Founding Team Badge.</p>
+                  <p className="font-display uppercase tracking-wider text-sm text-primary">No teams approved yet</p>
+                  <p className="text-xs text-muted-foreground mt-2">Applications are open. Minimum {minTeams} approved teams to start the season.</p>
                   <div className="flex flex-wrap gap-2 mt-4 justify-center">
                     <Button asChild size="sm"><Link to="/teams">Create Team</Link></Button>
                     <Button asChild size="sm" variant="outline"><a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1.5" />Join Discord</a></Button>
                   </div>
                 </div>
-              )}
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {teams.map(t => (
-                    <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors flex items-center gap-3">
-                      <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} size={40} rounded="md" />
-                      <div className="min-w-0">
-                        <div className="font-display font-bold uppercase truncate">{t.name}</div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          {t.tag && <span className="text-[10px] text-muted-foreground">[{t.tag}]</span>}
-                          {t.is_founding && <span className="text-[9px] uppercase tracking-wider text-accent border border-accent/40 rounded-sm px-1">Founding</span>}
+              ) : (
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {teams.map(t => {
+                    const row = standings.find(s => s.team_id === t.id);
+                    return (
+                      <Link key={t.id} to={`/teams/${t.id}`} className="border border-border rounded-md p-4 bg-card/40 hover:bg-card/60 hover:border-primary/40 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <TeamLogo name={t.name} tag={t.tag} avatarUrl={t.avatar_url} size={40} rounded="md" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-display font-bold uppercase truncate">{t.name}</div>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              {t.tag && <span className="text-[10px] text-muted-foreground">[{t.tag}]</span>}
+                              {t.is_founding && <span className="text-[9px] uppercase tracking-wider text-accent border border-accent/40 rounded-sm px-1">Founding</span>}
+                              <span className="text-[9px] uppercase tracking-wider text-success border border-success/40 rounded-sm px-1">Approved</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                ))}
-                {Array.from({ length: Math.max(0, league.max_teams - teams.length) }).map((_, i) => (
-                  <div key={`open-${i}`} className="border border-dashed border-primary/30 rounded-md p-4 bg-primary/5 flex flex-col gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
-                        <Plus className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-display font-bold uppercase text-primary text-sm">Open Slot</div>
-                        <div className="text-[10px] text-muted-foreground">Founding team slot · Season 0 Beta</div>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {!user ? (
-                        <Button asChild size="sm" className="flex-1">
-                          <Link to="/register">Create Account</Link>
-                        </Button>
-                      ) : myCaptainTeams.length === 0 ? (
-                        <Button asChild size="sm" className="flex-1">
-                          <Link to="/teams">Create Team</Link>
-                        </Button>
-                      ) : eligible.length > 0 ? (
-                        <Button size="sm" className="flex-1" onClick={() => handleRegister(eligible[0].id)} disabled={registering}>
-                          Register Team
-                        </Button>
-                      ) : (
-                        <Button asChild size="sm" variant="outline" className="flex-1">
-                          <Link to="/teams">My Teams</Link>
-                        </Button>
-                      )}
-                      <Button asChild size="sm" variant="outline" className="shrink-0">
-                        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3.5 w-3.5 mr-1" />Discord</a>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                        {row && (
+                          <div className="mt-3 grid grid-cols-3 gap-1 text-center text-[10px]">
+                            <div><div className="font-display text-sm">{row.played}</div><div className="text-muted-foreground uppercase">P</div></div>
+                            <div><div className="font-display text-sm">{row.wins}-{row.losses}</div><div className="text-muted-foreground uppercase">W-L</div></div>
+                            <div><div className="font-display text-sm text-primary">{row.points}</div><div className="text-muted-foreground uppercase">Pts</div></div>
+                          </div>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="playoffs" className="mt-6">
               {!season?.playoffs_started_at ? (
                 <div className="border border-dashed border-border rounded-md p-12 text-center">
-                  <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="font-display uppercase tracking-wider text-sm">Playoffs have not started yet</p>
-                  <p className="text-xs text-muted-foreground mt-2">Top {season?.playoff_size ?? 4} teams qualify after the regular season.</p>
+                  <Lock className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">Playoffs unlock after the regular season is complete</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {fmt?.playoff_label
+                      ? `${fmt.playoff_label} — best of ${fmt.playoff_match_format ?? "BO3"}.`
+                      : `Top ${season?.playoff_size ?? 4} teams qualify after the regular season.`}
+                  </p>
                 </div>
               ) : (
                 <PlayoffBracket
@@ -615,18 +683,56 @@ export default function LeagueDetailPage() {
               )}
             </TabsContent>
 
+            <TabsContent value="hof" className="mt-6">
+              {!hallOfFame || (!hallOfFame.champion_team_id && !hallOfFame.runner_up_team_id) ? (
+                <div className="border border-dashed border-border rounded-md p-12 text-center">
+                  <Crown className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="font-display uppercase tracking-wider text-sm">Hall of Fame</p>
+                  <p className="text-xs text-muted-foreground mt-2">Champions will appear here after the season is completed.</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {hallOfFame.champion_team_id && teamMap[hallOfFame.champion_team_id] && (
+                    <Card className="p-5 border-primary/40 bg-gradient-to-br from-primary/10 to-transparent">
+                      <div className="flex items-center gap-2 text-primary mb-2"><Crown className="h-4 w-4" /><span className="font-display uppercase tracking-widest text-[10px]">Champion</span></div>
+                      <Link to={`/teams/${hallOfFame.champion_team_id}`} className="font-display text-2xl uppercase hover:text-primary">
+                        {teamMap[hallOfFame.champion_team_id].name}
+                      </Link>
+                    </Card>
+                  )}
+                  {hallOfFame.runner_up_team_id && teamMap[hallOfFame.runner_up_team_id] && (
+                    <Card className="p-5">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-2"><Trophy className="h-4 w-4" /><span className="font-display uppercase tracking-widest text-[10px]">Runner-up</span></div>
+                      <Link to={`/teams/${hallOfFame.runner_up_team_id}`} className="font-display text-2xl uppercase hover:text-primary">
+                        {teamMap[hallOfFame.runner_up_team_id].name}
+                      </Link>
+                    </Card>
+                  )}
+                  {hallOfFame.notes && (
+                    <Card className="p-5 sm:col-span-2 text-sm text-muted-foreground whitespace-pre-line">{hallOfFame.notes}</Card>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="rules" className="mt-6">
               <Card className="p-6">
-                <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3">League rules</h2>
+                <h2 className="font-display uppercase tracking-wider text-sm text-muted-foreground mb-3 flex items-center gap-2">
+                  <ScrollText className="h-4 w-4 text-primary" /> Peak League rules
+                </h2>
                 {league.rules_md ? (
                   <pre className="text-sm whitespace-pre-wrap font-body leading-relaxed">{league.rules_md}</pre>
                 ) : (
                   <ul className="text-sm space-y-2 list-disc pl-5">
-                    <li>Win = 3 points · Draw = 1 point · Loss = 0 points.</li>
-                    <li>Round Robin regular season — every team plays every other team once.</li>
-                    <li>Top {season?.playoff_size ?? 4} teams advance to single-elimination playoffs.</li>
-                    <li>Captains submit the result; the opposing captain confirms or disputes.</li>
-                    <li>Disputed matches freeze standings until admin resolution.</li>
+                    <li>Valorant 5v5, European region.</li>
+                    <li>Admin-approved teams only — every registration is reviewed.</li>
+                    <li>{fmt?.regular_match_format ?? "BO1"} regular season unless the generated format says otherwise.</li>
+                    <li>{fmt?.playoff_match_format ?? "BO3"} playoffs unless the generated format says otherwise.</li>
+                    <li>Captains submit results, the opposing captain confirms or disputes.</li>
+                    <li>Proof screenshots may be required for confirmation.</li>
+                    <li>Disputes are handled by PeakGG staff and freeze standings until resolved.</li>
+                    <li>Cheating or severe toxicity can lead to penalties, point deductions or removal.</li>
+                    <li>Admin decisions are final.</li>
                     <li>Minimum roster size: {league.min_roster_size} players.</li>
                   </ul>
                 )}
@@ -636,6 +742,15 @@ export default function LeagueDetailPage() {
         </section>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function FormatStat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-md border border-border bg-card/40 p-3">
+      <div className="text-muted-foreground uppercase tracking-wider text-[9px]">{label}</div>
+      <div className="font-display text-base uppercase">{value}</div>
     </div>
   );
 }
