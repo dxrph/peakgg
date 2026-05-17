@@ -450,6 +450,49 @@ export default function AdminLeagues() {
                 </TabsContent>
 
                 <TabsContent value="fixtures" className="mt-4 space-y-3">
+                </TabsContent>
+
+                <TabsContent value="format" className="mt-4 space-y-3">
+                  {!activeSeason ? <p className="text-sm text-muted-foreground">Select a season.</p> : (
+                    <Card className="p-4 space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <Stat label="Approved teams" value={approvedCount} />
+                        <Stat label="Pending apps" value={pendingCount} />
+                        <Stat label="Min required" value={(activeSeason as any).min_team_count ?? 4} />
+                        <Stat label="Recommended" value={`${(activeSeason as any).recommended_min_teams ?? 8}–${(activeSeason as any).recommended_max_teams ?? 12}`} />
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" onClick={buildFormat} disabled={busy}>
+                          <Wand2 className="h-4 w-4 mr-1" /> Generate format from approved teams
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={buildPlayoffs} disabled={busy || !generatedFormat}>
+                          <Swords className="h-4 w-4 mr-1" /> Generate playoffs
+                        </Button>
+                      </div>
+                      {generatedFormat ? (
+                        <div className="rounded border border-border bg-card/40 p-3 space-y-2">
+                          <div className="text-xs font-display uppercase tracking-wider text-muted-foreground">Recommended format</div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                            <Info label="Teams" value={generatedFormat.teams} />
+                            <Info label="Mode" value={String(generatedFormat.mode ?? "").replace(/_/g, " ")} />
+                            <Info label="Reg. format" value={generatedFormat.regular_match_format} />
+                            <Info label="Playoff format" value={generatedFormat.playoff_match_format} />
+                            <Info label="Playoffs" value={generatedFormat.playoff_label} />
+                            <Info label="Matchdays" value={generatedFormat.matchdays} />
+                            <Info label="Total matches" value={generatedFormat.total_matches} />
+                          </div>
+                          {generatedFormat.recommendation && (
+                            <p className="text-xs text-amber-400">{generatedFormat.recommendation}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No format generated yet. Generate it once registrations close.</p>
+                      )}
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="fixtures-legacy-placeholder" className="hidden">
                   {!activeSeason ? null : (
                     <Card className="p-4 border-primary/30">
                       <h3 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
