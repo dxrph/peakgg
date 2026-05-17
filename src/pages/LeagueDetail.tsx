@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle, ShieldCheck, CheckCircle2, ListChecks, Clock, Award } from "lucide-react";
+import { Trophy, Users, Calendar, ChevronLeft, Mountain, Plus, MessageCircle, ShieldCheck, CheckCircle2, ListChecks, Clock, Award, Crown, Lock, Hourglass, CalendarClock, ScrollText, Sparkles, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -35,6 +35,8 @@ export default function LeagueDetailPage() {
   const [playoffMatches, setPlayoffMatches] = useState<PlayoffMatch[]>([]);
   const [teams, setTeams] = useState<TeamLite[]>([]);
   const [myTeams, setMyTeams] = useState<TeamLite[]>([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [hallOfFame, setHallOfFame] = useState<{ champion_team_id: string | null; runner_up_team_id: string | null; mvp_user_id: string | null; notes: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
 
@@ -98,6 +100,30 @@ export default function LeagueDetailPage() {
       }
       setTeams(teamRows);
       const realTeamIds = new Set(teamRows.map(t => t.id));
+      // Pending applications count
+      const { data: pendingRegs } = await supabase
+        .from("league_registrations")
+        .select("team_id")
+        .eq("season_id", s.id)
+        .eq("status", "pending");
+      const pendingIds = (pendingRegs ?? []).map((r: any) => r.team_id);
+      if (pendingIds.length) {
+        const { count } = await supabase
+          .from("teams")
+          .select("id", { count: "exact", head: true })
+          .in("id", pendingIds)
+          .eq("is_demo", false);
+        setPendingCount(count ?? 0);
+      } else {
+        setPendingCount(0);
+      }
+      // Hall of fame
+      const { data: hof } = await supabase
+        .from("league_hall_of_fame")
+        .select("champion_team_id, runner_up_team_id, mvp_user_id, notes")
+        .eq("season_id", s.id)
+        .maybeSingle();
+      setHallOfFame(hof ?? null);
       // Standings
       if (d) {
         const { data: st } = await supabase
@@ -237,6 +263,29 @@ export default function LeagueDetailPage() {
     (acc[k] ??= []).push(m);
     return acc;
   }, {});
+
+  // Bye-week detection: with an odd team count, the circle method leaves one team out each matchday.
+  const isOdd = teams.length % 2 === 1 && teams.length > 0;
+  const matchdayByes: Record<number, TeamLite[]> = {};
+  if (isOdd) {
+    for (const [mdStr, ms] of Object.entries(matchdayGroups)) {
+      const md = Number(mdStr);
+      const playing = new Set<string>();
+      ms.forEach(m => {
+        if (m.team_a?.id) playing.add(m.team_a.id);
+        if (m.team_b?.id) playing.add(m.team_b.id);
+      });
+      matchdayByes[md] = teams.filter(t => !playing.has(t.id));
+    }
+  }
+
+  const completedMatches = matches.filter(m => ["confirmed", "admin_resolved"].includes(m.result_status));
+  const fmt = (season as any)?.generated_format ?? null;
+  const formatGenerated = season?.format_status === "generated" && !!fmt;
+  const scheduleGenerated = season?.schedule_status === "generated";
+  const minTeams = season?.min_team_count ?? 4;
+  const recMin = season?.recommended_min_teams ?? 8;
+  const recMax = season?.recommended_max_teams ?? 12;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
