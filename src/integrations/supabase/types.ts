@@ -620,6 +620,33 @@ export type Database = {
         }
         Relationships: []
       }
+      league_badges: {
+        Row: {
+          awarded_at: string
+          code: string
+          id: string
+          label: string
+          season_id: string | null
+          team_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          code: string
+          id?: string
+          label: string
+          season_id?: string | null
+          team_id: string
+        }
+        Update: {
+          awarded_at?: string
+          code?: string
+          id?: string
+          label?: string
+          season_id?: string | null
+          team_id?: string
+        }
+        Relationships: []
+      }
       league_divisions: {
         Row: {
           capacity: number
@@ -654,6 +681,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      league_hall_of_fame: {
+        Row: {
+          champion_team_id: string | null
+          created_at: string
+          id: string
+          mvp_user_id: string | null
+          notes: string | null
+          runner_up_team_id: string | null
+          season_id: string
+        }
+        Insert: {
+          champion_team_id?: string | null
+          created_at?: string
+          id?: string
+          mvp_user_id?: string | null
+          notes?: string | null
+          runner_up_team_id?: string | null
+          season_id: string
+        }
+        Update: {
+          champion_team_id?: string | null
+          created_at?: string
+          id?: string
+          mvp_user_id?: string | null
+          notes?: string | null
+          runner_up_team_id?: string | null
+          season_id?: string
+        }
+        Relationships: []
       }
       league_not_found_events: {
         Row: {
@@ -692,7 +749,9 @@ export type Database = {
           decided_by: string | null
           division_id: string | null
           id: string
+          is_founding_team: boolean
           season_id: string
+          seed: number | null
           status: string
           submitted_by: string
           team_id: string
@@ -703,7 +762,9 @@ export type Database = {
           decided_by?: string | null
           division_id?: string | null
           id?: string
+          is_founding_team?: boolean
           season_id: string
+          seed?: number | null
           status?: string
           submitted_by: string
           team_id: string
@@ -714,7 +775,9 @@ export type Database = {
           decided_by?: string | null
           division_id?: string | null
           id?: string
+          is_founding_team?: boolean
           season_id?: string
+          seed?: number | null
           status?: string
           submitted_by?: string
           team_id?: string
@@ -742,51 +805,90 @@ export type Database = {
           created_at: string
           ends_at: string | null
           format: string
+          format_status: string
+          generated_format: Json | null
           id: string
           is_demo: boolean
+          is_founding_season: boolean
           league_id: string
+          match_format: string
+          max_team_count: number | null
+          min_team_count: number
           name: string
+          playoff_match_format: string
           playoff_size: number
           playoffs_started_at: string | null
+          recommended_max_teams: number
+          recommended_min_teams: number
+          region: string
           registration_deadline: string | null
+          registration_status: string
+          schedule_status: string
           season_number: number
           starts_at: string | null
           status: string
           updated_at: string
+          visibility: string
         }
         Insert: {
           champion_team_id?: string | null
           created_at?: string
           ends_at?: string | null
           format?: string
+          format_status?: string
+          generated_format?: Json | null
           id?: string
           is_demo?: boolean
+          is_founding_season?: boolean
           league_id: string
+          match_format?: string
+          max_team_count?: number | null
+          min_team_count?: number
           name: string
+          playoff_match_format?: string
           playoff_size?: number
           playoffs_started_at?: string | null
+          recommended_max_teams?: number
+          recommended_min_teams?: number
+          region?: string
           registration_deadline?: string | null
+          registration_status?: string
+          schedule_status?: string
           season_number?: number
           starts_at?: string | null
           status?: string
           updated_at?: string
+          visibility?: string
         }
         Update: {
           champion_team_id?: string | null
           created_at?: string
           ends_at?: string | null
           format?: string
+          format_status?: string
+          generated_format?: Json | null
           id?: string
           is_demo?: boolean
+          is_founding_season?: boolean
           league_id?: string
+          match_format?: string
+          max_team_count?: number | null
+          min_team_count?: number
           name?: string
+          playoff_match_format?: string
           playoff_size?: number
           playoffs_started_at?: string | null
+          recommended_max_teams?: number
+          recommended_min_teams?: number
+          region?: string
           registration_deadline?: string | null
+          registration_status?: string
+          schedule_status?: string
           season_number?: number
           starts_at?: string | null
           status?: string
           updated_at?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -1237,6 +1339,7 @@ export type Database = {
           bracket_position: number | null
           bracket_side: string | null
           chat_locked: boolean
+          confirmation_team_id: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
@@ -1257,11 +1360,14 @@ export type Database = {
           played_at: string | null
           player_a_id: string | null
           player_b_id: string | null
+          proof_url: string | null
           reported_by_user_id: string | null
           result_notes: string | null
           result_screenshot_url: string | null
           result_status: string | null
           round: number | null
+          rounds_a: number | null
+          rounds_b: number | null
           scheduled_at: string | null
           score_a: number | null
           score_b: number | null
@@ -1270,6 +1376,7 @@ export type Database = {
           server_info: string | null
           signup_a_id: string | null
           signup_b_id: string | null
+          stage: string
           status: string
           submitted_at: string | null
           submitted_by: string | null
@@ -1285,6 +1392,7 @@ export type Database = {
           bracket_position?: number | null
           bracket_side?: string | null
           chat_locked?: boolean
+          confirmation_team_id?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -1305,11 +1413,14 @@ export type Database = {
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          proof_url?: string | null
           reported_by_user_id?: string | null
           result_notes?: string | null
           result_screenshot_url?: string | null
           result_status?: string | null
           round?: number | null
+          rounds_a?: number | null
+          rounds_b?: number | null
           scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
@@ -1318,6 +1429,7 @@ export type Database = {
           server_info?: string | null
           signup_a_id?: string | null
           signup_b_id?: string | null
+          stage?: string
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
@@ -1333,6 +1445,7 @@ export type Database = {
           bracket_position?: number | null
           bracket_side?: string | null
           chat_locked?: boolean
+          confirmation_team_id?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -1353,11 +1466,14 @@ export type Database = {
           played_at?: string | null
           player_a_id?: string | null
           player_b_id?: string | null
+          proof_url?: string | null
           reported_by_user_id?: string | null
           result_notes?: string | null
           result_screenshot_url?: string | null
           result_status?: string | null
           round?: number | null
+          rounds_a?: number | null
+          rounds_b?: number | null
           scheduled_at?: string | null
           score_a?: number | null
           score_b?: number | null
@@ -1366,6 +1482,7 @@ export type Database = {
           server_info?: string | null
           signup_a_id?: string | null
           signup_b_id?: string | null
+          stage?: string
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
@@ -3212,6 +3329,20 @@ export type Database = {
         Returns: undefined
       }
       admin_create_sandbox_match: { Args: { _mode?: string }; Returns: string }
+      admin_force_complete_match: {
+        Args: {
+          _match_id: string
+          _rounds_a: number
+          _rounds_b: number
+          _score_a: number
+          _score_b: number
+        }
+        Returns: undefined
+      }
+      admin_resolve_dispute: {
+        Args: { _dispute_id: string; _note: string; _resolution: string }
+        Returns: undefined
+      }
       admin_resolve_match: {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
@@ -3243,6 +3374,10 @@ export type Database = {
           _score_a: number
           _score_b: number
         }
+        Returns: undefined
+      }
+      admin_void_match: {
+        Args: { _match_id: string; _note: string }
         Returns: undefined
       }
       apply_elo_decay: {
@@ -3328,10 +3463,12 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
-      dispute_match_result: {
-        Args: { _evidence?: string; _match_id: string; _reason: string }
-        Returns: undefined
-      }
+      dispute_match_result:
+        | { Args: { _match_id: string; _reason: string }; Returns: string }
+        | {
+            Args: { _evidence?: string; _match_id: string; _reason: string }
+            Returns: undefined
+          }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -3353,6 +3490,15 @@ export type Database = {
       generate_bracket: { Args: { _tournament_id: string }; Returns: undefined }
       generate_community_cup_bracket: {
         Args: { _tournament_id: string }
+        Returns: number
+      }
+      generate_league_format: { Args: { _season_id: string }; Returns: Json }
+      generate_league_playoffs: {
+        Args: { _season_id: string }
+        Returns: number
+      }
+      generate_league_schedule: {
+        Args: { _season_id: string }
         Returns: number
       }
       generate_round_robin_fixtures: {
@@ -3423,6 +3569,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recalculate_league_standings: {
+        Args: { _season_id: string }
+        Returns: undefined
+      }
       recalculate_smurf_risk: { Args: { _user_id: string }; Returns: number }
       recompute_standings_for_division: {
         Args: { _division_id: string }
@@ -3465,17 +3615,29 @@ export type Database = {
         }
         Returns: undefined
       }
-      submit_match_result: {
-        Args: {
-          _map?: string
-          _match_id: string
-          _notes?: string
-          _score_a: number
-          _score_b: number
-          _screenshot?: string
-        }
-        Returns: undefined
-      }
+      submit_match_result:
+        | {
+            Args: {
+              _map?: string
+              _match_id: string
+              _notes?: string
+              _score_a: number
+              _score_b: number
+              _screenshot?: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _match_id: string
+              _proof_url: string
+              _rounds_a: number
+              _rounds_b: number
+              _score_a: number
+              _score_b: number
+            }
+            Returns: undefined
+          }
       submit_open_cup_result: {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
