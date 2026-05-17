@@ -19,6 +19,28 @@ interface Season { id: string; league_id: string; name: string; status: string; 
 interface Registration { id: string; team_id: string; status: string; created_at: string; }
 
 export default function AdminLeagues() {
+  // helpers
+  return <AdminLeaguesInner />;
+}
+
+function Stat({ label, value }: { label: string; value: any }) {
+  return (
+    <div className="rounded border border-border bg-card/40 p-3">
+      <div className="text-xl font-display font-bold">{value ?? "—"}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
+    </div>
+  );
+}
+function Info({ label, value }: { label: string; value: any }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="font-display">{value ?? "—"}</div>
+    </div>
+  );
+}
+
+function AdminLeaguesInner() {
   const [leagues, setLeagues] = useState<League[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [activeLeague, setActiveLeague] = useState<League | null>(null);
