@@ -68,6 +68,22 @@ function statusToTab(s: string): Tab {
   return "all";
 }
 
+function Stat({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string | number; tone?: "success" | "accent" | "muted" }) {
+  const toneCls =
+    tone === "success" ? "border-success/30 text-success"
+    : tone === "accent" ? "border-accent/30 text-accent"
+    : "border-border text-foreground";
+  return (
+    <div className={`rounded-md border ${toneCls} bg-card/40 px-2.5 py-2 flex items-center gap-2`}>
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">{label}</div>
+        <div className="font-display text-sm leading-tight">{value}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function LeaguesPage() {
   const { selectedGame } = useGame();
   const [leagues, setLeagues] = useState<LeagueListItem[]>([]);
