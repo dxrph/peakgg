@@ -450,6 +450,19 @@ export default function AdminLeagues() {
                 </TabsContent>
 
                 <TabsContent value="fixtures" className="mt-4 space-y-3">
+                  {!activeSeason ? null : (
+                    <Card className="p-4 border-primary/30">
+                      <h3 className="font-display uppercase tracking-wider text-sm mb-3 flex items-center gap-2">
+                        <Wand2 className="h-4 w-4 text-primary" /> Dynamic Schedule (recommended)
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Uses the generated format and the list of approved teams. Supports 4–20 teams, even or odd counts (bye weeks).
+                      </p>
+                      <Button size="sm" onClick={buildSchedule} disabled={busy || !generatedFormat}>
+                        <Calendar className="h-4 w-4 mr-1" /> Generate dynamic schedule
+                      </Button>
+                    </Card>
+                  )}
                   {!activeSeason ? <p className="text-sm text-muted-foreground">Select a season.</p> : (
                     <Card className="p-4">
                       <h3 className="font-display uppercase tracking-wider text-sm mb-3">Generate Round Robin</h3>
