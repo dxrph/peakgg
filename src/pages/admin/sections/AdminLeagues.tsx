@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash, Swords } from "lucide-react";
+import { Plus, Calendar, Trophy, Check, X, RefreshCw, Sparkles, Trash, Swords, Wand2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import StatusPill from "@/components/leagues/StatusPill";
 
@@ -33,6 +33,9 @@ export default function AdminLeagues() {
   const [lForm, setLForm] = useState({ name: "", slug: "", game: "valorant", description: "", reward_text: "", max_teams: 8, min_roster_size: 5 });
   const [sForm, setSForm] = useState({ name: "Season 0 Beta", season_number: 0, format: "round_robin", starts_at: "", ends_at: "", registration_deadline: "", playoff_size: 4, status: "draft" });
   const [fixtureStart, setFixtureStart] = useState("");
+  const [generatedFormat, setGeneratedFormat] = useState<any>(null);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const loadLeagues = async () => {
     const { data } = await supabase.from("leagues").select("*").order("created_at", { ascending: false });
@@ -59,6 +62,45 @@ export default function AdminLeagues() {
   useEffect(() => { loadLeagues(); }, []);
   useEffect(() => { if (activeLeague) loadSeasons(activeLeague.id); else { setSeasons([]); setActiveSeason(null); } }, [activeLeague]);
   useEffect(() => { if (activeSeason) loadRegs(activeSeason.id); else setRegistrations([]); }, [activeSeason]);
+
+  useEffect(() => {
+    setGeneratedFormat((activeSeason as any)?.generated_format ?? null);
+    setApprovedCount(registrations.filter(r => r.status === "approved").length);
+    setPendingCount(registrations.filter(r => r.status === "pending").length);
+  }, [activeSeason, registrations]);
+
+  const buildFormat = async () => {
+    if (!activeSeason) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_format", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setGeneratedFormat(data);
+    toast.success("Format generated");
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
+
+  const buildSchedule = async () => {
+    if (!activeSeason) return;
+    if (!confirm("Generate the full schedule from approved teams? Existing non-completed matches will be cleared.")) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_schedule", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Generated ${data} matches`);
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
+
+  const buildPlayoffs = async () => {
+    if (!activeSeason) return;
+    if (!confirm("Generate the playoff bracket from current standings?")) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("generate_league_playoffs", { _season_id: activeSeason.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Playoffs created (${data} matches)`);
+    if (activeLeague) loadSeasons(activeLeague.id);
+  };
 
   const createLeague = async () => {
     if (!lForm.name || !lForm.slug) return toast.error("Name and slug required");
@@ -319,6 +361,7 @@ export default function AdminLeagues() {
                 <TabsList>
                   <TabsTrigger value="seasons">Seasons</TabsTrigger>
                   <TabsTrigger value="registrations">Registrations</TabsTrigger>
+                  <TabsTrigger value="format">Format</TabsTrigger>
                   <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                   <TabsTrigger value="standings">Standings</TabsTrigger>
                 </TabsList>
