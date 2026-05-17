@@ -27,8 +27,20 @@ interface LeagueListItem {
   banner_url: string | null;
   status: string;
   max_teams: number;
-  current_season?: { id: string; name: string; status: string } | null;
+  current_season?: {
+    id: string;
+    name: string;
+    status: string;
+    min_team_count?: number;
+    recommended_min_teams?: number;
+    recommended_max_teams?: number;
+    format_status?: string;
+    schedule_status?: string;
+    generated_format?: any;
+    registration_deadline?: string | null;
+  } | null;
   team_count: number;
+  pending_count: number;
 }
 
 type Tab = "all" | "registration_open" | "active" | "upcoming" | "completed";
@@ -73,20 +85,23 @@ export default function LeaguesPage() {
       const enriched = await Promise.all(list.map(async (l): Promise<LeagueListItem> => {
         const { data: seasons } = await supabase
           .from("league_seasons")
-          .select("id, name, status")
+          .select("id, name, status, min_team_count, recommended_min_teams, recommended_max_teams, format_status, schedule_status, generated_format, registration_deadline")
           .eq("league_id", l.id)
           .order("season_number", { ascending: false })
           .limit(1);
         const current = seasons?.[0] ?? null;
         let team_count = 0;
+        let pending_count = 0;
         if (current) {
           // Count only approved registrations whose team is real (non-demo) — must match Teams tab.
           const { data: regs } = await supabase
             .from("league_registrations")
-            .select("team_id")
+            .select("team_id, status")
             .eq("season_id", current.id)
-            .eq("status", "approved");
-          const ids = (regs ?? []).map((r: any) => r.team_id);
+            .in("status", ["approved", "pending"]);
+          const approvedIds = (regs ?? []).filter((r: any) => r.status === "approved").map((r: any) => r.team_id);
+          const pendingIds = (regs ?? []).filter((r: any) => r.status === "pending").map((r: any) => r.team_id);
+          const ids = approvedIds;
           if (ids.length) {
             const { count } = await supabase
               .from("teams")
@@ -95,8 +110,16 @@ export default function LeaguesPage() {
               .eq("is_demo", false);
             team_count = count ?? 0;
           }
+          if (pendingIds.length) {
+            const { count } = await supabase
+              .from("teams")
+              .select("id", { count: "exact", head: true })
+              .in("id", pendingIds)
+              .eq("is_demo", false);
+            pending_count = count ?? 0;
+          }
         }
-        return { ...l, current_season: current, team_count };
+        return { ...l, current_season: current, team_count, pending_count };
       }));
       setLeagues(enriched);
       setLoading(false);
