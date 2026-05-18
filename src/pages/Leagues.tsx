@@ -11,7 +11,8 @@ import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, ArrowRight, MessageCircle, Shield, CalendarClock, Flag,
   ListChecks, CheckCircle2, Crown, ChevronRight, Swords, ClipboardCheck,
-  Sparkles, Radio, Eye, History, Globe2,
+  Sparkles, Radio, Eye, History, Globe2, Layers, GitBranch, BarChart3,
+  Gavel, Network, Trophy as TrophyIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -62,12 +63,26 @@ const ROADMAP = [
 ];
 
 const HOW_STEPS = [
-  { n: "01", icon: Users, title: "Create Your Team", desc: "Set up your roster and invite your players." },
-  { n: "02", icon: ClipboardCheck, title: "Apply To The League", desc: "Submit your team for Season 0 Beta." },
-  { n: "03", icon: Shield, title: "Staff Review", desc: "Admins approve valid rosters." },
-  { n: "04", icon: ListChecks, title: "Format Generated", desc: "The season adapts to approved teams." },
-  { n: "05", icon: Swords, title: "Play Matchdays", desc: "Compete, submit results and climb standings." },
-  { n: "06", icon: Crown, title: "Playoffs", desc: "Top teams fight for champion status." },
+  { n: "01", icon: Users, title: "Create Your Team", desc: "Captains build their roster and invite players." },
+  { n: "02", icon: ClipboardCheck, title: "Apply To The Season", desc: "Submit your team for the current Peak League season." },
+  { n: "03", icon: Shield, title: "Staff Review", desc: "Only approved teams enter the competition." },
+  { n: "04", icon: ListChecks, title: "Format Generated", desc: "When registration closes, the league format is built from the approved teams." },
+  { n: "05", icon: Swords, title: "Matchdays Begin", desc: "Teams play scheduled matches, submit results and climb the standings." },
+  { n: "06", icon: Crown, title: "Playoffs + Champion", desc: "Top teams qualify for playoffs and fight for the Peak League title." },
+];
+
+const FORMAT_CARDS = [
+  { range: "4–7 Teams", format: "Single Round-Robin", playoff: "Top 2 Final" },
+  { range: "8–10 Teams", format: "Single Round-Robin", playoff: "Top 4 Playoffs" },
+  { range: "11–14 Teams", format: "Single Round-Robin", playoff: "Top 6 Playoffs" },
+  { range: "16+ Teams", format: "Groups / Divisions", playoff: "Playoff Qualification" },
+];
+
+const PUBLIC_SYSTEM = [
+  { icon: BarChart3, title: "Public Standings", desc: "Track every team's wins, losses and points." },
+  { icon: CheckCircle2, title: "Public Results", desc: "Every completed match shows the winner." },
+  { icon: ClipboardCheck, title: "Captain Confirmation", desc: "Results are submitted and confirmed by teams." },
+  { icon: Gavel, title: "Staff Disputes", desc: "Staff can resolve disputed results when needed." },
 ];
 
 const WHY = [
