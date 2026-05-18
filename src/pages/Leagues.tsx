@@ -479,46 +479,47 @@ export default function LeaguesPage() {
         {/* ============== ALL LEAGUES ============== */}
         <section id="leagues-list" className="container pt-2 pb-20">
           <div className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden">
-            {/* Header row */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 px-5 md:px-7 py-5 border-b border-border/60 bg-gradient-to-r from-card/60 via-card/30 to-transparent">
-              <div className="shrink-0">
-                <div className="eyebrow text-[10px]"><Flag className="h-3 w-3" /> Browse</div>
-                <h2 className="mt-1.5 font-display font-bold uppercase text-2xl md:text-[1.75rem] tracking-tight leading-none whitespace-nowrap">
-                  All Leagues
-                </h2>
+            {/* Header */}
+            <div className="px-5 md:px-7 pt-5 pb-4 border-b border-border/60 bg-gradient-to-r from-card/60 via-card/30 to-transparent">
+              <div className="flex items-end justify-between gap-4 flex-wrap">
+                <div>
+                  <div className="eyebrow text-[10px]"><Flag className="h-3 w-3" /> Browse</div>
+                  <h2 className="mt-1.5 font-display font-bold uppercase text-2xl md:text-[1.75rem] tracking-tight leading-none whitespace-nowrap">
+                    All Leagues
+                  </h2>
+                </div>
+                <span className="text-[11px] font-display uppercase tracking-[0.2em] text-muted-foreground pb-0.5">
+                  {filtered.length} {filtered.length === 1 ? "league" : "leagues"}
+                </span>
               </div>
-              <div className="flex items-center gap-3 lg:gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
-                <div className="flex items-center gap-1.5 shrink-0">
+
+              {/* Filters row */}
+              <div className="mt-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-5">
+                <FilterGroup label="Status">
                   {TABS.map(t => (
-                    <button
+                    <FilterPill
                       key={t.id}
+                      active={tab === t.id}
+                      tone="primary"
                       onClick={() => setTab(t.id)}
-                      className={`shrink-0 h-9 px-4 rounded-full text-[11px] font-display uppercase tracking-[0.14em] transition-all border ${
-                        tab === t.id
-                          ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_18px_-6px_hsl(var(--primary)/0.6)]"
-                          : "bg-transparent text-muted-foreground border-border/60 hover:text-foreground hover:border-border"
-                      }`}
                     >
                       {t.label}
-                    </button>
+                    </FilterPill>
                   ))}
-                </div>
-                <div className="h-6 w-px bg-border/70 shrink-0 hidden sm:block" />
-                <div className="flex items-center gap-1.5 shrink-0 pr-1">
-                  {[{ id: "all", label: "All Games" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
-                    <button
+                </FilterGroup>
+                <div className="hidden md:block h-8 w-px bg-border/70 shrink-0" />
+                <FilterGroup label="Game">
+                  {[{ id: "all", label: "All" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
+                    <FilterPill
                       key={g.id}
+                      active={gameFilter === g.id}
+                      tone="accent"
                       onClick={() => setGameFilter(g.id)}
-                      className={`shrink-0 h-9 px-4 rounded-full text-[11px] font-display uppercase tracking-[0.14em] transition-all border ${
-                        gameFilter === g.id
-                          ? "bg-accent/15 text-accent border-accent/50 shadow-[0_0_18px_-6px_hsl(var(--accent)/0.6)]"
-                          : "bg-transparent text-muted-foreground border-border/60 hover:text-foreground hover:border-border"
-                      }`}
                     >
                       {g.label}
-                    </button>
+                    </FilterPill>
                   ))}
-                </div>
+                </FilterGroup>
               </div>
             </div>
 
