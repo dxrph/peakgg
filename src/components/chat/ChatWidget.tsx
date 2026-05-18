@@ -41,7 +41,7 @@ const PEAK_CSS = `
   --pk-text:#fafafa; --pk-text-mid:#b0a8ac; --pk-text-dim:#6a6065; --pk-text-faint:#4a4146;
   --pk-red:#ff4655; --pk-red-soft:rgba(255,70,85,.10); --pk-red-soft-2:rgba(255,70,85,.18);
   --pk-green:#22c98b; --pk-amber:#ffb454; --pk-blue:#5b8cff;
-  position:relative; display:flex; flex-direction:column; overflow:hidden;
+  display:flex; flex-direction:column; overflow:hidden;
   background:linear-gradient(180deg,var(--pk-panel-2) 0%,var(--pk-panel) 100%);
   border:1px solid var(--pk-line-2);
   color:var(--pk-text);
