@@ -3,10 +3,16 @@ import { Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Mountain, BookOpen, Wrench, Flame, Brain, Gamepad2, Heart, Star, CheckCircle, XCircle, Clock, Crosshair, Zap, ChevronRight, Target, Info } from "lucide-react";
+import {
+  Mountain, BookOpen, Wrench, Flame, Brain, Gamepad2, Heart, Star,
+  CheckCircle, XCircle, Clock, Crosshair, Zap, ChevronRight, Target, Info,
+  Sparkles, Users, Trophy, Swords, Compass, ArrowRight, Activity,
+} from "lucide-react";
 import { useI18n } from "@/i18n";
 import { getAimGuideContent, type AimGameKey, type AimGuideContent } from "@/data/aim-guide";
+import { cn } from "@/lib/utils";
 
 const gameColors: Record<AimGameKey, string> = {
   valorant: "text-primary",
@@ -14,13 +20,47 @@ const gameColors: Record<AimGameKey, string> = {
   r6: "text-blue-400",
 };
 
+const TABS = [
+  { v: "intro", icon: BookOpen, key: "intro" as const },
+  { v: "tools", icon: Wrench, key: "tools" as const },
+  { v: "warmup", icon: Flame, key: "warmup" as const },
+  { v: "theory", icon: Brain, key: "theory" as const },
+  { v: "games", icon: Gamepad2, key: "games" as const },
+  { v: "mindset", icon: Heart, key: "mindset" as const },
+];
+
+const AUDIENCE = [
+  { icon: Sparkles, title: "New FPS Players", desc: "Build strong fundamentals from the start." },
+  { icon: Activity, title: "Ranked Grinders", desc: "Improve consistency and confidence." },
+  { icon: Trophy, title: "Competitive Players", desc: "Refine routines and training quality." },
+  { icon: Crosshair, title: "Aim Trainer Users", desc: "Add structure to your practice." },
+];
+
+const ROADMAP = [
+  { n: "01", title: "Start with the basics", desc: "Understand what aim training is — and isn't." },
+  { n: "02", title: "Pick the right tools", desc: "Choose KovaaK's, Aim Lab or in-game ranges." },
+  { n: "03", title: "Build your warm-up", desc: "A 10–15 min routine that primes your hands." },
+  { n: "04", title: "Learn aim theory", desc: "Flicking, tracking, switching, micro-adjust." },
+  { n: "05", title: "Apply by game", desc: "Tune sens, FOV and habits per title." },
+  { n: "06", title: "Stay consistent", desc: "Health, mindset and weekly practice cycles." },
+];
+
+const HERO_STATS = [
+  { label: "Modules", value: "6" },
+  { label: "Level", value: "Beginner+" },
+  { label: "Format", value: "Practical" },
+  { label: "Per game", value: "VAL · CS2 · R6" },
+];
+
 export default function AimGuidePage() {
   const { locale } = useI18n();
   const c = getAimGuideContent(locale);
+  const [tab, setTab] = useState<string>("intro");
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
+      {/* Top nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="container flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
@@ -28,152 +68,457 @@ export default function AimGuidePage() {
             </div>
             <span className="font-display font-bold text-xl tracking-tight">PEAKGG</span>
           </Link>
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold uppercase tracking-wider">
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold uppercase tracking-wider"
+          >
             {c.back_to_site}
           </Link>
         </div>
       </nav>
 
-      <main className="container pt-24 pb-16">
-        <div className="text-center mb-10">
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-3">
-            <span className="text-primary">{c.title_pre}</span> {c.title_post}
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">{c.hero_subtitle}</p>
+      {/* HERO */}
+      <header className="relative overflow-hidden border-b border-border/60">
+        <div className="absolute inset-0 bg-grid-faint opacity-40 pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 15% 0%, hsl(352 100% 62% / 0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 90% 100%, hsl(24 100% 63% / 0.14), transparent 60%)",
+          }}
+        />
+        <div className="container relative pt-28 pb-16 md:pt-32 md:pb-20">
+          <div className="grid lg:grid-cols-[1.3fr_1fr] gap-10 lg:gap-14 items-end">
+            {/* Left */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-[11px] font-display font-semibold uppercase tracking-[0.18em] mb-5">
+                <Sparkles className="h-3 w-3" /> PeakGG Learning Hub
+              </div>
+              <h1 className="font-display font-bold tracking-tight text-4xl md:text-6xl lg:text-[4.25rem] leading-[1.02] mb-5">
+                <span className="text-foreground">PeakGG</span>{" "}
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+                  Aim Guide
+                </span>
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+                The definitive training system for players who want{" "}
+                <span className="text-foreground font-semibold">better mechanics</span>,{" "}
+                <span className="text-foreground font-semibold">cleaner mouse control</span> and{" "}
+                <span className="text-foreground font-semibold">more consistency</span> in competitive FPS.
+              </p>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button
+                  size="lg"
+                  className="gradient-primary text-primary-foreground font-display uppercase tracking-wider shadow-[0_8px_30px_-8px_hsl(352_100%_62%/0.6)]"
+                  onClick={() => setTab("intro")}
+                >
+                  <Target className="h-4 w-4 mr-2" /> Start Learning
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-border/80 bg-card/40 hover:bg-card/80 font-display uppercase tracking-wider"
+                  onClick={() => document.getElementById("sections")?.scrollIntoView({ behavior: "smooth" })}
+                >
+                  <Compass className="h-4 w-4 mr-2" /> Browse Sections
+                </Button>
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-accent font-display uppercase tracking-wider"
+                  onClick={() => setTab("tools")}
+                >
+                  <Wrench className="h-4 w-4 mr-2" /> Recommended Tools
+                </Button>
+              </div>
+            </div>
+
+            {/* Right — summary card */}
+            <div className="relative">
+              <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/40 via-transparent to-accent/30 opacity-60 blur-[2px]" />
+              <div className="relative rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl p-6 md:p-7">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2 text-xs font-display uppercase tracking-[0.15em] text-muted-foreground">
+                    <Star className="h-3.5 w-3.5 text-accent" /> Guide Summary
+                  </div>
+                  <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
+                    Free
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {HERO_STATS.map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-lg border border-border/50 bg-background/50 p-3.5"
+                    >
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">
+                        {s.label}
+                      </div>
+                      <div className="mt-1 font-display font-bold text-lg text-foreground">{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 pt-5 border-t border-border/50 space-y-2.5 text-sm">
+                  {[
+                    "Warm-up + theory + health",
+                    "Per-game setups: VAL / CS2 / R6",
+                    "Practical, no fluff",
+                  ].map((t) => (
+                    <div key={t} className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                      <span>{t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
 
-        <Tabs defaultValue="intro" className="w-full">
-          <TabsList className="w-full flex flex-wrap h-auto gap-1 bg-secondary/50 p-1.5 rounded-lg mb-8">
-            {[
-              { v: "intro", icon: BookOpen, l: c.tabs.intro },
-              { v: "tools", icon: Wrench, l: c.tabs.tools },
-              { v: "warmup", icon: Flame, l: c.tabs.warmup },
-              { v: "theory", icon: Brain, l: c.tabs.theory },
-              { v: "games", icon: Gamepad2, l: c.tabs.games },
-              { v: "mindset", icon: Heart, l: c.tabs.mindset },
-            ].map(({ v, icon: Icon, l }) => (
-              <TabsTrigger key={v} value={v} className="flex-1 min-w-[140px] gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-primary/40 border border-transparent">
-                <Icon className="h-4 w-4" /> {l}
-              </TabsTrigger>
+      <main className="container py-14 md:py-16 space-y-16">
+        {/* WHO THIS IS FOR */}
+        <section>
+          <SectionHead
+            eyebrow="Audience"
+            title="Who this guide is for"
+            sub="Whatever your level, the routines and theory scale with you."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {AUDIENCE.map((a) => (
+              <div
+                key={a.title}
+                className="group relative rounded-xl border border-border/60 bg-card/50 p-5 hover:border-primary/40 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                  <a.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-semibold text-base text-foreground mb-1">{a.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
+              </div>
             ))}
-          </TabsList>
+          </div>
+        </section>
 
-          <TabsContent value="intro"><IntroSection c={c} /></TabsContent>
-          <TabsContent value="tools"><ToolsSection c={c} /></TabsContent>
-          <TabsContent value="warmup"><WarmupSection c={c} /></TabsContent>
-          <TabsContent value="theory"><TheorySection c={c} /></TabsContent>
-          <TabsContent value="games"><GamesSection c={c} /></TabsContent>
-          <TabsContent value="mindset"><MindsetSection c={c} /></TabsContent>
-        </Tabs>
+        {/* HOW TO USE */}
+        <section>
+          <SectionHead
+            eyebrow="Roadmap"
+            title="How to use this guide"
+            sub="A 6-step path from theory to consistent in-game results."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {ROADMAP.map((r, i) => (
+              <div
+                key={r.n}
+                className="relative rounded-xl border border-border/60 bg-gradient-to-br from-card/60 to-card/20 p-5 overflow-hidden"
+              >
+                <div className="absolute top-3 right-3 font-display text-3xl font-bold text-primary/20">
+                  {r.n}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-6 rounded-md bg-primary/15 text-primary text-xs font-bold font-display flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <h3 className="font-display font-semibold text-foreground">{r.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{r.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SECTIONS / TABS */}
+        <section id="sections" className="scroll-mt-20">
+          <SectionHead
+            eyebrow="The Guide"
+            title="Six modules. One system."
+            sub="Switch between sections — each is focused, practical and self-contained."
+          />
+
+          <Tabs value={tab} onValueChange={setTab} className="w-full">
+            {/* Sticky tabs */}
+            <div className="sticky top-16 z-30 -mx-4 px-4 py-3 mb-8 bg-background/85 backdrop-blur-xl border-b border-border/60">
+              <TabsList className="w-full h-auto bg-transparent p-0 flex gap-2 overflow-x-auto no-scrollbar justify-start md:justify-center">
+                {TABS.map(({ v, icon: Icon, key }) => (
+                  <TabsTrigger
+                    key={v}
+                    value={v}
+                    className={cn(
+                      "shrink-0 h-10 px-4 rounded-full border border-border/60 bg-card/40 text-muted-foreground gap-2",
+                      "hover:text-foreground hover:border-border transition-all",
+                      "data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:border-primary/50",
+                      "data-[state=active]:shadow-[0_0_22px_-6px_hsl(352_100%_62%/0.55)]",
+                      "font-display uppercase tracking-wider text-xs"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" /> {c.tabs[key]}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+
+            <TabsContent value="intro"><IntroSection c={c} /></TabsContent>
+            <TabsContent value="tools"><ToolsSection c={c} /></TabsContent>
+            <TabsContent value="warmup"><WarmupSection c={c} /></TabsContent>
+            <TabsContent value="theory"><TheorySection c={c} /></TabsContent>
+            <TabsContent value="games"><GamesSection c={c} /></TabsContent>
+            <TabsContent value="mindset"><MindsetSection c={c} /></TabsContent>
+          </Tabs>
+        </section>
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+      <footer className="border-t border-border/60 py-8 text-center text-sm text-muted-foreground">
         {c.footer}
       </footer>
     </div>
   );
 }
 
+/* ----------------------------- Shared blocks ----------------------------- */
+
+function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+  return (
+    <div className="mb-7 md:mb-9">
+      <div className="text-[11px] font-display font-semibold uppercase tracking-[0.2em] text-accent mb-2">
+        {eyebrow}
+      </div>
+      <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">{title}</h2>
+      {sub && <p className="mt-2 text-muted-foreground max-w-2xl">{sub}</p>}
+    </div>
+  );
+}
+
+function Panel({
+  children,
+  className,
+  tone = "default",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  tone?: "default" | "primary" | "accent" | "success" | "danger";
+}) {
+  const tones: Record<string, string> = {
+    default: "border-border/60",
+    primary: "border-primary/30",
+    accent: "border-accent/30",
+    success: "border-green-500/25",
+    danger: "border-destructive/30",
+  };
+  return (
+    <div className={cn("rounded-xl border bg-card/50 backdrop-blur-sm", tones[tone], className)}>
+      {children}
+    </div>
+  );
+}
+
+function PanelHead({
+  icon: Icon,
+  title,
+  tone = "primary",
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  tone?: "primary" | "accent" | "success" | "danger";
+}) {
+  const tones: Record<string, string> = {
+    primary: "text-primary bg-primary/10 border-primary/20",
+    accent: "text-accent bg-accent/10 border-accent/20",
+    success: "text-green-400 bg-green-500/10 border-green-500/20",
+    danger: "text-destructive bg-destructive/10 border-destructive/20",
+  };
+  return (
+    <div className="flex items-center gap-3 p-5 pb-3">
+      <div className={cn("w-9 h-9 rounded-lg border flex items-center justify-center", tones[tone])}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <h3 className="font-display font-semibold text-lg text-foreground">{title}</h3>
+    </div>
+  );
+}
+
+/* --------------------------------- Intro --------------------------------- */
+
 function IntroSection({ c }: { c: AimGuideContent }) {
   const i = c.intro;
   return (
     <div className="space-y-6">
-      <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle className="font-display flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> {i.what_title}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground leading-relaxed space-y-3">
-          <p>{i.what_p1_pre}<span className="text-foreground font-semibold">KovaaK's</span> / <span className="text-foreground font-semibold">Aim Lab</span>{i.what_p1_post}</p>
-          <p>{i.what_p2}</p>
-        </CardContent>
-      </Card>
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
+        <Panel tone="primary" className="overflow-hidden">
+          <div className="p-6 md:p-7">
+            <div className="text-[11px] font-display uppercase tracking-[0.2em] text-primary mb-2">
+              Module 01
+            </div>
+            <h3 className="font-display font-bold text-2xl mb-4 flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" /> {i.what_title}
+            </h3>
+            <div className="space-y-3 text-muted-foreground leading-relaxed max-w-prose">
+              <p>
+                {i.what_p1_pre}
+                <span className="text-foreground font-semibold px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
+                  KovaaK's
+                </span>{" "}
+                /{" "}
+                <span className="text-foreground font-semibold px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20">
+                  Aim Lab
+                </span>
+                {i.what_p1_post}
+              </p>
+              <p>{i.what_p2}</p>
+            </div>
+          </div>
+        </Panel>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="border-green-500/20">
-          <CardHeader>
-            <CardTitle className="font-display text-lg flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /> {i.pros_title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-muted-foreground">
-              {i.pros_items.map(t => (
-                <li key={t} className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />{t}</li>
+        <Panel tone="accent" className="overflow-hidden">
+          <div className="p-6 md:p-7 h-full flex flex-col">
+            <div className="text-[11px] font-display uppercase tracking-[0.2em] text-accent mb-2">
+              Concept
+            </div>
+            <h4 className="font-display font-bold text-xl mb-3">Aim Training = Mechanics Gym</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Isolated reps to train specific motor skills you reuse in-game.
+            </p>
+            <ul className="mt-auto space-y-2.5">
+              {["Flicking", "Tracking", "Switching", "Micro-corrections"].map((t) => (
+                <li
+                  key={t}
+                  className="flex items-center justify-between text-sm border-b border-border/40 pb-2 last:border-0"
+                >
+                  <span className="text-foreground font-medium">{t}</span>
+                  <ChevronRight className="h-4 w-4 text-accent" />
+                </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
-        <Card className="border-destructive/20">
-          <CardHeader>
-            <CardTitle className="font-display text-lg flex items-center gap-2"><XCircle className="h-5 w-5 text-destructive" /> {i.cons_title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-muted-foreground">
-              {i.cons_items.map(t => (
-                <li key={t} className="flex items-start gap-2"><XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />{t}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+          </div>
+        </Panel>
       </div>
 
-      <Card className="border-accent/20">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Clock className="h-5 w-5 text-accent" /> {i.time_title}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground space-y-2">
-          <p><span className="text-foreground font-semibold">{i.time_warmup_strong}</span>{i.time_warmup_rest}</p>
-          <p><span className="text-foreground font-semibold">{i.time_session_strong}</span>{i.time_session_rest}</p>
-          <p className="text-destructive/80">{i.time_warning}</p>
-        </CardContent>
-      </Card>
+      <div className="grid md:grid-cols-2 gap-6">
+        <Panel tone="success">
+          <PanelHead icon={CheckCircle} title={i.pros_title} tone="success" />
+          <ul className="px-5 pb-5 space-y-2.5">
+            {i.pros_items.map((t) => (
+              <li key={t} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+        <Panel tone="danger">
+          <PanelHead icon={XCircle} title={i.cons_title} tone="danger" />
+          <ul className="px-5 pb-5 space-y-2.5">
+            {i.cons_items.map((t) => (
+              <li key={t} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      </div>
+
+      <Panel tone="accent">
+        <PanelHead icon={Clock} title={i.time_title} tone="accent" />
+        <div className="px-5 pb-5 grid sm:grid-cols-2 gap-3">
+          <div className="rounded-lg bg-background/40 border border-border/40 p-4">
+            <div className="text-xs uppercase tracking-wider text-accent font-display mb-1">Warm-up</div>
+            <p className="text-sm text-muted-foreground">
+              <span className="text-foreground font-semibold">{i.time_warmup_strong}</span>
+              {i.time_warmup_rest}
+            </p>
+          </div>
+          <div className="rounded-lg bg-background/40 border border-border/40 p-4">
+            <div className="text-xs uppercase tracking-wider text-accent font-display mb-1">Session</div>
+            <p className="text-sm text-muted-foreground">
+              <span className="text-foreground font-semibold">{i.time_session_strong}</span>
+              {i.time_session_rest}
+            </p>
+          </div>
+          <div className="sm:col-span-2 rounded-lg bg-destructive/5 border border-destructive/20 p-4 text-sm text-destructive/90 flex items-start gap-2">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>{i.time_warning}</span>
+          </div>
+        </div>
+      </Panel>
     </div>
   );
 }
+
+/* --------------------------------- Tools --------------------------------- */
 
 function ToolsSection({ c }: { c: AimGuideContent }) {
   const t = c.tools;
-  const badgeClasses = ["bg-accent/20 text-accent border-accent/40", "bg-green-500/20 text-green-400 border-green-500/40", ""];
+  const badgeClasses = [
+    "bg-accent/15 text-accent border-accent/40",
+    "bg-green-500/15 text-green-400 border-green-500/40",
+    "bg-muted text-muted-foreground border-border",
+  ];
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 gap-5">
         {t.apps.map((app, idx) => (
-          <Card key={app.name} className="border-border hover:border-primary/30 transition-colors">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-display text-lg">{app.name}</CardTitle>
-                {app.badge && <Badge variant="outline" className={badgeClasses[idx] ?? ""}>{app.badge}</Badge>}
-              </div>
-              <CardDescription>{app.price}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground text-sm">{app.desc}</p>
+          <Panel key={app.name} className="overflow-hidden hover:border-primary/40 transition-colors">
+            <div className="p-5 border-b border-border/40 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-green-400 mb-1">{t.pros_label}</p>
+                <h3 className="font-display font-bold text-lg text-foreground">{app.name}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{app.price}</p>
+              </div>
+              {app.badge && (
+                <Badge variant="outline" className={cn("text-[10px]", badgeClasses[idx] ?? "")}>
+                  {app.badge}
+                </Badge>
+              )}
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-muted-foreground">{app.desc}</p>
+              <div>
+                <p className="text-[10px] font-display uppercase tracking-wider text-green-400 mb-1.5">
+                  {t.pros_label}
+                </p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  {app.pros.map(p => <li key={p} className="flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-green-500 shrink-0" />{p}</li>)}
+                  {app.pros.map((p) => (
+                    <li key={p} className="flex items-center gap-1.5">
+                      <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                      {p}
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold text-destructive mb-1">{t.cons_label}</p>
+                <p className="text-[10px] font-display uppercase tracking-wider text-destructive mb-1.5">
+                  {t.cons_label}
+                </p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  {app.cons.map(co => <li key={co} className="flex items-center gap-1.5"><XCircle className="h-3 w-3 text-destructive shrink-0" />{co}</li>)}
+                  {app.cons.map((co) => (
+                    <li key={co} className="flex items-center gap-1.5">
+                      <XCircle className="h-3 w-3 text-destructive shrink-0" />
+                      {co}
+                    </li>
+                  ))}
                 </ul>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Panel>
         ))}
       </div>
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Star className="h-5 w-5 text-primary" /> {t.advice_title}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">
-          {t.advice_pre}<span className="text-foreground font-semibold">{t.advice_strong1}</span>{t.advice_mid}<span className="text-foreground font-semibold">{t.advice_strong2}</span>{t.advice_post}
-        </CardContent>
-      </Card>
+      <Panel tone="primary" className="bg-gradient-to-br from-primary/5 to-transparent">
+        <PanelHead icon={Star} title={t.advice_title} tone="primary" />
+        <p className="px-5 pb-5 text-muted-foreground leading-relaxed">
+          {t.advice_pre}
+          <span className="text-foreground font-semibold">{t.advice_strong1}</span>
+          {t.advice_mid}
+          <span className="text-foreground font-semibold">{t.advice_strong2}</span>
+          {t.advice_post}
+        </p>
+      </Panel>
     </div>
   );
 }
+
+/* -------------------------------- Warm-up -------------------------------- */
 
 function WarmupSection({ c }: { c: AimGuideContent }) {
   const w = c.warmup;
@@ -181,16 +526,30 @@ function WarmupSection({ c }: { c: AimGuideContent }) {
     <div className="space-y-6">
       <Accordion type="multiple" className="space-y-3">
         {w.phases.map((phase, i) => (
-          <AccordionItem key={i} value={`phase-${i}`} className="border border-border rounded-lg px-4 overflow-hidden">
-            <AccordionTrigger className="font-display text-lg hover:no-underline">
-              <span className="flex items-center gap-2"><Flame className="h-5 w-5 text-accent" />{phase.title}</span>
+          <AccordionItem
+            key={i}
+            value={`phase-${i}`}
+            className="border border-border/60 rounded-xl px-5 overflow-hidden bg-card/40 backdrop-blur-sm"
+          >
+            <AccordionTrigger className="font-display text-base md:text-lg hover:no-underline py-4">
+              <span className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 text-accent flex items-center justify-center text-xs font-bold">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {phase.title}
+              </span>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-3 pb-2">
+              <div className="space-y-2 pb-3">
                 {phase.steps.map((s, j) => (
-                  <div key={j} className="flex flex-col sm:flex-row sm:items-center gap-2 bg-secondary/50 rounded-md p-3">
-                    <span className="font-semibold text-foreground min-w-[200px]">{s.scenario}</span>
-                    <Badge variant="outline" className="w-fit border-primary/30 text-primary text-xs">{s.type}</Badge>
+                  <div
+                    key={j}
+                    className="grid sm:grid-cols-[200px_auto_1fr] gap-2 sm:gap-3 items-center bg-background/40 border border-border/40 rounded-lg p-3"
+                  >
+                    <span className="font-semibold text-foreground text-sm">{s.scenario}</span>
+                    <Badge variant="outline" className="w-fit border-primary/30 text-primary text-[10px]">
+                      {s.type}
+                    </Badge>
                     <span className="text-muted-foreground text-sm">{s.desc}</span>
                   </div>
                 ))}
@@ -200,66 +559,91 @@ function WarmupSection({ c }: { c: AimGuideContent }) {
         ))}
       </Accordion>
 
-      <Card className="border-accent/20">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Zap className="h-5 w-5 text-accent" /> {w.rules_title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-muted-foreground">
-            {w.rules.map((r, i) => (
-              <li key={i} className="flex items-start gap-2"><ChevronRight className="h-4 w-4 text-accent mt-0.5 shrink-0" />{r}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <Panel tone="accent">
+        <PanelHead icon={Zap} title={w.rules_title} tone="accent" />
+        <ul className="px-5 pb-5 grid sm:grid-cols-2 gap-2">
+          {w.rules.map((r, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2 text-sm text-muted-foreground bg-background/40 border border-border/40 rounded-lg p-3"
+            >
+              <ChevronRight className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+              {r}
+            </li>
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }
+
+/* --------------------------------- Theory -------------------------------- */
 
 function TheorySection({ c }: { c: AimGuideContent }) {
   const th = c.theory;
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        {th.categories.map(cat => (
-          <Card key={cat.title} className={cat.color}>
-            <CardHeader>
-              <CardTitle className="font-display text-lg flex items-center gap-2"><span className="text-2xl">{cat.emoji}</span>{cat.title}</CardTitle>
-              <div className="flex flex-wrap gap-2">
-                {cat.badges.map(b => <Badge key={b} variant="secondary" className="text-xs">{b}</Badge>)}
+      <div className="grid md:grid-cols-2 gap-5">
+        {th.categories.map((cat) => (
+          <Panel key={cat.title} className={cn("overflow-hidden", cat.color)}>
+            <div className="p-5 border-b border-border/40">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-lg bg-background/50 border border-border/40 flex items-center justify-center text-2xl">
+                  {cat.emoji}
+                </div>
+                <h3 className="font-display font-bold text-lg">{cat.title}</h3>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-muted-foreground text-sm">{cat.desc}</p>
-              <div className="bg-secondary/50 rounded-md p-3 text-sm">
-                <span className="font-semibold text-accent">{th.tip_label}</span>{" "}
-                <span className="text-muted-foreground">{cat.tip}</span>
+              <div className="flex flex-wrap gap-1.5">
+                {cat.badges.map((b) => (
+                  <Badge key={b} variant="secondary" className="text-[10px]">
+                    {b}
+                  </Badge>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-muted-foreground">{cat.desc}</p>
+              <div className="rounded-lg bg-background/40 border border-border/40 p-3 text-sm">
+                <span className="font-display font-semibold text-accent uppercase text-[10px] tracking-wider">
+                  {th.tip_label}
+                </span>
+                <p className="mt-1 text-muted-foreground">{cat.tip}</p>
+              </div>
+            </div>
+          </Panel>
         ))}
       </div>
 
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Crosshair className="h-5 w-5 text-primary" /> {th.sens_title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {th.sens_data.map(s => (
-            <div key={s.cat} className="flex items-center gap-4">
-              <span className="font-semibold text-foreground w-24">{s.cat}</span>
-              <Badge variant="outline" className="border-primary/30 text-primary">{s.range}</Badge>
+      <Panel>
+        <PanelHead icon={Crosshair} title={th.sens_title} tone="primary" />
+        <div className="px-5 pb-5 space-y-2">
+          {th.sens_data.map((s) => (
+            <div
+              key={s.cat}
+              className="flex items-center justify-between bg-background/40 border border-border/40 rounded-lg p-3"
+            >
+              <span className="font-display font-semibold text-foreground text-sm">{s.cat}</span>
+              <Badge variant="outline" className="border-primary/30 text-primary">
+                {s.range}
+              </Badge>
             </div>
           ))}
-          <div className="bg-secondary/50 rounded-md p-3 text-sm text-muted-foreground space-y-1 mt-2">
-            <p><span className="text-foreground font-semibold">{th.sens_universal_label}</span> {th.sens_universal_value}</p>
-            <p><span className="text-accent">{th.sens_note_label}</span> {th.sens_note_text}</p>
+          <div className="rounded-lg bg-background/40 border border-border/40 p-4 text-sm text-muted-foreground space-y-1.5 mt-2">
+            <p>
+              <span className="text-foreground font-semibold">{th.sens_universal_label}</span>{" "}
+              {th.sens_universal_value}
+            </p>
+            <p>
+              <span className="text-accent">{th.sens_note_label}</span> {th.sens_note_text}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
     </div>
   );
 }
+
+/* --------------------------------- Games --------------------------------- */
 
 function GamesSection({ c }: { c: AimGuideContent }) {
   const [game, setGame] = useState<AimGameKey>("valorant");
@@ -268,121 +652,135 @@ function GamesSection({ c }: { c: AimGuideContent }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2">
-        {(Object.keys(labels.data) as AimGameKey[]).map(k => (
+      <div className="flex flex-wrap gap-2">
+        {(Object.keys(labels.data) as AimGameKey[]).map((k) => (
           <button
             key={k}
             onClick={() => setGame(k)}
-            className={`px-4 py-2 rounded-md font-display font-semibold text-sm uppercase tracking-wider transition-colors border ${game === k
-              ? `${gameColors[k]} border-current bg-current/10`
-              : "text-muted-foreground border-border hover:text-foreground"
-            }`}
+            className={cn(
+              "px-4 h-10 rounded-full font-display font-semibold text-xs uppercase tracking-wider transition-all border",
+              game === k
+                ? `${gameColors[k]} border-current bg-current/10 shadow-[0_0_18px_-6px_currentColor]`
+                : "text-muted-foreground border-border/60 bg-card/40 hover:text-foreground hover:border-border"
+            )}
           >
             {labels.data[k].label}
           </button>
         ))}
       </div>
 
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">{labels.setup_label} — {g.label}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p><span className="text-foreground font-semibold">{labels.sens_label}</span> {g.setup.sens}</p>
-          <p><span className="text-foreground font-semibold">{labels.fov_label}</span> {g.setup.fov}</p>
-        </CardContent>
-      </Card>
+      <div className="grid lg:grid-cols-2 gap-5">
+        <Panel tone="primary">
+          <PanelHead icon={Swords} title={`${labels.setup_label} — ${g.label}`} tone="primary" />
+          <div className="px-5 pb-5 space-y-2">
+            <div className="rounded-lg bg-background/40 border border-border/40 p-3 text-sm">
+              <span className="text-foreground font-semibold">{labels.sens_label}</span>{" "}
+              <span className="text-muted-foreground">{g.setup.sens}</span>
+            </div>
+            <div className="rounded-lg bg-background/40 border border-border/40 p-3 text-sm">
+              <span className="text-foreground font-semibold">{labels.fov_label}</span>{" "}
+              <span className="text-muted-foreground">{g.setup.fov}</span>
+            </div>
+          </div>
+        </Panel>
 
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">{labels.warmup_label} — {g.label}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ol className="space-y-3">
+        <Panel tone="accent">
+          <PanelHead icon={Flame} title={`${labels.warmup_label} — ${g.label}`} tone="accent" />
+          <ol className="px-5 pb-5 space-y-2.5">
             {g.warmup.map((w, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0">{i + 1}</span>
-                <span className="text-muted-foreground text-sm pt-1">{w}</span>
+              <li
+                key={i}
+                className="flex items-start gap-3 bg-background/40 border border-border/40 rounded-lg p-3"
+              >
+                <span className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 text-accent flex items-center justify-center text-xs font-bold shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-muted-foreground pt-1">{w}</span>
               </li>
             ))}
           </ol>
-        </CardContent>
-      </Card>
+        </Panel>
+      </div>
 
-      <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">{labels.tips_label} — {g.label}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {g.tips.map((t, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />{t}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <Panel tone="primary">
+        <PanelHead icon={ArrowRight} title={`${labels.tips_label} — ${g.label}`} tone="primary" />
+        <ul className="px-5 pb-5 grid sm:grid-cols-2 gap-2">
+          {g.tips.map((t, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2 text-sm text-muted-foreground bg-background/40 border border-border/40 rounded-lg p-3"
+            >
+              <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }
+
+/* --------------------------------- Mindset ------------------------------- */
 
 function MindsetSection({ c }: { c: AimGuideContent }) {
   const m = c.mindset;
   return (
     <div className="space-y-6">
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Brain className="h-5 w-5 text-primary" /> {m.growth_title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 space-y-2">
-              <h4 className="font-display font-semibold text-destructive">{m.fixed_title}</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                {m.fixed_items.map(t => (
-                  <li key={t} className="flex items-center gap-2"><XCircle className="h-3 w-3 text-destructive shrink-0" />{t}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4 space-y-2">
-              <h4 className="font-display font-semibold text-green-400">{m.growth_subtitle}</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                {m.growth_items.map(t => (
-                  <li key={t} className="flex items-center gap-2"><CheckCircle className="h-3 w-3 text-green-500 shrink-0" />{t}</li>
-                ))}
-              </ul>
-            </div>
+      <Panel>
+        <PanelHead icon={Brain} title={m.growth_title} tone="primary" />
+        <div className="px-5 pb-5 grid md:grid-cols-2 gap-4">
+          <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-4 space-y-2">
+            <h4 className="font-display font-semibold text-destructive flex items-center gap-2">
+              <XCircle className="h-4 w-4" /> {m.fixed_title}
+            </h4>
+            <ul className="text-sm text-muted-foreground space-y-1.5">
+              {m.fixed_items.map((t) => (
+                <li key={t} className="flex items-start gap-2">
+                  <span className="mt-1.5 w-1 h-1 rounded-full bg-destructive shrink-0" />
+                  {t}
+                </li>
+              ))}
+            </ul>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Heart className="h-5 w-5 text-primary" /> {m.health_title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            {m.health_items.map(item => (
-              <div key={item.title} className="bg-secondary/50 rounded-lg p-4 space-y-1">
-                <p className="text-2xl">{item.emoji}</p>
-                <h4 className="font-display font-semibold text-foreground">{item.title}</h4>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
+          <div className="rounded-lg bg-green-500/5 border border-green-500/20 p-4 space-y-2">
+            <h4 className="font-display font-semibold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" /> {m.growth_subtitle}
+            </h4>
+            <ul className="text-sm text-muted-foreground space-y-1.5">
+              {m.growth_items.map((t) => (
+                <li key={t} className="flex items-start gap-2">
+                  <span className="mt-1.5 w-1 h-1 rounded-full bg-green-400 shrink-0" />
+                  {t}
+                </li>
+              ))}
+            </ul>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card className="border-accent/20">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2"><Info className="h-5 w-5 text-accent" /> {m.self_title}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground text-sm space-y-2">
+      <Panel>
+        <PanelHead icon={Heart} title={m.health_title} tone="primary" />
+        <div className="px-5 pb-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {m.health_items.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-lg bg-background/40 border border-border/40 p-4 space-y-1"
+            >
+              <p className="text-2xl">{item.emoji}</p>
+              <h4 className="font-display font-semibold text-foreground text-sm">{item.title}</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel tone="accent" className="bg-gradient-to-br from-accent/5 to-transparent">
+        <PanelHead icon={Info} title={m.self_title} tone="accent" />
+        <div className="px-5 pb-5 text-sm text-muted-foreground space-y-2 max-w-prose">
           <p>{m.self_p1}</p>
           <p className="text-accent font-semibold">{m.self_p2}</p>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
     </div>
   );
 }
