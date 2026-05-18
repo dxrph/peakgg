@@ -43,7 +43,7 @@ interface Registration {
   id: string; team_id: string; status: string; created_at: string;
   is_founding_team: boolean; submitted_by: string;
 }
-interface Team { id: string; name: string; tag: string | null; captain_id: string | null; }
+interface Team { id: string; name: string; tag: string | null; owner_id: string | null; }
 interface MatchRow {
   id: string; matchday: number | null; stage: string;
   team_a_id: string | null; team_b_id: string | null;
@@ -135,11 +135,11 @@ export default function PeakLeagueAdmin() {
     setRegs(rs);
     const teamIds = [...new Set(rs.map(r => r.team_id))];
     if (teamIds.length) {
-      const { data: ts } = await supabase.from("teams").select("id, name, tag, captain_id").in("id", teamIds);
+      const { data: ts } = await supabase.from("teams").select("id, name, tag, owner_id").in("id", teamIds);
       const m: Record<string, Team> = {};
       for (const t of ts ?? []) m[t.id] = t as Team;
       setTeamMap(prev => ({ ...prev, ...m }));
-      const capIds = (ts ?? []).map(t => t.captain_id).filter(Boolean) as string[];
+      const capIds = (ts ?? []).map(t => t.owner_id).filter(Boolean) as string[];
       if (capIds.length) {
         const { data: ps } = await supabase.from("profiles").select("id, username, display_name").in("id", capIds);
         const pm: Record<string, { username: string | null; display_name: string | null }> = {};
@@ -157,7 +157,7 @@ export default function PeakLeagueAdmin() {
     const ids = [...new Set(list.flatMap(m => [m.team_a_id, m.team_b_id]).filter(Boolean))] as string[];
     const missing = ids.filter(id => !teamMap[id]);
     if (missing.length) {
-      const { data: ts } = await supabase.from("teams").select("id, name, tag, captain_id").in("id", missing);
+      const { data: ts } = await supabase.from("teams").select("id, name, tag, owner_id").in("id", missing);
       const m: Record<string, Team> = {};
       for (const t of ts ?? []) m[t.id] = t as Team;
       setTeamMap(prev => ({ ...prev, ...m }));
@@ -389,7 +389,7 @@ export default function PeakLeagueAdmin() {
                   )}
                   {regs.map(r => {
                     const t = teamMap[r.team_id];
-                    const captain = t?.captain_id ? profileMap[t.captain_id] : null;
+                    const captain = t?.owner_id ? profileMap[t.owner_id] : null;
                     return (
                       <TableRow key={r.id}>
                         <TableCell>
