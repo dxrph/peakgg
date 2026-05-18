@@ -584,7 +584,7 @@ export default function LeaguesPage() {
         </section>
 
         {/* ============== ALL LEAGUES ============== */}
-        <section id="leagues-list" className="container pt-2 pb-20">
+        <section id="leagues-list" className="container pt-16 md:pt-20 pb-20">
           <div className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden">
             {/* Header */}
             <div className="px-5 md:px-7 pt-5 pb-4 border-b border-border/60 bg-gradient-to-r from-card/60 via-card/30 to-transparent">
