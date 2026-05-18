@@ -11,7 +11,8 @@ import EmptyState from "@/components/ui/empty-state";
 import {
   Trophy, Users, ArrowRight, MessageCircle, Shield, CalendarClock, Flag,
   ListChecks, CheckCircle2, Crown, ChevronRight, Swords, ClipboardCheck,
-  Sparkles, Radio, Eye, History, Globe2,
+  Sparkles, Radio, Eye, History, Globe2, Layers, GitBranch, BarChart3,
+  Gavel, Network, Trophy as TrophyIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -62,12 +63,26 @@ const ROADMAP = [
 ];
 
 const HOW_STEPS = [
-  { n: "01", icon: Users, title: "Create Your Team", desc: "Set up your roster and invite your players." },
-  { n: "02", icon: ClipboardCheck, title: "Apply To The League", desc: "Submit your team for Season 0 Beta." },
-  { n: "03", icon: Shield, title: "Staff Review", desc: "Admins approve valid rosters." },
-  { n: "04", icon: ListChecks, title: "Format Generated", desc: "The season adapts to approved teams." },
-  { n: "05", icon: Swords, title: "Play Matchdays", desc: "Compete, submit results and climb standings." },
-  { n: "06", icon: Crown, title: "Playoffs", desc: "Top teams fight for champion status." },
+  { n: "01", icon: Users, title: "Create Your Team", desc: "Captains build their roster and invite players." },
+  { n: "02", icon: ClipboardCheck, title: "Apply To The Season", desc: "Submit your team for the current Peak League season." },
+  { n: "03", icon: Shield, title: "Staff Review", desc: "Only approved teams enter the competition." },
+  { n: "04", icon: ListChecks, title: "Format Generated", desc: "When registration closes, the league format is built from the approved teams." },
+  { n: "05", icon: Swords, title: "Matchdays Begin", desc: "Teams play scheduled matches, submit results and climb the standings." },
+  { n: "06", icon: Crown, title: "Playoffs + Champion", desc: "Top teams qualify for playoffs and fight for the Peak League title." },
+];
+
+const FORMAT_CARDS = [
+  { range: "4–7 Teams", format: "Single Round-Robin", playoff: "Top 2 Final" },
+  { range: "8–10 Teams", format: "Single Round-Robin", playoff: "Top 4 Playoffs" },
+  { range: "11–14 Teams", format: "Single Round-Robin", playoff: "Top 6 Playoffs" },
+  { range: "16+ Teams", format: "Groups / Divisions", playoff: "Playoff Qualification" },
+];
+
+const PUBLIC_SYSTEM = [
+  { icon: BarChart3, title: "Public Standings", desc: "Track every team's wins, losses and points." },
+  { icon: CheckCircle2, title: "Public Results", desc: "Every completed match shows the winner." },
+  { icon: ClipboardCheck, title: "Captain Confirmation", desc: "Results are submitted and confirmed by teams." },
+  { icon: Gavel, title: "Staff Disputes", desc: "Staff can resolve disputed results when needed." },
 ];
 
 const WHY = [
@@ -418,37 +433,129 @@ export default function LeaguesPage() {
           </section>
         )}
 
-        {/* ============== HOW IT WORKS ============== */}
-        <section className="relative py-20 md:py-24 border-y border-border/60 overflow-hidden">
-          <div className="absolute inset-0 bg-[#0a0a0a]/40" />
+        {/* ============== HOW PEAK LEAGUE WORKS ============== */}
+        <section className="relative py-20 md:py-28 border-y border-border/60 overflow-hidden">
+          {/* Cinematic backdrop */}
+          <div className="absolute inset-0 bg-[#08080c]/60" />
+          <div className="absolute inset-0 bg-grid-faint opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[60rem] h-[60rem] rounded-full bg-primary/[0.05] blur-3xl" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
           <div className="container relative">
-            <div className="text-center mb-14">
-              <div className="eyebrow justify-center"><CalendarClock className="h-3 w-3" /> Roadmap</div>
+            {/* Heading */}
+            <div className="text-center max-w-3xl mx-auto mb-14 md:mb-16">
+              <div className="eyebrow justify-center"><CalendarClock className="h-3 w-3" /> Competition Flow</div>
               <h2 className="mt-3 font-display font-bold uppercase text-4xl md:text-5xl tracking-tight">
                 How <span className="text-primary text-glow-red">Peak League</span> Works
               </h2>
-              <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-                Six steps from team creation to lifting the trophy.
+              <p className="mt-4 text-muted-foreground text-base md:text-lg">
+                From team application to playoffs — every season is built around approved teams.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground/80 leading-relaxed">
+                Peak League is a seasonal Valorant competition where teams apply, staff review the rosters,
+                and the final league format is generated from the approved teams. Every match, result,
+                standing and champion is public.
               </p>
             </div>
 
-            <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-4">
-              <div className="hidden lg:block absolute top-[3.25rem] left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-              {HOW_STEPS.map((s, i) => (
-                <div key={s.n} className="relative text-center px-2">
-                  <div className="relative mx-auto w-24 h-24 mb-5">
-                    <div className="absolute inset-0 rounded-full bg-primary/[0.06] border border-primary/30 flex items-center justify-center backdrop-blur-sm">
-                      <s.icon className="h-8 w-8 text-primary" />
+            {/* 6-step flow */}
+            <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-3">
+              {/* desktop connector line */}
+              <div className="hidden lg:block absolute top-7 left-[6%] right-[6%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              {HOW_STEPS.map((s) => (
+                <div
+                  key={s.n}
+                  className="relative rounded-xl border border-border/60 bg-[linear-gradient(160deg,hsl(240_15%_10%/0.85),hsl(240_18%_5%/0.85))] p-5 pt-8 backdrop-blur-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  {/* step number badge */}
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className="relative w-14 h-14 rounded-full bg-background border border-primary/50 flex items-center justify-center shadow-[0_0_24px_-6px_hsl(var(--primary)/0.7)]">
+                      <span className="font-display font-bold text-primary text-lg">{s.n}</span>
                     </div>
-                    <span className="absolute -top-1 -right-1 text-2xl font-display font-bold text-primary text-glow-red bg-background px-1.5 rounded">
-                      {s.n}
-                    </span>
                   </div>
-                  <h3 className="font-display font-bold uppercase tracking-tight">{s.title}</h3>
-                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed max-w-[16ch] mx-auto">{s.desc}</p>
+                  <div className="flex justify-center mt-2 mb-3">
+                    <s.icon className="h-6 w-6 text-accent" />
+                  </div>
+                  <h3 className="text-center font-display font-bold uppercase tracking-tight text-sm md:text-[15px] leading-tight">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-center text-[13px] text-muted-foreground leading-relaxed">
+                    {s.desc}
+                  </p>
                 </div>
               ))}
+            </div>
+
+            {/* COMPETITION FORMAT sub-section */}
+            <div className="mt-20 md:mt-24">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="eyebrow justify-center"><Layers className="h-3 w-3" /> Competition Format</div>
+                <h3 className="mt-3 font-display font-bold uppercase text-2xl md:text-3xl tracking-tight">
+                  Dynamic League Format
+                </h3>
+                <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+                  Peak League does not force every season into one fixed bracket. The format adapts
+                  to the number of approved teams.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {FORMAT_CARDS.map((f, i) => (
+                  <div
+                    key={f.range}
+                    className="group relative rounded-xl border border-border/60 bg-card/40 overflow-hidden hover:border-accent/50 transition-all duration-300"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-display uppercase tracking-[0.22em] text-muted-foreground">
+                          Tier {i + 1}
+                        </span>
+                        <Network className="h-4 w-4 text-accent/70" />
+                      </div>
+                      <div className="font-display font-bold uppercase text-xl tracking-tight text-foreground">
+                        {f.range}
+                      </div>
+                      <div className="mt-4 space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-foreground/90">
+                          <GitBranch className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span>{f.format}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-foreground/90">
+                          <Crown className="h-3.5 w-3.5 text-accent shrink-0" />
+                          <span>{f.playoff}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* PUBLIC COMPETITION SYSTEM */}
+            <div className="mt-16 md:mt-20">
+              <div className="text-center max-w-2xl mx-auto mb-8">
+                <div className="eyebrow justify-center"><Eye className="h-3 w-3" /> Public Competition System</div>
+                <h3 className="mt-3 font-display font-bold uppercase text-xl md:text-2xl tracking-tight">
+                  Built In The Open
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {PUBLIC_SYSTEM.map((p) => (
+                  <div
+                    key={p.title}
+                    className="rounded-lg border border-border/60 bg-card/30 p-4 hover:border-primary/40 transition-colors"
+                  >
+                    <p.icon className="h-5 w-5 text-primary mb-3" />
+                    <div className="font-display font-bold uppercase text-[13px] tracking-tight leading-tight">
+                      {p.title}
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      {p.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -477,7 +584,7 @@ export default function LeaguesPage() {
         </section>
 
         {/* ============== ALL LEAGUES ============== */}
-        <section id="leagues-list" className="container pt-2 pb-20">
+        <section id="leagues-list" className="container pt-16 md:pt-20 pb-20">
           <div className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden">
             {/* Header */}
             <div className="px-5 md:px-7 pt-5 pb-4 border-b border-border/60 bg-gradient-to-r from-card/60 via-card/30 to-transparent">
