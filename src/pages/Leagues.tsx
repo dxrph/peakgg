@@ -9,8 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import EmptyState from "@/components/ui/empty-state";
 import {
-  Trophy, Users, ArrowRight, Mountain, Sparkles, MessageCircle,
-  Shield, Star, CalendarClock, Flag, ListChecks, CheckCircle2, Hourglass, CalendarRange, Crown, Lock,
+  Trophy, Users, ArrowRight, MessageCircle, Shield, CalendarClock, Flag,
+  ListChecks, CheckCircle2, Crown, ChevronRight, Swords, ClipboardCheck,
+  Sparkles, Radio, Eye, History, Globe2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -60,28 +61,35 @@ const ROADMAP = [
   { name: "Rainbow Six League", game: "Rainbow Six Siege", note: "Launches when R6 mode goes live." },
 ];
 
+const HOW_STEPS = [
+  { n: "01", icon: Users, title: "Create Your Team", desc: "Set up your roster and invite your players." },
+  { n: "02", icon: ClipboardCheck, title: "Apply To The League", desc: "Submit your team for Season 0 Beta." },
+  { n: "03", icon: Shield, title: "Staff Review", desc: "Admins approve valid rosters." },
+  { n: "04", icon: ListChecks, title: "Format Generated", desc: "The season adapts to approved teams." },
+  { n: "05", icon: Swords, title: "Play Matchdays", desc: "Compete, submit results and climb standings." },
+  { n: "06", icon: Crown, title: "Playoffs", desc: "Top teams fight for champion status." },
+];
+
+const WHY = [
+  { icon: Eye, title: "Get Discovered", desc: "Build your team history on PeakGG." },
+  { icon: ListChecks, title: "Real Structure", desc: "Standings, results, playoffs and public records." },
+  { icon: Globe2, title: "Community Competition", desc: "Compete against other European teams and communities." },
+  { icon: History, title: "Founding Status", desc: "Early teams become part of PeakGG history." },
+];
+
+const FEATURES = [
+  { icon: Users, title: "Build Your Roster", desc: "Create your team and apply for the season." },
+  { icon: Shield, title: "Staff-Approved Competition", desc: "Only reviewed teams enter the league." },
+  { icon: CalendarClock, title: "Matchdays + Standings", desc: "Every result updates the race to playoffs." },
+  { icon: Crown, title: "Playoffs + Champion", desc: "Top teams fight for the Peak League title." },
+];
+
 function statusToTab(s: string): Tab {
   if (s === "registration_open") return "registration_open";
   if (s === "ongoing" || s === "playoffs" || s === "registration_closed") return "active";
   if (s === "draft") return "upcoming";
   if (s === "completed") return "completed";
   return "all";
-}
-
-function Stat({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string | number; tone?: "success" | "accent" | "muted" }) {
-  const toneCls =
-    tone === "success" ? "border-success/30 text-success"
-    : tone === "accent" ? "border-accent/30 text-accent"
-    : "border-border text-foreground";
-  return (
-    <div className={`rounded-md border ${toneCls} bg-card/40 px-2.5 py-2 flex items-center gap-2`}>
-      <Icon className="h-3.5 w-3.5 shrink-0" />
-      <div className="min-w-0">
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">{label}</div>
-        <div className="font-display text-sm leading-tight">{value}</div>
-      </div>
-    </div>
-  );
 }
 
 export default function LeaguesPage() {
@@ -109,7 +117,6 @@ export default function LeaguesPage() {
         let team_count = 0;
         let pending_count = 0;
         if (current) {
-          // Count only approved registrations whose team is real (non-demo) — must match Teams tab.
           const { data: regs } = await supabase
             .from("league_registrations")
             .select("team_id, status")
@@ -117,21 +124,16 @@ export default function LeaguesPage() {
             .in("status", ["approved", "pending"]);
           const approvedIds = (regs ?? []).filter((r: any) => r.status === "approved").map((r: any) => r.team_id);
           const pendingIds = (regs ?? []).filter((r: any) => r.status === "pending").map((r: any) => r.team_id);
-          const ids = approvedIds;
-          if (ids.length) {
+          if (approvedIds.length) {
             const { count } = await supabase
-              .from("teams")
-              .select("id", { count: "exact", head: true })
-              .in("id", ids)
-              .eq("is_demo", false);
+              .from("teams").select("id", { count: "exact", head: true })
+              .in("id", approvedIds).eq("is_demo", false);
             team_count = count ?? 0;
           }
           if (pendingIds.length) {
             const { count } = await supabase
-              .from("teams")
-              .select("id", { count: "exact", head: true })
-              .in("id", pendingIds)
-              .eq("is_demo", false);
+              .from("teams").select("id", { count: "exact", head: true })
+              .in("id", pendingIds).eq("is_demo", false);
             pending_count = count ?? 0;
           }
         }
@@ -160,272 +162,352 @@ export default function LeaguesPage() {
     );
   }, [leagues]);
 
-  const stats = useMemo(() => {
-    const active = leagues.filter(l => ["ongoing", "playoffs"].includes(l.current_season?.status ?? "")).length;
-    const regOpen = leagues.filter(l => (l.current_season?.status ?? l.status) === "registration_open").length;
-    const teamsRegistered = leagues.reduce((sum, l) => sum + (l.team_count || 0), 0);
-    const openSlots = leagues.reduce((sum, l) => {
-      if ((l.current_season?.status ?? l.status) !== "registration_open") return sum;
-      return sum + Math.max(0, (l.max_teams || 0) - (l.team_count || 0));
-    }, 0);
-    return { active, regOpen, teamsRegistered, openSlots };
-  }, [leagues]);
-
-  const renderCard = (l: LeagueListItem, isFeatured = false) => {
-    const status = l.current_season?.status ?? l.status;
-    const isOpen = status === "registration_open";
-    const minTeams = l.current_season?.min_team_count ?? 4;
-    const recMin = l.current_season?.recommended_min_teams ?? 8;
-    const recMax = l.current_season?.recommended_max_teams ?? 12;
-    const fmt = l.current_season?.generated_format;
-    const formatGenerated = l.current_season?.format_status === "generated" && !!fmt;
-    const scheduleGenerated = l.current_season?.schedule_status === "generated";
-    const pct = Math.min(100, ((l.team_count || 0) / Math.max(1, recMax)) * 100);
-    const gameName = GAMES.find(g => g.id === l.game)?.name ?? l.game;
-
-    return (
-      <Card
-        key={l.id}
-        className={`overflow-hidden transition-all hover:border-primary/50 hover:shadow-[0_0_30px_-12px_hsl(var(--primary)/0.5)] ${
-          isFeatured ? "border-primary/40 neon-border" : ""
-        }`}
-      >
-        {l.banner_url && (
-          <div
-            className={`bg-cover bg-center relative ${isFeatured ? "h-48 md:h-56" : "h-32"}`}
-            style={{ backgroundImage: `url(${l.banner_url})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-            {isFeatured && (
-              <div className="absolute top-3 left-3">
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm bg-primary text-primary-foreground text-[10px] font-display uppercase tracking-widest">
-                  <Star className="h-3 w-3" />Featured Season
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-        <div className={isFeatured ? "p-6 md:p-8" : "p-5"}>
-          <div className="flex items-start justify-between mb-3 gap-2">
-            <div className="min-w-0">
-              <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground mb-1">
-                {gameName} · Europe · {l.current_season?.name ?? "No active season"}
-              </div>
-              <h3 className={`font-display font-bold uppercase tracking-tight ${isFeatured ? "text-2xl md:text-3xl" : "text-xl"}`}>
-                {l.name}
-              </h3>
-            </div>
-            <StatusPill status={status} />
-          </div>
-          {l.description && (
-            <p className={`text-sm text-muted-foreground mb-4 ${isFeatured ? "" : "line-clamp-2"}`}>
-              {l.description}
-            </p>
-          )}
-
-          {l.current_season && (
-            <div className="mb-4 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <Stat icon={CheckCircle2} tone="success" label="Approved" value={l.team_count} />
-                <Stat icon={Hourglass} tone="accent" label="Pending" value={l.pending_count} />
-                <Stat icon={Shield} tone="muted" label="Min required" value={minTeams} />
-                <Stat icon={CalendarRange} tone="muted" label="Recommended" value={`${recMin}–${recMax}`} />
-              </div>
-              <div>
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
-                  <span>Approved teams</span>
-                  <span>{l.team_count} / {recMax} target</span>
-                </div>
-                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                </div>
-                {l.team_count < minTeams && (
-                  <p className="text-[10px] text-muted-foreground mt-1.5">
-                    Minimum {minTeams} approved teams required to start.
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-wider">
-                <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${formatGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
-                  <ListChecks className="h-3 w-3" />
-                  Format: {formatGenerated ? "Generated" : "Pending"}
-                </div>
-                <div className={`rounded-sm border px-2 py-1.5 flex items-center gap-1.5 ${scheduleGenerated ? "border-success/40 text-success bg-success/5" : "border-border text-muted-foreground bg-card/40"}`}>
-                  <CalendarClock className="h-3 w-3" />
-                  Schedule: {scheduleGenerated ? "Generated" : "Locked"}
-                </div>
-              </div>
-              {formatGenerated && fmt && (
-                <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-[11px] space-y-1">
-                  <div className="font-display uppercase tracking-wider text-[10px] text-primary flex items-center gap-1.5">
-                    <Crown className="h-3 w-3" /> Generated format
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-foreground/90">
-                    <span className="text-muted-foreground">Teams</span><span>{fmt.teams}</span>
-                    <span className="text-muted-foreground">Mode</span><span className="uppercase">{String(fmt.mode ?? "").replace(/_/g, " ")}</span>
-                    {fmt.matchdays != null && (<><span className="text-muted-foreground">Matchdays</span><span>{fmt.matchdays}</span></>)}
-                    {fmt.total_matches != null && (<><span className="text-muted-foreground">Total matches</span><span>{fmt.total_matches}</span></>)}
-                    {fmt.playoff_label && (<><span className="text-muted-foreground">Playoffs</span><span>{fmt.playoff_label}</span></>)}
-                    {fmt.regular_match_format && (<><span className="text-muted-foreground">Regular</span><span>{fmt.regular_match_format}</span></>)}
-                    {fmt.playoff_match_format && (<><span className="text-muted-foreground">Playoff</span><span>{fmt.playoff_match_format}</span></>)}
-                    {typeof fmt.teams === "number" && fmt.teams % 2 === 1 && (<><span className="text-muted-foreground">Bye weeks</span><span>Enabled</span></>)}
-                  </div>
-                </div>
-              )}
-              {!l.current_season && (
-                <p className="text-xs text-muted-foreground">No active season yet.</p>
-              )}
-              {l.current_season && l.team_count === 0 && (
-                <p className="text-xs text-muted-foreground">No teams approved yet. Applications are open.</p>
-              )}
-              {isOpen && !formatGenerated && l.team_count >= minTeams && (
-                <p className="text-xs text-muted-foreground">Final format will be generated once registrations close.</p>
-              )}
-            </div>
-          )}
-
-          {l.reward_text && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-              <Trophy className="h-3.5 w-3.5 text-accent shrink-0" />
-              <span className="text-foreground">{l.reward_text}</span>
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button asChild variant={isFeatured ? "neon" : "default"} className="flex-1 uppercase tracking-wider">
-              <Link to={`/leagues/${l.id}`}>
-                View League<ArrowRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Button>
-            {isFeatured && isOpen && (
-              <Button asChild variant="neonOutline" className="flex-1 uppercase tracking-wider">
-                <Link to={`/leagues/${l.slug ?? l.id}#teams`}>
-                  <Users className="h-4 w-4 mr-1" />Apply With Team
-                </Link>
-              </Button>
-            )}
-            {status === "draft" && (
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="neonOutline" className="w-full uppercase tracking-wider">
-                  Get Notified
-                </Button>
-              </a>
-            )}
-          </div>
-        </div>
-      </Card>
-    );
-  };
-
-  const showStat = (n: number) => n > 0;
+  const featuredSlug = featured?.slug ?? featured?.id;
+  const fStatus = featured?.current_season?.status ?? featured?.status ?? "draft";
+  const fIsOpen = fStatus === "registration_open";
+  const fMin = featured?.current_season?.min_team_count ?? 4;
+  const fRecMin = featured?.current_season?.recommended_min_teams ?? 8;
+  const fRecMax = featured?.current_season?.recommended_max_teams ?? 12;
+  const fFmt = featured?.current_season?.generated_format;
+  const fFormatGenerated = featured?.current_season?.format_status === "generated" && !!fFmt;
+  const fApproved = featured?.team_count ?? 0;
+  const fPct = Math.min(100, (fApproved / Math.max(1, fMin)) * 100);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="PeakGG League Hub — Competitive FPS Leagues"
-        description="Browse active and upcoming PeakGG leagues. Register your team for Peak League, Challenger League and more competitive FPS circuits in Europe."
+        title="Peak League — Europe's Competitive Valorant League | PeakGG"
+        description="Apply with your team, climb the standings, and fight for the playoffs in Peak League — the competitive ladder for European Valorant teams on PeakGG."
         path="/leagues"
       />
       <Navbar />
 
       <main className="flex-1">
-        {/* HERO */}
-        <section className="relative border-b border-border bg-gradient-to-b from-primary/10 to-background overflow-hidden">
+        {/* ============== HERO ============== */}
+        <section className="relative overflow-hidden border-b border-border/60">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
+          <div className="absolute inset-0 bg-grid-faint opacity-40 pointer-events-none" />
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-primary/20 blur-[140px] pointer-events-none" />
+          <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-accent/15 blur-[160px] pointer-events-none" />
+          {/* Diagonal lines */}
           <div
-            className="absolute inset-0 opacity-[0.05] pointer-events-none"
+            className="absolute inset-0 opacity-[0.06] pointer-events-none"
             style={{
-              backgroundImage:
-                "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
+              backgroundImage: "repeating-linear-gradient(115deg, hsl(var(--primary)) 0, hsl(var(--primary)) 1px, transparent 1px, transparent 22px)",
             }}
           />
-          <div className="container relative py-12 md:py-16">
-            <div className="flex items-center gap-2 text-xs font-display uppercase tracking-widest text-primary mb-3">
-              <Mountain className="h-4 w-4" /> PeakGG / Peak League
-            </div>
-            <h1 className="font-display font-bold text-4xl md:text-6xl uppercase tracking-tight">
-              Peak <span className="text-primary">League</span>
-            </h1>
-            <p className="mt-4 text-muted-foreground max-w-2xl">
-              Europe's community-driven Valorant league. Teams apply. Admins approve. The season format is generated from the final approved teams.
-            </p>
 
-            <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 max-w-5xl">
-              {[
-                { icon: Users, label: "Dynamic Team Count" },
-                { icon: CheckCircle2, label: "Admin-Approved Teams" },
-                { icon: CalendarClock, label: "Auto Schedule" },
-                { icon: ListChecks, label: "Live Standings" },
-                { icon: Trophy, label: "Public Results" },
-                { icon: Crown, label: "Playoffs + Champion" },
-              ].map((s) => (
-                <div key={s.label} className="rounded-md border border-border bg-card/60 px-3 py-2.5 flex items-center gap-2">
-                  <s.icon className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span className="text-[11px] font-display uppercase tracking-wider text-foreground/80 leading-tight">{s.label}</span>
+          <div className="container relative py-16 md:py-24">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+              {/* LEFT */}
+              <div className="lg:col-span-7">
+                <Link to="/" className="inline-flex items-center gap-1.5 text-[11px] font-display uppercase tracking-[0.25em] text-muted-foreground hover:text-primary transition-colors">
+                  PeakGG <ChevronRight className="h-3 w-3" /> <span className="text-primary">Peak League</span>
+                </Link>
+
+                <h1 className="mt-5 font-display font-bold uppercase leading-[0.92] tracking-tight text-6xl sm:text-7xl md:text-8xl lg:text-[8.5rem]">
+                  Peak<br />
+                  <span className="text-primary text-glow-red">League</span>
+                </h1>
+
+                <p className="mt-6 text-lg md:text-xl text-foreground/85 font-body max-w-xl">
+                  The competitive ladder for European Valorant teams.
+                </p>
+                <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed">
+                  Build your roster. Apply to the league. Compete through matchdays, climb the standings and fight for the playoffs.
+                </p>
+
+                <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3">
+                  <Button asChild variant="neon" size="lg" className="ring-soft-primary">
+                    <Link to={featuredSlug ? `/leagues/${featuredSlug}#teams` : "/teams"}>
+                      <Users className="h-4 w-4" /> Apply With Team
+                    </Link>
+                  </Button>
+                  <Button asChild variant="neonOutline" size="lg">
+                    <Link to={featuredSlug ? `/leagues/${featuredSlug}` : "#leagues-list"}>
+                      <Trophy className="h-4 w-4" /> View League
+                    </Link>
+                  </Button>
+                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                    <Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground">
+                      <MessageCircle className="h-4 w-4" /> Join Discord
+                    </Button>
+                  </a>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="flex flex-wrap gap-3 mt-6">
-              <a href="#leagues-list">
-                <Button variant="neon" size="lg" className="uppercase tracking-wider">
-                  <Trophy className="h-4 w-4 mr-2" />Current Season
-                </Button>
-              </a>
-              <Link to="/teams">
-                <Button variant="neonOutline" size="lg" className="uppercase tracking-wider">
-                  <Users className="h-4 w-4 mr-2" />Create Team
-                </Button>
-              </Link>
-              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-                <Button variant="neonOutline" size="lg" className="uppercase tracking-wider">
-                  <MessageCircle className="h-4 w-4 mr-2" />Join Discord
-                </Button>
-              </a>
+              {/* RIGHT — Season status overlay panel */}
+              <div className="lg:col-span-5">
+                {loading || !featured ? (
+                  <Skeleton className="h-[380px] rounded-xl" />
+                ) : (
+                  <div className="relative">
+                    {/* Halo */}
+                    <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/40 via-transparent to-accent/30 blur-sm opacity-70" />
+                    <div className="relative rounded-2xl border border-primary/30 bg-[linear-gradient(160deg,hsl(240_15%_9%_/0.95),hsl(240_18%_5%_/0.95))] overflow-hidden shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)]">
+                      {/* Top strip */}
+                      <div className="flex items-center justify-between px-5 py-3 border-b border-primary/20 bg-primary/[0.04]">
+                        <div className="flex items-center gap-2">
+                          <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />
+                          <span className="text-[10px] font-display uppercase tracking-[0.3em] text-primary">Season Status</span>
+                        </div>
+                        <StatusPill status={fStatus} />
+                      </div>
+
+                      <div className="p-6">
+                        <div className="text-[11px] font-display uppercase tracking-[0.25em] text-muted-foreground">
+                          {featured.current_season?.name ?? "Founding Season"}
+                        </div>
+                        <h2 className="mt-1 font-display font-bold uppercase text-3xl md:text-4xl tracking-tight">
+                          {featured.name}
+                        </h2>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Europe · Valorant · Staff-approved teams only.
+                        </p>
+
+                        {/* Metric trio */}
+                        <div className="mt-6 grid grid-cols-3 gap-3">
+                          <MetricBig value={fApproved} label="Teams Approved" tone="primary" />
+                          <MetricBig value={fMin} label="Needed To Start" />
+                          <MetricBig value={`${fRecMin}–${fRecMax}`} label="Recommended" />
+                        </div>
+
+                        {/* Progress */}
+                        <div className="mt-6">
+                          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                            <span>Registration Progress</span>
+                            <span className="text-foreground/80 font-display">{fApproved} approved / {fMin} needed</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary/60 overflow-hidden relative">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-accent transition-all duration-700"
+                              style={{ width: `${fPct}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Format line */}
+                        <div className="mt-5 flex items-center gap-2 text-xs">
+                          <ListChecks className={`h-3.5 w-3.5 ${fFormatGenerated ? "text-success" : "text-muted-foreground"}`} />
+                          <span className="text-muted-foreground">Format:</span>
+                          <span className={fFormatGenerated ? "text-success font-medium" : "text-foreground/80"}>
+                            {fFormatGenerated ? "Generated" : "Not generated yet"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* FEATURED */}
+        {/* ============== FEATURE BLOCKS ============== */}
+        <section className="container py-16 md:py-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map((f, i) => (
+              <div
+                key={f.title}
+                className="group relative rounded-xl p-6 bg-[linear-gradient(160deg,hsl(240_15%_10%/0.9),hsl(240_18%_6%/0.9))] border border-border/60 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_hsl(var(--primary)/0.5)]"
+              >
+                <div className="absolute top-3 right-4 text-[10px] font-display tracking-[0.25em] text-primary/40">0{i + 1}</div>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <f.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-bold uppercase tracking-tight text-lg">{f.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============== CURRENT SEASON FEATURE ============== */}
         {!loading && featured && (
-          <section className="container pt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <h2 className="font-display uppercase tracking-widest text-xs text-muted-foreground">Featured Season</h2>
+          <section className="container pb-16 md:pb-24">
+            <div className="text-center mb-10">
+              <div className="eyebrow justify-center"><Sparkles className="h-3 w-3" /> Current Season</div>
+              <h2 className="mt-3 font-display font-bold uppercase text-4xl md:text-5xl tracking-tight">
+                {featured.current_season?.name ?? "Season 0 Beta"}
+              </h2>
+              <div className="mt-3 flex justify-center"><StatusPill status={fStatus} /></div>
             </div>
-            {renderCard(featured, true)}
+
+            <div className="relative rounded-2xl overflow-hidden border border-border/70 bg-[linear-gradient(160deg,hsl(240_15%_9%),hsl(240_18%_5%))]">
+              {/* Decorative */}
+              <div className="absolute inset-0 bg-grid-faint opacity-30 pointer-events-none" />
+              <div className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary/15 blur-[120px] pointer-events-none" />
+              <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
+
+              <div className="relative p-8 md:p-12">
+                <p className="text-base md:text-lg text-foreground/85 max-w-3xl">
+                  PeakGG's founding competitive season. Teams are reviewed by staff before entering the league.
+                  The final format is generated from approved teams when registrations close.
+                </p>
+
+                {/* 3 big metrics */}
+                <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <BigMetric value={fApproved} label="Teams Approved" highlight />
+                  <BigMetric value={fMin} label="Needed To Start" />
+                  <BigMetric value={`${fRecMin}–${fRecMax}`} label="Recommended" />
+                </div>
+
+                {/* Format message */}
+                {!fFormatGenerated && (
+                  <div className="mt-8 rounded-lg border border-primary/25 bg-primary/[0.04] px-5 py-4 flex items-center gap-3">
+                    <ListChecks className="h-5 w-5 text-primary shrink-0" />
+                    <p className="text-sm text-foreground/85">
+                      Final format will be generated once registrations close.
+                    </p>
+                  </div>
+                )}
+
+                {/* Generated format details */}
+                {fFormatGenerated && fFmt && (
+                  <div className="mt-8 rounded-xl border border-success/30 bg-success/[0.04] p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Crown className="h-4 w-4 text-success" />
+                      <span className="text-[11px] font-display uppercase tracking-[0.25em] text-success">Generated Format</span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <FormatStat label="Teams" value={fFmt.teams} />
+                      <FormatStat label="Format" value={String(fFmt.mode ?? "").replace(/_/g, " ")} />
+                      {fFmt.matchdays != null && <FormatStat label="Matchdays" value={fFmt.matchdays} />}
+                      {fFmt.total_matches != null && <FormatStat label="Total Matches" value={fFmt.total_matches} />}
+                      {fFmt.playoff_label && <FormatStat label="Playoffs" value={fFmt.playoff_label} />}
+                      {typeof fFmt.teams === "number" && fFmt.teams % 2 === 1 && <FormatStat label="Bye Weeks" value="Enabled" />}
+                    </div>
+                  </div>
+                )}
+
+                {/* Big progress */}
+                <div className="mt-8">
+                  <div className="flex items-end justify-between mb-2">
+                    <span className="text-[11px] font-display uppercase tracking-[0.25em] text-muted-foreground">Road To Kickoff</span>
+                    <span className="font-display text-lg">
+                      <span className="text-primary text-2xl">{fApproved}</span>
+                      <span className="text-muted-foreground"> approved / {fMin} needed to start</span>
+                    </span>
+                  </div>
+                  <div className="h-3 rounded-full bg-secondary/60 overflow-hidden relative">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-accent shadow-[0_0_20px_hsl(var(--primary)/0.6)] transition-all duration-700"
+                      style={{ width: `${fPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* CTAs */}
+                <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                  {fIsOpen && (
+                    <Button asChild variant="neon" size="lg" className="ring-soft-primary">
+                      <Link to={`/leagues/${featuredSlug}#teams`}>
+                        <Users className="h-4 w-4" /> Apply With Team
+                      </Link>
+                    </Button>
+                  )}
+                  <Button asChild variant="neonOutline" size="lg">
+                    <Link to={`/leagues/${featuredSlug}`}>
+                      <Trophy className="h-4 w-4" /> View League <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </section>
         )}
 
-        {/* FILTERS + LIST */}
-        <section id="leagues-list" className="container py-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <h2 className="font-display text-2xl uppercase tracking-tight">All Leagues</h2>
+        {/* ============== HOW IT WORKS ============== */}
+        <section className="relative py-20 md:py-24 border-y border-border/60 overflow-hidden">
+          <div className="absolute inset-0 bg-[#0a0a0a]/40" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="container relative">
+            <div className="text-center mb-14">
+              <div className="eyebrow justify-center"><CalendarClock className="h-3 w-3" /> Roadmap</div>
+              <h2 className="mt-3 font-display font-bold uppercase text-4xl md:text-5xl tracking-tight">
+                How <span className="text-primary text-glow-red">Peak League</span> Works
+              </h2>
+              <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+                Six steps from team creation to lifting the trophy.
+              </p>
+            </div>
+
+            <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-4">
+              <div className="hidden lg:block absolute top-[3.25rem] left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              {HOW_STEPS.map((s, i) => (
+                <div key={s.n} className="relative text-center px-2">
+                  <div className="relative mx-auto w-24 h-24 mb-5">
+                    <div className="absolute inset-0 rounded-full bg-primary/[0.06] border border-primary/30 flex items-center justify-center backdrop-blur-sm">
+                      <s.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <span className="absolute -top-1 -right-1 text-2xl font-display font-bold text-primary text-glow-red bg-background px-1.5 rounded">
+                      {s.n}
+                    </span>
+                  </div>
+                  <h3 className="font-display font-bold uppercase tracking-tight">{s.title}</h3>
+                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed max-w-[16ch] mx-auto">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ============== WHY TEAMS JOIN ============== */}
+        <section className="container py-20 md:py-24">
+          <div className="text-center mb-12">
+            <div className="eyebrow justify-center"><Trophy className="h-3 w-3" /> The Edge</div>
+            <h2 className="mt-3 font-display font-bold uppercase text-4xl md:text-5xl tracking-tight">
+              Why Teams Join
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {WHY.map((w, i) => (
+              <div
+                key={w.title}
+                className="group relative rounded-xl overflow-hidden border border-border/60 bg-[linear-gradient(160deg,hsl(240_15%_10%/0.92),hsl(240_18%_5%/0.92))] p-6 hover:border-accent/50 transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <w.icon className="h-7 w-7 text-accent mb-4" />
+                <h3 className="font-display font-bold uppercase tracking-tight text-lg">{w.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{w.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============== ALL LEAGUES ============== */}
+        <section id="leagues-list" className="container pb-20">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+            <div>
+              <div className="eyebrow"><Flag className="h-3 w-3" /> Browse</div>
+              <h2 className="mt-2 font-display font-bold uppercase text-3xl md:text-4xl tracking-tight">All Leagues</h2>
+            </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {TABS.map(t => (
                   <button
                     key={t.id}
                     onClick={() => setTab(t.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider border transition-all ${
+                    className={`shrink-0 px-3.5 py-2 rounded-full text-[11px] font-display uppercase tracking-[0.15em] transition-all ${
                       tab === t.id
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-card hover:border-primary/40 text-muted-foreground hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]"
+                        : "bg-card/60 text-muted-foreground hover:text-foreground hover:bg-card"
                     }`}
                   >
                     {t.label}
                   </button>
                 ))}
               </div>
-              <div className="flex gap-1.5 overflow-x-auto pb-1">
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {[{ id: "all", label: "All Games" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
                   <button
                     key={g.id}
                     onClick={() => setGameFilter(g.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-display uppercase tracking-wider border transition-all ${
+                    className={`shrink-0 px-3.5 py-2 rounded-full text-[11px] font-display uppercase tracking-[0.15em] transition-all ${
                       gameFilter === g.id
-                        ? "border-accent bg-accent/15 text-accent"
-                        : "border-border bg-card hover:border-accent/40 text-muted-foreground hover:text-foreground"
+                        ? "bg-accent text-accent-foreground shadow-[0_4px_20px_-4px_hsl(var(--accent)/0.6)]"
+                        : "bg-card/60 text-muted-foreground hover:text-foreground hover:bg-card"
                     }`}
                   >
                     {g.label}
@@ -437,7 +519,7 @@ export default function LeaguesPage() {
 
           {loading ? (
             <div className="grid md:grid-cols-2 gap-4">
-              {[0, 1].map(i => <Skeleton key={i} className="h-48" />)}
+              {[0, 1].map(i => <Skeleton key={i} className="h-56" />)}
             </div>
           ) : filtered.length === 0 ? (
             <EmptyState
@@ -451,68 +533,152 @@ export default function LeaguesPage() {
             />
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {filtered.map(l => renderCard(l, false))}
+              {filtered.map(l => <LeagueCard key={l.id} l={l} />)}
             </div>
           )}
         </section>
 
-        {/* UPCOMING ROADMAP */}
-        <section className="container pb-10">
-          <div className="flex items-center gap-2 mb-4">
+        {/* ============== UPCOMING ROADMAP ============== */}
+        <section className="container pb-20">
+          <div className="flex items-center gap-2 mb-5">
             <CalendarClock className="h-4 w-4 text-accent" />
-            <h2 className="font-display uppercase tracking-widest text-xs text-muted-foreground">Upcoming Opportunities</h2>
+            <h2 className="font-display uppercase tracking-[0.25em] text-xs text-muted-foreground">Upcoming Opportunities</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {ROADMAP.map(r => (
-              <div key={r.name} className="rounded-lg border border-dashed border-border bg-card/50 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">
+              <div key={r.name} className="rounded-xl border border-dashed border-border/70 bg-card/30 p-5 hover:border-accent/40 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-display uppercase tracking-[0.2em] text-muted-foreground">
                     <Flag className="inline h-3 w-3 mr-1" />{r.game}
                   </span>
-                  <span className="text-[10px] font-display uppercase tracking-widest text-accent">Coming Soon</span>
+                  <span className="text-[10px] font-display uppercase tracking-[0.2em] text-accent">Coming Soon</span>
                 </div>
                 <h3 className="font-display font-bold uppercase tracking-tight">{r.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{r.note}</p>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{r.note}</p>
               </div>
             ))}
           </div>
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-              <Button variant="neonOutline" size="sm" className="uppercase tracking-wider">
-                <MessageCircle className="h-4 w-4 mr-2" />Join Discord for updates
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <MessageCircle className="h-4 w-4" /> Join Discord for updates
               </Button>
             </a>
-          </div>
-        </section>
-
-        {/* WHY PEAK LEAGUE */}
-        <section className="container pb-16">
-          <div className="rounded-xl border border-border bg-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex gap-3">
-              <Shield className="h-6 w-6 text-primary shrink-0" />
-              <div>
-                <h3 className="font-display uppercase tracking-tight font-bold">Verified Rosters</h3>
-                <p className="text-sm text-muted-foreground mt-1">Anti-smurf checks and captain controls keep matches fair.</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Trophy className="h-6 w-6 text-accent shrink-0" />
-              <div>
-                <h3 className="font-display uppercase tracking-tight font-bold">Real Rewards</h3>
-                <p className="text-sm text-muted-foreground mt-1">Seasonal badges, trophies and qualification paths — no fake prize pools.</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Users className="h-6 w-6 text-primary shrink-0" />
-              <div>
-                <h3 className="font-display uppercase tracking-tight font-bold">Built for Europe</h3>
-                <p className="text-sm text-muted-foreground mt-1">EU-Brussels timezone, structured matchdays, captain confirmation flow.</p>
-              </div>
-            </div>
           </div>
         </section>
       </main>
       <Footer />
     </div>
+  );
+}
+
+/* ─────────── Helpers ─────────── */
+
+function MetricBig({ value, label, tone }: { value: string | number; label: string; tone?: "primary" }) {
+  return (
+    <div className="rounded-lg bg-background/60 border border-border/60 p-3 text-center">
+      <div className={`font-display font-bold text-2xl md:text-3xl leading-none ${tone === "primary" ? "text-primary text-glow-red" : "text-foreground"}`}>
+        {value}
+      </div>
+      <div className="mt-1.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground leading-tight">{label}</div>
+    </div>
+  );
+}
+
+function BigMetric({ value, label, highlight }: { value: string | number; label: string; highlight?: boolean }) {
+  return (
+    <div className={`relative rounded-xl border p-6 text-center overflow-hidden ${highlight ? "border-primary/40 bg-primary/[0.06]" : "border-border/60 bg-background/40"}`}>
+      {highlight && <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />}
+      <div className={`font-display font-bold text-5xl md:text-6xl leading-none tracking-tight ${highlight ? "text-primary text-glow-red" : "text-foreground"}`}>
+        {value}
+      </div>
+      <div className="mt-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function FormatStat({ label, value }: { label: string; value: any }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</div>
+      <div className="mt-1 font-display text-lg capitalize">{String(value)}</div>
+    </div>
+  );
+}
+
+function LeagueCard({ l }: { l: LeagueListItem }) {
+  const status = l.current_season?.status ?? l.status;
+  const isOpen = status === "registration_open";
+  const minTeams = l.current_season?.min_team_count ?? 4;
+  const fmt = l.current_season?.generated_format;
+  const formatGenerated = l.current_season?.format_status === "generated" && !!fmt;
+  const pct = Math.min(100, ((l.team_count || 0) / Math.max(1, minTeams)) * 100);
+  const gameName = GAMES.find(g => g.id === l.game)?.name ?? l.game;
+
+  return (
+    <Card className="group overflow-hidden border-border/60 bg-[linear-gradient(160deg,hsl(240_15%_9%/0.95),hsl(240_18%_5%/0.95))] hover:border-primary/40 transition-all duration-300 hover:shadow-[0_20px_50px_-20px_hsl(var(--primary)/0.4)]">
+      {l.banner_url ? (
+        <div
+          className="h-36 bg-cover bg-center relative"
+          style={{ backgroundImage: `url(${l.banner_url})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+        </div>
+      ) : (
+        <div className="h-2 bg-gradient-to-r from-primary via-primary/60 to-accent" />
+      )}
+      <div className="p-6">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-display uppercase tracking-[0.22em] text-muted-foreground mb-1">
+              {gameName} · Europe
+            </div>
+            <h3 className="font-display font-bold uppercase tracking-tight text-2xl">{l.name}</h3>
+            {l.current_season?.name && (
+              <div className="text-xs text-muted-foreground mt-1">{l.current_season.name}</div>
+            )}
+          </div>
+          <StatusPill status={status} />
+        </div>
+
+        {l.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{l.description}</p>
+        )}
+
+        {l.current_season && (
+          <>
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+              <span>Approved Teams</span>
+              <span className="text-foreground/80">{l.team_count} approved / {minTeams} needed to start</span>
+            </div>
+            <div className="h-1.5 bg-secondary/60 rounded-full overflow-hidden mb-4">
+              <div className="h-full bg-gradient-to-r from-primary to-accent transition-all" style={{ width: `${pct}%` }} />
+            </div>
+
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-5">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className={`h-3 w-3 ${formatGenerated ? "text-success" : "text-muted-foreground"}`} />
+                {formatGenerated ? "Format generated" : "Format not generated yet"}
+              </span>
+            </div>
+          </>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button asChild variant="neon" className="flex-1">
+            <Link to={`/leagues/${l.slug ?? l.id}`}>
+              View League <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+          {isOpen && (
+            <Button asChild variant="neonOutline" className="flex-1">
+              <Link to={`/leagues/${l.slug ?? l.id}#teams`}>
+                <Users className="h-4 w-4" /> Apply
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
