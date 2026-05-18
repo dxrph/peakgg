@@ -9,6 +9,7 @@ import {
   Mountain, BookOpen, Wrench, Flame, Brain, Gamepad2, Heart, Star,
   CheckCircle, XCircle, Clock, Crosshair, Zap, ChevronRight, Target, Info,
   Sparkles, Users, Trophy, Swords, Compass, ArrowRight, Activity,
+  ExternalLink, MousePointer2, Move, Timer, Wand2, Repeat, Gauge, CalendarDays,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { getAimGuideContent, type AimGameKey, type AimGuideContent } from "@/data/aim-guide";
@@ -50,6 +51,74 @@ const HERO_STATS = [
   { label: "Level", value: "Beginner+" },
   { label: "Format", value: "Practical" },
   { label: "Per game", value: "VAL · CS2 · R6" },
+];
+
+/* --------------------------- New local content --------------------------- */
+
+const CORE_SKILLS = [
+  { icon: Wand2, title: "Flicking", desc: "Fast movement from one target/angle to another. Useful for angle clearing, target switching and reactive shots." },
+  { icon: Move, title: "Tracking", desc: "Keeping your crosshair on a moving target. Critical in Apex, Overwatch, The Finals and some spray situations in CS/Valorant." },
+  { icon: Timer, title: "Click Timing", desc: "Clicking accurately at the correct moment. Essential for Valorant, CS2 and any precision weapon." },
+  { icon: MousePointer2, title: "Micro-Corrections", desc: "Small adjustments after your crosshair is close to the target. Vital in Valorant and CS2." },
+  { icon: Repeat, title: "Target Switching", desc: "Moving quickly between multiple enemies. Useful in clutches, retakes and multi-kill fights." },
+  { icon: Gauge, title: "Smoothness", desc: "Controlled mouse movement without shaking or overflicking. Drives long-term consistency and crosshair control." },
+];
+
+type ToolLink = { label: string; href: string };
+type ToolCard = {
+  name: string;
+  price: string;
+  best: string;
+  why: string;
+  tone: "primary" | "accent" | "success";
+  links: ToolLink[];
+};
+
+const RECOMMENDED_TOOLS: ToolCard[] = [
+  {
+    name: "Aimlabs",
+    price: "Free · Steam / Epic",
+    best: "Beginners, free training, quick routines, FPS-specific playlists.",
+    why: "Free aim trainer with many scenarios, analysis tools and easy access through Steam and Epic.",
+    tone: "primary",
+    links: [
+      { label: "Official Site", href: "https://aimlabs.com/" },
+      { label: "Steam", href: "https://store.steampowered.com/app/714010/Aimlabs/" },
+      { label: "Epic Games", href: "https://store.epicgames.com/p/aimlabs" },
+    ],
+  },
+  {
+    name: "KovaaK's",
+    price: "Paid · Steam",
+    best: "Serious aim training, custom scenarios, advanced mouse-control practice.",
+    why: "Highly customizable aim trainer with a massive scenario library and community playlists.",
+    tone: "accent",
+    links: [
+      { label: "Official Site", href: "https://kovaaks.com/" },
+      { label: "Steam", href: "https://store.steampowered.com/app/824270/KovaaKs/" },
+    ],
+  },
+  {
+    name: "Voltaic",
+    price: "Free benchmarks & app",
+    best: "Benchmarks, structured routines, progress tracking and improvement community.",
+    why: "Voltaic provides benchmark systems, routines and a community built around measurable FPS improvement.",
+    tone: "success",
+    links: [
+      { label: "Official Site", href: "https://voltaic.gg/" },
+      { label: "Voltaic App", href: "https://app.voltaic.gg/" },
+    ],
+  },
+];
+
+const SEVEN_DAY_PLAN = [
+  { day: "Day 1", title: "Baseline", desc: "Set your sensitivity and run baseline benchmarks." },
+  { day: "Day 2", title: "Precision", desc: "Micro-corrections + deathmatch." },
+  { day: "Day 3", title: "Control", desc: "Tracking and smoothness + in-game range." },
+  { day: "Day 4", title: "Speed", desc: "Flicking + click timing." },
+  { day: "Day 5", title: "Transfer", desc: "Game-specific routine focused on your main FPS." },
+  { day: "Day 6", title: "Re-test", desc: "Benchmark again and note weaknesses." },
+  { day: "Day 7", title: "Compete", desc: "Light warm-up and ranked focus." },
 ];
 
 export default function AimGuidePage() {
@@ -111,7 +180,10 @@ export default function AimGuidePage() {
                 <Button
                   size="lg"
                   className="gradient-primary text-primary-foreground font-display uppercase tracking-wider shadow-[0_8px_30px_-8px_hsl(352_100%_62%/0.6)]"
-                  onClick={() => setTab("intro")}
+                  onClick={() => {
+                    setTab("intro");
+                    document.getElementById("sections")?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
                   <Target className="h-4 w-4 mr-2" /> Start Learning
                 </Button>
@@ -127,7 +199,9 @@ export default function AimGuidePage() {
                   size="lg"
                   variant="ghost"
                   className="text-muted-foreground hover:text-accent font-display uppercase tracking-wider"
-                  onClick={() => setTab("tools")}
+                  onClick={() =>
+                    document.getElementById("recommended-tools")?.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   <Wrench className="h-4 w-4 mr-2" /> Recommended Tools
                 </Button>
@@ -266,6 +340,121 @@ export default function AimGuidePage() {
             <TabsContent value="games"><GamesSection c={c} /></TabsContent>
             <TabsContent value="mindset"><MindsetSection c={c} /></TabsContent>
           </Tabs>
+        </section>
+
+        {/* CORE AIM SKILLS */}
+        <section id="core-skills" className="scroll-mt-32">
+          <SectionHead
+            eyebrow="Fundamentals"
+            title="Core aim skills"
+            sub="The six mechanics every FPS player should train. Each one transfers directly into ranked play."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {CORE_SKILLS.map((s) => (
+              <div
+                key={s.title}
+                className="group rounded-xl border border-border/60 bg-card/50 p-5 hover:border-primary/40 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                  <s.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-semibold text-base text-foreground mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* RECOMMENDED TOOLS (external links) */}
+        <section id="recommended-tools" className="scroll-mt-32">
+          <SectionHead
+            eyebrow="Recommended Tools"
+            title="Train with the right software"
+            sub="The three platforms most competitive FPS players rely on. All links open the official sources."
+          />
+          <div className="grid md:grid-cols-3 gap-5">
+            {RECOMMENDED_TOOLS.map((tool) => (
+              <Panel key={tool.name} tone={tool.tone} className="flex flex-col">
+                <div className="p-5 border-b border-border/40 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-display font-bold text-lg text-foreground">{tool.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{tool.price}</p>
+                  </div>
+                  <Wrench className={cn(
+                    "h-5 w-5",
+                    tool.tone === "primary" && "text-primary",
+                    tool.tone === "accent" && "text-accent",
+                    tool.tone === "success" && "text-green-400",
+                  )} />
+                </div>
+                <div className="p-5 space-y-4 flex-1 flex flex-col">
+                  <div>
+                    <p className="text-[10px] font-display uppercase tracking-wider text-accent mb-1.5">
+                      Best for
+                    </p>
+                    <p className="text-sm text-muted-foreground">{tool.best}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-display uppercase tracking-wider text-primary mb-1.5">
+                      Why use it
+                    </p>
+                    <p className="text-sm text-muted-foreground">{tool.why}</p>
+                  </div>
+                  <div className="mt-auto pt-2 flex flex-wrap gap-2">
+                    {tool.links.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-border/60 bg-background/60 text-xs font-display uppercase tracking-wider text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                      >
+                        {l.label} <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Panel>
+            ))}
+          </div>
+
+          <Panel tone="primary" className="mt-5 bg-gradient-to-br from-primary/5 to-transparent">
+            <PanelHead icon={Star} title="Which one should I use?" tone="primary" />
+            <ul className="px-5 pb-5 space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2"><ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" /><span><span className="text-foreground font-semibold">Aimlabs</span> — free, simple and fast routines.</span></li>
+              <li className="flex items-start gap-2"><ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" /><span><span className="text-foreground font-semibold">KovaaK's</span> — deeper customization and serious aim training.</span></li>
+              <li className="flex items-start gap-2"><ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" /><span><span className="text-foreground font-semibold">Voltaic</span> — benchmarks, ranks, routines and measurable progress tracking.</span></li>
+            </ul>
+          </Panel>
+        </section>
+
+        {/* 7-DAY PLAN */}
+        <section id="seven-day-plan" className="scroll-mt-32">
+          <SectionHead
+            eyebrow="Quick Start"
+            title="7-Day Aim Reset Plan"
+            sub="One week to rebuild fundamentals, re-test your baseline and walk into ranked with a clear plan."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {SEVEN_DAY_PLAN.map((d, i) => (
+              <div
+                key={d.day}
+                className="relative rounded-xl border border-border/60 bg-gradient-to-br from-card/60 to-card/20 p-5 overflow-hidden"
+              >
+                <div className="absolute top-3 right-3 font-display text-3xl font-bold text-accent/20">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarDays className="h-4 w-4 text-accent" />
+                  <span className="text-[11px] font-display uppercase tracking-[0.18em] text-accent">
+                    {d.day}
+                  </span>
+                </div>
+                <h3 className="font-display font-semibold text-foreground mb-1">{d.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{d.desc}</p>
+              </div>
+            ))}
+          </div>
         </section>
       </main>
 
