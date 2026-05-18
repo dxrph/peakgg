@@ -22,6 +22,7 @@ import {
   Shield,
   Trash2,
   Plus,
+  Mountain,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,7 +59,7 @@ const PEAK_CSS = `
 /* Header */
 .pkw .pk-header{padding:14px 16px 12px; border-bottom:1px solid var(--pk-line); background:var(--pk-panel-2); flex-shrink:0;}
 .pkw .pk-row{display:flex; justify-content:space-between; align-items:center;}
-.pkw .pk-logo{width:24px;height:24px;border-radius:6px;background:var(--pk-red);display:grid;place-items:center;color:#fff;font-size:11px;line-height:1;box-shadow:0 4px 12px -2px rgba(255,70,85,.5);}
+.pkw .pk-logo{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#ff4655 0%,#ff8c42 100%);display:grid;place-items:center;color:#fff;line-height:1;box-shadow:0 4px 12px -2px rgba(255,70,85,.5);}
 .pkw .pk-title{font-weight:800; letter-spacing:.06em; font-size:15px; text-transform:uppercase;}
 .pkw .pk-online{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:99px;background:rgba(34,201,139,.07);border:1px solid rgba(34,201,139,.16); font-size:11px; color:var(--pk-text-mid);}
 .pkw .pk-online .dot{width:6px;height:6px;border-radius:50%;background:var(--pk-green); animation:pkwPulse 2s infinite;}
@@ -712,7 +713,7 @@ export default function ChatWidget() {
             <div className="pk-header">
               <div className="pk-row">
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div className="pk-logo">▲</div>
+                  <div className="pk-logo"><Mountain className="h-3.5 w-3.5" strokeWidth={2.5} /></div>
                   <span className="pk-title pk-display">PeakGG Chat</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
