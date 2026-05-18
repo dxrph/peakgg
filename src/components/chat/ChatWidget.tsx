@@ -675,9 +675,9 @@ export default function ChatWidget() {
       <style>{PEAK_CSS}</style>
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="Open chat"
+        aria-label={open ? "Close chat" : "Open chat"}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300",
+          "fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300",
           "bg-[#111] border border-border/60 hover:border-primary/60 hover:shadow-[0_0_24px_hsl(var(--primary)/0.3)]",
           open && "scale-95",
         )}
@@ -702,9 +702,9 @@ export default function ChatWidget() {
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
             className={cn(
-              "pkw fixed z-50 bottom-24 right-6 w-[420px] h-[720px] rounded-2xl",
+              "pkw fixed z-50 bottom-24 left-6 w-[420px] h-[720px] rounded-2xl",
               "max-h-[calc(100vh-7rem)]",
-              "max-sm:inset-0 max-sm:w-full max-sm:h-full max-sm:max-h-none max-sm:rounded-none max-sm:bottom-0 max-sm:right-0",
+              "max-sm:inset-0 max-sm:w-full max-sm:h-full max-sm:max-h-none max-sm:rounded-none max-sm:bottom-0 max-sm:left-0",
             )}
             style={{ boxShadow: "0 40px 100px -20px rgba(0,0,0,.75)" }}
           >
