@@ -52,7 +52,6 @@ import ContactPage from "./pages/Contact";
 import PrivacyPage from "./pages/Privacy";
 import TermsPage from "./pages/Terms";
 import ComingSoonPage from "./pages/ComingSoon";
-import PeakChat from "./components/PeakChat";
 import ChatWidget from "./components/chat/ChatWidget";
 import GlobalActiveBar from "./components/competitive/GlobalActiveBar";
 import Analytics from "./components/Analytics";
@@ -145,7 +144,6 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/coming-soon" element={<ComingSoonPage />} />
-              <Route path="/peak-chat" element={<PeakChat />} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
