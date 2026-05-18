@@ -616,6 +616,48 @@ function FormatStat({ label, value }: { label: string; value: any }) {
   );
 }
 
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <span className="hidden md:inline text-[10px] font-display uppercase tracking-[0.22em] text-muted-foreground/70 shrink-0">
+        {label}
+      </span>
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 py-0.5">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FilterPill({
+  active,
+  tone,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  tone: "primary" | "accent";
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const activeCls =
+    tone === "primary"
+      ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_18px_-6px_hsl(var(--primary)/0.6)]"
+      : "bg-accent/15 text-accent border-accent/50 shadow-[0_0_18px_-6px_hsl(var(--accent)/0.6)]";
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 h-8 px-3.5 rounded-full text-[11px] font-display uppercase tracking-[0.12em] transition-all border ${
+        active
+          ? activeCls
+          : "bg-transparent text-muted-foreground border-border/60 hover:text-foreground hover:border-border"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function LeagueCard({ l }: { l: LeagueListItem }) {
   const status = l.current_season?.status ?? l.status;
   const isOpen = status === "registration_open";
