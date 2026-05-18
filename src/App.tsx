@@ -36,6 +36,7 @@ import AdminAnnouncements from "./pages/admin/sections/AdminAnnouncements";
 import AdminSeasons from "./pages/admin/sections/AdminSeasons";
 import AdminElo from "./pages/admin/sections/AdminElo";
 import AdminLeagues from "./pages/admin/sections/AdminLeagues";
+import PeakLeagueAdmin from "./pages/admin/PeakLeagueAdmin";
 import LeaguesPage from "./pages/Leagues";
 import LeagueDetailPage from "./pages/LeagueDetail";
 import MatchDetailPage from "./pages/MatchDetail";
