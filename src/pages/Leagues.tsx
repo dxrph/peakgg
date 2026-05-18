@@ -477,65 +477,74 @@ export default function LeaguesPage() {
         </section>
 
         {/* ============== ALL LEAGUES ============== */}
-        <section id="leagues-list" className="container pb-20">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
-            <div>
-              <div className="eyebrow"><Flag className="h-3 w-3" /> Browse</div>
-              <h2 className="mt-2 font-display font-bold uppercase text-3xl md:text-4xl tracking-tight">All Leagues</h2>
+        <section id="leagues-list" className="container pt-2 pb-20">
+          <div className="rounded-xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden">
+            {/* Header row */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 px-5 md:px-7 py-5 border-b border-border/60 bg-gradient-to-r from-card/60 via-card/30 to-transparent">
+              <div className="shrink-0">
+                <div className="eyebrow text-[10px]"><Flag className="h-3 w-3" /> Browse</div>
+                <h2 className="mt-1.5 font-display font-bold uppercase text-2xl md:text-[1.75rem] tracking-tight leading-none whitespace-nowrap">
+                  All Leagues
+                </h2>
+              </div>
+              <div className="flex items-center gap-3 lg:gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {TABS.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id)}
+                      className={`shrink-0 h-9 px-4 rounded-full text-[11px] font-display uppercase tracking-[0.14em] transition-all border ${
+                        tab === t.id
+                          ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_18px_-6px_hsl(var(--primary)/0.6)]"
+                          : "bg-transparent text-muted-foreground border-border/60 hover:text-foreground hover:border-border"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="h-6 w-px bg-border/70 shrink-0 hidden sm:block" />
+                <div className="flex items-center gap-1.5 shrink-0 pr-1">
+                  {[{ id: "all", label: "All Games" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
+                    <button
+                      key={g.id}
+                      onClick={() => setGameFilter(g.id)}
+                      className={`shrink-0 h-9 px-4 rounded-full text-[11px] font-display uppercase tracking-[0.14em] transition-all border ${
+                        gameFilter === g.id
+                          ? "bg-accent/15 text-accent border-accent/50 shadow-[0_0_18px_-6px_hsl(var(--accent)/0.6)]"
+                          : "bg-transparent text-muted-foreground border-border/60 hover:text-foreground hover:border-border"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                {TABS.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTab(t.id)}
-                    className={`shrink-0 px-3.5 py-2 rounded-full text-[11px] font-display uppercase tracking-[0.15em] transition-all ${
-                      tab === t.id
-                        ? "bg-primary text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]"
-                        : "bg-card/60 text-muted-foreground hover:text-foreground hover:bg-card"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                {[{ id: "all", label: "All Games" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
-                  <button
-                    key={g.id}
-                    onClick={() => setGameFilter(g.id)}
-                    className={`shrink-0 px-3.5 py-2 rounded-full text-[11px] font-display uppercase tracking-[0.15em] transition-all ${
-                      gameFilter === g.id
-                        ? "bg-accent text-accent-foreground shadow-[0_4px_20px_-4px_hsl(var(--accent)/0.6)]"
-                        : "bg-card/60 text-muted-foreground hover:text-foreground hover:bg-card"
-                    }`}
-                  >
-                    {g.label}
-                  </button>
-                ))}
-              </div>
+
+            {/* Content */}
+            <div className="p-5 md:p-7">
+              {loading ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[0, 1].map(i => <Skeleton key={i} className="h-56" />)}
+                </div>
+              ) : filtered.length === 0 ? (
+                <EmptyState
+                  icon={Trophy}
+                  title="No leagues in this category yet"
+                  description="New seasons will appear here once registration opens. Join Discord to be notified first."
+                  ctaLabel="Join Discord"
+                  ctaOnClick={() => window.open(DISCORD_INVITE, "_blank")}
+                  secondaryLabel="Create Team"
+                  secondaryTo="/teams"
+                />
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {filtered.map(l => <LeagueCard key={l.id} l={l} />)}
+                </div>
+              )}
             </div>
           </div>
-
-          {loading ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {[0, 1].map(i => <Skeleton key={i} className="h-56" />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={Trophy}
-              title="No leagues in this category yet"
-              description="New seasons will appear here once registration opens. Join Discord to be notified first."
-              ctaLabel="Join Discord"
-              ctaOnClick={() => window.open(DISCORD_INVITE, "_blank")}
-              secondaryLabel="Create Team"
-              secondaryTo="/teams"
-            />
-          ) : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {filtered.map(l => <LeagueCard key={l.id} l={l} />)}
-            </div>
-          )}
         </section>
 
         {/* ============== UPCOMING ROADMAP ============== */}
