@@ -365,6 +365,12 @@ function ChannelView({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [canModerate, setCanModerate] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -391,17 +397,81 @@ function ChannelView({
     }
   }, [chat.messages.length]);
 
+  // Close emoji picker on outside click
+  useEffect(() => {
+    if (!showEmoji) return;
+    const onDown = (e: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setShowEmoji(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [showEmoji]);
+
+  // Build/clean image preview URL
+  useEffect(() => {
+    if (attachment && attachment.type.startsWith("image/")) {
+      const url = URL.createObjectURL(attachment);
+      setAttachmentPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setAttachmentPreview(null);
+  }, [attachment]);
+
+  const insertEmoji = (emoji: string) => {
+    const el = inputRef.current;
+    if (!el) {
+      setInput((v) => (v + emoji).slice(0, 200));
+      return;
+    }
+    const start = el.selectionStart ?? input.length;
+    const end = el.selectionEnd ?? input.length;
+    const next = (input.slice(0, start) + emoji + input.slice(end)).slice(0, 200);
+    setInput(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      const pos = Math.min(start + emoji.length, next.length);
+      el.setSelectionRange(pos, pos);
+    });
+  };
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 10 MB.", variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+    setAttachment(f);
+    e.target.value = "";
+  };
+
+  const formatBytes = (b: number) => {
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / 1024 / 1024).toFixed(1)} MB`;
+  };
+
   const showSlash = input.startsWith("/");
   const len = input.length;
-  const canSend = input.trim().length > 0 && !sending;
+  const canSend = (input.trim().length > 0 || !!attachment) && !sending;
 
   const send = async () => {
     if (!canSend) return;
     setSending(true);
-    const res = await chat.sendMessage(input);
+    let payload = input.trim();
+    if (attachment) {
+      const tag = `📎 ${attachment.name} (${formatBytes(attachment.size)})`;
+      payload = payload ? `${payload}\n${tag}` : tag;
+    }
+    const res = await chat.sendMessage(payload);
     setSending(false);
     if (res.ok) {
       setInput("");
+      setAttachment(null);
+      setShowEmoji(false);
     } else if (res.error) {
       toast({ title: "Cannot send", description: res.error, variant: "destructive" });
       if (res.error.startsWith("Your message was blocked")) setInput("");
@@ -537,14 +607,76 @@ function ChannelView({
           </p>
         ) : (
           <>
+            {attachment && (
+              <div className="pk-attach">
+                <div className="pk-attach-thumb">
+                  {attachmentPreview ? (
+                    <img src={attachmentPreview} alt={attachment.name} />
+                  ) : (
+                    <Paperclip size={16} />
+                  )}
+                </div>
+                <div className="pk-attach-info">
+                  <div className="pk-attach-name">{attachment.name}</div>
+                  <div className="pk-attach-meta pk-mono">
+                    {formatBytes(attachment.size)} · {attachment.type || "file"}
+                  </div>
+                </div>
+                <button
+                  className="pk-attach-x"
+                  onClick={() => setAttachment(null)}
+                  aria-label="Remove attachment"
+                  data-tip="Remove"
+                  type="button"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
             <div className="pk-input-wrap">
-              <button className="pk-tool" aria-label="Attach" type="button">
+              <input
+                ref={fileRef}
+                type="file"
+                hidden
+                accept="image/*,.pdf,.txt,.zip,.doc,.docx,.xls,.xlsx,.csv"
+                onChange={onPickFile}
+              />
+              <button
+                className="pk-tool"
+                aria-label="Attach file"
+                data-tip="Attach file"
+                type="button"
+                onClick={() => fileRef.current?.click()}
+              >
                 <Paperclip size={15} />
               </button>
-              <button className="pk-tool" aria-label="Emoji" type="button">
-                <Smile size={15} />
-              </button>
+              <div ref={emojiRef} style={{ position: "relative", display: "flex" }}>
+                <button
+                  className={cn("pk-tool", showEmoji && "active")}
+                  aria-label="Emoji"
+                  data-tip="Emoji"
+                  type="button"
+                  onClick={() => setShowEmoji((v) => !v)}
+                >
+                  <Smile size={15} />
+                </button>
+                {showEmoji && (
+                  <div className="pk-emoji-pop" role="dialog" aria-label="Emoji picker">
+                    {["😀","😎","😂","🔥","❤️","👍","👀","🫡","🎯","💀","😭","😤","✅","❌"].map((e) => (
+                      <button
+                        key={e}
+                        type="button"
+                        onClick={() => insertEmoji(e)}
+                        aria-label={`Insert ${e}`}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <input
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value.slice(0, 200))}
                 onKeyDown={(e) => {
@@ -564,17 +696,18 @@ function ChannelView({
                 disabled={!canSend}
                 onClick={send}
                 aria-label="Send"
+                data-tip="Send message"
                 type="button"
               >
                 <Send size={14} />
               </button>
             </div>
-            <div className="pk-hint pk-mono">
+            <div className="pk-hint">
               <span>
-                Markdown · <kbd>@</kbd> mention · <kbd>/</kbd> commands
+                <kbd>@</kbd> mention <kbd>/</kbd> commands
               </span>
               <span>
-                <kbd>↵</kbd> send · <kbd>⇧</kbd>+<kbd>↵</kbd> new line
+                <kbd>Enter</kbd> send <kbd>Shift</kbd>+<kbd>Enter</kbd> new line
               </span>
             </div>
           </>
