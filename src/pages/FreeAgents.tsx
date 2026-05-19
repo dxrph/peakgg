@@ -605,7 +605,7 @@ function HowItWorksSection() {
               <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-3">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 border border-primary/40 flex items-center justify-center">
-                  <s.icon className="h-4.5 w-4.5 text-primary" />
+                  <s.icon className="h-5 w-5 text-primary" />
                 </div>
                 <span className="font-display font-bold text-3xl text-primary/20 leading-none">
                   0{i + 1}
