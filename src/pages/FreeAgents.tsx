@@ -465,29 +465,31 @@ function PurposeCard({
   ctaLabel: string;
   ctaTo: string;
 }) {
-  const color = tone === "primary" ? "primary" : "accent";
   const isHash = ctaTo.startsWith("#");
+  const hoverBorder = tone === "primary" ? "hover:border-primary/60" : "hover:border-accent/60";
+  const iconText = tone === "primary" ? "text-primary" : "text-accent";
+  const bulletText = tone === "primary" ? "text-primary" : "text-accent";
+  const gradientVar = tone === "primary" ? "--primary" : "--accent";
   return (
     <div
-      className={`group relative rounded-xl border border-border/70 bg-card/60 backdrop-blur p-6 overflow-hidden transition-all hover:border-${color}/60 hover:-translate-y-0.5`}
-      style={{ boxShadow: "0 0 0 0 transparent" }}
+      className={`group relative rounded-xl border border-border/70 bg-card/60 backdrop-blur p-6 overflow-hidden transition-all ${hoverBorder} hover:-translate-y-0.5`}
     >
       {/* Gradient edge */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, hsl(var(--${color})/0.7), transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, hsl(var(${gradientVar})/0.7), transparent)` }}
       />
       <div
         className="absolute -top-20 -right-16 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl pointer-events-none"
-        style={{ background: `hsl(var(--${color})/0.18)` }}
+        style={{ background: `hsl(var(${gradientVar})/0.18)` }}
       />
 
       <div className="flex items-start gap-4">
         <div
-          className={`h-11 w-11 shrink-0 rounded-lg border flex items-center justify-center`}
-          style={{ background: `hsl(var(--${color})/0.1)`, borderColor: `hsl(var(--${color})/0.4)` }}
+          className="h-11 w-11 shrink-0 rounded-lg border flex items-center justify-center"
+          style={{ background: `hsl(var(${gradientVar})/0.1)`, borderColor: `hsl(var(${gradientVar})/0.4)` }}
         >
-          <Icon className={`h-5 w-5 text-${color}`} />
+          <Icon className={`h-5 w-5 ${iconText}`} />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-display font-bold uppercase tracking-wider text-lg leading-none">{title}</h3>
@@ -498,7 +500,7 @@ function PurposeCard({
       <ul className="mt-5 space-y-2">
         {bullets.map((b) => (
           <li key={b} className="flex items-center gap-2 text-sm font-body text-foreground/90">
-            <CheckCircle2 className={`h-3.5 w-3.5 text-${color} shrink-0`} />
+            <CheckCircle2 className={`h-3.5 w-3.5 ${bulletText} shrink-0`} />
             {b}
           </li>
         ))}
