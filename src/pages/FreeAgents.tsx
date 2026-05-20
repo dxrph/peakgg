@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon, UserPlus, Target, RotateCcw, ChevronDown, Trophy, Compass, Radio, CheckCircle2, ArrowRight } from "lucide-react";
+import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon, UserPlus, Target, RotateCcw, ChevronDown, Trophy, Compass, Radio, CheckCircle2, ArrowRight, Eye, Gamepad2, MapPin, Languages, Clock, BadgeCheck, Info } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -172,6 +172,15 @@ export default function FreeAgentsPage() {
           </button>
         )}
       </div>
+
+      {agents.length === 0 && !loading && (
+        <div className="rounded-lg border border-border/50 bg-background/30 p-3 flex gap-2 items-start">
+          <Info className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+          <p className="text-[11px] leading-relaxed text-muted-foreground font-body">
+            Filters will become useful once players start listing their profiles.
+          </p>
+        </div>
+      )}
 
       <div>
         <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.search", { defaultValue: "Search" })}</Label>
