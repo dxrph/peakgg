@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon, UserPlus, Target, RotateCcw, ChevronDown, Trophy, Compass, Radio, CheckCircle2, ArrowRight } from "lucide-react";
+import { Search, Users, Loader2, Star, ShieldCheck, Sparkles, Globe2, MessageSquare, Filter as FilterIcon, UserPlus, Target, RotateCcw, ChevronDown, Trophy, Compass, Radio, CheckCircle2, ArrowRight, Eye, Gamepad2, MapPin, Languages, Clock, BadgeCheck, Info } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -172,6 +172,15 @@ export default function FreeAgentsPage() {
           </button>
         )}
       </div>
+
+      {agents.length === 0 && !loading && (
+        <div className="rounded-lg border border-border/50 bg-background/30 p-3 flex gap-2 items-start">
+          <Info className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+          <p className="text-[11px] leading-relaxed text-muted-foreground font-body">
+            Filters will become useful once players start listing their profiles.
+          </p>
+        </div>
+      )}
 
       <div>
         <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.search", { defaultValue: "Search" })}</Label>
@@ -381,7 +390,7 @@ export default function FreeAgentsPage() {
             </CollapsibleContent>
           </Collapsible>
         ) : (
-          <aside className="lg:sticky lg:top-20 self-start rounded-xl border border-border bg-card/60 backdrop-blur p-5 shadow-lg shadow-black/20">
+          <aside className="lg:sticky lg:top-20 self-start rounded-xl border border-border/50 bg-card/30 backdrop-blur p-5">
             {FiltersPanel}
           </aside>
         )}
@@ -394,7 +403,11 @@ export default function FreeAgentsPage() {
               <p className="text-xs text-muted-foreground font-body mt-1">
                 {loading
                   ? t("free_agents.loading", { defaultValue: "Loading players…" })
-                  : `${filtered.length} ${filtered.length === 1 ? "player" : "players"}${filtersActive ? " match your filters" : " listed"}`}
+                  : filtersActive
+                    ? `${filtered.length} ${filtered.length === 1 ? "player" : "players"} found with current filters.`
+                    : agents.length === 0
+                      ? "No players listed yet — complete your profile to become discoverable."
+                      : `${agents.length} ${agents.length === 1 ? "player" : "players"} listed`}
               </p>
             </div>
             {filtersActive && !loading && (
@@ -526,50 +539,101 @@ function PurposeCard({
 }
 
 function EmptyState({ filtersActive, user, onReset }: { filtersActive: boolean; user: any; onReset: () => void }) {
+  const benefits = [
+    { icon: Target, label: "Show your role" },
+    { icon: Trophy, label: "Display your rank / ELO" },
+    { icon: MessageSquare, label: "Get contacted by captains" },
+  ];
+  const teamsSee = [
+    { icon: Gamepad2, label: "Main game" },
+    { icon: Target, label: "Role" },
+    { icon: Trophy, label: "Rank / ELO" },
+    { icon: MapPin, label: "Region" },
+    { icon: Languages, label: "Languages" },
+    { icon: Clock, label: "Availability" },
+    { icon: BadgeCheck, label: "Verification & trust" },
+  ];
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-gradient-to-b from-card/80 to-card/30 backdrop-blur p-10 text-center overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.08] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(hsl(var(--primary)/0.5) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.5) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-          maskImage: "radial-gradient(circle at center, black, transparent 70%)",
-        }}
-      />
-      <div className="relative">
-        <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/40 flex items-center justify-center mb-5 shadow-[0_0_40px_hsl(var(--primary)/0.35)]">
-          <Users className="h-9 w-9 text-primary" />
-        </div>
-        <h3 className="font-display font-bold uppercase tracking-wider text-2xl mb-2">
-          {filtersActive ? "No players match these filters" : "No free agents listed yet"}
-        </h3>
-        <p className="text-sm text-muted-foreground font-body max-w-md mx-auto">
-          {filtersActive
-            ? "No players match your current filters yet. Try widening the search or become one of the first players listed on PeakGG."
-            : "Be one of the first players on PeakGG. List yourself and get discovered by founding teams preparing for Season 1."}
-        </p>
+    <div className="space-y-5">
+      <div className="relative rounded-2xl border border-border/70 bg-gradient-to-b from-card/80 to-card/30 backdrop-blur p-8 md:p-10 text-center overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.08] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--primary)/0.5) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.5) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            maskImage: "radial-gradient(circle at center, black, transparent 70%)",
+          }}
+        />
+        <div className="relative">
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/40 flex items-center justify-center mb-5 shadow-[0_0_40px_hsl(var(--primary)/0.35)]">
+            <Users className="h-9 w-9 text-primary" />
+          </div>
+          <h3 className="font-display font-bold uppercase tracking-wider text-2xl mb-2">
+            {filtersActive ? "No players match these filters" : "No free agents listed yet"}
+          </h3>
+          <p className="text-sm text-muted-foreground font-body max-w-lg mx-auto leading-relaxed">
+            {filtersActive
+              ? "No players match these filters. Try widening your search."
+              : "Be one of the first players discovered by PeakGG teams. Complete your profile and appear in the scouting board for captains building competitive rosters."}
+          </p>
 
-        <div className="mt-6 flex flex-wrap gap-2 justify-center">
-          {user ? (
-            <Link to="/settings"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
-          ) : (
-            <Link to="/register"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
+          {!filtersActive && (
+            <div className="mt-6 flex flex-wrap gap-2 justify-center">
+              {benefits.map((b) => (
+                <div
+                  key={b.label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-[11px] font-display uppercase tracking-wider text-foreground/90"
+                >
+                  <b.icon className="h-3 w-3 text-primary" /> {b.label}
+                </div>
+              ))}
+            </div>
           )}
-          {filtersActive && (
-            <Button variant="neonOutline" onClick={onReset}>
-              <RotateCcw className="h-4 w-4 mr-1.5" /> Reset Filters
-            </Button>
-          )}
-          <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-              <MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord
-            </Button>
-          </a>
-        </div>
 
-        <p className="mt-5 text-[11px] uppercase tracking-wider font-display text-muted-foreground/80">
-          Teams can only discover players who complete their free agent profile.
+          <div className="mt-6 flex flex-wrap gap-2 justify-center">
+            {user ? (
+              <Link to="/settings"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
+            ) : (
+              <Link to="/register"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
+            )}
+            {filtersActive && (
+              <Button variant="neonOutline" onClick={onReset}>
+                <RotateCcw className="h-4 w-4 mr-1.5" /> Reset Filters
+              </Button>
+            )}
+            <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+              <Button variant="neonOutline">
+                <MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord
+              </Button>
+            </a>
+          </div>
+
+          <p className="mt-5 text-[11px] uppercase tracking-wider font-display text-muted-foreground/80">
+            Teams can only discover players who complete their free agent profile.
+          </p>
+        </div>
+      </div>
+
+      {/* What teams will see */}
+      <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Eye className="h-4 w-4 text-accent" />
+          <h4 className="font-display font-bold uppercase tracking-wider text-sm">What teams will see</h4>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {teamsSee.map((it) => (
+            <div
+              key={it.label}
+              className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/30 px-3 py-2.5 text-xs font-body text-foreground/90"
+            >
+              <it.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span className="truncate">{it.label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-[11px] text-muted-foreground font-body">
+          This is what your card will look like to captains scouting rosters — the more complete your profile, the better your visibility.
         </p>
       </div>
     </div>
