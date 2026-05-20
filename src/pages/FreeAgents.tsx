@@ -334,22 +334,27 @@ export default function FreeAgentsPage() {
               List your profile, show your game, role, rank and availability — or scout verified players for your next competitive roster.
             </p>
 
-            {/* Auth-aware hero CTAs */}
+            {/* Auth-aware hero CTAs — all "Complete Profile" buttons share one handler */}
             <div className="mt-7 flex flex-wrap gap-2.5 justify-center">
-              {!user ? (
-                <>
-                  <Link to="/register"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
-                  <a href="#agents-list"><Button variant="neonOutline" size="lg"><Compass className="h-4 w-4 mr-1.5" /> Browse Players</Button></a>
-                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground"><MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord</Button></a>
-                </>
-              ) : (
-                <>
-                  <Link to="/settings"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
-                  <a href="#agents-list"><Button variant="neonOutline" size="lg"><Compass className="h-4 w-4 mr-1.5" /> Browse Players</Button></a>
-                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground"><MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord</Button></a>
-                </>
-              )}
+              <Button variant="neon" size="lg" onClick={onCompleteCta}>
+                <UserPlus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+              </Button>
+              <a href="#agents-list">
+                <Button variant="neonOutline" size="lg">
+                  <Compass className="h-4 w-4 mr-1.5" /> Browse Players
+                </Button>
+              </a>
+              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground">
+                  <MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord
+                </Button>
+              </a>
             </div>
+            {alreadyListed && (
+              <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-display uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-3 w-3" /> Your profile is listed
+              </p>
+            )}
           </div>
 
           {/* Hero stats — only show real values, hide if zero */}
