@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,11 @@ import RankBadge from "@/components/RankBadge";
 import GameIcon from "@/components/GameIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { DISCORD_INVITE } from "@/lib/links";
+import {
+  handleCompleteFreeAgentProfile,
+  freeAgentCtaLabel,
+  isFreeAgentListed,
+} from "@/lib/free-agent";
 
 type AgentRow = {
   id: string;
@@ -31,6 +36,8 @@ type AgentRow = {
   region: string | null;
   language: string | null;
   preferred_game: string | null;
+  role: string | null;
+  availability: string | null;
   reputation_score: number;
   account_verified: boolean;
   smurf_risk_score: number;
@@ -53,7 +60,11 @@ const LANGUAGES = [
 
 export default function FreeAgentsPage() {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const onCompleteCta = () => handleCompleteFreeAgentProfile(user, navigate);
+  const ctaLabel = freeAgentCtaLabel(user, profile);
+  const alreadyListed = isFreeAgentListed(profile);
   const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState<AgentRow[]>([]);
@@ -76,10 +87,15 @@ export default function FreeAgentsPage() {
       const { data: profs } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, region, language, preferred_game, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
+          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
         )
         .eq("looking_for_team", true)
         .eq("is_banned", false)
+        // Only profiles that are "complete enough" should appear publicly.
+        .not("preferred_game", "is", null)
+        .not("role", "is", null)
+        .not("region", "is", null)
+        .not("availability", "is", null)
         .order("last_active_at", { ascending: false })
         .limit(200);
       const list = (profs as AgentRow[]) ?? [];
@@ -318,22 +334,27 @@ export default function FreeAgentsPage() {
               List your profile, show your game, role, rank and availability — or scout verified players for your next competitive roster.
             </p>
 
-            {/* Auth-aware hero CTAs */}
+            {/* Auth-aware hero CTAs — all "Complete Profile" buttons share one handler */}
             <div className="mt-7 flex flex-wrap gap-2.5 justify-center">
-              {!user ? (
-                <>
-                  <Link to="/register"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
-                  <a href="#agents-list"><Button variant="neonOutline" size="lg"><Compass className="h-4 w-4 mr-1.5" /> Browse Players</Button></a>
-                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground"><MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord</Button></a>
-                </>
-              ) : (
-                <>
-                  <Link to="/settings"><Button variant="neon" size="lg"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
-                  <a href="#agents-list"><Button variant="neonOutline" size="lg"><Compass className="h-4 w-4 mr-1.5" /> Browse Players</Button></a>
-                  <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground"><MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord</Button></a>
-                </>
-              )}
+              <Button variant="neon" size="lg" onClick={onCompleteCta}>
+                <UserPlus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+              </Button>
+              <a href="#agents-list">
+                <Button variant="neonOutline" size="lg">
+                  <Compass className="h-4 w-4 mr-1.5" /> Browse Players
+                </Button>
+              </a>
+              <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="lg" className="text-muted-foreground hover:text-foreground">
+                  <MessageSquare className="h-4 w-4 mr-1.5" /> Join Discord
+                </Button>
+              </a>
             </div>
+            {alreadyListed && (
+              <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-display uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-3 w-3" /> Your profile is listed
+              </p>
+            )}
           </div>
 
           {/* Hero stats — only show real values, hide if zero */}
@@ -357,8 +378,8 @@ export default function FreeAgentsPage() {
             title="For Players"
             body="Create a free agent profile with your game, role, rank, region, languages and availability."
             bullets={["Show your role and rank", "Get discovered by teams", "Add availability and languages"]}
-            ctaLabel={user ? "Complete Profile" : "Create Account"}
-            ctaTo={user ? "/settings" : "/register"}
+            ctaLabel={ctaLabel}
+            ctaOnClick={onCompleteCta}
           />
           <PurposeCard
             tone="accent"
@@ -426,7 +447,8 @@ export default function FreeAgentsPage() {
           ) : filtered.length === 0 ? (
             <EmptyState
               filtersActive={filtersActive}
-              user={user}
+              ctaLabel={ctaLabel}
+              onComplete={onCompleteCta}
               onReset={resetFilters}
             />
           ) : (
@@ -469,6 +491,7 @@ function PurposeCard({
   bullets,
   ctaLabel,
   ctaTo,
+  ctaOnClick,
 }: {
   tone: "primary" | "accent";
   icon: any;
@@ -476,9 +499,10 @@ function PurposeCard({
   body: string;
   bullets: string[];
   ctaLabel: string;
-  ctaTo: string;
+  ctaTo?: string;
+  ctaOnClick?: () => void;
 }) {
-  const isHash = ctaTo.startsWith("#");
+  const isHash = !!ctaTo && ctaTo.startsWith("#");
   const hoverBorder = tone === "primary" ? "hover:border-primary/60" : "hover:border-accent/60";
   const iconText = tone === "primary" ? "text-primary" : "text-accent";
   const bulletText = tone === "primary" ? "text-primary" : "text-accent";
@@ -520,14 +544,22 @@ function PurposeCard({
       </ul>
 
       <div className="mt-6">
-        {isHash ? (
+        {ctaOnClick ? (
+          <Button
+            variant={tone === "primary" ? "neon" : "neonOutline"}
+            className="w-full sm:w-auto"
+            onClick={ctaOnClick}
+          >
+            {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
+          </Button>
+        ) : isHash ? (
           <a href={ctaTo}>
             <Button variant={tone === "primary" ? "neon" : "neonOutline"} className="w-full sm:w-auto">
               {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
           </a>
         ) : (
-          <Link to={ctaTo}>
+          <Link to={ctaTo!}>
             <Button variant={tone === "primary" ? "neon" : "neonOutline"} className="w-full sm:w-auto">
               {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
@@ -538,7 +570,17 @@ function PurposeCard({
   );
 }
 
-function EmptyState({ filtersActive, user, onReset }: { filtersActive: boolean; user: any; onReset: () => void }) {
+function EmptyState({
+  filtersActive,
+  ctaLabel,
+  onComplete,
+  onReset,
+}: {
+  filtersActive: boolean;
+  ctaLabel: string;
+  onComplete: () => void;
+  onReset: () => void;
+}) {
   const benefits = [
     { icon: Target, label: "Show your role" },
     { icon: Trophy, label: "Display your rank / ELO" },
@@ -592,11 +634,9 @@ function EmptyState({ filtersActive, user, onReset }: { filtersActive: boolean; 
           )}
 
           <div className="mt-6 flex flex-wrap gap-2 justify-center">
-            {user ? (
-              <Link to="/settings"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
-            ) : (
-              <Link to="/register"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
-            )}
+            <Button variant="neon" onClick={onComplete}>
+              <UserPlus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+            </Button>
             {filtersActive && (
               <Button variant="neonOutline" onClick={onReset}>
                 <RotateCcw className="h-4 w-4 mr-1.5" /> Reset Filters

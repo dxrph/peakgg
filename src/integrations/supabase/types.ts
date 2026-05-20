@@ -1868,6 +1868,7 @@ export type Database = {
       profiles: {
         Row: {
           account_verified: boolean
+          availability: string | null
           avatar_url: string | null
           ban_expires_at: string | null
           ban_reason: string | null
@@ -1888,6 +1889,7 @@ export type Database = {
           looking_for_team: boolean
           peak_coins: number
           preferred_game: string | null
+          preferred_team_type: string | null
           rank: string | null
           region: string | null
           reputation_score: number
@@ -1900,6 +1902,7 @@ export type Database = {
         }
         Insert: {
           account_verified?: boolean
+          availability?: string | null
           avatar_url?: string | null
           ban_expires_at?: string | null
           ban_reason?: string | null
@@ -1920,6 +1923,7 @@ export type Database = {
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
+          preferred_team_type?: string | null
           rank?: string | null
           region?: string | null
           reputation_score?: number
@@ -1932,6 +1936,7 @@ export type Database = {
         }
         Update: {
           account_verified?: boolean
+          availability?: string | null
           avatar_url?: string | null
           ban_expires_at?: string | null
           ban_reason?: string | null
@@ -1952,6 +1957,7 @@ export type Database = {
           looking_for_team?: boolean
           peak_coins?: number
           preferred_game?: string | null
+          preferred_team_type?: string | null
           rank?: string | null
           region?: string | null
           reputation_score?: number
