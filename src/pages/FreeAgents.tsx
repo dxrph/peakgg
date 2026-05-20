@@ -390,7 +390,7 @@ export default function FreeAgentsPage() {
             </CollapsibleContent>
           </Collapsible>
         ) : (
-          <aside className="lg:sticky lg:top-20 self-start rounded-xl border border-border bg-card/60 backdrop-blur p-5 shadow-lg shadow-black/20">
+          <aside className="lg:sticky lg:top-20 self-start rounded-xl border border-border/50 bg-card/30 backdrop-blur p-5">
             {FiltersPanel}
           </aside>
         )}
@@ -403,7 +403,11 @@ export default function FreeAgentsPage() {
               <p className="text-xs text-muted-foreground font-body mt-1">
                 {loading
                   ? t("free_agents.loading", { defaultValue: "Loading players…" })
-                  : `${filtered.length} ${filtered.length === 1 ? "player" : "players"}${filtersActive ? " match your filters" : " listed"}`}
+                  : filtersActive
+                    ? `${filtered.length} ${filtered.length === 1 ? "player" : "players"} found with current filters.`
+                    : agents.length === 0
+                      ? "No players listed yet — complete your profile to become discoverable."
+                      : `${agents.length} ${agents.length === 1 ? "player" : "players"} listed`}
               </p>
             </div>
             {filtersActive && !loading && (
