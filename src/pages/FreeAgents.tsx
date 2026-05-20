@@ -378,8 +378,8 @@ export default function FreeAgentsPage() {
             title="For Players"
             body="Create a free agent profile with your game, role, rank, region, languages and availability."
             bullets={["Show your role and rank", "Get discovered by teams", "Add availability and languages"]}
-            ctaLabel={user ? "Complete Profile" : "Create Account"}
-            ctaTo={user ? "/settings" : "/register"}
+            ctaLabel={ctaLabel}
+            ctaOnClick={onCompleteCta}
           />
           <PurposeCard
             tone="accent"
@@ -490,6 +490,7 @@ function PurposeCard({
   bullets,
   ctaLabel,
   ctaTo,
+  ctaOnClick,
 }: {
   tone: "primary" | "accent";
   icon: any;
@@ -497,9 +498,10 @@ function PurposeCard({
   body: string;
   bullets: string[];
   ctaLabel: string;
-  ctaTo: string;
+  ctaTo?: string;
+  ctaOnClick?: () => void;
 }) {
-  const isHash = ctaTo.startsWith("#");
+  const isHash = !!ctaTo && ctaTo.startsWith("#");
   const hoverBorder = tone === "primary" ? "hover:border-primary/60" : "hover:border-accent/60";
   const iconText = tone === "primary" ? "text-primary" : "text-accent";
   const bulletText = tone === "primary" ? "text-primary" : "text-accent";
@@ -541,14 +543,22 @@ function PurposeCard({
       </ul>
 
       <div className="mt-6">
-        {isHash ? (
+        {ctaOnClick ? (
+          <Button
+            variant={tone === "primary" ? "neon" : "neonOutline"}
+            className="w-full sm:w-auto"
+            onClick={ctaOnClick}
+          >
+            {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
+          </Button>
+        ) : isHash ? (
           <a href={ctaTo}>
             <Button variant={tone === "primary" ? "neon" : "neonOutline"} className="w-full sm:w-auto">
               {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
           </a>
         ) : (
-          <Link to={ctaTo}>
+          <Link to={ctaTo!}>
             <Button variant={tone === "primary" ? "neon" : "neonOutline"} className="w-full sm:w-auto">
               {ctaLabel} <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
