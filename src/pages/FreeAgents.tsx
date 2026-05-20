@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,11 @@ import RankBadge from "@/components/RankBadge";
 import GameIcon from "@/components/GameIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { DISCORD_INVITE } from "@/lib/links";
+import {
+  handleCompleteFreeAgentProfile,
+  freeAgentCtaLabel,
+  isFreeAgentListed,
+} from "@/lib/free-agent";
 
 type AgentRow = {
   id: string;
@@ -31,6 +36,8 @@ type AgentRow = {
   region: string | null;
   language: string | null;
   preferred_game: string | null;
+  role: string | null;
+  availability: string | null;
   reputation_score: number;
   account_verified: boolean;
   smurf_risk_score: number;
@@ -53,7 +60,11 @@ const LANGUAGES = [
 
 export default function FreeAgentsPage() {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const onCompleteCta = () => handleCompleteFreeAgentProfile(user, navigate);
+  const ctaLabel = freeAgentCtaLabel(user, profile);
+  const alreadyListed = isFreeAgentListed(profile);
   const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState<AgentRow[]>([]);
@@ -76,10 +87,15 @@ export default function FreeAgentsPage() {
       const { data: profs } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, region, language, preferred_game, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
+          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
         )
         .eq("looking_for_team", true)
         .eq("is_banned", false)
+        // Only profiles that are "complete enough" should appear publicly.
+        .not("preferred_game", "is", null)
+        .not("role", "is", null)
+        .not("region", "is", null)
+        .not("availability", "is", null)
         .order("last_active_at", { ascending: false })
         .limit(200);
       const list = (profs as AgentRow[]) ?? [];
