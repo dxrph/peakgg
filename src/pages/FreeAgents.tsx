@@ -447,7 +447,8 @@ export default function FreeAgentsPage() {
           ) : filtered.length === 0 ? (
             <EmptyState
               filtersActive={filtersActive}
-              user={user}
+              ctaLabel={ctaLabel}
+              onComplete={onCompleteCta}
               onReset={resetFilters}
             />
           ) : (
@@ -569,7 +570,17 @@ function PurposeCard({
   );
 }
 
-function EmptyState({ filtersActive, user, onReset }: { filtersActive: boolean; user: any; onReset: () => void }) {
+function EmptyState({
+  filtersActive,
+  ctaLabel,
+  onComplete,
+  onReset,
+}: {
+  filtersActive: boolean;
+  ctaLabel: string;
+  onComplete: () => void;
+  onReset: () => void;
+}) {
   const benefits = [
     { icon: Target, label: "Show your role" },
     { icon: Trophy, label: "Display your rank / ELO" },
@@ -623,11 +634,9 @@ function EmptyState({ filtersActive, user, onReset }: { filtersActive: boolean; 
           )}
 
           <div className="mt-6 flex flex-wrap gap-2 justify-center">
-            {user ? (
-              <Link to="/settings"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Complete Profile</Button></Link>
-            ) : (
-              <Link to="/register"><Button variant="neon"><UserPlus className="h-4 w-4 mr-1.5" /> Create Account</Button></Link>
-            )}
+            <Button variant="neon" onClick={onComplete}>
+              <UserPlus className="h-4 w-4 mr-1.5" /> {ctaLabel}
+            </Button>
             {filtersActive && (
               <Button variant="neonOutline" onClick={onReset}>
                 <RotateCcw className="h-4 w-4 mr-1.5" /> Reset Filters
