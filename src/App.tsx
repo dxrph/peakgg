@@ -43,6 +43,7 @@ import MatchDetailPage from "./pages/MatchDetail";
 import TeamDashboardPage from "./pages/TeamDashboard";
 import AimGuidePage from "./pages/AimGuide";
 import FreeAgentsPage from "./pages/FreeAgents";
+import FreeAgentsCompletePage from "./pages/FreeAgentsComplete";
 import NotificationsPage from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
 import EloExplainedPage from "./pages/EloExplained";
@@ -137,6 +138,7 @@ const App = () => (
               />
               <Route path="/aim-guide" element={<AimGuidePage />} />
               <Route path="/free-agents" element={<ProtectedRoute><FreeAgentsPage /></ProtectedRoute>} />
+              <Route path="/free-agents/complete-profile" element={<ProtectedRoute><FreeAgentsCompletePage /></ProtectedRoute>} />
               <Route path="/elo" element={<EloExplainedPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/faq" element={<FAQPage />} />
