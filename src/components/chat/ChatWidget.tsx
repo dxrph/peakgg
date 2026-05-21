@@ -23,6 +23,7 @@ import {
   Trash2,
   Plus,
   Mountain,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,8 +31,9 @@ import { useChat, type ChatMessage } from "@/hooks/useChat";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import PeakBotView from "./PeakBotView";
 
-type Tab = "global" | "team";
+type Tab = "global" | "team" | "ai";
 
 /* ───────────────────────── Scoped styles ───────────────────────── */
 
@@ -355,7 +357,7 @@ function ChannelView({
   teamName,
   currentUsername,
 }: {
-  kind: Tab;
+  kind: "global" | "team";
   teamId: string | null;
   teamName: string | null;
   currentUsername?: string | null;
@@ -915,6 +917,13 @@ export default function ChatWidget() {
                   Team
                   {teamUnread > 0 && tab !== "team" && <span className="pk-notif" />}
                 </button>
+                <button
+                  className={cn("pk-tab", tab === "ai" && "active")}
+                  onClick={() => setTab("ai")}
+                >
+                  <Sparkles size={13} />
+                  PeakBot
+                </button>
               </div>
             </div>
 
@@ -927,7 +936,7 @@ export default function ChatWidget() {
                 teamName={null}
                 currentUsername={username}
               />
-            ) : (
+            ) : tab === "team" ? (
               <ChannelView
                 key={`team-${teamId ?? "none"}`}
                 kind="team"
@@ -935,6 +944,8 @@ export default function ChatWidget() {
                 teamName={teamName}
                 currentUsername={username}
               />
+            ) : (
+              <PeakBotView key="peakbot" />
             )}
           </motion.div>
         )}
