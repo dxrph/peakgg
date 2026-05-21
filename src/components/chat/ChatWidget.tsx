@@ -357,7 +357,7 @@ function ChannelView({
   teamName,
   currentUsername,
 }: {
-  kind: Tab;
+  kind: "global" | "team";
   teamId: string | null;
   teamName: string | null;
   currentUsername?: string | null;
