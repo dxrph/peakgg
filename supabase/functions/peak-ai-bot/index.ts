@@ -233,6 +233,133 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (module === "announcements") {
+      // Admin-only (already gated above). Generates drafts, NEVER publishes.
+      if (!message) return err("empty_message");
+
+      const ctxBlock = Object.keys(context).length
+        ? `\nADMIN CONTEXT (use only if relevant):\n${JSON.stringify(context).slice(0, 800)}`
+        : "";
+
+      const langName =
+        language === "it" ? "Italian" : language === "fr" ? "French" : "English";
+
+      const toneLine: Record<string, string> = {
+        default: "Direct, confident, esports-native. Hype but credible.",
+        hype: "Hype esports caster energy. Punchy. Caps sparingly.",
+        meme: "Meme-aware, ranked-pain humor — never abusive.",
+        professional: "Professional esports tone. No memes. Clear and concise.",
+        short: "Maximum 2 short sentences in the body.",
+        toxic_fun: "Toxic-fun banter about gameplay only (instalocks, whiffs, tilt). Never about people or identity.",
+      };
+
+      const sys = `You are PeakBot, drafting an OFFICIAL PeakGG announcement for the admin team to review.
+
+LANGUAGE: ${langName}.
+TONE: ${toneLine[tone] ?? toneLine.default}
+
+HARD RULES:
+- This is a DRAFT. You never publish. The admin will edit and approve.
+- Output STRICT JSON only, no markdown, no prose outside JSON.
+- Title: max 90 chars, no trailing period, no emoji spam (max 1 emoji).
+- Body: max 600 chars, plain text, no markdown headings, line breaks allowed.
+- Never invent dates, ELO values, prize money, sponsor names, or match results not present in the admin context.
+- If context is missing, keep claims generic and let the admin fill specifics.
+- Use PeakGG vocabulary: Peak League, Open Cup, Challenger Series, Peak Championship, Free Agents, ELO, Rookie/Contender/Rival/Expert/Elite/Master/Apex.
+- Never insult users or target identity.
+
+JSON SHAPE:
+{
+  "title": "string",
+  "body": "string",
+  "urgent_suggested": false,
+  "variants": [
+    { "label": "Short",    "title": "string", "body": "string" },
+    { "label": "Hype",     "title": "string", "body": "string" },
+    { "label": "Pro",      "title": "string", "body": "string" }
+  ]
+}`;
+
+      let raw = "";
+      try {
+        raw = await callLovableAI(
+          [
+            { role: "system", content: sys + ctxBlock },
+            {
+              role: "user",
+              content: `Draft an announcement about: ${message}\nReturn ONLY the JSON object.`,
+            },
+          ],
+          { temperature: 0.8 },
+        );
+      } catch (e: any) {
+        if (e?.status === 429) return err("rate_limited", 429);
+        if (e?.status === 402) return err("payment_required", 402);
+        throw e;
+      }
+
+      // Tolerate fenced code blocks
+      const cleaned = raw
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch {
+        // Try to extract the first {...} block
+        const m = cleaned.match(/\{[\s\S]*\}/);
+        if (m) {
+          try {
+            parsed = JSON.parse(m[0]);
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      if (!parsed || typeof parsed.title !== "string" || typeof parsed.body !== "string") {
+        return json({
+          success: false,
+          module,
+          error: "bad_ai_output",
+          message:
+            "PeakBot returned an unreadable draft. Try again or simplify the topic.",
+        });
+      }
+
+      const clip = (s: unknown, n: number) =>
+        String(s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+
+      const draft = {
+        title: clip(parsed.title, 120),
+        body: clip(parsed.body, 4000),
+        urgent_suggested: Boolean(parsed.urgent_suggested),
+        variants: Array.isArray(parsed.variants)
+          ? parsed.variants
+              .slice(0, 4)
+              .map((v: any) => ({
+                label: clip(v?.label, 24) || "Variant",
+                title: clip(v?.title, 120),
+                body: clip(v?.body, 4000),
+              }))
+              .filter((v: any) => v.title && v.body)
+          : [],
+      };
+
+      return json({
+        success: true,
+        module,
+        title: draft.title,
+        message: draft.body,
+        metadata: {
+          urgent_suggested: draft.urgent_suggested,
+          variants: draft.variants,
+        },
+      });
+    }
+
     // All other modules — Phase 2+. Acknowledge cleanly so the UI is honest.
     return json({
       success: false,
