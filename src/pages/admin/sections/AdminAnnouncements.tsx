@@ -18,6 +18,11 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { logAdminAction, formatRelative } from "@/lib/admin";
 import { sanitizeText } from "@/lib/security";
+import { usePeakAIBot, type PeakBotTone } from "@/hooks/usePeakAIBot";
+import { Sparkles, Wand2, RotateCw } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 type Announcement = {
   id: string;
@@ -41,6 +46,17 @@ export default function AdminAnnouncements() {
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [form, setForm] = useState({ title: "", body: "", active: true, urgent: false });
 
+  // AI draft state — generates drafts only; nothing publishes until admin clicks Pubblica/Salva.
+  const ai = usePeakAIBot();
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiTone, setAiTone] = useState<PeakBotTone>("default");
+  const [aiLang, setAiLang] = useState<"en" | "it" | "fr">("it");
+  const [aiVariants, setAiVariants] = useState<
+    { label: string; title: string; body: string }[]
+  >([]);
+  const [aiUrgent, setAiUrgent] = useState(false);
+
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -58,13 +74,55 @@ export default function AdminAnnouncements() {
   const openCreate = () => {
     setEditing(null);
     setForm({ title: "", body: "", active: true, urgent: false });
+    setAiOpen(false);
+    setAiVariants([]);
+    setAiTopic("");
+    setAiUrgent(false);
+    ai.reset();
     setOpen(true);
   };
 
   const openEdit = (a: Announcement) => {
     setEditing(a);
     setForm({ title: a.title, body: a.body, active: a.active, urgent: a.urgent });
+    setAiOpen(false);
+    setAiVariants([]);
+    setAiTopic("");
+    ai.reset();
     setOpen(true);
+  };
+
+  const generateDraft = async () => {
+    const topic = aiTopic.trim().slice(0, 500);
+    if (topic.length < 4) {
+      toast.error("Descrivi l'annuncio in almeno 4 caratteri");
+      return;
+    }
+    const res = await ai.callBot(
+      "announcements",
+      topic,
+      { current_title: form.title || undefined },
+      { tone: aiTone, language: aiLang },
+    );
+    if (!res?.success) {
+      // hook already surfaced error
+      if (ai.error) toast.error(ai.error);
+      return;
+    }
+    const variants = (res.metadata as any)?.variants ?? [];
+    setAiVariants(Array.isArray(variants) ? variants : []);
+    setAiUrgent(Boolean((res.metadata as any)?.urgent_suggested));
+    setForm((f) => ({
+      ...f,
+      title: res.title || f.title,
+      body: res.message || f.body,
+    }));
+    toast.success("Bozza AI generata — rivedi prima di pubblicare");
+  };
+
+  const applyVariant = (v: { title: string; body: string }) => {
+    setForm((f) => ({ ...f, title: v.title, body: v.body }));
+    toast.success("Variante applicata");
   };
 
   const submit = async () => {
@@ -224,10 +282,130 @@ export default function AdminAnnouncements() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Modifica annuncio" : "Nuovo annuncio"}</DialogTitle>
           </DialogHeader>
+
+          <div className="rounded-lg border border-primary/30 bg-primary/5">
+            <button
+              type="button"
+              onClick={() => setAiOpen((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left"
+            >
+              <span className="flex items-center gap-2 text-sm font-display uppercase tracking-wider">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Draft Assistant
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {aiOpen ? "Nascondi" : "Mostra"}
+              </span>
+            </button>
+
+            {aiOpen && (
+              <div className="px-3 pb-3 space-y-2 border-t border-primary/20 pt-3">
+                <p className="text-xs text-muted-foreground">
+                  Genera una bozza. Nulla viene pubblicato finché non clicchi “{editing ? "Salva" : "Pubblica"}”.
+                </p>
+                <Textarea
+                  rows={2}
+                  placeholder="Es: La Peak League Season 1 apre le iscrizioni venerdì 18:00 CET, top 8 team avanzano ai playoff."
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value.slice(0, 500))}
+                  maxLength={500}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Tone</Label>
+                    <Select value={aiTone} onValueChange={(v) => setAiTone(v as PeakBotTone)}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        <SelectItem value="hype">Hype</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="short">Short</SelectItem>
+                        <SelectItem value="meme">Meme</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Lingua</Label>
+                    <Select value={aiLang} onValueChange={(v) => setAiLang(v as any)}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="it">Italiano</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={generateDraft}
+                    disabled={ai.loading || aiTopic.trim().length < 4}
+                  >
+                    <Wand2 className="h-4 w-4 mr-1" />
+                    {ai.loading ? "Generazione…" : "Genera bozza"}
+                  </Button>
+                  {ai.response && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={generateDraft}
+                      disabled={ai.loading}
+                    >
+                      <RotateCw className="h-4 w-4 mr-1" /> Rigenera
+                    </Button>
+                  )}
+                  {aiUrgent && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setForm((f) => ({ ...f, urgent: true }))}
+                    >
+                      Suggerito: URGENTE
+                    </Button>
+                  )}
+                </div>
+                {ai.error && (
+                  <p className="text-xs text-destructive">{ai.error}</p>
+                )}
+                {aiVariants.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
+                    <Label className="text-xs">Varianti</Label>
+                    <div className="grid gap-1.5">
+                      {aiVariants.map((v, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => applyVariant(v)}
+                          className="text-left rounded-md border border-border bg-card/50 hover:border-primary/50 hover:bg-card transition p-2"
+                        >
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <Badge variant="outline" className="font-display text-[10px]">
+                              {v.label}
+                            </Badge>
+                            <span className="text-xs font-semibold truncate">{v.title}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">{v.body}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-3">
             <div>
               <Label>Titolo</Label>
