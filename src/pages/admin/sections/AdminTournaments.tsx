@@ -654,7 +654,7 @@ function ReplaceTeamDialog({
 
 /* ─────────── AI draft panel ─────────── */
 
-type DraftVariant = { label: string; description: string; rules: string };
+type DraftVariant = { label: string; tagline?: string; description: string; rules: string };
 
 function AITournamentDraftPanel({
   form,
@@ -693,6 +693,8 @@ function AITournamentDraftPanel({
     reward_badge: form.reward_badge || undefined,
     start_date: form.start_date || undefined,
     end_date: form.end_date || undefined,
+    status: form.status,
+    existing_description: (form.description ?? "").trim() || undefined,
   });
 
   const generate = async () => {
@@ -742,9 +744,11 @@ function AITournamentDraftPanel({
       {open && (
         <div className="px-3 pb-3 space-y-3 border-t border-primary/20 pt-3">
           <p className="text-xs text-muted-foreground">
-            Genera una bozza di descrizione + regolamento. Niente viene pubblicato: rivedi e modifica prima di salvare.
-            PeakBot usa formato, BO, mappe, ELO e premi inseriti qui sopra come contesto.
+            Genera una bozza di descrizione + regolamento usando il contesto già compilato (formato, BO, mappe, ELO, premi, date).
           </p>
+          <div className="rounded border border-amber-500/30 bg-amber-500/10 text-amber-200 text-[11px] px-2 py-1.5">
+            ⚠ Le bozze AI sono suggerimenti. Rivedi sempre prima di salvare. Niente viene pubblicato automaticamente.
+          </div>
 
           <div>
             <Label className="text-xs">Topic / angolo narrativo (opzionale)</Label>
@@ -798,39 +802,21 @@ function AITournamentDraftPanel({
 
           {error && (
             <div className="rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs p-2">
-              {error}
+              {error} I dati del form non sono stati toccati — puoi riprovare.
+            </div>
+          )}
+
+          {!response && !loading && !error && (
+            <div className="rounded border border-dashed border-border bg-background/40 p-4 text-center text-xs text-muted-foreground">
+              Nessuna bozza generata. Compila il form qui sopra e clicca <span className="text-primary font-display">Genera bozza</span> per ricevere 3 varianti (Short, Hype, Pro).
             </div>
           )}
 
           {response?.success && (
             <div className="space-y-3">
-              {meta.tagline && (
-                <div className="rounded border border-border bg-card/60 p-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tagline</p>
-                  <p className="text-sm font-display">{meta.tagline}</p>
-                </div>
-              )}
-
-              <DraftBlock
-                label="Descrizione principale"
-                text={meta.description ?? response.message}
-                onApply={() => applyDescription(meta.description ?? response.message)}
-                onCopy={() => copyText(meta.description ?? response.message)}
-              />
-
-              {meta.rules && (
-                <DraftBlock
-                  label="Regolamento"
-                  text={meta.rules}
-                  applyLabel="Aggiungi a descrizione"
-                  onApply={() => appendRules(meta.rules!)}
-                  onCopy={() => copyText(meta.rules!)}
-                />
-              )}
-
               {meta.variants && meta.variants.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Varianti</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Varianti generate</p>
                   <div className="grid gap-2">
                     {meta.variants.map((v, i) => (
                       <div key={i} className="rounded border border-border bg-card/60 p-2 space-y-2">
@@ -838,18 +824,21 @@ function AITournamentDraftPanel({
                           <span className="text-xs font-display uppercase tracking-wider text-primary">{v.label}</span>
                           <div className="flex gap-1">
                             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => applyDescription(v.description)}>
-                              Usa descrizione
+                              Applica descrizione
                             </Button>
                             {v.rules && (
                               <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => appendRules(v.rules)}>
-                                + Regole
+                                + Regolamento
                               </Button>
                             )}
-                            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => copyText(`${v.description}\n\n${v.rules ?? ""}`.trim())}>
+                            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" title="Copia tutto" onClick={() => copyText(`${v.tagline ? v.tagline + "\n\n" : ""}${v.description}\n\n${v.rules ?? ""}`.trim())}>
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         </div>
+                        {v.tagline && (
+                          <p className="text-sm font-display text-foreground">{v.tagline}</p>
+                        )}
                         <p className="text-xs whitespace-pre-wrap text-foreground/90">{v.description}</p>
                         {v.rules && (
                           <p className="text-[11px] whitespace-pre-wrap text-muted-foreground border-t border-border pt-2">{v.rules}</p>
@@ -858,6 +847,15 @@ function AITournamentDraftPanel({
                     ))}
                   </div>
                 </div>
+              )}
+
+              {(!meta.variants || meta.variants.length === 0) && (
+                <DraftBlock
+                  label="Bozza"
+                  text={meta.description ?? response.message}
+                  onApply={() => applyDescription(meta.description ?? response.message)}
+                  onCopy={() => copyText(meta.description ?? response.message)}
+                />
               )}
             </div>
           )}
