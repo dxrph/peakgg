@@ -394,10 +394,14 @@ HARD RULES:
 - "description": 2–4 short paragraphs (max 700 chars total). Plain text. No markdown headings, no emoji spam (max 1 emoji).
 - "rules": numbered list as plain text using "1. ", "2. " line prefixes. Max 8 rules. Max 800 chars total.
 - "tagline": one short hype line, max 80 chars. No trailing period required.
-- Only mention format, BO, map mode, max teams, ELO range, entry type, rewards, start date IF present in the admin context. NEVER invent dates, prize money, sponsors, ELO numbers, or results.
+- Only mention format, BO, map mode, max teams, ELO range, entry type, rewards, start date IF present in the admin context. NEVER invent dates, prize money, sponsors, ELO numbers, results, or sponsors.
+- "reward_trophies" is an internal PeakGG trophy count, NOT cash. Never describe it as cash, euros, dollars, or a real prize pool. Never mention cash prizes unless the context explicitly contains a "cash_prize" field.
+- If "existing_description" or "existing_rules" are present in the context, treat them as the current admin draft: stay coherent, do not contradict, do not duplicate them verbatim.
+- If a field is missing, use neutral wording ("ELO range open to all", "format announced soon", "rewards TBA") instead of guessing.
 - Use PeakGG vocabulary: Peak League, Open Cup, Challenger Series, Peak Championship, Free Agents, ELO, Rookie/Contender/Rival/Expert/Elite/Master/Apex.
 - Rules must reflect the provided format/BO/map mode when given; otherwise stay generic ("respect the bracket schedule", "no smurfing", "report disputes within 10 minutes", etc.).
 - Never insult users or target identity.
+- You MUST return exactly 3 variants with labels "Short", "Hype", "Pro", each with its own tagline, description and rules. "Short" = 2 punchy sentences max. "Hype" = caster energy, light meme allowed, no insults. "Pro" = clean professional esports copy, no memes.
 
 JSON SHAPE:
 {
@@ -405,9 +409,9 @@ JSON SHAPE:
   "description": "string",
   "rules": "string",
   "variants": [
-    { "label": "Short",        "description": "string", "rules": "string" },
-    { "label": "Hype",         "description": "string", "rules": "string" },
-    { "label": "Professional", "description": "string", "rules": "string" }
+    { "label": "Short", "tagline": "string", "description": "string", "rules": "string" },
+    { "label": "Hype",  "tagline": "string", "description": "string", "rules": "string" },
+    { "label": "Pro",   "tagline": "string", "description": "string", "rules": "string" }
   ]
 }`;
 
@@ -472,6 +476,7 @@ JSON SHAPE:
               .slice(0, 4)
               .map((v: any) => ({
                 label: clipLine(v?.label, 24) || "Variant",
+                tagline: clipLine(v?.tagline, 120),
                 description: clipMulti(v?.description, 1500),
                 rules: clipMulti(v?.rules, 1500),
               }))
