@@ -20,7 +20,8 @@ type Module =
   | "content_studio"
   | "safety_monitor"
   | "onboarding"
-  | "chat_moderation";
+  | "chat_moderation"
+  | "tournament_brief";
 
 const MODULES: Module[] = [
   "assistant",
@@ -33,12 +34,14 @@ const MODULES: Module[] = [
   "safety_monitor",
   "onboarding",
   "chat_moderation",
+  "tournament_brief",
 ];
 
 const ADMIN_ONLY: Module[] = [
   "announcements",
   "followups",
   "safety_monitor",
+  "tournament_brief",
 ];
 
 const TONES = ["default", "hype", "meme", "professional", "short", "toxic_fun"] as const;
@@ -355,6 +358,136 @@ JSON SHAPE:
         message: draft.body,
         metadata: {
           urgent_suggested: draft.urgent_suggested,
+          variants: draft.variants,
+        },
+      });
+    }
+
+    if (module === "tournament_brief") {
+      // Admin-only. Generates a tournament description + short rules block.
+      if (!message) return err("empty_message");
+
+      const ctxBlock = Object.keys(context).length
+        ? `\nTOURNAMENT CONTEXT (use only what's relevant — do not invent missing data):\n${JSON.stringify(context).slice(0, 1200)}`
+        : "";
+
+      const langName =
+        language === "it" ? "Italian" : language === "fr" ? "French" : "English";
+
+      const toneLine: Record<string, string> = {
+        default: "Direct, confident, esports-native. Hype but credible.",
+        hype: "Hype esports caster energy. Punchy. Caps sparingly.",
+        meme: "Meme-aware, ranked-pain humor — never abusive.",
+        professional: "Professional esports tone. No memes. Clear and concise.",
+        short: "Maximum 2 short sentences in the description.",
+        toxic_fun: "Toxic-fun banter about gameplay only. Never about people.",
+      };
+
+      const sys = `You are PeakBot, drafting an OFFICIAL PeakGG TOURNAMENT page for the admin team to review.
+
+LANGUAGE: ${langName}.
+TONE: ${toneLine[tone] ?? toneLine.default}
+
+HARD RULES:
+- This is a DRAFT. You never publish. Admin will edit and approve.
+- Output STRICT JSON only, no markdown, no prose outside JSON.
+- "description": 2–4 short paragraphs (max 700 chars total). Plain text. No markdown headings, no emoji spam (max 1 emoji).
+- "rules": numbered list as plain text using "1. ", "2. " line prefixes. Max 8 rules. Max 800 chars total.
+- "tagline": one short hype line, max 80 chars. No trailing period required.
+- Only mention format, BO, map mode, max teams, ELO range, entry type, rewards, start date IF present in the admin context. NEVER invent dates, prize money, sponsors, ELO numbers, or results.
+- Use PeakGG vocabulary: Peak League, Open Cup, Challenger Series, Peak Championship, Free Agents, ELO, Rookie/Contender/Rival/Expert/Elite/Master/Apex.
+- Rules must reflect the provided format/BO/map mode when given; otherwise stay generic ("respect the bracket schedule", "no smurfing", "report disputes within 10 minutes", etc.).
+- Never insult users or target identity.
+
+JSON SHAPE:
+{
+  "tagline": "string",
+  "description": "string",
+  "rules": "string",
+  "variants": [
+    { "label": "Short",        "description": "string", "rules": "string" },
+    { "label": "Hype",         "description": "string", "rules": "string" },
+    { "label": "Professional", "description": "string", "rules": "string" }
+  ]
+}`;
+
+      let raw = "";
+      try {
+        raw = await callLovableAI(
+          [
+            { role: "system", content: sys + ctxBlock },
+            {
+              role: "user",
+              content: `Draft the tournament page for: ${message}\nReturn ONLY the JSON object.`,
+            },
+          ],
+          { temperature: 0.75 },
+        );
+      } catch (e: any) {
+        if (e?.status === 429) return err("rate_limited", 429);
+        if (e?.status === 402) return err("payment_required", 402);
+        throw e;
+      }
+
+      const cleaned = raw
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch {
+        const m = cleaned.match(/\{[\s\S]*\}/);
+        if (m) {
+          try { parsed = JSON.parse(m[0]); } catch { /* ignore */ }
+        }
+      }
+
+      if (!parsed || typeof parsed.description !== "string") {
+        return json({
+          success: false,
+          module,
+          error: "bad_ai_output",
+          message:
+            "PeakBot returned an unreadable draft. Try again or simplify the topic.",
+        });
+      }
+
+      const clipMulti = (s: unknown, n: number) =>
+        String(s ?? "")
+          .replace(/[ \t]+/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim()
+          .slice(0, n);
+      const clipLine = (s: unknown, n: number) =>
+        String(s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+
+      const draft = {
+        tagline: clipLine(parsed.tagline, 120),
+        description: clipMulti(parsed.description, 1500),
+        rules: clipMulti(parsed.rules, 1500),
+        variants: Array.isArray(parsed.variants)
+          ? parsed.variants
+              .slice(0, 4)
+              .map((v: any) => ({
+                label: clipLine(v?.label, 24) || "Variant",
+                description: clipMulti(v?.description, 1500),
+                rules: clipMulti(v?.rules, 1500),
+              }))
+              .filter((v: any) => v.description)
+          : [],
+      };
+
+      return json({
+        success: true,
+        module,
+        title: draft.tagline,
+        message: draft.description,
+        metadata: {
+          tagline: draft.tagline,
+          description: draft.description,
+          rules: draft.rules,
           variants: draft.variants,
         },
       });
