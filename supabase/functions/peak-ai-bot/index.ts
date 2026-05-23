@@ -20,7 +20,8 @@ type Module =
   | "content_studio"
   | "safety_monitor"
   | "onboarding"
-  | "chat_moderation";
+  | "chat_moderation"
+  | "tournament_brief";
 
 const MODULES: Module[] = [
   "assistant",
@@ -33,12 +34,14 @@ const MODULES: Module[] = [
   "safety_monitor",
   "onboarding",
   "chat_moderation",
+  "tournament_brief",
 ];
 
 const ADMIN_ONLY: Module[] = [
   "announcements",
   "followups",
   "safety_monitor",
+  "tournament_brief",
 ];
 
 const TONES = ["default", "hype", "meme", "professional", "short", "toxic_fun"] as const;
