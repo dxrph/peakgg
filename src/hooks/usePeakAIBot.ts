@@ -11,7 +11,8 @@ export type PeakBotModule =
   | "content_studio"
   | "safety_monitor"
   | "onboarding"
-  | "chat_moderation";
+  | "chat_moderation"
+  | "tournament_brief";
 
 export type PeakBotTone =
   | "default"
