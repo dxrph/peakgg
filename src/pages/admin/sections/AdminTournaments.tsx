@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trophy, Download, X, Pencil, ArrowRightLeft, Loader2, GitBranch } from "lucide-react";
+import { Plus, Trophy, Download, X, Pencil, ArrowRightLeft, Loader2, GitBranch, Sparkles, RefreshCw, Copy } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { downloadCSV, formatRelative, logAdminAction, toCSV } from "@/lib/admin"
 import { sanitizeText } from "@/lib/security";
 import TournamentWizardDialog from "@/components/admin/tournament-wizard/TournamentWizardDialog";
 import type { WizardForm } from "@/components/admin/tournament-wizard/types";
+import { usePeakAIBot } from "@/hooks/usePeakAIBot";
 
 const VALORANT_MAPS = ["Ascent", "Breeze", "Fracture", "Haven", "Lotus", "Pearl", "Split"] as const;
 
