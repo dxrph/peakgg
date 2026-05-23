@@ -651,3 +651,249 @@ function ReplaceTeamDialog({
     </Dialog>
   );
 }
+
+/* ─────────── AI draft panel ─────────── */
+
+type DraftVariant = { label: string; description: string; rules: string };
+
+function AITournamentDraftPanel({
+  form,
+  update,
+}: {
+  form: FormState;
+  update: (patch: Partial<FormState>) => void;
+}) {
+  const { loading, error, response, callBot, regenerate } = usePeakAIBot();
+  const [open, setOpen] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [tone, setTone] = useState<"default" | "hype" | "professional" | "short" | "meme">("default");
+  const [language, setLanguage] = useState<"it" | "en" | "fr">("it");
+
+  const meta = (response?.metadata ?? {}) as {
+    tagline?: string;
+    description?: string;
+    rules?: string;
+    variants?: DraftVariant[];
+  };
+
+  const buildContext = () => ({
+    name: form.name || undefined,
+    game: "valorant",
+    format: form.format,
+    bo: form.bo,
+    map_mode: form.map_mode,
+    map_pool: form.map_mode === "fixed" ? undefined : form.map_pool,
+    fixed_map: form.map_mode === "fixed" ? form.fixed_map : undefined,
+    max_teams: form.max_teams,
+    entry_type: form.entry_type,
+    entry_cost_coins: form.entry_type === "paid" ? form.entry_cost_coins : undefined,
+    min_elo: form.min_elo,
+    max_elo: form.rank_max,
+    reward_trophies: form.reward_trophies || undefined,
+    reward_badge: form.reward_badge || undefined,
+    start_date: form.start_date || undefined,
+    end_date: form.end_date || undefined,
+  });
+
+  const generate = async () => {
+    const t = topic.trim() || form.name.trim();
+    if (!t) {
+      toast.error("Inserisci almeno il nome o un topic per il torneo");
+      return;
+    }
+    await callBot("tournament_brief", t, buildContext(), { tone, language });
+  };
+
+  const applyDescription = (text: string) => {
+    update({ description: text.slice(0, 1000) });
+    toast.success("Descrizione applicata");
+  };
+
+  const appendRules = (rules: string) => {
+    const cur = (form.description ?? "").trim();
+    const block = `${cur ? cur + "\n\n" : ""}— Regolamento —\n${rules}`;
+    update({ description: block.slice(0, 1000) });
+    toast.success("Regole aggiunte alla descrizione");
+  };
+
+  const copyText = async (s: string) => {
+    try {
+      await navigator.clipboard.writeText(s);
+      toast.success("Copiato");
+    } catch {
+      toast.error("Copia non riuscita");
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-primary/30 bg-primary/5">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-3 py-2 text-left"
+      >
+        <span className="flex items-center gap-2 font-display uppercase tracking-wider text-sm text-primary">
+          <Sparkles className="h-4 w-4" />
+          PeakBot — AI Draft Tornei
+        </span>
+        <span className="text-xs text-muted-foreground">{open ? "Chiudi" : "Apri"}</span>
+      </button>
+
+      {open && (
+        <div className="px-3 pb-3 space-y-3 border-t border-primary/20 pt-3">
+          <p className="text-xs text-muted-foreground">
+            Genera una bozza di descrizione + regolamento. Niente viene pubblicato: rivedi e modifica prima di salvare.
+            PeakBot usa formato, BO, mappe, ELO e premi inseriti qui sopra come contesto.
+          </p>
+
+          <div>
+            <Label className="text-xs">Topic / angolo narrativo (opzionale)</Label>
+            <Textarea
+              rows={2}
+              maxLength={500}
+              placeholder={`Es. "Open Cup di lancio della season 2, focus sui nuovi team"`}
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Tono</Label>
+              <Select value={tone} onValueChange={(v) => setTone(v as typeof tone)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="hype">Hype</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="short">Short</SelectItem>
+                  <SelectItem value="meme">Meme</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Lingua</Label>
+              <Select value={language} onValueChange={(v) => setLanguage(v as typeof language)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="it">Italiano</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="fr">Français</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="button" size="sm" onClick={generate} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              Genera bozza
+            </Button>
+            {response?.success && (
+              <Button type="button" size="sm" variant="outline" onClick={() => regenerate()} disabled={loading}>
+                <RefreshCw className="h-4 w-4 mr-2" /> Rigenera
+              </Button>
+            )}
+          </div>
+
+          {error && (
+            <div className="rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs p-2">
+              {error}
+            </div>
+          )}
+
+          {response?.success && (
+            <div className="space-y-3">
+              {meta.tagline && (
+                <div className="rounded border border-border bg-card/60 p-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tagline</p>
+                  <p className="text-sm font-display">{meta.tagline}</p>
+                </div>
+              )}
+
+              <DraftBlock
+                label="Descrizione principale"
+                text={meta.description ?? response.message}
+                onApply={() => applyDescription(meta.description ?? response.message)}
+                onCopy={() => copyText(meta.description ?? response.message)}
+              />
+
+              {meta.rules && (
+                <DraftBlock
+                  label="Regolamento"
+                  text={meta.rules}
+                  applyLabel="Aggiungi a descrizione"
+                  onApply={() => appendRules(meta.rules!)}
+                  onCopy={() => copyText(meta.rules!)}
+                />
+              )}
+
+              {meta.variants && meta.variants.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Varianti</p>
+                  <div className="grid gap-2">
+                    {meta.variants.map((v, i) => (
+                      <div key={i} className="rounded border border-border bg-card/60 p-2 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-display uppercase tracking-wider text-primary">{v.label}</span>
+                          <div className="flex gap-1">
+                            <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => applyDescription(v.description)}>
+                              Usa descrizione
+                            </Button>
+                            {v.rules && (
+                              <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => appendRules(v.rules)}>
+                                + Regole
+                              </Button>
+                            )}
+                            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => copyText(`${v.description}\n\n${v.rules ?? ""}`.trim())}>
+                              <Copy className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-xs whitespace-pre-wrap text-foreground/90">{v.description}</p>
+                        {v.rules && (
+                          <p className="text-[11px] whitespace-pre-wrap text-muted-foreground border-t border-border pt-2">{v.rules}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DraftBlock({
+  label,
+  text,
+  onApply,
+  onCopy,
+  applyLabel = "Applica",
+}: {
+  label: string;
+  text: string;
+  onApply: () => void;
+  onCopy: () => void;
+  applyLabel?: string;
+}) {
+  return (
+    <div className="rounded border border-border bg-card/60 p-2 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+        <div className="flex gap-1">
+          <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onApply}>
+            {applyLabel}
+          </Button>
+          <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={onCopy}>
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+      <p className="text-xs whitespace-pre-wrap text-foreground/90">{text}</p>
+    </div>
+  );
+}
