@@ -525,6 +525,8 @@ function TournamentFormDialog({
             <Label>Descrizione</Label>
             <Textarea rows={3} value={form.description ?? ""} onChange={(e) => update({ description: e.target.value })} maxLength={1000} />
           </div>
+
+          <AITournamentDraftPanel form={form} update={update} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={submitting}>Annulla</Button>
