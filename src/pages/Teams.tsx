@@ -24,12 +24,14 @@ import { Trophy as TrophyIcon, Sparkles, BadgeCheck, MessageCircle, LayoutDashbo
 import TeamLogo from "@/components/teams/TeamLogo";
 import { DISCORD_INVITE } from "@/lib/links";
 
-const GAMES = [
+import { enabledGameIds } from "@/lib/feature-flags";
+const ALL_GAMES = [
   { value: "all", label: "All games" },
   { value: "valorant", label: "Valorant" },
   { value: "cs2", label: "CS2" },
   { value: "r6s", label: "Rainbow Six Siege" },
 ];
+const GAMES = ALL_GAMES.filter(g => g.value === "all" || enabledGameIds.includes(g.value as any));
 const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
 
 function getTeamBadge(team: { trophies: number; looking_for_players: boolean; is_founding?: boolean }) {
