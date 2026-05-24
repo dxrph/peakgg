@@ -1,6 +1,7 @@
 import { Shield, Swords, Trophy, Users, Gamepad2, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useI18n } from "@/i18n";
+import { hideComingSoonSurfaces } from "@/lib/feature-flags";
 
 type FeatureStatus = "available" | "coming_soon" | "in_development";
 
@@ -21,7 +22,7 @@ function StatusPill({ status, label }: { status: FeatureStatus; label: string })
 
 export default function FeaturesSection() {
   const { t } = useI18n();
-  const features: { icon: typeof Swords; title: string; description: string; status: FeatureStatus }[] = [
+  const allFeatures: { icon: typeof Swords; title: string; description: string; status: FeatureStatus }[] = [
     { icon: Swords,    title: t("features.f1_title"), description: t("features.f1_desc"), status: "coming_soon" },
     { icon: Trophy,    title: t("features.f2_title"), description: t("features.f2_desc"), status: "coming_soon" },
     { icon: Users,     title: t("features.f3_title"), description: t("features.f3_desc"), status: "available" },
@@ -29,6 +30,11 @@ export default function FeaturesSection() {
     { icon: BarChart3, title: t("features.f5_title"), description: t("features.f5_desc"), status: "available" },
     { icon: Gamepad2,  title: t("features.f6_title"), description: t("features.f6_desc"), status: "coming_soon" },
   ];
+  // Closed-beta cleanup: only show what actually works to avoid empty promises.
+  const features = hideComingSoonSurfaces
+    ? allFeatures.filter(f => f.status === "available")
+    : allFeatures;
+  if (features.length === 0) return null;
   const statusLabel: Record<FeatureStatus, string> = {
     available: t("features.status_available"),
     coming_soon: t("features.status_coming_soon"),

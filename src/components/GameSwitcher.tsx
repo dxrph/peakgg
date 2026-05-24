@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GAMES, type GameId, getRankByElo } from "@/lib/ranks";
+import { GAMES, getActiveGames, type GameId, getRankByElo } from "@/lib/ranks";
 import { useGame } from "@/lib/game-context";
 import GameIcon from "@/components/GameIcon";
 import RankBadge from "@/components/RankBadge";
@@ -16,6 +16,10 @@ export default function GameSwitcher({
 }) {
   const { selectedGame, setSelectedGame } = useGame();
   const { user } = useAuth();
+  const activeGames = getActiveGames();
+  // While the Valorant-only beta is on, the switcher collapses to a single
+  // game — no need to render a picker with one button.
+  if (activeGames.length <= 1) return null;
   const [elos, setElos] = useState<Record<GameId, number>>({
     valorant: 1000,
     cs2: 1000,
@@ -46,7 +50,7 @@ export default function GameSwitcher({
 
   return (
     <div className={`flex items-center gap-0.5 rounded-md border border-border/60 bg-background/40 p-0.5 ${className}`}>
-      {GAMES.map((game) => {
+      {activeGames.map((game) => {
         const elo = elos[game.id];
         const rank = getRankByElo(elo);
         const isActive = selectedGame === game.id;

@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { GAMES, type GameId } from "@/lib/ranks";
+import { GAMES, getActiveGames, type GameId } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 
 const REGIONS = ["EU", "EU-West", "EU-East", "EU-North", "EU-South"];
@@ -221,7 +221,7 @@ export default function FreeAgentsCompletePage() {
               >
                 <SelectTrigger><SelectValue placeholder="Select your main game" /></SelectTrigger>
                 <SelectContent>
-                  {GAMES.map((g) => (
+                  {getActiveGames().map((g) => (
                     <SelectItem key={g.id} value={g.id}>
                       <span className="inline-flex items-center gap-2">
                         <GameIcon game={g.id} size={14} /> {g.name}

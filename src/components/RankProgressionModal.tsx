@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { RANKS, GAMES, getRankByElo, getEloProgress, getGameById, type RankInfo, type GameId } from "@/lib/ranks";
+import { RANKS, GAMES, getActiveGames, getRankByElo, getEloProgress, getGameById, type RankInfo, type GameId } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import GameIcon from "@/components/GameIcon";
 import { useI18n } from "@/i18n";
@@ -78,7 +78,7 @@ export default function RankProgressionModal({
         <div className="px-6 pt-5 pb-5 space-y-5">
           {/* Game selector */}
           <div className="flex items-center justify-center gap-1 p-1 rounded-lg bg-[#16161A] border border-[#1E1E24]">
-            {GAMES.map((g) => {
+            {getActiveGames().map((g) => {
               const active = g.id === game;
               return (
                 <button

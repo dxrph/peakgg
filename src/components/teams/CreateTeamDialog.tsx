@@ -21,11 +21,14 @@ interface Props {
   onCreated?: () => void;
 }
 
-const GAMES = [
+import { enabledGameIds } from "@/lib/feature-flags";
+
+const ALL_GAMES = [
   { value: "valorant", label: "Valorant", short: "VAL", color: "#FF4655", glow: "rgba(255,70,85,0.45)" },
   { value: "cs2",      label: "CS2",      short: "CS2", color: "#F59E0B", glow: "rgba(245,158,11,0.45)" },
   { value: "r6s",      label: "R6 Siege", short: "R6",  color: "#3B82F6", glow: "rgba(59,130,246,0.45)" },
 ] as const;
+const GAMES = ALL_GAMES.filter(g => enabledGameIds.includes(g.value as any));
 
 const REGIONS = [
   { value: "EU",    label: "EU",    flag: "🇪🇺" },

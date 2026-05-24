@@ -73,7 +73,7 @@ type UploadResult = { ok: true; url: string } | { ok: false; error: string };
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
-import { GAMES, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
+import { GAMES, getActiveGames, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 import SeasonBadge from "@/components/seasons/SeasonBadge";
 
@@ -517,7 +517,7 @@ export default function ProfilePage() {
           {/* OVERVIEW */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {GAMES.map((g) => (
+              {getActiveGames().map((g) => (
                 <PerGameCard
                   key={g.id}
                   game={g.id}
@@ -637,7 +637,7 @@ export default function ProfilePage() {
           <TabsContent value="stats">
             <Tabs defaultValue={preferredGame}>
               <TabsList className="w-full justify-start overflow-x-auto no-scrollbar bg-card border border-border h-auto p-1">
-              {GAMES.map((g) => (
+              {getActiveGames().map((g) => (
                 <TabsTrigger
                   key={g.id}
                   value={g.id}
@@ -649,7 +649,7 @@ export default function ProfilePage() {
               ))}
             </TabsList>
 
-            {GAMES.map((g) => {
+            {getActiveGames().map((g) => {
               const s = stats[g.id];
               const elo = s?.elo ?? 1000;
               const wins = s?.wins ?? 0;
@@ -1386,7 +1386,7 @@ function EditProfileDialog({
             <Select value={preferredGame} onValueChange={setPreferredGame}>
               <SelectTrigger><SelectValue placeholder="Select a game" /></SelectTrigger>
               <SelectContent>
-                {GAMES.map(g => (
+                {getActiveGames().map(g => (
                   <SelectItem key={g.id} value={g.id}>
                     <span className="inline-flex items-center gap-2">
                       <GameIcon game={g.id} size={16} />
