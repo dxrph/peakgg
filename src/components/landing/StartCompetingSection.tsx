@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Users, Trophy, Video, ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { hideComingSoonSurfaces } from "@/lib/feature-flags";
 
 export default function StartCompetingSection() {
   const { t } = useI18n();
 
-  const CARDS = [
+  const ALL_CARDS = [
     {
       icon: Users,
       title: t("start_competing.card1_title"),
@@ -32,6 +33,8 @@ export default function StartCompetingSection() {
       comingSoon: true,
     },
   ];
+  // Closed-beta cleanup: hide "coming soon" cards so users only see live flows.
+  const CARDS = hideComingSoonSurfaces ? ALL_CARDS.filter(c => !c.comingSoon) : ALL_CARDS;
 
   return (
     <section className="py-20 md:py-24 relative overflow-hidden">
