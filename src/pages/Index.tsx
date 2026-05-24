@@ -20,7 +20,7 @@ const Index = () => {
     name: "PeakGG",
     url: "https://peakgg.net",
     logo: "https://peakgg.net/logo.png",
-    description: "Competitive gaming platform for Valorant, CS2 and Rainbow Six Siege",
+    description: "Competitive Valorant platform — ranked, tournaments, teams and free agents for serious players in Europe.",
     email: "peakgg.official@gmail.com",
     foundingDate: "2026",
     foundingLocation: "Brussels, Belgium",
@@ -41,9 +41,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO
-        title="PeakGG — Compete. Rise. Dominate. | Competitive Gaming Platform"
-        description="PeakGG is the ultimate competitive gaming platform for Valorant, CS2 and Rainbow Six Siege. Ranked matchmaking, tournaments, team management and community for serious players."
-        keywords="PeakGG, competitive gaming, Valorant tournaments, CS2 ranked, Rainbow Six Siege, esports platform Belgium, gaming community, ranked matchmaking FPS, FPS tournaments Europe, Valorant ELO system"
+        title="PeakGG — Compete. Rise. Dominate. | Competitive Valorant Platform"
+        description="PeakGG is the competitive Valorant platform for serious European players. Ranked Open Cup tournaments, teams, free agents and the Peak rank system."
+        keywords="PeakGG, competitive Valorant, Valorant tournaments, Valorant ranked, esports platform Belgium, Valorant teams Europe, Valorant free agents, Valorant ELO system, Open Cup"
         path="/"
         jsonLd={[orgSchema, siteSchema]}
       />
