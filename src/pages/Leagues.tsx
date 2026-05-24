@@ -17,7 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { DISCORD_INVITE } from "@/lib/links";
 import { useGame } from "@/lib/game-context";
-import { GAMES } from "@/lib/ranks";
+import { GAMES, getActiveGames } from "@/lib/ranks";
 
 interface LeagueListItem {
   id: string;
@@ -616,7 +616,7 @@ export default function LeaguesPage() {
                 </FilterGroup>
                 <div className="hidden md:block h-8 w-px bg-border/70 shrink-0" />
                 <FilterGroup label="Game">
-                  {[{ id: "all", label: "All" }, ...GAMES.map(g => ({ id: g.id, label: g.name }))].map(g => (
+                  {[{ id: "all", label: "All" }, ...getActiveGames().map(g => ({ id: g.id, label: g.name }))].map(g => (
                     <FilterPill
                       key={g.id}
                       active={gameFilter === g.id}

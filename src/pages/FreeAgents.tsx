@@ -16,7 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
-import { GAMES, getRankByElo, type GameId } from "@/lib/ranks";
+import { GAMES, getActiveGames, getRankByElo, type GameId } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import GameIcon from "@/components/GameIcon";
 import { useAuth } from "@/hooks/useAuth";
@@ -217,7 +217,7 @@ export default function FreeAgentsPage() {
           <SelectTrigger className="mt-1.5 bg-background/40 border-border/60"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("free_agents.all_games", { defaultValue: "All games" })}</SelectItem>
-            {GAMES.map((g) => (
+            {getActiveGames().map((g) => (
               <SelectItem key={g.id} value={g.id}>
                 <span className="inline-flex items-center gap-2">
                   <GameIcon game={g.id} size={14} /> {g.name}
