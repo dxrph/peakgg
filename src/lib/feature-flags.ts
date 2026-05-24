@@ -5,6 +5,25 @@ export const openCupPublicQueueEnabled = true;
 export const rankedPublicBetaEnabled = true;
 
 // ---------------------------------------------------------------------------
+// Valorant-only closed beta
+// ---------------------------------------------------------------------------
+// PeakGG is currently focused on a Valorant-only closed beta. Other games
+// (CS2, R6S), placeholder widgets and "Coming Soon" surfaces are hidden via
+// these flags. Flip back to `false` to restore the multi-game UI.
+
+export const valorantOnlyBeta = true;
+
+/** Game IDs surfaced in public UI while `valorantOnlyBeta` is enabled. */
+export const enabledGameIds: ReadonlyArray<"valorant" | "cs2" | "r6s"> =
+  valorantOnlyBeta ? ["valorant"] : ["valorant", "cs2", "r6s"];
+
+/** Hide marketing cards, feature pills and shortcuts marked "coming soon". */
+export const hideComingSoonSurfaces = valorantOnlyBeta;
+
+/** Hide empty placeholder widgets (Clip of the Week, Coach Marketplace, AI Studio). */
+export const hideEmptyPlaceholders = valorantOnlyBeta;
+
+// ---------------------------------------------------------------------------
 // Unified Competitive Queue config
 // ---------------------------------------------------------------------------
 // One config powers Open Cup + Ranked + future modes. The current public
