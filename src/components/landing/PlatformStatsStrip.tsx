@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { Gamepad2, Award, Trophy, Globe2 } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { enabledGameIds } from "@/lib/feature-flags";
 
 export default function PlatformStatsStrip() {
   const { t } = useI18n();
 
   const STATS = [
-    { icon: Gamepad2, value: "3",  label: t("platform_stats.games") },
+    { icon: Gamepad2, value: String(enabledGameIds.length), label: t("platform_stats.games") },
     { icon: Award,    value: "10", label: t("platform_stats.ranks") },
     { icon: Trophy,   value: "3",  label: t("platform_stats.tiers") },
     { icon: Globe2,   value: "EU", label: t("platform_stats.region") },
