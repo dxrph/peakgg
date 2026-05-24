@@ -97,6 +97,20 @@ export function getGameById(id: GameId): GameInfo {
   return GAMES.find(g => g.id === id) || GAMES[0];
 }
 
+// Active games respect the `valorantOnlyBeta` feature flag so the rest of the
+// UI (game switcher, filters, marketing) can stay multi-game-aware while the
+// closed beta hides everything except Valorant. Reactivating CS2 / R6S is a
+// one-flag flip — no code deletion required.
+import { enabledGameIds } from "./feature-flags";
+
+export function getActiveGames(): GameInfo[] {
+  return GAMES.filter(g => enabledGameIds.includes(g.id));
+}
+
+export function isGameActive(id: GameId): boolean {
+  return enabledGameIds.includes(id);
+}
+
 // Tournament tier system
 export interface TournamentTier {
   tier: number;
