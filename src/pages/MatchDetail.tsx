@@ -713,9 +713,27 @@ export default function MatchDetailPage() {
                     </div>
                     {d.reason && <div className="text-foreground/90 break-words">{d.reason}</div>}
                     {d.evidence_url && (
-                      <a href={d.evidence_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-primary hover:underline mt-1.5">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const url = d.evidence_url!;
+                          if (/^https?:\/\//i.test(url)) {
+                            window.open(url, "_blank", "noopener,noreferrer");
+                            return;
+                          }
+                          const { data, error } = await supabase.storage
+                            .from("dispute-evidence")
+                            .createSignedUrl(url, 300);
+                          if (error || !data?.signedUrl) {
+                            toast.error("Couldn't open evidence (permission denied or expired).");
+                            return;
+                          }
+                          window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+                        }}
+                        className="inline-flex items-center text-xs text-primary hover:underline mt-1.5"
+                      >
                         View evidence ↗
-                      </a>
+                      </button>
                     )}
                     {d.resolution_note && (
                       <div className="mt-2 pt-2 border-t border-border/60 text-xs">
