@@ -32,7 +32,7 @@ const ALL_GAMES = [
   { value: "r6s", label: "Rainbow Six Siege" },
 ];
 const GAMES = ALL_GAMES.filter(g => g.value === "all" || enabledGameIds.includes(g.value as any));
-const RANKS_FILTER = ["all", "Rookie", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Apex"];
+const RANKS_FILTER = ["all", "Rookie", "Contender", "Rival", "Expert", "Elite", "Master", "Apex"];
 
 function getTeamBadge(team: { trophies: number; looking_for_players: boolean; is_founding?: boolean }) {
   if (team.is_founding) {

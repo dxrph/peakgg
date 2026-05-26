@@ -11,21 +11,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 const DESC_KEYS: Record<RankTier, string> = {
   Rookie: "desc_rookie",
-  Iron: "desc_iron",
-  Bronze: "desc_bronze",
-  Silver: "desc_silver",
-  Gold: "desc_gold",
-  Platinum: "desc_platinum",
-  Diamond: "desc_diamond",
+  Contender: "desc_contender",
+  Rival: "desc_rival",
+  Expert: "desc_expert",
   Elite: "desc_elite",
   Master: "desc_master",
   Apex: "desc_apex",
 };
 
 function unlockKey(tier: number): string {
-  // Tournament tiers: Open Cup (all), Challenger (Silver=4), Championship (Diamond=7)
-  if (tier >= 7) return "unlock_championship";
-  if (tier >= 4) return "unlock_challenger";
+  // Tournament tiers: Open Cup (all), Challenger (Rival=3), Championship (Elite=5)
+  if (tier >= 5) return "unlock_championship";
+  if (tier >= 3) return "unlock_challenger";
   return "unlock_open_cup";
 }
 

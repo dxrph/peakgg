@@ -1,25 +1,20 @@
+import { useState } from "react";
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
-import rookieEmblem from "@/assets/ranks/rookie.png";
 import { useRankDefinitions, getCachedEmblemUrl } from "@/hooks/useRankDefinitions";
-import { useState } from "react";
-
-/** Map of ranks that use a custom uploaded PNG asset instead of the procedural SVG emblem. */
-const CUSTOM_EMBLEMS: Partial<Record<RankTier, string>> = {
-  Rookie: rookieEmblem,
-};
 
 /**
  * RankBadge — premium SVG rank emblem for PeakGG.
  *
- * All 10 emblems are inline SVG (no raster PNGs) → infinitely scalable,
- * truly transparent, and impossible to perceive as "pasted square images".
+ * Each of the 7 ranks has a UNIQUE outer silhouette and a UNIQUE central glyph
+ * so the progression is instantly readable from a 20px leaderboard row up to
+ * a 120px hero placement.
  *
  * Drive it by:
- *   <RankBadge elo={1750} />              ← derives rank from ELO (preferred)
- *   <RankBadge rank="Diamond" />          ← explicit rank name
+ *   <RankBadge elo={1750} />              ← derive rank from ELO (preferred)
+ *   <RankBadge rank="Elite" />            ← explicit rank name (legacy names also work)
  *
- * Sizes:  xs 20 · sm 28 · md 44 · lg 80 · xl 104
+ * Sizes:  xs 20 · sm 28 · md 44 · lg 88 · xl 120
  */
 export interface RankBadgeProps {
   elo?: number;
@@ -28,8 +23,7 @@ export interface RankBadgeProps {
   showLabel?: boolean;
   showElo?: boolean;
   className?: string;
-  /** Force the procedural SVG emblem even for ranks that have a custom uploaded asset.
-   *  Useful where we need a perfectly consistent set (e.g. the rank progression showcase). */
+  /** Force the procedural SVG even when a custom emblem_url is configured. */
   forceProcedural?: boolean;
 }
 
@@ -62,12 +56,12 @@ export default function RankBadge({
   const { tRank } = useI18n();
   const localizedName = tRank(info.name);
   const isApex = info.name === "Apex";
-  // Subscribe so we re-render when defs load (cheap — single shared cache).
+
+  // Re-render when rank_definitions load (admin-configured emblem URLs).
   useRankDefinitions();
   const dbEmblem = forceProcedural ? null : getCachedEmblemUrl(info.name);
-  const localFallback = forceProcedural ? undefined : CUSTOM_EMBLEMS[info.name];
   const [imgFailed, setImgFailed] = useState(false);
-  const customSrc = !forceProcedural && !imgFailed ? (dbEmblem ?? localFallback) : undefined;
+  const customSrc = !forceProcedural && !imgFailed ? dbEmblem ?? null : null;
 
   return (
     <span
@@ -75,8 +69,6 @@ export default function RankBadge({
       title={`${localizedName}${typeof elo === "number" ? ` · ${elo} ELO` : ""}`}
     >
       {customSrc ? (
-        // Custom official emblem — no frame, no glow, no background.
-        // Square container, object-contain, fully transparent, with breathing space.
         <span
           className="relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
           style={{ width: px, height: px, padding: Math.max(2, Math.round(px * 0.06)) }}
@@ -96,8 +88,11 @@ export default function RankBadge({
             width: px,
             height: px,
             filter: `drop-shadow(0 0 ${Math.round(px * 0.22)}px ${info.hex}${
-              isApex ? "dd" : "66"
-            }) drop-shadow(0 ${Math.max(2, Math.round(px * 0.04))}px ${Math.max(4, Math.round(px * 0.06))}px rgba(0,0,0,0.7))`,
+              isApex ? "dd" : "55"
+            }) drop-shadow(0 ${Math.max(2, Math.round(px * 0.04))}px ${Math.max(
+              4,
+              Math.round(px * 0.06),
+            )}px rgba(0,0,0,0.7))`,
           }}
         >
           <RankEmblem rank={info} size={px} />
@@ -117,43 +112,18 @@ export default function RankBadge({
 
 export { RankBadge };
 
-/* ------------------------------------------------------------------ */
-/* Reusable size variants (semantic)                                   */
-/* ------------------------------------------------------------------ */
-
-export const RankBadgeLarge = (p: Omit<RankBadgeProps, "size">) => (
-  <RankBadge {...p} size="lg" />
-);
-export const RankBadgeMedium = (p: Omit<RankBadgeProps, "size">) => (
-  <RankBadge {...p} size="md" />
-);
-export const RankBadgeCompact = (p: Omit<RankBadgeProps, "size">) => (
-  <RankBadge {...p} size="sm" />
-);
+export const RankBadgeLarge   = (p: Omit<RankBadgeProps, "size">) => <RankBadge {...p} size="lg" />;
+export const RankBadgeMedium  = (p: Omit<RankBadgeProps, "size">) => <RankBadge {...p} size="md" />;
+export const RankBadgeCompact = (p: Omit<RankBadgeProps, "size">) => <RankBadge {...p} size="sm" />;
 
 /* ================================================================== */
 /* SVG EMBLEM SYSTEM                                                  */
 /*                                                                     */
-/* All emblems share a hexagonal shield silhouette — same DNA, with    */
-/* progressively richer interior detail as the rank rises.             */
-/* Rendered as inline SVG → transparent, scalable, no pasted-image    */
-/* feel. Each tier introduces a distinctive central glyph.             */
+/* Each tier has its OWN outer silhouette (the most readable signal at */
+/* leaderboard sizes) and its OWN central glyph. All silhouettes share */
+/* a 100×100 viewBox and the same metallic rim → bevel → dark-glass    */
+/* plate → glyph → shine stack so they read as one identity system.    */
 /* ================================================================== */
-
-/**
- * Premium "aegis shield" silhouette — sharper hex-shield hybrid with
- * chamfered shoulders and a pointed crest. Aggressive esports feel,
- * instantly readable as a competitive rank emblem (not a hex, not a pill).
- */
-// Outer silhouette — chamfered top corners, gentle waist, pointed bottom crest
-const SHIELD_OUTER =
-  "M50 2 L72 6 L92 14 L92 40 C92 60 84 76 70 88 L50 99 L30 88 C16 76 8 60 8 40 L8 14 L28 6 Z";
-// Metal shoulder ring (between outer rim and inner plate)
-const SHIELD_RIM =
-  "M50 8 L70 12 L87 18 L87 40 C87 58 80 72 67 83 L50 93 L33 83 C20 72 13 58 13 40 L13 18 L30 12 Z";
-// Inner mounted plate (dark glass interior)
-const SHIELD_INNER =
-  "M50 15 L67 18 L82 24 L82 40 C82 55 76 67 64 76 L50 85 L36 76 C24 67 18 55 18 40 L18 24 L33 18 Z";
 
 function darken(hex: string, amt = 0.4): string {
   const h = hex.replace("#", "");
@@ -170,6 +140,81 @@ function lighten(hex: string, amt = 0.3): string {
   return `rgb(${r},${g},${b})`;
 }
 
+interface Silhouette {
+  outer: string; // outermost chrome rim
+  rim: string;   // recessed bevel groove
+  inner: string; // dark glass mounted plate
+}
+
+/* ----------------------------- silhouettes ----------------------------- */
+
+// 1. ROOKIE — soft rounded shield. Calm, beginner.
+const SIL_ROOKIE: Silhouette = {
+  outer: "M50 4 C72 4 92 12 92 28 L92 50 C92 74 74 92 50 98 C26 92 8 74 8 50 L8 28 C8 12 28 4 50 4 Z",
+  rim:   "M50 10 C70 10 87 17 87 30 L87 50 C87 70 71 86 50 92 C29 86 13 70 13 50 L13 30 C13 17 30 10 50 10 Z",
+  inner: "M50 17 C67 17 82 22 82 32 L82 50 C82 66 68 80 50 85 C32 80 18 66 18 50 L18 32 C18 22 33 17 50 17 Z",
+};
+
+// 2. CONTENDER — hexagon. Stable, geometric.
+const SIL_CONTENDER: Silhouette = {
+  outer: "M50 3 L92 25 L92 75 L50 97 L8 75 L8 25 Z",
+  rim:   "M50 10 L87 30 L87 70 L50 90 L13 70 L13 30 Z",
+  inner: "M50 18 L82 35 L82 65 L50 82 L18 65 L18 35 Z",
+};
+
+// 3. RIVAL — angular pentagon battle shield (flat top, point down).
+const SIL_RIVAL: Silhouette = {
+  outer: "M10 8 L90 8 L90 50 L50 98 L10 50 Z",
+  rim:   "M16 14 L84 14 L84 50 L50 90 L16 50 Z",
+  inner: "M22 22 L78 22 L78 50 L50 82 L22 50 Z",
+};
+
+// 4. EXPERT — kite shield (taller, pointed crest top, pointed crest bottom).
+const SIL_EXPERT: Silhouette = {
+  outer: "M50 2 L88 26 L82 70 L50 98 L18 70 L12 26 Z",
+  rim:   "M50 10 L82 30 L77 66 L50 91 L23 66 L18 30 Z",
+  inner: "M50 18 L76 34 L72 62 L50 84 L28 62 L24 34 Z",
+};
+
+// 5. ELITE — chamfered octagonal medal. Clean, premium.
+const SIL_ELITE: Silhouette = {
+  outer: "M30 4 L70 4 L96 30 L96 70 L70 96 L30 96 L4 70 L4 30 Z",
+  rim:   "M34 11 L66 11 L89 34 L89 66 L66 89 L34 89 L11 66 L11 34 Z",
+  inner: "M38 19 L62 19 L81 38 L81 62 L62 81 L38 81 L19 62 L19 38 Z",
+};
+
+// 6. MASTER — aegis with shoulder horns (wide top, pointed bottom).
+const SIL_MASTER: Silhouette = {
+  outer:
+    "M50 3 L72 6 L92 14 L96 28 L88 36 L92 48 C92 70 76 86 50 99 C24 86 8 70 8 48 L12 36 L4 28 L8 14 L28 6 Z",
+  rim:
+    "M50 10 L70 13 L87 20 L87 30 L82 36 L87 48 C87 66 73 80 50 92 C27 80 13 66 13 48 L18 36 L13 30 L13 20 L30 13 Z",
+  inner:
+    "M50 18 L67 21 L82 26 L80 36 L82 48 C82 62 70 74 50 85 C30 74 18 62 18 48 L20 36 L18 26 L33 21 Z",
+};
+
+// 7. APEX — pointed crest with crown spikes (legendary silhouette).
+const SIL_APEX: Silhouette = {
+  outer:
+    "M50 1 L58 6 L66 1 L72 8 L80 4 L84 14 L92 14 L92 42 C92 64 80 80 64 90 L50 99 L36 90 C20 80 8 64 8 42 L8 14 L16 14 L20 4 L28 8 L34 1 L42 6 Z",
+  rim:
+    "M50 12 L70 15 L87 20 L87 42 C87 62 76 76 64 84 L50 92 L36 84 C24 76 13 62 13 42 L13 20 L30 15 Z",
+  inner:
+    "M50 19 L67 22 L82 27 L82 42 C82 58 73 70 62 76 L50 84 L38 76 C27 70 18 58 18 42 L18 27 L33 22 Z",
+};
+
+const SILHOUETTES: Record<RankTier, Silhouette> = {
+  Rookie:    SIL_ROOKIE,
+  Contender: SIL_CONTENDER,
+  Rival:     SIL_RIVAL,
+  Expert:    SIL_EXPERT,
+  Elite:     SIL_ELITE,
+  Master:    SIL_MASTER,
+  Apex:      SIL_APEX,
+};
+
+/* ------------------------------ emblem -------------------------------- */
+
 interface EmblemProps {
   rank: RankInfo;
   size: number;
@@ -183,6 +228,7 @@ function RankEmblem({ rank, size }: EmblemProps) {
   const deep = darken(c, 0.82);
   const light = lighten(c, 0.45);
   const bright = lighten(c, 0.72);
+  const sil = SILHOUETTES[rank.name];
   const isApex = rank.name === "Apex";
 
   return (
@@ -195,103 +241,78 @@ function RankEmblem({ rank, size }: EmblemProps) {
       className="block"
     >
       <defs>
-        {/* Outer metallic rim — multi-stop for richer chrome feel */}
         <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={bright} />
-          <stop offset="18%" stopColor={light} />
-          <stop offset="55%" stopColor={c} />
-          <stop offset="85%" stopColor={dark} />
+          <stop offset="0%"   stopColor={bright} />
+          <stop offset="18%"  stopColor={light} />
+          <stop offset="55%"  stopColor={c} />
+          <stop offset="85%"  stopColor={dark} />
           <stop offset="100%" stopColor={deep} />
         </linearGradient>
-        {/* Inner bevel groove — a dark recessed ring between rim and plate */}
         <linearGradient id={`${id}-bevel`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#000" stopOpacity="0.95" />
-          <stop offset="50%" stopColor={dark} stopOpacity="0.9" />
+          <stop offset="0%"   stopColor="#000" stopOpacity="0.95" />
+          <stop offset="50%"  stopColor={dark} stopOpacity="0.9" />
           <stop offset="100%" stopColor="#000" stopOpacity="1" />
         </linearGradient>
-        {/* Interior dark glass with rank-tinted glow at top */}
         <radialGradient id={`${id}-glass`} cx="50%" cy="28%" r="82%">
-          <stop offset="0%" stopColor={c} stopOpacity="0.55" />
-          <stop offset="38%" stopColor={dark} stopOpacity="0.55" />
-          <stop offset="70%" stopColor="#0a0a0e" stopOpacity="0.98" />
-          <stop offset="100%" stopColor="#000" stopOpacity="1" />
+          <stop offset="0%"   stopColor={c}   stopOpacity="0.55" />
+          <stop offset="38%"  stopColor={dark} stopOpacity="0.55" />
+          <stop offset="70%"  stopColor="#0a0a0e" stopOpacity="0.98" />
+          <stop offset="100%" stopColor="#000"  stopOpacity="1" />
         </radialGradient>
-        {/* Top shine sweep — sharper highlight band */}
         <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="0%"  stopColor="#ffffff" stopOpacity="0.55" />
           <stop offset="35%" stopColor="#ffffff" stopOpacity="0.08" />
           <stop offset="55%" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-        {/* Subtle hex texture pattern, clipped to inner plate */}
-        <pattern id={`${id}-tex`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+        {isApex && (
+          <linearGradient id={`${id}-apexrim`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stopColor="#FCD34D" />
+            <stop offset="50%"  stopColor="#FF8C42" />
+            <stop offset="100%" stopColor="#FF4655" />
+          </linearGradient>
+        )}
+        <pattern id={`${id}-tex`} width="6" height="6" patternUnits="userSpaceOnUse">
           <path d="M3 0 L6 1.5 L6 4.5 L3 6 L0 4.5 L0 1.5 Z" fill="none" stroke={light} strokeWidth="0.25" strokeOpacity="0.18" />
         </pattern>
-        {/* Clip mask so shine + texture respect inner plate silhouette */}
         <clipPath id={`${id}-clip`}>
-          <path d={SHIELD_INNER} />
+          <path d={sil.inner} />
         </clipPath>
       </defs>
 
-      {/* 1. Outer chrome rim */}
-      <path d={SHIELD_OUTER} fill={`url(#${id}-rim)`} />
+      {/* 1. Outer chrome rim — Apex uses the legendary gradient */}
+      <path d={sil.outer} fill={isApex ? `url(#${id}-apexrim)` : `url(#${id}-rim)`} />
       {/* 2. Bright top edge highlight */}
-      <path
-        d={SHIELD_OUTER}
-        fill="none"
-        stroke={bright}
-        strokeOpacity="0.85"
-        strokeWidth="0.6"
-      />
+      <path d={sil.outer} fill="none" stroke={bright} strokeOpacity="0.85" strokeWidth="0.6" />
       {/* 3. Recessed bevel groove */}
-      <path d={SHIELD_RIM} fill={`url(#${id}-bevel)`} />
+      <path d={sil.rim} fill={`url(#${id}-bevel)`} />
       {/* 4. Dark glass mounted plate */}
-      <path d={SHIELD_INNER} fill={`url(#${id}-glass)`} />
-      {/* 5. Hex texture inside the plate (very subtle) */}
+      <path d={sil.inner} fill={`url(#${id}-glass)`} />
+      {/* 5. Subtle hex texture inside the plate */}
       <g clipPath={`url(#${id}-clip)`}>
         <rect x="0" y="0" width="100" height="100" fill={`url(#${id}-tex)`} />
       </g>
       {/* 6. Inner accent ring */}
-      <path
-        d={SHIELD_INNER}
-        fill="none"
-        stroke={light}
-        strokeOpacity="0.7"
-        strokeWidth="0.8"
-      />
+      <path d={sil.inner} fill="none" stroke={light} strokeOpacity="0.7" strokeWidth="0.8" />
       {/* 7. Glyph — clipped to plate */}
       <g clipPath={`url(#${id}-clip)`}>{Glyph({ color: c, light, dark })}</g>
       {/* 8. Top shine sweep over everything */}
-      <path d={SHIELD_INNER} fill={`url(#${id}-shine)`} />
-      {/* 9. Tier color pip on crest (skipped on Apex which has corona) */}
-      {!isApex && (
-        <circle cx="50" cy="11" r="1.6" fill={bright} opacity="0.95" />
-      )}
-      {/* Apex extra: gold corona + crown spikes */}
+      <path d={sil.inner} fill={`url(#${id}-shine)`} />
+      {/* 9. Apex extra: gold corona arc + crown sparks */}
       {isApex && (
         <>
-          <path
-            d={SHIELD_OUTER}
-            fill="none"
-            stroke="#FCD34D"
-            strokeOpacity="0.7"
-            strokeWidth="1.4"
-          />
-          <path
-            d="M42 6 L46 1 L50 5 L54 1 L58 6"
-            fill="none"
-            stroke="#FCD34D"
-            strokeOpacity="0.9"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d={sil.outer} fill="none" stroke="#FCD34D" strokeOpacity="0.85" strokeWidth="1.4" />
+          <circle cx="50" cy="6" r="1.6" fill="#FCD34D" />
+          <circle cx="34" cy="9"  r="1.1" fill="#FCD34D" opacity="0.9" />
+          <circle cx="66" cy="9"  r="1.1" fill="#FCD34D" opacity="0.9" />
         </>
       )}
     </svg>
   );
 }
 
-/* -------- Per-rank glyphs (centered in 100x100 viewBox) ---------- */
+/* -------------------------- per-rank glyphs --------------------------- */
+/* All glyphs use the 100×100 viewBox; the plate clipping keeps them    */
+/* visually balanced inside each unique silhouette.                     */
 
 interface GlyphCtx {
   color: string;
@@ -300,131 +321,107 @@ interface GlyphCtx {
 }
 type GlyphFn = (ctx: GlyphCtx) => JSX.Element;
 
-// 1. ROOKIE — single small chevron
+// 1. ROOKIE — single small chevron.
 const RookieGlyph: GlyphFn = ({ color, light }) => (
   <g>
-    <path d="M35 58 L50 44 L65 58" stroke={light} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="50" cy="68" r="2.2" fill={color} />
+    <path d="M35 60 L50 46 L65 60" stroke={light} strokeWidth="3.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="50" cy="70" r="2.2" fill={color} />
   </g>
 );
 
-// 2. IRON — heavy bar with rivets
-const IronGlyph: GlyphFn = ({ color, light, dark }) => (
+// 2. CONTENDER — twin chevrons + a small upward spark.
+const ContenderGlyph: GlyphFn = ({ color, light }) => (
   <g>
-    <rect x="30" y="44" width="40" height="14" rx="1.5" fill={color} stroke={dark} strokeWidth="1.2" />
-    <rect x="30" y="44" width="40" height="4" fill={light} opacity="0.4" />
-    <circle cx="36" cy="51" r="1.8" fill={dark} />
-    <circle cx="64" cy="51" r="1.8" fill={dark} />
-    <path d="M28 62 L72 62" stroke={light} strokeWidth="1.2" opacity="0.5" />
+    <path d="M30 56 L50 40 L70 56" stroke={light} strokeWidth="3.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M34 68 L50 54 L66 68" stroke={color} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+    <circle cx="50" cy="32" r="2" fill={light} />
   </g>
 );
 
-// 3. BRONZE — two stacked chevrons
-const BronzeGlyph: GlyphFn = ({ color, light }) => (
+// 3. RIVAL — crossed sabres / X mark with central rivet.
+const RivalGlyph: GlyphFn = ({ color, light }) => (
   <g>
-    <path d="M30 56 L50 40 L70 56" stroke={light} strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M34 66 L50 52 L66 66" stroke={color} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+    <path d="M30 30 L70 70" stroke={light} strokeWidth="4" strokeLinecap="round" />
+    <path d="M70 30 L30 70" stroke={light} strokeWidth="4" strokeLinecap="round" />
+    <path d="M30 30 L70 70" stroke={color} strokeWidth="1.4" strokeLinecap="round" opacity="0.9" />
+    <path d="M70 30 L30 70" stroke={color} strokeWidth="1.4" strokeLinecap="round" opacity="0.9" />
+    <circle cx="50" cy="50" r="4" fill="#0a0a0c" stroke={light} strokeWidth="1.4" />
   </g>
 );
 
-// 4. SILVER — three chevrons
-const SilverGlyph: GlyphFn = ({ color, light }) => (
-  <g>
-    <path d="M30 50 L50 36 L70 50" stroke={light} strokeWidth="3.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M32 60 L50 46 L68 60" stroke={light} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
-    <path d="M34 70 L50 56 L66 70" stroke={color} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
-  </g>
-);
-
-// 5. GOLD — laurel star / sunburst
-const GoldGlyph: GlyphFn = ({ color, light }) => (
+// 4. EXPERT — 4-point compass star.
+const ExpertGlyph: GlyphFn = ({ color, light }) => (
   <g>
     <path
-      d="M50 28 L55 44 L72 44 L58 54 L63 70 L50 60 L37 70 L42 54 L28 44 L45 44 Z"
+      d="M50 24 L56 46 L78 50 L56 54 L50 76 L44 54 L22 50 L44 46 Z"
       fill={color}
       stroke={light}
-      strokeWidth="1.2"
+      strokeWidth="1.4"
       strokeLinejoin="round"
     />
     <path
-      d="M50 36 L52.5 46 L62 46 L54.5 52 L57 62 L50 56 L43 62 L45.5 52 L38 46 L47.5 46 Z"
+      d="M50 34 L53 47 L66 50 L53 53 L50 66 L47 53 L34 50 L47 47 Z"
       fill={light}
       opacity="0.55"
     />
+    <circle cx="50" cy="50" r="2.2" fill="#0a0a0c" />
   </g>
 );
 
-// 6. PLATINUM — angular tech crystal
-const PlatinumGlyph: GlyphFn = ({ color, light }) => (
+// 5. ELITE — laurel wreath enclosing a star.
+const EliteGlyph: GlyphFn = ({ color, light, dark }) => (
   <g>
-    <path d="M50 28 L70 50 L50 72 L30 50 Z" fill={color} stroke={light} strokeWidth="1.4" />
-    <path d="M50 28 L50 72" stroke={light} strokeWidth="1" opacity="0.7" />
-    <path d="M30 50 L70 50" stroke={light} strokeWidth="1" opacity="0.7" />
-    <path d="M40 40 L60 60" stroke={light} strokeWidth="0.6" opacity="0.45" />
-    <path d="M60 40 L40 60" stroke={light} strokeWidth="0.6" opacity="0.45" />
-    <circle cx="50" cy="50" r="3" fill={light} />
-  </g>
-);
-
-// 7. DIAMOND — gem facets
-const DiamondGlyph: GlyphFn = ({ color, light }) => (
-  <g>
-    <path d="M34 38 L66 38 L74 50 L50 76 L26 50 Z" fill={color} stroke={light} strokeWidth="1.4" strokeLinejoin="round" />
-    <path d="M26 50 L74 50" stroke={light} strokeWidth="1" opacity="0.85" />
-    <path d="M34 38 L42 50 L50 76" stroke={light} strokeWidth="0.8" fill="none" opacity="0.7" />
-    <path d="M66 38 L58 50 L50 76" stroke={light} strokeWidth="0.8" fill="none" opacity="0.7" />
-    <path d="M42 50 L58 50" stroke={light} strokeWidth="0.6" opacity="0.5" />
-  </g>
-);
-
-// 8. ELITE — winged shield
-const EliteGlyph: GlyphFn = ({ color, light }) => (
-  <g>
-    {/* wings */}
-    <path d="M22 46 L34 44 L30 52 L20 50 Z" fill={color} opacity="0.85" />
-    <path d="M78 46 L66 44 L70 52 L80 50 Z" fill={color} opacity="0.85" />
-    {/* shield */}
+    {/* laurel wreath */}
     <path
-      d="M50 32 L66 40 L66 56 C66 66 58 72 50 76 C42 72 34 66 34 56 L34 40 Z"
-      fill={color}
+      d="M28 50 C28 35 38 26 50 26 C62 26 72 35 72 50 C72 65 62 74 50 74 C38 74 28 65 28 50 Z"
+      fill="none"
       stroke={light}
       strokeWidth="1.4"
+      opacity="0.85"
+    />
+    <path d="M32 40 L26 36 M32 50 L24 50 M32 60 L26 64" stroke={light} strokeWidth="1.4" strokeLinecap="round" />
+    <path d="M68 40 L74 36 M68 50 L76 50 M68 60 L74 64" stroke={light} strokeWidth="1.4" strokeLinecap="round" />
+    {/* central star */}
+    <path
+      d="M50 36 L54 47 L66 47 L56 54 L60 66 L50 58 L40 66 L44 54 L34 47 L46 47 Z"
+      fill={color}
+      stroke={dark}
+      strokeWidth="0.8"
       strokeLinejoin="round"
     />
-    <path d="M50 40 L50 70" stroke={light} strokeWidth="1" opacity="0.7" />
-    <path d="M40 52 L60 52" stroke={light} strokeWidth="1" opacity="0.7" />
   </g>
 );
 
-// 9. MASTER — royal crown
+// 6. MASTER — royal crown with three jewels.
 const MasterGlyph: GlyphFn = ({ color, light }) => (
   <g>
     <path
-      d="M28 60 L34 38 L44 52 L50 32 L56 52 L66 38 L72 60 Z"
+      d="M26 62 L32 36 L44 52 L50 30 L56 52 L68 36 L74 62 Z"
       fill={color}
       stroke={light}
       strokeWidth="1.4"
       strokeLinejoin="round"
     />
-    <rect x="28" y="62" width="44" height="6" rx="1" fill={color} stroke={light} strokeWidth="1.2" />
-    <circle cx="50" cy="32" r="3" fill={light} />
-    <circle cx="34" cy="38" r="2.2" fill={light} opacity="0.85" />
-    <circle cx="66" cy="38" r="2.2" fill={light} opacity="0.85" />
+    <rect x="26" y="64" width="48" height="7" rx="1.2" fill={color} stroke={light} strokeWidth="1.2" />
+    <circle cx="50" cy="30" r="3.2" fill={light} />
+    <circle cx="32" cy="36" r="2.2" fill={light} opacity="0.9" />
+    <circle cx="68" cy="36" r="2.2" fill={light} opacity="0.9" />
+    <path d="M30 68 L70 68" stroke="#0a0a0c" strokeWidth="1" opacity="0.6" />
   </g>
 );
 
-// 10. APEX — flame triangle peak
-const ApexGlyph: GlyphFn = ({ color, light }) => (
+// 7. APEX — flame-peak summit (mountain + flame highlight).
+const ApexGlyph: GlyphFn = ({ light }) => (
   <g>
-    {/* outer triangle */}
+    {/* outer triangular peak filled with the legendary gradient via apexrim ref */}
     <path
-      d="M50 22 L78 76 L22 76 Z"
-      fill={color}
-      stroke={light}
+      d="M50 22 L80 76 L20 76 Z"
+      fill="url(#rk-apex-apexrim)"
+      stroke="#FCD34D"
       strokeWidth="1.6"
       strokeLinejoin="round"
     />
-    {/* inner inverted notch */}
+    {/* inner inverted notch (the dark valley) */}
     <path
       d="M50 50 L66 76 L34 76 Z"
       fill="#0a0a0c"
@@ -432,25 +429,22 @@ const ApexGlyph: GlyphFn = ({ color, light }) => (
       strokeWidth="1"
       strokeLinejoin="round"
     />
-    {/* flame highlight */}
+    {/* flame highlight at the summit */}
     <path
-      d="M50 30 L60 56 L50 50 L40 56 Z"
-      fill={light}
-      opacity="0.85"
+      d="M50 28 L60 56 L50 50 L40 56 Z"
+      fill="#FCD34D"
+      opacity="0.95"
     />
-    <circle cx="50" cy="42" r="2.2" fill="#fff" />
+    <circle cx="50" cy="40" r="2.4" fill="#fff" />
   </g>
 );
 
 const GLYPHS: Record<RankTier, GlyphFn> = {
-  Rookie: RookieGlyph,
-  Iron: IronGlyph,
-  Bronze: BronzeGlyph,
-  Silver: SilverGlyph,
-  Gold: GoldGlyph,
-  Platinum: PlatinumGlyph,
-  Diamond: DiamondGlyph,
-  Elite: EliteGlyph,
-  Master: MasterGlyph,
-  Apex: ApexGlyph,
+  Rookie:    RookieGlyph,
+  Contender: ContenderGlyph,
+  Rival:     RivalGlyph,
+  Expert:    ExpertGlyph,
+  Elite:     EliteGlyph,
+  Master:    MasterGlyph,
+  Apex:      ApexGlyph,
 };

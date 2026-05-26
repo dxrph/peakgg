@@ -139,7 +139,10 @@
     "Diamond": "Diamant",
     "Elite": "Élite",
     "Master": "Maître",
-    "Apex": "Apex"
+    "Apex": "Apex",
+    "Contender": "Prétendant",
+    "Rival": "Rival",
+    "Expert": "Expert"
   },
   "hero": {
     "season_badge": "SAISON 1 — EN DIRECT",
@@ -235,7 +238,10 @@
     "desc_diamond": "Niveau compétitif élevé. Surclasse le lobby moyen.",
     "desc_elite": "Rare et respecté. La fraction haute de la base de joueurs.",
     "desc_master": "Top performance compétitive. Lecture du jeu en avance.",
-    "desc_apex": "Le meilleur du meilleur sur PeakGG. Le sommet de l'échelle."
+    "desc_apex": "Le meilleur du meilleur sur PeakGG. Le sommet de l'échelle.",
+    "desc_contender": "Tu dépasses les bases. Les duels commencent à tomber.",
+    "desc_rival": "Vrai compétiteur. Tu lis la lobby et punis les erreurs.",
+    "desc_expert": "Mécaniques nettes, appels précis. Un cran au-dessus."
   },
   "top_players": {
     "title_pre": "MEILLEURS JOUEURS",
