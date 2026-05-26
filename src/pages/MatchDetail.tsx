@@ -341,8 +341,8 @@ export default function MatchDetailPage() {
           .from("dispute-evidence")
           .upload(path, evidenceFile, { upsert: false, contentType: evidenceFile.type || undefined });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("dispute-evidence").getPublicUrl(path);
-        uploadedUrl = pub.publicUrl;
+        // Store the storage path (bucket is private) — we create a signed URL on view.
+        uploadedUrl = path;
       }
     } catch (e: any) {
       setBusy(false);
