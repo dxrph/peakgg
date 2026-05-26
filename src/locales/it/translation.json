@@ -139,7 +139,10 @@
     "Diamond": "Diamante",
     "Elite": "Elite",
     "Master": "Maestro",
-    "Apex": "Apex"
+    "Apex": "Apex",
+    "Contender": "Sfidante",
+    "Rival": "Rivale",
+    "Expert": "Esperto"
   },
   "hero": {
     "season_badge": "STAGIONE 1 — LIVE",
@@ -235,7 +238,10 @@
     "desc_diamond": "Skill competitiva alta. Supera la lobby media.",
     "desc_elite": "Raro e rispettato. La fascia alta della player base.",
     "desc_master": "Performance competitiva top. Legge il gioco in anticipo.",
-    "desc_apex": "Il meglio del meglio su PeakGG. La vetta della scala."
+    "desc_apex": "Il meglio del meglio su PeakGG. La vetta della scala.",
+    "desc_contender": "Stai superando le basi. I trade iniziano a chiudere.",
+    "desc_rival": "Vero competitor. Leggi la lobby e punisci gli errori.",
+    "desc_expert": "Meccaniche pulite, chiamate decise. Un netto salto di livello."
   },
   "top_players": {
     "title_pre": "TOP PLAYERS",
