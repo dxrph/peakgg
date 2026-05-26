@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { GAMES, getRankByElo } from "@/lib/ranks";
 import { Trophy, TrendingUp, TrendingDown, Swords, Clock, Info, ShieldCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import RankShowcaseGrid from "@/components/RankShowcaseGrid";
 
 type EloRow = {
   id: string;
@@ -138,6 +139,15 @@ export default function EloExplained() {
               <div className={`mt-1 font-mono font-bold ${r.tone}`}>{r.value}</div>
             </Card>
           ))}
+        </div>
+
+        {/* All 7 ranks preview */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy className="h-5 w-5 text-primary" />
+            <h2 className="font-display font-bold text-xl uppercase tracking-wider">The 7 PeakGG ranks</h2>
+          </div>
+          <RankShowcaseGrid />
         </div>
 
         {/* Trigger explanation */}
