@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { MessageCircle, Swords, Sparkles, Mountain } from "lucide-react";
+import { MessageCircle, Swords, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { DISCORD_INVITE } from "@/lib/links";
