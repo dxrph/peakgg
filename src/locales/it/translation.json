@@ -272,7 +272,7 @@
   "discord_cta": {
     "eyebrow": "COMMUNITY PRE-LANCIO",
     "title": "Entra nel Discord di PeakGG",
-    "subtitle": "Fai parte della prima community competitiva FPS d'Europa prima del lancio. Trova compagni, ricevi annunci sui tornei e aiutaci a costruire la piattaforma.",
+    "subtitle": "Fai parte della prima community competitiva Valorant d'Europa prima del lancio. Trova compagni, ricevi annunci sui tornei e aiutaci a costruire la piattaforma.",
     "button": "Entra nel Discord"
   },
   "start_competing": {
@@ -282,7 +282,7 @@
     "subtitle": "Tre modi per entrare subito nella community PeakGG.",
     "coming_soon": "In arrivo",
     "card1_title": "Trova Compagni",
-    "card1_desc": "Crea il tuo profilo e preparati a connetterti con player FPS europei in cerca di squadra.",
+    "card1_desc": "Crea il tuo profilo e preparati a connetterti con player in cerca di squadra.",
     "card1_cta": "Esplora Free Agent",
     "card2_title": "Partecipa ai Tornei",
     "card2_desc": "Preparati alle Open Cup, alle Challenger Series e ai futuri Peak Championship.",
@@ -294,7 +294,7 @@
   "pre_launch_cta": {
     "eyebrow": "Pre-lancio",
     "title": "Unisciti ai primi player PeakGG",
-    "subtitle": "Crea il tuo profilo, entra nel Discord e aiutaci a costruire il primo hub FPS competitivo per l'Europa prima della Stagione 1.",
+    "subtitle": "Crea il tuo profilo, entra nel Discord e aiutaci a costruire PeakGG prima del lancio.",
     "cta_register": "Crea Account",
     "cta_discord": "Entra nel Discord"
   },
@@ -305,7 +305,7 @@
     "region": "Community Europea"
   },
   "footer": {
-    "tagline": "La piattaforma competitiva multi-gioco definitiva per VALORANT, CS2 e Rainbow Six Siege.",
+    "tagline": "La piattaforma competitiva per player Valorant seri in Europa.",
     "platform": "Piattaforma",
     "matchmaking": "Matchmaking",
     "tournaments": "Tornei",
@@ -331,7 +331,7 @@
     "mission_title": "La nostra missione",
     "mission_body": "PeakGG esiste perché il gaming competitivo merita una casa migliore. Matchmaking equo, tornei veri, una community che ti spinge al tuo picco. Abbiamo costruito ciò su cui volevamo giocare noi.",
     "story_title": "La nostra storia",
-    "story_body": "Nata nel 2026 a Bruxelles, in Belgio. PeakGG è nata dalla frustrazione verso le piattaforme esistenti — laggose, ingiuste, senza anima. Due persone, una visione: costruire la piattaforma che i giocatori FPS seri meritano davvero.",
+    "story_body": "Nata nel 2026 a Bruxelles, in Belgio. PeakGG è nata dalla frustrazione verso le piattaforme esistenti — laggose, ingiuste, senza anima. Due persone, una visione: costruire la piattaforma che i giocatori competitivi seri meritano davvero.",
     "values_title": "I nostri valori",
     "value_fair_title": "Fair play",
     "value_fair_desc": "Ogni partita è equa. Anti-smurf, basato su ELO, niente pay-to-win.",
@@ -362,11 +362,11 @@
     "section_account": "Account e sicurezza",
     "section_legal": "Legale e privacy",
     "q_what_is_q": "Cos'è PeakGG?",
-    "q_what_is_a": "PeakGG è una piattaforma gaming competitiva gratuita per Valorant, CS2 e Rainbow Six Siege. Matchmaking ranked, tornei, gestione team e community — tutto in un solo posto.",
+    "q_what_is_a": "PeakGG è una piattaforma competitiva gratuita per Valorant. Matchmaking ranked, tornei, gestione team e community — tutto in un solo posto.",
     "q_free_q": "PeakGG è gratis?",
     "q_free_a": "Sì, totalmente gratis. Registrati su peakgg.net e inizia a competere subito. Nessun abbonamento richiesto.",
     "q_games_q": "Quali giochi sono supportati?",
-    "q_games_a": "Valorant è disponibile ora. CS2 e Rainbow Six Siege arrivano presto — lascia la tua email su quelle pagine per essere avvisato per primo.",
+    "q_games_a": "Valorant è disponibile ora. Altri giochi potrebbero essere aggiunti in futuro.",
     "q_register_q": "Come creo un account?",
     "q_register_a": "Clicca \"Inizia a giocare\" sulla home, inserisci nome utente ed email, ed è fatta. 30 secondi.",
     "q_rank_works_q": "Come funziona il sistema di rank?",
