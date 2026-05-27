@@ -145,22 +145,22 @@
     "Expert": "Esperto"
   },
   "hero": {
-    "season_badge": "STAGIONE 1 — LIVE",
-    "line1": "L'HUB COMPETITIVO",
-    "line2": "PER GLI FPS",
-    "line3": "EUROPEI.",
-    "subtitle": "Partecipa ai tornei, trova compagni di squadra, condividi clip e scala i rank PeakGG su Valorant, CS2 e Rainbow Six Siege.",
+    "season_badge": "CLOSED BETA — LIVE",
+    "line1": "COMPETI",
+    "line2": "SENZA AVERE",
+    "line3": "UN'ORG",
+    "subtitle": "Trova compagni di squadra, partecipa ai tornei e scala i rank Peak in tutta Europa.",
     "cta_play": "Entra nell'Arena",
     "cta_discord": "Entra nel Discord",
-    "cta_register": "Crea Account",
+    "cta_register": "Entra nella Beta",
     "cta_secondary": "Come funziona",
     "cta_leaderboard": "Vedi la Ladder",
     "stat_players_online": "Giocatori online",
     "stat_matches_today": "Partite oggi",
     "stat_tournaments_live": "Tornei attivi",
-    "trust_ranked": "Matchmaking ranked",
-    "trust_anticheat": "Anti-cheat attivo",
-    "trust_eu": "Server EU low-ping"
+    "trust_finder": "Trova Team",
+    "trust_ranks": "Rank Peak",
+    "trust_cups": "Open Cup"
   },
   "stats": {
     "players_registered": "Giocatori registrati",
