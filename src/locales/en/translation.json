@@ -175,18 +175,18 @@
     "step1_title": "Create your player profile",
     "step1_desc": "Sign up in 30 seconds and set your game, role, country and rank.",
     "step2_title": "Find teammates or create a team",
-    "step2_desc": "Browse free agents or build your own roster across VALORANT, CS2 and R6.",
+    "step2_desc": "Browse free agents or build your own roster on Valorant.",
     "step3_title": "Join tournaments and scrims",
     "step3_desc": "Compete in Open Cups, Challenger Series and Peak Championships.",
     "step4_title": "Share your best clips",
     "step4_desc": "Upload highlights, get votes from the community and chase Clip of the Week.",
     "step5_title": "Climb the PeakGG ranks",
-    "step5_desc": "Earn Peak Points, rank up from Rookie to Apex and become an EU FPS name."
+    "step5_desc": "Earn Peak Points, rank up from Rookie to Apex and become a name on PeakGG."
   },
   "features": {
     "title_pre": "BUILT FOR",
     "title_accent": "COMPETITORS",
-    "subtitle": "The PeakGG roadmap — what's live now and what's coming next for serious EU FPS players.",
+    "subtitle": "The PeakGG roadmap — what's live now and what's coming next for serious EU players.",
     "status_available": "Available",
     "status_coming_soon": "Coming Soon",
     "status_in_development": "In Development",
@@ -272,7 +272,7 @@
   "discord_cta": {
     "eyebrow": "PRE-LAUNCH COMMUNITY",
     "title": "Join the PeakGG Discord",
-    "subtitle": "Be part of the first competitive FPS community in Europe before launch. Find teammates, get tournament announcements and shape the platform with us.",
+    "subtitle": "Be part of the first competitive Valorant community in Europe before launch. Find teammates, get tournament announcements and shape the platform with us.",
     "button": "Join Discord"
   },
   "start_competing": {
@@ -282,7 +282,7 @@
     "subtitle": "Three ways to plug into the PeakGG community right now.",
     "coming_soon": "Coming Soon",
     "card1_title": "Find Teammates",
-    "card1_desc": "Create your profile and get ready to connect with EU FPS players looking for a squad.",
+    "card1_desc": "Create your profile and get ready to connect with players looking for a squad.",
     "card1_cta": "Browse Free Agents",
     "card2_title": "Join Tournaments",
     "card2_desc": "Be ready for Open Cups, Challenger Series and future Peak Championships.",
@@ -294,7 +294,7 @@
   "pre_launch_cta": {
     "eyebrow": "Pre-Launch",
     "title": "Join the first PeakGG players",
-    "subtitle": "Create your profile, join the Discord and help shape the first competitive FPS hub for EU players before Season 1 begins.",
+    "subtitle": "Create your profile, join the Discord and help shape PeakGG before launch.",
     "cta_register": "Create Account",
     "cta_discord": "Join Discord"
   },
@@ -305,7 +305,7 @@
     "region": "European Community"
   },
   "footer": {
-    "tagline": "The ultimate multi-game competitive platform for VALORANT, CS2, and Rainbow Six Siege.",
+    "tagline": "The competitive platform for serious Valorant players in Europe.",
     "platform": "Platform",
     "matchmaking": "Matchmaking",
     "tournaments": "Tournaments",
