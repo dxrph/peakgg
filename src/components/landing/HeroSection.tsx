@@ -110,18 +110,18 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-y-2 text-[11px] md:text-xs text-muted-foreground font-body uppercase tracking-[0.14em]"
           >
             <div className="flex items-center gap-2 px-4">
+              <Users className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>{t("hero.trust_finder")}</span>
+            </div>
+            <span className="hidden sm:inline-block w-px h-3 bg-border" />
+            <div className="flex items-center gap-2 px-4">
+              <Award className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>{t("hero.trust_ranks")}</span>
+            </div>
+            <span className="hidden sm:inline-block w-px h-3 bg-border" />
+            <div className="flex items-center gap-2 px-4">
               <Trophy className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span>{t("hero.trust_ranked")}</span>
-            </div>
-            <span className="hidden sm:inline-block w-px h-3 bg-border" />
-            <div className="flex items-center gap-2 px-4">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span>{t("hero.trust_anticheat")}</span>
-            </div>
-            <span className="hidden sm:inline-block w-px h-3 bg-border" />
-            <div className="flex items-center gap-2 px-4">
-              <Server className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span>{t("hero.trust_eu")}</span>
+              <span>{t("hero.trust_cups")}</span>
             </div>
           </motion.div>
         </div>
