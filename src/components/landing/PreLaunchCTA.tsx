@@ -47,19 +47,14 @@ export default function PreLaunchCTA() {
                   {t("pre_launch_cta.cta_register")}
                 </Button>
               </Link>
-              <Link to="/leagues" className="w-full sm:w-auto">
-                <Button size="lg" variant="neonOutline" className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider">
-                  <Mountain className="mr-2 h-5 w-5" />
-                  Peak League S0
-                </Button>
-              </Link>
               <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                 <Button
+                  variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0"
+                  className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider border-[#5865F2]/40 text-[#a8b0f7] hover:bg-[#5865F2]/10 hover:text-white hover:border-[#5865F2]/60"
                 >
                   <MessageCircle className="mr-2 h-5 w-5" />
-                  Join Discord — Season 0 Beta
+                  {t("pre_launch_cta.cta_discord")}
                 </Button>
               </a>
             </div>
