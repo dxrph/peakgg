@@ -145,22 +145,22 @@
     "Expert": "Expert"
   },
   "hero": {
-    "season_badge": "SAISON 1 — EN DIRECT",
-    "line1": "LE HUB COMPÉTITIF",
-    "line2": "POUR LES JOUEURS",
-    "line3": "FPS D'EUROPE.",
-    "subtitle": "Participe à des tournois, trouve des coéquipiers, partage tes clips et grimpe les rangs PeakGG sur Valorant, CS2 et Rainbow Six Siege.",
+    "season_badge": "BÊTA FERMÉE — EN DIRECT",
+    "line1": "COMPÉTIS",
+    "line2": "SANS AVOIR",
+    "line3": "UNE ORG",
+    "subtitle": "Trouve des coéquipiers, rejoins des tournois et grimpe les rangs Peak en Europe.",
     "cta_play": "Entrer dans l'Arène",
     "cta_discord": "Rejoindre Discord",
-    "cta_register": "Créer un compte",
+    "cta_register": "Rejoindre la Beta",
     "cta_leaderboard": "Voir le Classement",
     "stat_players_online": "Joueurs en ligne",
     "stat_matches_today": "Matchs aujourd'hui",
     "stat_tournaments_live": "Tournois en cours",
     "cta_secondary": "Comment ça marche",
-    "trust_ranked": "Matchmaking par niveau",
-    "trust_anticheat": "Anti-triche activé",
-    "trust_eu": "Serveurs EU faible ping"
+    "trust_finder": "Trouver une Team",
+    "trust_ranks": "Rangs Peak",
+    "trust_cups": "Open Cup"
   },
   "stats": {
     "players_registered": "Joueurs inscrits",
@@ -175,18 +175,18 @@
     "step1_title": "Crée ton profil joueur",
     "step1_desc": "Inscris-toi en 30 secondes et choisis ton jeu, ton rôle, ton pays et ton rang.",
     "step2_title": "Trouve des coéquipiers ou crée un team",
-    "step2_desc": "Parcours les free agents ou monte ton propre roster sur VALORANT, CS2 et R6.",
+    "step2_desc": "Parcours les free agents ou monte ton propre roster sur Valorant.",
     "step3_title": "Rejoins tournois et scrims",
     "step3_desc": "Affronte les autres dans Open Cup, Challenger Series et Peak Championship.",
     "step4_title": "Partage tes meilleurs clips",
     "step4_desc": "Upload tes highlights, récolte des votes et vise le Clip of the Week.",
     "step5_title": "Grimpe les rangs PeakGG",
-    "step5_desc": "Gagne des Peak Points, monte de Rookie à Apex et fais-toi un nom dans les FPS EU."
+    "step5_desc": "Gagne des Peak Points, monte de Rookie à Apex et fais-toi un nom sur PeakGG."
   },
   "features": {
     "title_pre": "CONÇU POUR LES",
     "title_accent": "COMPÉTITEURS",
-    "subtitle": "La roadmap PeakGG — ce qui est dispo et ce qui arrive pour les joueurs FPS européens sérieux.",
+    "subtitle": "La roadmap PeakGG — ce qui est dispo et ce qui arrive pour les joueurs européens sérieux.",
     "status_available": "Disponible",
     "status_coming_soon": "Bientôt",
     "status_in_development": "En développement",
@@ -264,14 +264,14 @@
   "cta_section": {
     "title_pre": "PRÊT À",
     "title_accent": "COMPÉTIR",
-    "subtitle": "Rejoins des milliers de joueurs sur la plateforme compétitive multi-jeux la plus avancée.",
+    "subtitle": "Rejoins des milliers de joueurs sur la plateforme compétitive la plus avancée.",
     "cta_logged_in": "Commencer à jouer",
     "cta_guest": "Crée ton compte"
   },
   "discord_cta": {
     "eyebrow": "COMMUNAUTÉ PRÉ-LANCEMENT",
     "title": "Rejoins le Discord PeakGG",
-    "subtitle": "Fais partie de la première communauté FPS compétitive d'Europe avant le lancement. Trouve des coéquipiers, reçois les annonces des tournois et aide-nous à façonner la plateforme.",
+    "subtitle": "Fais partie de la première communauté Valorant compétitive d'Europe avant le lancement. Trouve des coéquipiers, reçois les annonces des tournois et aide-nous à façonner la plateforme.",
     "button": "Rejoindre Discord"
   },
   "start_competing": {
@@ -281,7 +281,7 @@
     "subtitle": "Trois manières de rejoindre la communauté PeakGG dès maintenant.",
     "coming_soon": "Bientôt",
     "card1_title": "Trouve des Coéquipiers",
-    "card1_desc": "Crée ton profil et prépare-toi à te connecter avec des joueurs FPS européens cherchant une équipe.",
+    "card1_desc": "Crée ton profil et prépare-toi à te connecter avec des joueurs cherchant une équipe.",
     "card1_cta": "Voir les Free Agents",
     "card2_title": "Rejoins des Tournois",
     "card2_desc": "Prépare-toi pour les Open Cups, les Challenger Series et les futurs Peak Championships.",
@@ -293,7 +293,7 @@
   "pre_launch_cta": {
     "eyebrow": "Pré-lancement",
     "title": "Rejoins les premiers joueurs PeakGG",
-    "subtitle": "Crée ton profil, rejoins le Discord et aide-nous à façonner le premier hub FPS compétitif pour l'Europe avant la Saison 1.",
+    "subtitle": "Crée ton profil, rejoins le Discord et aide-nous à façonner PeakGG avant le lancement.",
     "cta_register": "Créer un compte",
     "cta_discord": "Rejoindre Discord"
   },
@@ -304,7 +304,7 @@
     "region": "Communauté Européenne"
   },
   "footer": {
-    "tagline": "La plateforme compétitive multi-jeux ultime pour VALORANT, CS2 et Rainbow Six Siege.",
+    "tagline": "La plateforme compétitive pour les joueurs Valorant sérieux en Europe.",
     "platform": "Plateforme",
     "matchmaking": "Matchmaking",
     "tournaments": "Tournois",
@@ -330,7 +330,7 @@
     "mission_title": "Notre mission",
     "mission_body": "PeakGG existe parce que le gaming compétitif mérite un meilleur foyer. Matchmaking équitable, vrais tournois, une communauté qui te pousse à ton sommet. Nous avons construit ce sur quoi nous voulions jouer.",
     "story_title": "Notre histoire",
-    "story_body": "Lancée en 2026 à Bruxelles, en Belgique. PeakGG est née de la frustration face aux plateformes existantes — laggy, injustes, sans âme. Deux personnes, une vision : construire la plateforme que les joueurs FPS sérieux méritent vraiment.",
+    "story_body": "Lancée en 2026 à Bruxelles, en Belgique. PeakGG est née de la frustration face aux plateformes existantes — laggy, injustes, sans âme. Deux personnes, une vision : construire la plateforme que les joueurs compétitifs sérieux méritent vraiment.",
     "values_title": "Nos valeurs",
     "value_fair_title": "Fair-play",
     "value_fair_desc": "Chaque match est équitable. Anti-smurf, basé sur l'ELO, sans pay-to-win.",
@@ -361,11 +361,11 @@
     "section_account": "Compte et sécurité",
     "section_legal": "Légal et confidentialité",
     "q_what_is_q": "Qu'est-ce que PeakGG ?",
-    "q_what_is_a": "PeakGG est une plateforme de gaming compétitif gratuite pour Valorant, CS2 et Rainbow Six Siege. Matchmaking classé, tournois, gestion d'équipes et communauté — tout en un seul endroit.",
+    "q_what_is_a": "PeakGG est une plateforme compétitive gratuite pour Valorant. Matchmaking classé, tournois, gestion d'équipes et communauté — tout en un seul endroit.",
     "q_free_q": "PeakGG est-il gratuit ?",
     "q_free_a": "Oui, totalement gratuit. Inscris-toi sur peakgg.net et commence à compétir immédiatement. Aucun abonnement requis.",
     "q_games_q": "Quels jeux sont pris en charge ?",
-    "q_games_a": "Valorant est disponible maintenant. CS2 et Rainbow Six Siege arrivent bientôt — laisse ton e-mail sur leurs pages pour être prévenu en premier.",
+    "q_games_a": "Valorant est disponible maintenant. D'autres jeux pourraient être ajoutés à l'avenir.",
     "q_register_q": "Comment créer un compte ?",
     "q_register_a": "Clique sur \"Commencer à jouer\" sur la page d'accueil, remplis ton nom d'utilisateur et ton e-mail, et c'est fait. 30 secondes.",
     "q_rank_works_q": "Comment fonctionne le système de rang ?",
@@ -672,7 +672,7 @@
   },
   "free_agents": {
     "meta_title": "Agents Libres — PeakGG",
-    "meta_description": "Trouvez des joueurs solo cherchant une équipe sur Valorant, CS2 et R6 en Europe.",
+    "meta_description": "Trouvez des joueurs solo cherchant une équipe sur Valorant en Europe.",
     "eyebrow": "Tableau de Recrutement",
     "title": "Agents Libres",
     "subtitle": "Découvrez les joueurs cherchant une équipe. Filtrez par jeu, ELO, région, langue et réputation.",
