@@ -68,6 +68,17 @@ export default function HeroSection() {
           <motion.div initial="hidden" animate="visible" variants={fadeUp(0.4)}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 justify-center w-full max-w-md sm:max-w-none sm:w-auto"
           >
+            <Link to={registerHref} className="w-full sm:w-auto">
+              <Button
+                variant="neon"
+                size="lg"
+                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider hover:-translate-y-0.5 transition-all duration-200 shadow-[0_0_24px_hsl(var(--primary)/0.35)] hover:shadow-[0_0_36px_hsl(var(--primary)/0.5)]"
+              >
+                <Swords className="mr-2 h-5 w-5" />
+                {t("hero.cta_register")}
+                <ArrowRight className="ml-1 h-5 w-5" />
+              </Button>
+            </Link>
             <a
               href={DISCORD_INVITE}
               target="_blank"
@@ -75,24 +86,14 @@ export default function HeroSection() {
               className="w-full sm:w-auto"
             >
               <Button
+                variant="outline"
                 size="lg"
-                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider bg-[#5865F2] hover:bg-[#4752c4] text-white border-0 shadow-[0_0_24px_rgba(88,101,242,0.4)] hover:shadow-[0_0_36px_rgba(88,101,242,0.6)] hover:-translate-y-0.5 transition-all duration-200"
+                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider border-[#5865F2]/40 text-[#a8b0f7] hover:bg-[#5865F2]/10 hover:text-white hover:border-[#5865F2]/60 hover:-translate-y-0.5 transition-all duration-200"
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
                 {t("hero.cta_discord")}
-                <ArrowRight className="ml-1 h-5 w-5" />
               </Button>
             </a>
-            <Link to={registerHref} className="w-full sm:w-auto">
-              <Button
-                variant="neonOutline"
-                size="lg"
-                className="w-full sm:w-auto h-12 px-6 rounded-sm uppercase tracking-wider hover:-translate-y-0.5 transition-transform duration-200"
-              >
-                <Swords className="mr-2 h-5 w-5" />
-                {t("hero.cta_register")}
-              </Button>
-            </Link>
           </motion.div>
 
           <motion.button
