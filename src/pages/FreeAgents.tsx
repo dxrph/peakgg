@@ -43,6 +43,7 @@ type AgentRow = {
   smurf_risk_score: number;
   last_active_at: string;
   fast_track: boolean;
+  preferred_team_type: string | null;
   // joined
   best_elo?: number;
   best_game?: GameId;
@@ -86,6 +87,8 @@ export default function FreeAgentsPage() {
   const [minRep, setMinRep] = useState<number>(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [noSmurf, setNoSmurf] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [goalFilter, setGoalFilter] = useState<string>("all");
 
   useEffect(() => {
     let active = true;
@@ -94,7 +97,7 @@ export default function FreeAgentsPage() {
       const { data: profs } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
+          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track, preferred_team_type"
         )
         .eq("looking_for_team", true)
         .eq("is_banned", false)
@@ -142,12 +145,14 @@ export default function FreeAgentsPage() {
       if (elo < eloRange[0] || elo > eloRange[1]) return false;
       if (region !== "all" && (a.region ?? "").toLowerCase() !== region.toLowerCase()) return false;
       if (language !== "all" && (a.language ?? "").toLowerCase() !== language.toLowerCase()) return false;
+      if (roleFilter !== "all" && (a.role ?? "").toLowerCase() !== roleFilter.toLowerCase()) return false;
+      if (goalFilter !== "all" && (a.preferred_team_type ?? "").toLowerCase() !== goalFilter.toLowerCase()) return false;
       if (Number(a.reputation_score) < minRep) return false;
       if (verifiedOnly && !a.account_verified) return false;
       if (noSmurf && (a.smurf_risk_score ?? 0) >= 50) return false;
       return true;
     });
-  }, [agents, search, game, eloRange, region, language, minRep, verifiedOnly, noSmurf]);
+  }, [agents, search, game, eloRange, region, language, minRep, verifiedOnly, noSmurf, roleFilter, goalFilter]);
 
   const filtersActive =
     search.trim() !== "" ||
@@ -158,7 +163,9 @@ export default function FreeAgentsPage() {
     language !== "all" ||
     minRep > 0 ||
     verifiedOnly ||
-    noSmurf;
+    noSmurf ||
+    roleFilter !== "all" ||
+    goalFilter !== "all";
 
   const resetFilters = () => {
     setSearch("");
@@ -169,6 +176,8 @@ export default function FreeAgentsPage() {
     setMinRep(0);
     setVerifiedOnly(false);
     setNoSmurf(false);
+    setRoleFilter("all");
+    setGoalFilter("all");
   };
 
   // Real stats (no fake numbers — only shown when data exists)
