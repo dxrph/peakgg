@@ -284,6 +284,28 @@ export default function FreeAgentsPage() {
       </div>
 
       <div>
+        <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.role", { defaultValue: "Role" })}</Label>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="mt-1.5 bg-background/40 border-border/60"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("free_agents.all_roles", { defaultValue: "All roles" })}</SelectItem>
+            {VALORANT_ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.goal", { defaultValue: "Competitive goal" })}</Label>
+        <Select value={goalFilter} onValueChange={setGoalFilter}>
+          <SelectTrigger className="mt-1.5 bg-background/40 border-border/60"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("free_agents.all_goals", { defaultValue: "Any goal" })}</SelectItem>
+            {COMPETITIVE_GOALS.map((g) => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
         <div className="flex items-center justify-between mb-1.5">
           <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.min_rep", { defaultValue: "Min reputation" })}</Label>
           <span className="text-[11px] font-mono text-primary">{minRep.toFixed(1)} ★</span>
