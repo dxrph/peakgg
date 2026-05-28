@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
-import { Users, Plus, Swords, Trophy, Globe, Shield, Target, MessageSquare, CheckCircle2, Eye, Settings, UserPlus } from "lucide-react";
+import { Users, Plus, Swords, Trophy, Globe, Shield, Target, MessageSquare, CheckCircle2, Eye, Settings, UserPlus, UsersRound, Radio } from "lucide-react";
 import CreateTeamDialog from "@/components/teams/CreateTeamDialog";
 import RosterDialog from "@/components/teams/RosterDialog";
 import JoinTeamDialog from "@/components/teams/JoinTeamDialog";
@@ -22,6 +22,7 @@ import ContactPlayerDialog from "@/components/teams/ContactPlayerDialog";
 import DiscordCTA from "@/components/landing/DiscordCTA";
 import { Trophy as TrophyIcon, Sparkles, BadgeCheck, MessageCircle, LayoutDashboard, LogIn } from "lucide-react";
 import TeamLogo from "@/components/teams/TeamLogo";
+import RankBadge from "@/components/RankBadge";
 import { DISCORD_INVITE } from "@/lib/links";
 
 import { enabledGameIds } from "@/lib/feature-flags";
