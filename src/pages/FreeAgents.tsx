@@ -769,6 +769,7 @@ function AgentCard({ agent }: { agent: AgentRow }) {
   const elo = agent.best_elo ?? 1000;
   const rank = getRankByElo(elo);
   const rep = Number(agent.reputation_score ?? 5);
+  const goalLabel = COMPETITIVE_GOALS.find((g) => g.value === (agent.preferred_team_type ?? "").toLowerCase())?.label;
   return (
     <Link
       to={`/profile/${agent.username}`}
@@ -825,6 +826,24 @@ function AgentCard({ agent }: { agent: AgentRow }) {
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           <RankBadge elo={elo} size="sm" showLabel />
           <span className="font-mono text-xs text-primary font-bold">{elo}</span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {agent.role && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-primary/40 text-primary bg-primary/5">
+              <Target className="h-2.5 w-2.5 mr-1" />{agent.role}
+            </Badge>
+          )}
+          {agent.availability && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-accent/30 text-accent bg-accent/5">
+              <Clock className="h-2.5 w-2.5 mr-1" />{agent.availability}
+            </Badge>
+          )}
+          {goalLabel && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-border text-foreground/80">
+              <Trophy className="h-2.5 w-2.5 mr-1" />{goalLabel}
+            </Badge>
+          )}
         </div>
 
         {agent.bio && (
