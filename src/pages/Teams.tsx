@@ -373,6 +373,12 @@ export default function TeamsPage() {
                     : null;
                   const memberCount = memberCounts[tt.id] ?? 0;
                   const openSpots = Math.max(0, 5 - memberCount);
+                  const isFull = openSpots === 0;
+                  const statusPill = isFull
+                    ? { label: t("teams_page.status_full", { defaultValue: "Full Roster" }), cn: "border-muted/40 text-muted-foreground bg-muted/10", Icon: UsersRound }
+                    : tt.looking_for_players
+                      ? { label: t("teams_page.status_recruiting", { defaultValue: "Recruiting" }), cn: "border-success/40 text-success bg-success/10", Icon: Radio }
+                      : { label: t("teams_page.status_open", { defaultValue: "Open Spots" }), cn: "border-primary/30 text-primary bg-primary/10", Icon: UserPlus };
                   return (
                     <div key={tt.id} className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-all flex flex-col">
                       <div className="flex items-center gap-3 mb-4">
@@ -387,10 +393,18 @@ export default function TeamsPage() {
                             <span className="flex items-center gap-1"><Users className="h-3 w-3" />{memberCount}/5</span>
                           </div>
                         </div>
+                        {tt.rank && (
+                          <div className="shrink-0">
+                            <RankBadge rank={tt.rank} size="md" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-1 mb-3">
                         <Badge variant="secondary" className="text-xs font-display uppercase">{tt.game}</Badge>
                         {tt.rank && <Badge variant="outline" className="text-xs font-display">{tt.rank}</Badge>}
+                        <Badge variant="outline" className={`text-[10px] font-display uppercase tracking-wider ${statusPill.cn}`}>
+                          <statusPill.Icon className="h-3 w-3 mr-1" />{statusPill.label}
+                        </Badge>
                         {(() => {
                           const b = getTeamBadge(tt);
                           if (!b) return null;
