@@ -351,8 +351,8 @@ export default function TeamsPage() {
 
             {filteredTeams.length === 0 ? (
               <EmptyState
-                title={t("teams_page.empty_teams_title", { defaultValue: "No public teams yet" })}
-                desc={t("teams_page.empty_teams_desc", { defaultValue: "Create your team and become one of the founding rosters of PeakGG. Join the Discord to coordinate with other early players." })}
+                title={t("teams_page.empty_teams_title", { defaultValue: "No team found yet." })}
+                desc={t("teams_page.empty_teams_desc", { defaultValue: "Create your own team and start building your roster." })}
                 ctaLabel={
                   !user
                     ? t("teams_page.create_account", { defaultValue: "Create Account" })
