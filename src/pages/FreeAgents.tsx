@@ -57,6 +57,13 @@ const LANGUAGES = [
   { code: "de", label: "Deutsch" },
   { code: "pt", label: "Português" },
 ];
+const VALORANT_ROLES = ["Duelist", "Controller", "Initiator", "Sentinel", "Flex", "IGL"];
+const COMPETITIVE_GOALS = [
+  { value: "casual", label: "Casual" },
+  { value: "ranked", label: "Ranked Grind" },
+  { value: "tournaments", label: "Tournaments" },
+  { value: "longterm", label: "Long-term Team" },
+];
 
 export default function FreeAgentsPage() {
   const { t } = useI18n();
