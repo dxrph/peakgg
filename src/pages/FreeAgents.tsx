@@ -43,6 +43,7 @@ type AgentRow = {
   smurf_risk_score: number;
   last_active_at: string;
   fast_track: boolean;
+  preferred_team_type: string | null;
   // joined
   best_elo?: number;
   best_game?: GameId;
@@ -56,6 +57,13 @@ const LANGUAGES = [
   { code: "es", label: "Español" },
   { code: "de", label: "Deutsch" },
   { code: "pt", label: "Português" },
+];
+const VALORANT_ROLES = ["Duelist", "Controller", "Initiator", "Sentinel", "Flex", "IGL"];
+const COMPETITIVE_GOALS = [
+  { value: "casual", label: "Casual" },
+  { value: "ranked", label: "Ranked Grind" },
+  { value: "tournaments", label: "Tournaments" },
+  { value: "longterm", label: "Long-term Team" },
 ];
 
 export default function FreeAgentsPage() {
@@ -79,6 +87,8 @@ export default function FreeAgentsPage() {
   const [minRep, setMinRep] = useState<number>(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [noSmurf, setNoSmurf] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [goalFilter, setGoalFilter] = useState<string>("all");
 
   useEffect(() => {
     let active = true;
@@ -87,7 +97,7 @@ export default function FreeAgentsPage() {
       const { data: profs } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track"
+          "id, username, display_name, avatar_url, bio, region, language, preferred_game, role, availability, reputation_score, account_verified, smurf_risk_score, last_active_at, fast_track, preferred_team_type"
         )
         .eq("looking_for_team", true)
         .eq("is_banned", false)
@@ -135,12 +145,14 @@ export default function FreeAgentsPage() {
       if (elo < eloRange[0] || elo > eloRange[1]) return false;
       if (region !== "all" && (a.region ?? "").toLowerCase() !== region.toLowerCase()) return false;
       if (language !== "all" && (a.language ?? "").toLowerCase() !== language.toLowerCase()) return false;
+      if (roleFilter !== "all" && (a.role ?? "").toLowerCase() !== roleFilter.toLowerCase()) return false;
+      if (goalFilter !== "all" && (a.preferred_team_type ?? "").toLowerCase() !== goalFilter.toLowerCase()) return false;
       if (Number(a.reputation_score) < minRep) return false;
       if (verifiedOnly && !a.account_verified) return false;
       if (noSmurf && (a.smurf_risk_score ?? 0) >= 50) return false;
       return true;
     });
-  }, [agents, search, game, eloRange, region, language, minRep, verifiedOnly, noSmurf]);
+  }, [agents, search, game, eloRange, region, language, minRep, verifiedOnly, noSmurf, roleFilter, goalFilter]);
 
   const filtersActive =
     search.trim() !== "" ||
@@ -151,7 +163,9 @@ export default function FreeAgentsPage() {
     language !== "all" ||
     minRep > 0 ||
     verifiedOnly ||
-    noSmurf;
+    noSmurf ||
+    roleFilter !== "all" ||
+    goalFilter !== "all";
 
   const resetFilters = () => {
     setSearch("");
@@ -162,6 +176,8 @@ export default function FreeAgentsPage() {
     setMinRep(0);
     setVerifiedOnly(false);
     setNoSmurf(false);
+    setRoleFilter("all");
+    setGoalFilter("all");
   };
 
   // Real stats (no fake numbers — only shown when data exists)
@@ -263,6 +279,28 @@ export default function FreeAgentsPage() {
           <SelectContent>
             <SelectItem value="all">{t("free_agents.all_languages", { defaultValue: "All languages" })}</SelectItem>
             {LANGUAGES.map((l) => <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.role", { defaultValue: "Role" })}</Label>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="mt-1.5 bg-background/40 border-border/60"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("free_agents.all_roles", { defaultValue: "All roles" })}</SelectItem>
+            {VALORANT_ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-[11px] uppercase tracking-wider font-display text-muted-foreground">{t("free_agents.goal", { defaultValue: "Competitive goal" })}</Label>
+        <Select value={goalFilter} onValueChange={setGoalFilter}>
+          <SelectTrigger className="mt-1.5 bg-background/40 border-border/60"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("free_agents.all_goals", { defaultValue: "Any goal" })}</SelectItem>
+            {COMPETITIVE_GOALS.map((g) => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -731,6 +769,7 @@ function AgentCard({ agent }: { agent: AgentRow }) {
   const elo = agent.best_elo ?? 1000;
   const rank = getRankByElo(elo);
   const rep = Number(agent.reputation_score ?? 5);
+  const goalLabel = COMPETITIVE_GOALS.find((g) => g.value === (agent.preferred_team_type ?? "").toLowerCase())?.label;
   return (
     <Link
       to={`/profile/${agent.username}`}
@@ -787,6 +826,24 @@ function AgentCard({ agent }: { agent: AgentRow }) {
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           <RankBadge elo={elo} size="sm" showLabel />
           <span className="font-mono text-xs text-primary font-bold">{elo}</span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {agent.role && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-primary/40 text-primary bg-primary/5">
+              <Target className="h-2.5 w-2.5 mr-1" />{agent.role}
+            </Badge>
+          )}
+          {agent.availability && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-accent/30 text-accent bg-accent/5">
+              <Clock className="h-2.5 w-2.5 mr-1" />{agent.availability}
+            </Badge>
+          )}
+          {goalLabel && (
+            <Badge variant="outline" className="text-[10px] font-display uppercase tracking-wider border-border text-foreground/80">
+              <Trophy className="h-2.5 w-2.5 mr-1" />{goalLabel}
+            </Badge>
+          )}
         </div>
 
         {agent.bio && (
