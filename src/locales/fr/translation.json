@@ -296,7 +296,8 @@
     "title": "Rejoins les premiers joueurs PeakGG",
     "subtitle": "Crée ton profil, rejoins le Discord et aide-nous à façonner PeakGG avant le lancement.",
     "cta_register": "Créer un compte",
-    "cta_discord": "Rejoindre Discord"
+    "cta_discord": "Rejoindre Discord",
+    "beta_access_note": "La Bêta Fermée est ouverte à tous les joueurs. Aucun code d'invitation requis."
   },
   "platform_stats": {
     "games": "Jeux Supportés",
