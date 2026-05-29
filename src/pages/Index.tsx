@@ -7,6 +7,7 @@ import StartCompetingSection from "@/components/landing/StartCompetingSection";
 import PreLaunchCTA from "@/components/landing/PreLaunchCTA";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
+import ProgressionPath from "@/components/landing/ProgressionPath";
 import RankShowcase from "@/components/landing/RankShowcase";
 import TopPlayersWeek from "@/components/landing/TopPlayersWeek";
 import DiscordCTA from "@/components/landing/DiscordCTA";
@@ -56,6 +57,9 @@ const Index = () => {
         <PlatformStatsStrip />
         <FeaturesSection />
         <HowItWorksSteps />
+        <section className="container py-16 md:py-20">
+          <ProgressionPath />
+        </section>
         <RankShowcase />
         <TopPlayersWeek />
         <DiscordCTA />
