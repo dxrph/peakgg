@@ -464,6 +464,11 @@ export default function TournamentsPage() {
           </div>
         </section>
 
+        {/* Unified progression explainer */}
+        <section className="mb-16">
+          <ProgressionPath />
+        </section>
+
         {/* FEATURED TOURNAMENT — PeakGG Community Cup #1 (current flagship) */}
         {featured && (
           <section className="mb-16">
