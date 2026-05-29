@@ -12,6 +12,7 @@ import { GAMES, getRankByElo } from "@/lib/ranks";
 import { Trophy, TrendingUp, TrendingDown, Swords, Clock, Info, ShieldCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import RankShowcaseGrid from "@/components/RankShowcaseGrid";
+import ProgressionPath from "@/components/landing/ProgressionPath";
 
 type EloRow = {
   id: string;
@@ -143,6 +144,9 @@ export default function EloExplained() {
 
         {/* All 7 ranks preview */}
         <div className="mb-12">
+          <div className="mb-10">
+            <ProgressionPath variant="compact" />
+          </div>
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="h-5 w-5 text-primary" />
             <h2 className="font-display font-bold text-xl uppercase tracking-wider">The 7 PeakGG ranks</h2>
