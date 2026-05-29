@@ -28,6 +28,7 @@ import { useMatchFoundListener } from "@/hooks/useMatchFoundListener";
 import RankBadge from "@/components/RankBadge";
 import QueueLobby from "@/components/competitive/QueueLobby";
 import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
+import ProgressionPath from "@/components/landing/ProgressionPath";
 
 // Thresholds for cup unlocks (ELO-based)
 const CHALLENGER_ELO = 1200;
