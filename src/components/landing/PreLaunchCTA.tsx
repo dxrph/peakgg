@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { MessageCircle, Swords, Sparkles } from "lucide-react";
+import { MessageCircle, Swords, Sparkles, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -57,6 +57,12 @@ export default function PreLaunchCTA() {
                   {t("pre_launch_cta.cta_discord")}
                 </Button>
               </a>
+            </div>
+            <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/30 bg-emerald-500/5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span className="text-[11px] md:text-xs text-emerald-200/90 font-body">
+                {t("pre_launch_cta.beta_access_note")}
+              </span>
             </div>
           </div>
         </motion.div>

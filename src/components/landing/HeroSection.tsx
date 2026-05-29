@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Swords, ArrowRight, Trophy, Users, Award, MessageCircle, ChevronDown } from "lucide-react";
+import { Swords, ArrowRight, Trophy, Users, Award, MessageCircle, ChevronDown, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -94,6 +94,16 @@ export default function HeroSection() {
                 {t("hero.cta_discord")}
               </Button>
             </a>
+          </motion.div>
+
+          <motion.div
+            initial="hidden" animate="visible" variants={fadeUp(0.45)}
+            className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-emerald-500/30 bg-emerald-500/5"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span className="text-[11px] md:text-xs text-emerald-200/90 font-body">
+              {t("hero.beta_access_note")}
+            </span>
           </motion.div>
 
           <motion.button
