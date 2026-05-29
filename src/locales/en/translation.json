@@ -297,7 +297,8 @@
     "title": "Join the first PeakGG players",
     "subtitle": "Create your profile, join the Discord and help shape PeakGG before launch.",
     "cta_register": "Create Account",
-    "cta_discord": "Join Discord"
+    "cta_discord": "Join Discord",
+    "beta_access_note": "Closed Beta is open to all players. No invite code required."
   },
   "platform_stats": {
     "games": "Supported Games",
