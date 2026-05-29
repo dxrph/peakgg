@@ -31,8 +31,11 @@ import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
 import ProgressionPath from "@/components/landing/ProgressionPath";
 
 // Thresholds for cup unlocks (ELO-based)
-const CHALLENGER_ELO = 1200;
-const CHAMPIONSHIP_ELO = 1800;
+// Aligned with PeakGG Rank thresholds (see src/lib/ranks.ts):
+//   Rival starts at 1000 ELO  → unlocks Challenger Series
+//   Elite starts at 2000 ELO  → unlocks Peak Championship
+const CHALLENGER_ELO = 1000;
+const CHAMPIONSHIP_ELO = 2000;
 
 type SoloTier = {
   id: "open" | "challenger" | "championship";
