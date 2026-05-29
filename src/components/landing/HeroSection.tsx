@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Swords, ArrowRight, Trophy, Users, Award, MessageCircle, ChevronDown } from "lucide-react";
+import { Swords, ArrowRight, Trophy, Users, Award, MessageCircle, ChevronDown, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
