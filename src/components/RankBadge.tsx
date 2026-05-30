@@ -96,7 +96,16 @@ export default function RankBadge({
       {customSrc ? (
         <span
           className="relative inline-flex items-center justify-center transition-transform duration-200 hover:scale-[1.05]"
-          style={{ width: px, height: px, padding: Math.max(2, Math.round(px * 0.06)) }}
+          style={{
+            width: px,
+            height: px,
+            filter: `drop-shadow(0 0 ${Math.round(px * 0.18)}px ${info.hex}${
+              isApex ? "cc" : "55"
+            }) drop-shadow(0 ${Math.max(1, Math.round(px * 0.03))}px ${Math.max(
+              3,
+              Math.round(px * 0.05),
+            )}px rgba(0,0,0,0.6))`,
+          }}
         >
           <img
             src={customSrc}
