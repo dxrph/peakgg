@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
-import { Settings2, ChevronDown, Shield, Users, Sparkles, Trophy, Eye } from "lucide-react";
+import { Settings2, ChevronDown, Shield, Users, Sparkles, Trophy, Eye, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -21,21 +21,26 @@ interface Props {
   onCreated?: () => void;
 }
 
-import { enabledGameIds } from "@/lib/feature-flags";
+const VALORANT = {
+  value: "valorant" as const,
+  label: "Valorant",
+  short: "VAL",
+  color: "#FF4655",
+  glow: "rgba(255,70,85,0.45)",
+};
 
-const ALL_GAMES = [
-  { value: "valorant", label: "Valorant", short: "VAL", color: "#FF4655", glow: "rgba(255,70,85,0.45)" },
-  { value: "cs2",      label: "CS2",      short: "CS2", color: "#F59E0B", glow: "rgba(245,158,11,0.45)" },
-  { value: "r6s",      label: "R6 Siege", short: "R6",  color: "#3B82F6", glow: "rgba(59,130,246,0.45)" },
-] as const;
-const GAMES = ALL_GAMES.filter(g => enabledGameIds.includes(g.value as any));
+const EUROPE = { value: "EU" as const, label: "Europe", flag: "🇪🇺" };
 
-const REGIONS = [
-  { value: "EU",    label: "EU",    flag: "🇪🇺" },
-  { value: "NA",    label: "NA",    flag: "🇺🇸" },
-  { value: "APAC",  label: "APAC",  flag: "🌏" },
-  { value: "LATAM", label: "LATAM", flag: "🌎" },
-] as const;
+function computeInitials(name: string, tag: string): string {
+  const source = (name || tag || "").trim();
+  if (!source) return "";
+  const words = source.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  const single = words[0] ?? "";
+  return single.slice(0, 2).toUpperCase();
+}
 
 export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Props) {
   const { user } = useAuth();
@@ -44,8 +49,8 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
 
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
-  const [game, setGame] = useState<typeof GAMES[number]["value"]>("valorant");
-  const [region, setRegion] = useState<typeof REGIONS[number]["value"]>("EU");
+  const game = VALORANT.value;
+  const region = EUROPE.value;
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [recruitment, setRecruitment] = useState<"open" | "invite" | "closed">("open");
   const [description, setDescription] = useState("");
@@ -55,17 +60,14 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const [loading, setLoading] = useState(false);
 
   const reset = () => {
-    setName(""); setTag(""); setGame("valorant"); setRegion("EU");
+    setName(""); setTag("");
     setAdvancedOpen(false); setRecruitment("open"); setDescription(""); setDiscord("");
     setSlots(2); setIsPublic(true);
   };
 
-  const isValid =
-    name.trim().length > 0 &&
-    tag.trim().length > 0 &&
-    !!game &&
-    !!region;
-  const selectedGame = GAMES.find((g) => g.value === game)!;
+  const isValid = name.trim().length > 0 && tag.trim().length > 0;
+  const selectedGame = VALORANT;
+  const initials = computeInitials(name, tag);
 
   const submit = async () => {
     if (!user) {
@@ -135,7 +137,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
               {t("teams_page.create_team_title", { defaultValue: "Create Your Team" })}
             </DialogTitle>
             <DialogDescription className="font-body max-w-2xl">
-              {t("teams_page.create_team_sub", { defaultValue: "Set up your team identity, build your roster and enter the PeakGG competitive ecosystem." })}
+              {t("teams_page.create_team_sub", { defaultValue: "Create your team, recruit players and compete in PeakGG tournaments." })}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -174,70 +176,79 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
 
           {/* SECTION: COMPETITIVE SETUP */}
           <SectionLabel icon={Trophy} text={t("teams_page.section_competitive", { defaultValue: "Competitive setup" })} />
-          {/* GAME PICKER */}
-          <div className="space-y-2">
-            <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
-              {t("teams_page.main_game", { defaultValue: "Main game" })}
-            </Label>
-            <div className="grid grid-cols-3 gap-2">
-              {GAMES.map((g) => {
-                const active = game === g.value;
-                return (
-                  <button
-                    key={g.value}
-                    type="button"
-                    onClick={() => setGame(g.value)}
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-md border-2 transition-all",
-                      "bg-background/60 hover:scale-[1.02]",
-                      active ? "scale-[1.02]" : "border-border opacity-70 hover:opacity-100"
-                    )}
-                    style={
-                      active
-                        ? { borderColor: g.color, boxShadow: `0 0 16px ${g.glow}, inset 0 0 12px ${g.glow}` }
-                        : undefined
-                    }
-                  >
-                    <span
-                      className="font-display text-lg leading-none tracking-wider"
-                      style={{ color: active ? g.color : "hsl(var(--muted-foreground))" }}
-                    >
-                      {g.short}
-                    </span>
-                    <span
-                      className="font-display uppercase text-xs tracking-wider"
-                      style={active ? { color: g.color } : undefined}
-                    >
-                      {g.label}
-                    </span>
-                  </button>
-                );
-              })}
+          {/* LOCKED GAME + REGION */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
+                {t("teams_page.main_game", { defaultValue: "Game" })}
+              </Label>
+              <div
+                className="flex items-center justify-between gap-2 py-3 px-3 rounded-md border-2 bg-background/60"
+                style={{ borderColor: VALORANT.color, boxShadow: `0 0 12px ${VALORANT.glow}` }}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-display text-base tracking-wider" style={{ color: VALORANT.color }}>
+                    {VALORANT.short}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-display uppercase text-sm tracking-wider truncate">
+                      {VALORANT.label}
+                    </div>
+                    <div className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {t("teams_page.closed_beta", { defaultValue: "Closed Beta" })}
+                    </div>
+                  </div>
+                </div>
+                <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
+                {t("teams_page.region", { defaultValue: "Region" })}
+              </Label>
+              <div className="flex items-center justify-between gap-2 py-3 px-3 rounded-md border-2 border-border bg-background/60">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl leading-none">{EUROPE.flag}</span>
+                  <div className="min-w-0">
+                    <div className="font-display uppercase text-sm tracking-wider truncate">
+                      {EUROPE.label}
+                    </div>
+                    <div className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {t("teams_page.beta_region", { defaultValue: "Beta region" })}
+                    </div>
+                  </div>
+                </div>
+                <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+              </div>
             </div>
           </div>
 
-          {/* REGION PICKER */}
+          {/* RECRUITMENT STATUS (simple) */}
           <div className="space-y-2">
-            <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground">
-              {t("teams_page.region", { defaultValue: "Region" })}
+            <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Users className="h-4 w-4 text-primary" />
+              {t("teams_page.recruitment_status", { defaultValue: "Recruitment status" })}
             </Label>
-            <div className="grid grid-cols-4 gap-2">
-              {REGIONS.map((r) => {
-                const active = region === r.value;
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { v: "open" as const,   label: t("teams_page.rec_recruiting", { defaultValue: "Recruiting Players" }) },
+                { v: "closed" as const, label: t("teams_page.rec_full",       { defaultValue: "Full Roster" }) },
+              ]).map((opt) => {
+                const active = recruitment === opt.v;
                 return (
                   <button
-                    key={r.value}
+                    key={opt.v}
                     type="button"
-                    onClick={() => setRegion(r.value)}
+                    onClick={() => setRecruitment(opt.v)}
                     className={cn(
-                      "flex flex-col items-center gap-1 py-2 rounded-md border-2 transition-all bg-background/60",
+                      "py-2.5 rounded-md border-2 font-display uppercase text-xs tracking-wider transition-all bg-background/60",
                       active
-                        ? "border-primary text-primary shadow-[0_0_14px_hsl(var(--primary)/0.4)] scale-[1.03]"
-                        : "border-border opacity-70 hover:opacity-100 hover:scale-[1.02]"
+                        ? "border-primary text-primary shadow-[0_0_14px_hsl(var(--primary)/0.4)]"
+                        : "border-border opacity-70 hover:opacity-100"
                     )}
                   >
-                    <span className="text-xl leading-none">{r.flag}</span>
-                    <span className="font-display uppercase text-[10px] tracking-wider">{r.label}</span>
+                    {opt.label}
                   </button>
                 );
               })}
@@ -255,7 +266,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
               >
                 <span className="flex items-center gap-2 font-display uppercase text-xs tracking-wider text-muted-foreground group-hover:text-foreground">
                   <Settings2 className="h-4 w-4" />
-                  {t("teams_page.advanced_settings", { defaultValue: "Description, recruitment & contact" })}
+                  {t("teams_page.advanced_settings", { defaultValue: "Description & contact" })}
                 </span>
                 <ChevronDown className={cn("h-4 w-4 transition-transform text-muted-foreground", advancedOpen && "rotate-180")} />
               </button>
@@ -275,38 +286,6 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                     placeholder="What is your team about?"
                     className="font-body bg-background/60 resize-none"
                   />
-                </div>
-
-                {/* Recruitment status */}
-                <div className="space-y-2">
-                  <Label className="font-display uppercase text-xs tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-primary" />
-                    {t("teams_page.recruitment_status", { defaultValue: "Recruitment status" })}
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {([
-                      { v: "open",   label: t("teams_page.rec_open",   { defaultValue: "Open" }) },
-                      { v: "invite", label: t("teams_page.rec_invite", { defaultValue: "Invite Only" }) },
-                      { v: "closed", label: t("teams_page.rec_closed", { defaultValue: "Closed" }) },
-                    ] as const).map((opt) => {
-                      const active = recruitment === opt.v;
-                      return (
-                        <button
-                          key={opt.v}
-                          type="button"
-                          onClick={() => setRecruitment(opt.v)}
-                          className={cn(
-                            "py-2 rounded-md border-2 font-display uppercase text-xs tracking-wider transition-all bg-background/60",
-                            active
-                              ? "border-primary text-primary shadow-[0_0_14px_hsl(var(--primary)/0.4)]"
-                              : "border-border opacity-70 hover:opacity-100"
-                          )}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
 
                 {recruitment === "open" && (
@@ -390,33 +369,35 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
             </div>
             <div className="px-4 pb-4 -mt-7">
               <div
-                className="w-14 h-14 rounded-md border-2 flex items-center justify-center font-display text-lg tracking-wider bg-card"
-                style={{ borderColor: selectedGame.color, color: selectedGame.color }}
+                className="w-14 h-14 rounded-md border-2 flex items-center justify-center font-display text-xl tracking-wider bg-gradient-to-br from-background to-card relative overflow-hidden"
+                style={{
+                  borderColor: selectedGame.color,
+                  color: selectedGame.color,
+                  boxShadow: `0 0 16px ${selectedGame.glow}, inset 0 0 10px ${selectedGame.glow}`,
+                }}
               >
-                {(tag || name.slice(0, 3) || "?").toUpperCase().slice(0, 4)}
+                {initials ? (
+                  <span className="relative z-10">{initials}</span>
+                ) : (
+                  <span className="relative z-10 opacity-40">PG</span>
+                )}
               </div>
               <div className="mt-3 min-w-0">
                 <div className="font-display font-bold text-lg truncate">
                   {name.trim() || t("teams_page.preview_name_ph", { defaultValue: "Your team name" })}
                 </div>
                 <div className="font-mono text-xs text-muted-foreground">
-                  [{tag.toUpperCase().slice(0, 4) || "TAG"}] · {selectedGame.label} · {region}
+                  [{tag.toUpperCase().slice(0, 4) || "TAG"}] · {selectedGame.label} · 🇪🇺 {EUROPE.label}
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {recruitment === "open" && (
+                {recruitment === "open" ? (
                   <span className="text-[10px] uppercase tracking-wider font-display border border-success/40 text-success rounded-sm px-1.5 py-0.5">
-                    {t("teams_page.rec_open", { defaultValue: "Open" })}
+                    {t("teams_page.rec_recruiting", { defaultValue: "Recruiting Players" })}
                   </span>
-                )}
-                {recruitment === "invite" && (
-                  <span className="text-[10px] uppercase tracking-wider font-display border border-accent/40 text-accent rounded-sm px-1.5 py-0.5">
-                    {t("teams_page.rec_invite", { defaultValue: "Invite Only" })}
-                  </span>
-                )}
-                {recruitment === "closed" && (
+                ) : (
                   <span className="text-[10px] uppercase tracking-wider font-display border border-border text-muted-foreground rounded-sm px-1.5 py-0.5">
-                    {t("teams_page.rec_closed", { defaultValue: "Closed" })}
+                    {t("teams_page.rec_full", { defaultValue: "Full Roster" })}
                   </span>
                 )}
                 <span className="text-[10px] uppercase tracking-wider font-display border border-primary/40 text-primary rounded-sm px-1.5 py-0.5">
@@ -451,7 +432,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
         <div className="flex flex-col gap-2 px-6 py-4 border-t border-border bg-background/40 mt-2">
           {!isValid && (
             <p className="text-[11px] text-muted-foreground font-body text-right">
-              {t("teams_page.create_helper", { defaultValue: "Add a team name, tag, game and region to create your team." })}
+              {t("teams_page.create_helper", { defaultValue: "Add a team name and tag to create your team." })}
             </p>
           )}
           <div className="flex justify-end gap-2">
