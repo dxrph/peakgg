@@ -57,7 +57,7 @@ const SOLO_TIERS: SoloTier[] = [
     tagline: "Solo queue · 1v1 Test · Affects ELO · Public Beta",
     status: "Public Beta",
     unlock: "Open Cup is in public beta. Queue size and rules may change while we test matchmaking and ELO updates. Currently 1v1 only — full 5v5 opens as the player pool grows.",
-    rewards: ["+25 ELO per win", "−15 ELO per loss", "Open Cup badge"],
+    rewards: ["Dynamic ELO (K=24)", "More for upsets, less for favored wins", "Open Cup badge"],
     cta: { label: "Join Open Cup", href: "#solo-path" },
     accent: "border-success/40 text-success",
     icon: Trophy,
@@ -98,7 +98,7 @@ const HOW_IT_WORKS = [
 
 const FAQ = [
   { q: "Do I need a team for the Open Cup?", a: "No. Open Cup creates a temporary team for that match only — it does not appear on the public Teams page." },
-  { q: "How does my ELO change?", a: "Open Cup matches use the same ELO system as ranked matches: about +25 for a win and −15 for a loss, adjusted for opponent strength." },
+  { q: "How does my ELO change?", a: "PeakGG uses a dynamic Elo formula. Beating a stronger team gives more ELO; losing to a weaker team costs more. K factor is 24 for Open Cup and Ranked, 28 for Challenger Series, 32 for Peak Championship. Scrims do not affect your rank." },
   { q: "How are Team Tournaments different?", a: "Team Tournaments require a captain to register a full permanent roster. Results count for the team, not individuals." },
   { q: "When does ELO update?", a: "Only after both sides confirm the result (or an admin resolves a dispute). Cancelled or unconfirmed matches do not affect ELO." },
 ];
@@ -720,7 +720,7 @@ export default function TournamentsPage() {
                     </div>
                     <div className="flex items-center justify-between text-xs font-body">
                       <span className="text-muted-foreground">Stakes</span>
-                      <span className="text-foreground">{tier.id === "open" ? "+25 / −15 ELO" : tier.id === "challenger" ? "Higher ELO swings" : "Season glory"}</span>
+                      <span className="text-foreground">{tier.id === "open" ? "Dynamic ELO · K=24" : tier.id === "challenger" ? "Dynamic ELO · K=28" : "Dynamic ELO · K=32"}</span>
                     </div>
                     {user && progressTo && !eligible && (
                       <div className="pt-2 border-t border-border/60">
