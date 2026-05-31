@@ -66,6 +66,22 @@ Deno.serve(async (req) => {
       return json({ error: "Unsupported game" }, 400);
     }
 
+    // Scrims are practice matches — they NEVER affect official PeakGG ELO.
+    // Mark as processed so we don't keep retrying, then exit.
+    if (match.kind === "scrim") {
+      await admin.from("matches").update({ elo_processed_at: new Date().toISOString() }).eq("id", match.id);
+      return json({ ok: true, skipped: "scrim_no_elo_impact" });
+    }
+
+    // K factor by match type — see EloExplained "Advanced formula".
+    const K_BY_KIND: Record<string, number> = {
+      open_cup: 24,
+      ranked: 24,
+      challenger_series: 28,
+      peak_championship: 32,
+    };
+    const kFactor = K_BY_KIND[match.kind as string] ?? 24;
+
     // Atomic claim: set elo_processed_at NOW so concurrent invocations bail out.
     // If another invocation already claimed it, we exit early.
     const { data: claimed, error: claimErr } = await admin.rpc("claim_match_for_elo", { _match_id: match.id });
@@ -118,16 +134,19 @@ Deno.serve(async (req) => {
     const game = match.game as GameId;
     const updated: any[] = [];
 
+    // Default starting ELO for new players is 500 (Contender entry).
+    const DEFAULT_ELO = 500;
+
     // Compute opponent average ELO per side for dynamic delta
     async function avgEloForUsers(userIds: string[]): Promise<number> {
-      if (userIds.length === 0) return 1000;
+      if (userIds.length === 0) return DEFAULT_ELO;
       const { data } = await admin
         .from("player_stats")
         .select("elo")
         .eq("game", game)
         .in("user_id", userIds);
-      if (!data || data.length === 0) return 1000;
-      return Math.round(data.reduce((s, r: any) => s + (r.elo ?? 1000), 0) / data.length);
+      if (!data || data.length === 0) return DEFAULT_ELO;
+      return Math.round(data.reduce((s, r: any) => s + (r.elo ?? DEFAULT_ELO), 0) / data.length);
     }
 
     const winners = participants.filter(p => p.won).map(p => p.userId);
@@ -153,7 +172,7 @@ Deno.serve(async (req) => {
         .eq("game", game)
         .maybeSingle();
 
-      const baseElo = existing?.elo ?? 1000;
+      const baseElo = existing?.elo ?? DEFAULT_ELO;
       const baseWins = existing?.wins ?? 0;
       const baseLosses = existing?.losses ?? 0;
       const baseMatches = existing?.matches_played ?? 0;
@@ -165,8 +184,13 @@ Deno.serve(async (req) => {
         _player_elo: baseElo,
         _opponent_elo: opponentElo,
         _won: p.won,
+        _k: kFactor,
       });
-      let delta = typeof deltaRows === "number" ? deltaRows : (p.won ? 25 : -15);
+      let delta = typeof deltaRows === "number"
+        ? deltaRows
+        : Math.max(-kFactor * 2, Math.min(kFactor * 2,
+            Math.round(kFactor * ((p.won ? 1 : 0) - 1 / (1 + Math.pow(10, (opponentElo - baseElo) / 400))))
+          ));
       // Fast Track: 1.8x ELO gain on wins until reaching Gold (1400)
       if (fastTrack.get(p.userId) && p.won && baseElo < 1400) {
         delta = Math.round(delta * 1.8);
