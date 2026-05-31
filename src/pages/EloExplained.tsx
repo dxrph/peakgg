@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { GAMES, getRankByElo } from "@/lib/ranks";
-import { Trophy, TrendingUp, TrendingDown, Swords, Clock, Info, ShieldCheck } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Swords, Clock, Info, ShieldCheck, ChevronDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import RankShowcaseGrid from "@/components/RankShowcaseGrid";
 import ProgressionPath from "@/components/landing/ProgressionPath";
@@ -27,10 +27,10 @@ type EloRow = {
 };
 
 const RULES = [
-  { icon: TrendingUp,  label: "Match Win",      value: "+25 ELO", tone: "text-success" },
-  { icon: TrendingDown,label: "Match Loss",     value: "−15 ELO", tone: "text-destructive" },
-  { icon: Swords,      label: "Scrim Win",      value: "+10 ELO", tone: "text-accent" },
-  { icon: Clock,       label: "Inactivity Decay", value: "−10 ELO / 14 days", tone: "text-muted-foreground" },
+  { icon: TrendingUp,   label: "Beat stronger team",  value: "Bigger gain",  tone: "text-success" },
+  { icon: TrendingDown, label: "Lose to weaker team", value: "Bigger loss",  tone: "text-destructive" },
+  { icon: Swords,       label: "Scrims",              value: "No rank impact", tone: "text-accent" },
+  { icon: Clock,        label: "Inactivity Decay",    value: "−10 / 14 days", tone: "text-muted-foreground" },
 ];
 
 export default function EloExplained() {
@@ -104,27 +104,59 @@ export default function EloExplained() {
           </p>
         </motion.div>
 
-        {/* Formula */}
+        {/* How ELO works — plain-language */}
         <Card className="p-6 md:p-8 mb-8 border-border bg-card neon-border">
           <div className="flex items-center gap-2 mb-4">
             <Info className="h-5 w-5 text-primary" />
-            <h2 className="font-display font-bold text-xl uppercase tracking-wider">The formula</h2>
+            <h2 className="font-display font-bold text-xl uppercase tracking-wider">How ELO works</h2>
           </div>
-          <div className="rounded-lg border border-border bg-background/60 p-5 font-mono text-sm md:text-base overflow-x-auto">
-            <div className="text-muted-foreground"># After a ranked match completes</div>
-            <div className="mt-2">
-              <span className="text-primary">new_elo</span> = <span className="text-foreground">max(0, current_elo + delta)</span>
+          <p className="text-sm md:text-base font-body text-foreground/90 leading-relaxed">
+            PeakGG uses a <span className="text-primary font-semibold">dynamic ELO system</span>. Beating stronger
+            teams gives you more ELO. Losing to weaker teams costs you more ELO.
+            {" "}<span className="text-foreground font-semibold">Scrims do not affect your official rank.</span>
+          </p>
+
+          <div className="mt-5 grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg border border-success/30 bg-success/5 p-4">
+              <div className="text-xs uppercase tracking-widest text-success font-display mb-2">Underdog win</div>
+              <p className="text-sm font-body text-muted-foreground">
+                Your team avg <span className="text-foreground font-mono">1000</span> beats opponent
+                avg <span className="text-foreground font-mono">1200</span>:
+                <span className="text-success font-semibold"> bigger ELO reward</span> than a normal win.
+                A loss would <span className="text-foreground">cost less</span> than usual.
+              </p>
             </div>
-            <div className="mt-1">
-              <span className="text-primary">delta</span> = <span className="text-success">+25</span> if win, <span className="text-destructive">−15</span> if loss
-            </div>
-            <div className="mt-1 text-muted-foreground"># Scrims (practice matches)</div>
-            <div className="mt-1">
-              <span className="text-primary">delta</span> = <span className="text-accent">+10</span> on scrim win, <span className="text-muted-foreground">0</span> otherwise
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+              <div className="text-xs uppercase tracking-widest text-destructive font-display mb-2">Favored loss</div>
+              <p className="text-sm font-body text-muted-foreground">
+                Your team avg <span className="text-foreground font-mono">1200</span> loses to opponent
+                avg <span className="text-foreground font-mono">1000</span>:
+                <span className="text-destructive font-semibold"> bigger ELO loss</span> than a normal defeat.
+                A win would <span className="text-foreground">give less</span> than usual.
+              </p>
             </div>
           </div>
+
+          <details className="mt-5 group rounded-lg border border-border bg-background/60 p-4">
+            <summary className="flex items-center justify-between cursor-pointer text-xs uppercase tracking-widest font-display text-muted-foreground hover:text-foreground transition-colors">
+              Advanced formula
+              <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-3 font-mono text-xs md:text-sm overflow-x-auto space-y-1.5">
+              <div className="text-muted-foreground"># Standard Elo expected score</div>
+              <div><span className="text-primary">expected</span> = 1 / (1 + 10 ^ ((opponentAvgElo − teamAvgElo) / 400))</div>
+              <div><span className="text-primary">delta</span> = round(K × (actual − expected))</div>
+              <div className="text-muted-foreground"># actual = 1 for win, 0 for loss · minimum ELO is 0</div>
+              <div className="text-muted-foreground mt-2"># K factor by match type</div>
+              <div>Open Cup · Ranked Match → <span className="text-foreground">K = 24</span></div>
+              <div>Challenger Series → <span className="text-foreground">K = 28</span></div>
+              <div>Peak Championship → <span className="text-foreground">K = 32</span></div>
+              <div>Scrim → <span className="text-accent">does not affect official ELO</span></div>
+            </div>
+          </details>
+
           <p className="text-xs text-muted-foreground mt-4 font-body">
-            ELO is calculated server-side by a secure backend function the moment a match is marked
+            ELO is calculated server-side the moment a match is marked
             <em> completed</em>. Every change is logged below for full transparency.
           </p>
         </Card>

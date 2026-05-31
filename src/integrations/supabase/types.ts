@@ -3409,10 +3409,20 @@ export type Database = {
         Args: { _tournament_id: string }
         Returns: undefined
       }
-      calculate_dynamic_elo_delta: {
-        Args: { _opponent_elo: number; _player_elo: number; _won: boolean }
-        Returns: number
-      }
+      calculate_dynamic_elo_delta:
+        | {
+            Args: { _opponent_elo: number; _player_elo: number; _won: boolean }
+            Returns: number
+          }
+        | {
+            Args: {
+              _k: number
+              _opponent_elo: number
+              _player_elo: number
+              _won: boolean
+            }
+            Returns: number
+          }
       can_access_match_chat: {
         Args: { _match_id: string; _user_id: string }
         Returns: boolean

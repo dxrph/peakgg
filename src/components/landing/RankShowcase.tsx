@@ -240,7 +240,7 @@ export default function RankShowcase() {
                           className={`relative ${isApex || isUserRank ? "rank-shimmer" : ""}`}
                           style={isApex || isUserRank ? { borderRadius: 12 } : undefined}
                         >
-                          <RankBadge rank={r.name} size={isApex ? "lg" : "md"} forceProcedural />
+                          <RankBadge rank={r.name} size={isApex ? "lg" : "md"} />
                         </div>
 
                         <div
@@ -306,7 +306,7 @@ export default function RankShowcase() {
               <div className="p-5 sm:p-7 grid gap-6 md:grid-cols-[auto,1fr,auto] items-start">
                 {/* Left: large badge */}
                 <div className="flex flex-col items-center md:items-start gap-2">
-                  <RankBadge rank={selected.name} size="xl" forceProcedural />
+                  <RankBadge rank={selected.name} size="xl" />
                   <div className="text-[10px] uppercase font-display tracking-[0.2em] text-muted-foreground">
                     {t("rank_showcase.tier_label")} {selected.tier} / {RANKS.length}
                   </div>
@@ -402,7 +402,7 @@ export default function RankShowcase() {
                       {nextRank ? (
                         <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <RankBadge rank={nextRank.name} size="sm" forceProcedural />
+                            <RankBadge rank={nextRank.name} size="sm" />
                             <div className="min-w-0">
                               <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-display">
                                 {t("rank_showcase.next_rank")}
@@ -442,7 +442,7 @@ export default function RankShowcase() {
                       {nextRank && (
                         <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <RankBadge rank={nextRank.name} size="sm" forceProcedural />
+                            <RankBadge rank={nextRank.name} size="sm" />
                             <div>
                               <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-display">
                                 {t("rank_showcase.next_rank")}

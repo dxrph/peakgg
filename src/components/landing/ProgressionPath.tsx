@@ -19,7 +19,7 @@ const STEPS = [
   {
     icon: TrendingUp,
     title: "2. Earn ELO every match",
-    body: "+25 ELO per win · −15 per loss · +10 per scrim win. Every result updates your score automatically.",
+    body: "Beat stronger teams → bigger ELO gain. Lose to weaker teams → bigger ELO loss. Scrims don't affect your official rank.",
     accent: "text-primary border-primary/40",
   },
   {

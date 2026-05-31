@@ -31,7 +31,7 @@ export default function RankShowcaseGrid({
             key={r.name}
             className="group flex flex-col items-center text-center gap-3 rounded-xl border border-border/40 bg-background/40 px-2 py-4 transition-colors hover:border-primary/40"
           >
-            <RankBadge rank={r.name} size={size} forceProcedural />
+            <RankBadge rank={r.name} size={size} />
             <div className="flex flex-col leading-tight">
               <span
                 className="font-display font-bold tracking-wider text-sm"

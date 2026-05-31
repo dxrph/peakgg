@@ -114,7 +114,7 @@ export default function AdminElo() {
         </h2>
         <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
           <li><strong>Decay:</strong> -10 ELO per ogni settimana di inattività oltre 14 giorni, mai sotto 1000.</li>
-          <li><strong>ELO dinamico:</strong> +25 base ±15 in base al gap di ELO con l'avversario (range 10–40).</li>
+          <li><strong>ELO dinamico:</strong> formula Elo standard <code>K × (actual − expected)</code>. K=24 Open Cup/Ranked, 28 Challenger, 32 Peak Championship. Gli scrim non influenzano l'ELO ufficiale.</li>
           <li><strong>Smurf risk:</strong> calcolato da winrate, ELO climb 7gg, account age, streak, verifica.</li>
           <li><strong>Trigger:</strong> il risk si ricalcola automaticamente a ogni match completato.</li>
         </ul>
