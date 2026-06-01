@@ -118,6 +118,38 @@ export default function HeroSection() {
       <style>{`
         @keyframes heroFloatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
         @keyframes heroSweep  { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+        @keyframes heroShine {
+          0%   { background-position: -150% 50%; }
+          55%  { background-position:  150% 50%; }
+          100% { background-position:  150% 50%; }
+        }
+        @keyframes heroPulseGlow {
+          0%,100% { text-shadow: 0 0 18px hsl(var(--primary)/0.55), 0 0 42px hsl(var(--primary)/0.35); }
+          50%     { text-shadow: 0 0 28px hsl(var(--primary)/0.85), 0 0 70px hsl(var(--primary)/0.55), 0 0 110px hsl(var(--accent)/0.35); }
+        }
+        @keyframes heroGlitchA {
+          0%,92%,100% { transform: translate(0,0); opacity: 0; }
+          93%         { transform: translate(-2px,-1px); opacity: 0.7; }
+          95%         { transform: translate(2px,1px);  opacity: 0.6; }
+          97%         { transform: translate(-1px,1px); opacity: 0.4; }
+        }
+        @keyframes heroGlitchB {
+          0%,92%,100% { transform: translate(0,0); opacity: 0; }
+          93%         { transform: translate(2px,1px);  opacity: 0.6; }
+          95%         { transform: translate(-2px,-1px); opacity: 0.5; }
+          97%         { transform: translate(1px,-1px); opacity: 0.4; }
+        }
+        @keyframes heroUnderline {
+          0%   { transform: scaleX(0); opacity: 0; }
+          25%  { transform: scaleX(1); opacity: 1; }
+          85%  { transform: scaleX(1); opacity: 1; }
+          100% { transform: scaleX(1); opacity: 0; }
+        }
+        @keyframes heroSpark {
+          0%   { transform: translate(0,0) scale(0); opacity: 0; }
+          20%  { opacity: 1; }
+          100% { transform: translate(var(--dx,0), var(--dy,0)) scale(1); opacity: 0; }
+        }
       `}</style>
 
       <div className="container relative z-10 pt-20 pb-12 md:pt-24 md:pb-16">
@@ -137,20 +169,84 @@ export default function HeroSection() {
           >
             <span className="block text-foreground">{t("hero.line1")}</span>
             <span className="block text-foreground">{t("hero.line2")}</span>
-            <span className="relative inline-block overflow-hidden">
-              <span className="block text-primary text-glow-red relative z-10">{t("hero.line3")}</span>
-              {/* Red light sweep across the accent line */}
+            <span className="relative inline-block">
+              {/* Chromatic-aberration ghost layers (occasional glitch) */}
               <span
                 aria-hidden
-                className="absolute inset-y-0 -inset-x-1/4 pointer-events-none"
+                className="absolute inset-0 block pointer-events-none select-none"
+                style={{
+                  color: "hsl(352 100% 62%)",
+                  mixBlendMode: "screen",
+                  animation: "heroGlitchA 6s steps(1,end) infinite",
+                  filter: "blur(0.4px)",
+                }}
+              >
+                {t("hero.line3")}
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-0 block pointer-events-none select-none"
+                style={{
+                  color: "hsl(190 100% 60%)",
+                  mixBlendMode: "screen",
+                  animation: "heroGlitchB 6s steps(1,end) infinite",
+                  filter: "blur(0.4px)",
+                }}
+              >
+                {t("hero.line3")}
+              </span>
+
+              {/* Main text — gradient shine + pulsing glow */}
+              <span
+                className="relative z-10 block bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(110deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 38%, #ffffff 50%, hsl(var(--accent)) 62%, hsl(var(--primary)) 100%)",
+                  backgroundSize: "250% 100%",
+                  WebkitBackgroundClip: "text",
+                  animation:
+                    "heroShine 4.5s cubic-bezier(0.4,0,0.2,1) infinite, heroPulseGlow 4.5s ease-in-out infinite",
+                }}
+              >
+                {t("hero.line3")}
+              </span>
+
+              {/* Bottom accent bar that draws in then fades */}
+              <span
+                aria-hidden
+                className="absolute left-0 right-0 -bottom-1 h-[3px] origin-left pointer-events-none rounded-full"
                 style={{
                   background:
-                    "linear-gradient(110deg, transparent 35%, hsl(var(--primary) / 0.55) 50%, transparent 65%)",
-                  mixBlendMode: "screen",
-                  filter: "blur(6px)",
-                  animation: "heroSweep 5s ease-in-out infinite",
+                    "linear-gradient(90deg, transparent, hsl(var(--primary)), hsl(var(--accent)), transparent)",
+                  boxShadow: "0 0 14px hsl(var(--primary)/0.7)",
+                  animation: "heroUnderline 4.5s ease-in-out infinite",
                 }}
               />
+
+              {/* Spark particles riding the sweep */}
+              <span aria-hidden className="absolute inset-0 pointer-events-none overflow-visible">
+                {[
+                  { left: "20%", top: "30%", dx: "26px",  dy: "-30px", delay: "0.4s" },
+                  { left: "55%", top: "60%", dx: "-20px", dy: "-40px", delay: "1.6s" },
+                  { left: "78%", top: "35%", dx: "30px",  dy: "-26px", delay: "2.8s" },
+                ].map((s, i) => (
+                  <span
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full"
+                    style={{
+                      left: s.left,
+                      top: s.top,
+                      // @ts-expect-error CSS custom props
+                      "--dx": s.dx,
+                      "--dy": s.dy,
+                      background: "hsl(var(--primary))",
+                      boxShadow:
+                        "0 0 6px hsl(var(--primary)), 0 0 14px hsl(var(--accent)/0.6)",
+                      animation: `heroSpark 4.5s ease-out ${s.delay} infinite`,
+                    }}
+                  />
+                ))}
+              </span>
             </span>
           </motion.h1>
 
