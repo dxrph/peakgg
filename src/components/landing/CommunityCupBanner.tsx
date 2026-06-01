@@ -104,35 +104,11 @@ export default function CommunityCupBanner() {
             }}
           />
 
-          {/* Animated sheen */}
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(110deg, transparent 40%, hsl(var(--primary)/0.18) 50%, transparent 60%)",
-              animation: "ccSheen 3s ease-in-out infinite",
-            }}
-          />
-          <style>{`
-            @keyframes ccSheen { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
-            @keyframes ccPulseRing {
-              0%   { transform: scale(0.9); opacity: 0.6; }
-              80%  { transform: scale(1.4); opacity: 0; }
-              100% { transform: scale(1.4); opacity: 0; }
-            }
-          `}</style>
-
           <div className="relative p-5 md:p-7 flex flex-col lg:flex-row items-start lg:items-center gap-5 lg:gap-7">
             {/* Trophy emblem */}
             <div className="relative shrink-0">
-              <span
-                aria-hidden
-                className="absolute inset-0 rounded-2xl border border-primary/50"
-                style={{ animation: "ccPulseRing 2.4s ease-out infinite" }}
-              />
-              <div className="relative h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-gradient-to-br from-primary/25 to-accent/10 border border-primary/50 flex items-center justify-center shadow-[0_0_30px_hsl(var(--primary)/0.35)]">
-                <Trophy className="h-8 w-8 md:h-10 md:w-10 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
+              <div className="relative h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 border border-primary/40 flex items-center justify-center">
+                <Trophy className="h-8 w-8 md:h-10 md:w-10 text-primary" />
               </div>
             </div>
 
