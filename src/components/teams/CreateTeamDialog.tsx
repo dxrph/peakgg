@@ -129,17 +129,35 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent
         className={cn(
-          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)]",
+          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)] relative",
           "bg-card",
           "data-[state=open]:animate-fade-in",
           "duration-200"
         )}
         style={{ borderColor: "hsl(var(--border))" }}
       >
-        {/* Top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
+        {/* Ambient background atmosphere */}
+        <AmbientBackdrop reduced={!!prefersReducedMotion} />
 
-        <div className="px-6 pt-6 pb-2 animate-fade-in">
+        {/* Top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary relative z-10" />
+
+        {/* Animated sweep light */}
+        {!prefersReducedMotion && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, hsl(var(--primary)/0.8), hsl(var(--accent)/0.6), transparent)",
+            }}
+            initial={{ x: "-30%", opacity: 0 }}
+            animate={{ x: ["-30%", "130%"], opacity: [0, 1, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+          />
+        )}
+
+        <div className="px-6 pt-6 pb-2 animate-fade-in relative z-10">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display text-2xl uppercase tracking-wider">
               <Shield className="h-6 w-6 text-primary" />
@@ -151,7 +169,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           </DialogHeader>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-0 max-h-[75vh] overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-0 max-h-[75vh] overflow-y-auto relative z-10">
         <div className="px-6 pb-2 space-y-5 lg:border-r lg:border-border">
           {/* SECTION: IDENTITY */}
           <SectionLabel icon={Shield} text={t("teams_page.section_identity", { defaultValue: "Team identity" })} />
