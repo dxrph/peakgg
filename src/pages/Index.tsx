@@ -10,9 +10,8 @@ import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
 import ProgressionPath from "@/components/landing/ProgressionPath";
 import RankShowcase from "@/components/landing/RankShowcase";
 import TopPlayersWeek from "@/components/landing/TopPlayersWeek";
-import DiscordCTA from "@/components/landing/DiscordCTA";
-import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
+import DiscordCTA from "@/components/landing/DiscordCTA";
 
 const Index = () => {
   const orgSchema = {
@@ -63,7 +62,6 @@ const Index = () => {
         <RankShowcase />
         <TopPlayersWeek />
         <DiscordCTA />
-        <CTASection />
       </main>
       <Footer />
     </div>
