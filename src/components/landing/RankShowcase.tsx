@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import RankBadge from "@/components/RankBadge";
 import { RANKS, getRankByElo, type RankTier } from "@/lib/ranks";
-import { Mountain, MapPin, ArrowRight, Trophy, Lock, Check, Sparkles, TrendingUp, Flag } from "lucide-react";
+import { Mountain, MapPin, ArrowRight, Trophy, Check, Sparkles, TrendingUp, Flag, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,27 @@ const DESC_KEYS: Record<RankTier, string> = {
   Apex: "desc_apex",
 };
 
+// Copy improvements — beta-friendly, motivational. Used as i18n defaultValue.
+const DESC_FALLBACK: Record<RankTier, string> = {
+  Rookie: "Start your climb. Play Open Cups, earn ELO and build your profile.",
+  Contender: "Prove consistency and keep climbing through competitive matches.",
+  Rival: "Challenger Series unlocked. You are now entering serious competition.",
+  Expert: "Advanced competitors with strong match history and consistent results.",
+  Elite: "Peak Championship unlocked. High-level competitors only.",
+  Master: "One step below Apex. Defend your place among the best.",
+  Apex: "The summit of PeakGG. Reserved for the best competitors.",
+};
+
+const UNLOCK_FALLBACK: Record<RankTier, string | null> = {
+  Rookie: null,
+  Contender: null,
+  Rival: "Challenger Series unlocked",
+  Expert: null,
+  Elite: "Peak Championship unlocked",
+  Master: null,
+  Apex: "Summit status — highest PeakGG rank",
+};
+
 function unlockKey(tier: number): string {
   // Tournament tiers: Open Cup (all), Challenger (Rival=3), Championship (Elite=5)
   if (tier >= 5) return "unlock_championship";
@@ -29,7 +50,8 @@ function unlockKey(tier: number): string {
 export default function RankShowcase() {
   const { user } = useAuth();
   const { t, tRank } = useI18n();
-  const href = user ? "/play" : "/register";
+  const href = user ? "/tournaments" : "/register";
+  const ctaLabel = user ? "Find a Tournament" : "Join Beta";
   const [userElo, setUserElo] = useState<number | null>(null);
   const [selectedName, setSelectedName] = useState<RankTier | null>(null);
 
@@ -62,16 +84,19 @@ export default function RankShowcase() {
     [userElo],
   );
 
-  // Default selection: user's current rank, fallback to Apex.
+  // Default selection: user's current rank if logged in, otherwise Rookie.
   useEffect(() => {
     if (selectedName) return;
-    setSelectedName(userRank?.name ?? "Apex");
+    setSelectedName(userRank?.name ?? "Rookie");
   }, [userRank, selectedName]);
 
   const selected = useMemo(
-    () => RANKS.find((r) => r.name === selectedName) ?? RANKS[RANKS.length - 1],
+    () => RANKS.find((r) => r.name === selectedName) ?? RANKS[0],
     [selectedName],
   );
+  // For logged-out users, mark Rookie as the "starting point" instead of leaving
+  // the rail without a "you are here" marker.
+  const highlightName: RankTier = userRank?.name ?? "Rookie";
   const nextRank = RANKS.find((r) => r.tier === selected.tier + 1) ?? null;
   const eloToSelected =
     typeof userElo === "number" && userElo < selected.minElo
@@ -172,7 +197,11 @@ export default function RankShowcase() {
                 {RANKS.map((r, i) => {
                   const isApex = r.name === "Apex";
                   const isSelected = selected.name === r.name;
-                  const isUserRank = userRank?.name === r.name;
+                  const isUserRank = highlightName === r.name;
+                  // Apex only gets its premium golden treatment when it is the
+                  // user's rank or the actively selected card — otherwise it
+                  // sits visually equal to the other tiers.
+                  const apexEmphasis = isApex && (isSelected || isUserRank);
                   return (
                     <motion.div
                       key={r.name}
@@ -193,7 +222,7 @@ export default function RankShowcase() {
                             ? "-translate-y-1 shadow-[0_10px_36px_-12px_rgba(0,0,0,0.9)]"
                             : "hover:-translate-y-1 hover:shadow-[0_8px_32px_-12px_rgba(0,0,0,0.8)]"
                         } ${
-                          isApex
+                          apexEmphasis
                             ? "bg-gradient-to-b from-accent/10 via-[#0a0a0a]/80 to-[#050505]"
                             : "bg-gradient-to-b from-[#0e0e12]/85 to-[#06060a]/85"
                         }`}
@@ -202,7 +231,7 @@ export default function RankShowcase() {
                           borderStyle: "solid",
                           borderColor: isSelected
                             ? r.hex
-                            : isApex
+                            : apexEmphasis
                             ? "hsl(var(--accent) / 0.4)"
                             : "rgba(255,255,255,0.06)",
                           boxShadow: isSelected
@@ -214,10 +243,10 @@ export default function RankShowcase() {
                         <span
                           className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-display font-bold tracking-[0.18em] uppercase px-2 py-0.5 rounded-full border bg-[#0a0a0a] z-10 whitespace-nowrap inline-flex items-center gap-1"
                           style={{
-                            color: isUserRank ? "#fff" : isApex ? "#FCD34D" : r.hex,
+                            color: isUserRank ? "#fff" : apexEmphasis ? "#FCD34D" : r.hex,
                             borderColor: isUserRank
                               ? r.hex
-                              : isApex
+                              : apexEmphasis
                               ? "hsl(var(--accent) / 0.55)"
                               : `${r.hex}55`,
                             background: isUserRank ? `${r.hex}22` : "#0a0a0a",
@@ -226,10 +255,10 @@ export default function RankShowcase() {
                           {isUserRank ? (
                             <>
                               <MapPin className="w-2.5 h-2.5" />
-                              {t("rank_showcase.you_are_here")}
+                              {user
+                                ? t("rank_showcase.you_are_here", { defaultValue: "You are here" })
+                                : t("rank_showcase.start_here", { defaultValue: "Start here" })}
                             </>
-                          ) : isApex ? (
-                            t("rank_showcase.goal_label")
                           ) : (
                             `T${r.tier}`
                           )}
@@ -237,10 +266,10 @@ export default function RankShowcase() {
 
                         {/* Badge */}
                         <div
-                          className={`relative ${isApex || isUserRank ? "rank-shimmer" : ""}`}
-                          style={isApex || isUserRank ? { borderRadius: 12 } : undefined}
+                          className={`relative ${apexEmphasis || isUserRank ? "rank-shimmer" : ""}`}
+                          style={apexEmphasis || isUserRank ? { borderRadius: 12 } : undefined}
                         >
-                          <RankBadge rank={r.name} size={isApex ? "lg" : "md"} />
+                          <RankBadge rank={r.name} size={apexEmphasis ? "lg" : "md"} />
                         </div>
 
                         <div
