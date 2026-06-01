@@ -462,33 +462,29 @@ export default function RankShowcase() {
                       )}
                     </>
                   ) : (
-                    /* No user — generic next-rank info */
+                    /* No user — invite to join the beta instead of showing "0 ELO". */
                     <div className="text-xs">
-                      <div className="inline-flex items-center gap-1.5 text-muted-foreground">
-                        <Lock className="w-3.5 h-3.5" />
-                        {t("rank_showcase.select_a_rank")}
+                      <div className="text-[10px] uppercase tracking-widest font-display text-muted-foreground">
+                        {t("rank_showcase.track_progress", {
+                          defaultValue: "Track your progress",
+                        })}
                       </div>
-                      {nextRank && (
-                        <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <RankBadge rank={nextRank.name} size="sm" />
-                            <div>
-                              <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-display">
-                                {t("rank_showcase.next_rank")}
-                              </div>
-                              <div
-                                className="text-xs font-display font-bold uppercase"
-                                style={{ color: nextRank.hex }}
-                              >
-                                {tRank(nextRank.name)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="font-mono tabular-nums text-xs text-muted-foreground">
-                            {nextRank.minElo}+
-                          </div>
-                        </div>
-                      )}
+                      <p className="mt-1.5 text-sm text-foreground/85 font-body leading-snug">
+                        {t("rank_showcase.signup_nudge", {
+                          defaultValue:
+                            "Create your account to track your Peak ELO.",
+                        })}
+                      </p>
+                      <Link to="/register" className="block mt-3">
+                        <Button
+                          variant="neon"
+                          size="sm"
+                          className="w-full"
+                        >
+                          <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                          {t("rank_showcase.cta_join_beta", { defaultValue: "Join Beta" })}
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </div>
