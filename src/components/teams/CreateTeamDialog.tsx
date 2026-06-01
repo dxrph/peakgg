@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { Settings2, ChevronDown, Shield, Users, Sparkles, Trophy, Eye, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import trophyAsset from "@/assets/championship-trophy.png.asset.json";
 
 interface Props {
   open: boolean;
@@ -46,6 +48,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const { user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
 
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
@@ -58,11 +61,13 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const [slots, setSlots] = useState(2);
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const reset = () => {
     setName(""); setTag("");
     setAdvancedOpen(false); setRecruitment("open"); setDescription(""); setDiscord("");
     setSlots(2); setIsPublic(true);
+    setSuccess(false);
   };
 
   const isValid = name.trim().length > 0 && tag.trim().length > 0;
@@ -110,10 +115,14 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     if (memErr) { toast.error(memErr.message); return; }
 
     toast.success(t("teams_page.team_created_captain", { defaultValue: "Team created. You are now the captain." }));
-    reset();
-    onOpenChange(false);
-    onCreated?.();
-    navigate(`/teams/${(team as any).id}/manage`);
+    setSuccess(true);
+    const teamId = (team as any).id;
+    setTimeout(() => {
+      reset();
+      onOpenChange(false);
+      onCreated?.();
+      navigate(`/teams/${teamId}/manage`);
+    }, 1400);
   };
 
   return (
