@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { Settings2, ChevronDown, Shield, Users, Sparkles, Trophy, Eye, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import trophyAsset from "@/assets/championship-trophy.png.asset.json";
 
 interface Props {
   open: boolean;
@@ -46,6 +48,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const { user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
 
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
@@ -58,11 +61,13 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const [slots, setSlots] = useState(2);
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const reset = () => {
     setName(""); setTag("");
     setAdvancedOpen(false); setRecruitment("open"); setDescription(""); setDiscord("");
     setSlots(2); setIsPublic(true);
+    setSuccess(false);
   };
 
   const isValid = name.trim().length > 0 && tag.trim().length > 0;
@@ -110,27 +115,49 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     if (memErr) { toast.error(memErr.message); return; }
 
     toast.success(t("teams_page.team_created_captain", { defaultValue: "Team created. You are now the captain." }));
-    reset();
-    onOpenChange(false);
-    onCreated?.();
-    navigate(`/teams/${(team as any).id}/manage`);
+    setSuccess(true);
+    const teamId = (team as any).id;
+    setTimeout(() => {
+      reset();
+      onOpenChange(false);
+      onCreated?.();
+      navigate(`/teams/${teamId}/manage`);
+    }, 1400);
   };
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent
         className={cn(
-          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)]",
+          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)] relative",
           "bg-card",
           "data-[state=open]:animate-fade-in",
           "duration-200"
         )}
         style={{ borderColor: "hsl(var(--border))" }}
       >
-        {/* Top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
+        {/* Ambient background atmosphere */}
+        <AmbientBackdrop reduced={!!prefersReducedMotion} />
 
-        <div className="px-6 pt-6 pb-2 animate-fade-in">
+        {/* Top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary relative z-10" />
+
+        {/* Animated sweep light */}
+        {!prefersReducedMotion && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, hsl(var(--primary)/0.8), hsl(var(--accent)/0.6), transparent)",
+            }}
+            initial={{ x: "-30%", opacity: 0 }}
+            animate={{ x: ["-30%", "130%"], opacity: [0, 1, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+          />
+        )}
+
+        <div className="px-6 pt-6 pb-2 animate-fade-in relative z-10">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display text-2xl uppercase tracking-wider">
               <Shield className="h-6 w-6 text-primary" />
@@ -142,7 +169,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           </DialogHeader>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-0 max-h-[75vh] overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-0 max-h-[75vh] overflow-y-auto relative z-10">
         <div className="px-6 pb-2 space-y-5 lg:border-r lg:border-border">
           {/* SECTION: IDENTITY */}
           <SectionLabel icon={Shield} text={t("teams_page.section_identity", { defaultValue: "Team identity" })} />
@@ -341,16 +368,25 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
         </div>
 
         {/* LIVE PREVIEW PANEL */}
-        <aside className="px-6 py-5 bg-background/40 lg:bg-background/60 border-t lg:border-t-0 border-border space-y-4">
+        <aside className="px-6 py-5 bg-background/40 lg:bg-background/60 border-t lg:border-t-0 border-border space-y-4 relative">
+          {/* Road to Championship */}
+          <RoadToChampionship reduced={!!prefersReducedMotion} t={t} />
+
           <div className="flex items-center gap-2 text-[11px] font-display uppercase tracking-widest text-muted-foreground">
             <Eye className="h-3.5 w-3.5" />
             {t("teams_page.live_preview", { defaultValue: "Live preview" })}
           </div>
 
           {/* Team card preview */}
-          <div
-            className="rounded-lg border-2 bg-card overflow-hidden transition-all"
-            style={{ borderColor: selectedGame.color, boxShadow: `0 0 24px ${selectedGame.glow}` }}
+          <motion.div
+            className="rounded-lg border-2 bg-card overflow-hidden"
+            style={{ borderColor: selectedGame.color }}
+            animate={{
+              boxShadow: isValid
+                ? `0 0 32px ${selectedGame.glow}`
+                : `0 0 18px ${selectedGame.glow}`,
+            }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <div
               className="h-14 relative"
@@ -376,16 +412,32 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                   boxShadow: `0 0 16px ${selectedGame.glow}, inset 0 0 10px ${selectedGame.glow}`,
                 }}
               >
-                {initials ? (
-                  <span className="relative z-10">{initials}</span>
-                ) : (
-                  <span className="relative z-10 opacity-40">PG</span>
-                )}
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={initials || "PG"}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: initials ? 1 : 0.4, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="relative z-10"
+                  >
+                    {initials || "PG"}
+                  </motion.span>
+                </AnimatePresence>
               </div>
               <div className="mt-3 min-w-0">
-                <div className="font-display font-bold text-lg truncate">
-                  {name.trim() || t("teams_page.preview_name_ph", { defaultValue: "Your team name" })}
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={name.trim() || "ph-name"}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.22 }}
+                    className={cn("font-display font-bold text-lg truncate", !name.trim() && "text-muted-foreground")}
+                  >
+                    {name.trim() || t("teams_page.preview_name_ph", { defaultValue: "Your team name" })}
+                  </motion.div>
+                </AnimatePresence>
                 <div className="font-mono text-xs text-muted-foreground">
                   [{tag.toUpperCase().slice(0, 4) || "TAG"}] · {selectedGame.label} · 🇪🇺 {EUROPE.label}
                 </div>
@@ -411,7 +463,7 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Tips */}
           <div className="rounded-md border border-border bg-card/40 p-3 space-y-2">
@@ -443,23 +495,75 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           >
             {t("common.cancel", { defaultValue: "Cancel" })}
           </Button>
-          <Button
+          <motion.button
+            type="button"
             onClick={submit}
             disabled={loading || !isValid}
+            whileHover={!loading && isValid ? { y: -2, scale: 1.01 } : undefined}
+            whileTap={!loading && isValid ? { scale: 0.98 } : undefined}
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
             className={cn(
-              "font-display uppercase tracking-wider min-w-36 text-white border-0",
+              "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-md font-display uppercase tracking-wider min-w-36 text-white border-0",
               "bg-gradient-to-r from-primary via-primary to-accent",
-              "hover:brightness-110",
-              "shadow-[0_0_18px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_24px_hsl(var(--primary)/0.7)]",
+              "hover:brightness-110 transition-[filter,box-shadow] duration-300",
+              "shadow-[0_0_18px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_28px_hsl(var(--primary)/0.75),0_8px_24px_hsl(var(--primary)/0.35)]",
               "disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
             )}
           >
+            {loading && <span className="h-3 w-3 rounded-full border-2 border-white/40 border-t-white animate-spin" />}
             {loading
               ? t("teams_page.creating", { defaultValue: "Creating…" })
               : t("teams_page.create_my_team", { defaultValue: "Create My Team" })}
-          </Button>
+          </motion.button>
           </div>
         </div>
+
+        {/* Success overlay */}
+        <AnimatePresence>
+          {success && (
+            <motion.div
+              className="absolute inset-0 z-30 flex items-center justify-center bg-background/85 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 220, damping: 18 }}
+                className="relative flex flex-col items-center gap-4"
+              >
+                <motion.div
+                  className="absolute inset-0 -m-10 rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.25) 45%, transparent 70%)",
+                  }}
+                  animate={{ scale: [1, 1.4, 1.2], opacity: [0.9, 0.2, 0] }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                />
+                <img
+                  src={trophyAsset.url}
+                  alt=""
+                  width={140}
+                  height={140}
+                  className="relative h-32 w-32 object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.7)]"
+                />
+                <div className="relative font-display uppercase tracking-[0.25em] text-lg text-foreground">
+                  {t("teams_page.team_ready", { defaultValue: "Team Ready" })}
+                </div>
+                <div className="relative h-[2px] w-40 overflow-hidden bg-border/50">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-primary to-accent"
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "0%" }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </DialogContent>
     </Dialog>
   );
@@ -471,6 +575,161 @@ function SectionLabel({ icon: Icon, text }: { icon: React.ComponentType<{ classN
       <Icon className="h-3.5 w-3.5 text-primary" />
       <span className="font-display uppercase text-[11px] tracking-widest text-muted-foreground">{text}</span>
       <div className="flex-1 h-px bg-border" />
+    </div>
+  );
+}
+
+/* ----------------------- Ambient Backdrop ----------------------- */
+function AmbientBackdrop({ reduced }: { reduced: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* HUD grid */}
+      <div
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--primary)/0.6) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.6) 1px, transparent 1px)",
+          backgroundSize: "42px 42px",
+        }}
+      />
+      {/* Ambient red glow */}
+      {!reduced && (
+        <>
+          <motion.div
+            className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.25), transparent 70%)" }}
+            animate={{ opacity: [0.35, 0.65, 0.35], scale: [1, 1.08, 1] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, hsl(var(--accent)/0.18), transparent 70%)" }}
+            animate={{ opacity: [0.25, 0.5, 0.25], scale: [1.05, 0.95, 1.05] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </>
+      )}
+      {/* Floating particles */}
+      {!reduced && (
+        <div className="absolute inset-0">
+          {[
+            { l: "12%", t: "78%", d: 7, delay: 0 },
+            { l: "28%", t: "22%", d: 9, delay: 1.6 },
+            { l: "52%", t: "65%", d: 8, delay: 0.8 },
+            { l: "74%", t: "30%", d: 10, delay: 2.2 },
+            { l: "88%", t: "72%", d: 7.5, delay: 1.2 },
+            { l: "42%", t: "12%", d: 9.5, delay: 3 },
+          ].map((p, i) => (
+            <motion.span
+              key={i}
+              className="absolute h-1 w-1 rounded-full bg-primary/70"
+              style={{ left: p.l, top: p.t, boxShadow: "0 0 8px hsl(var(--primary)/0.8)" }}
+              animate={{ y: [0, -14, 0], opacity: [0.15, 0.7, 0.15] }}
+              transition={{ duration: p.d, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ----------------------- Road to Championship ----------------------- */
+function RoadToChampionship({ reduced, t }: { reduced: boolean; t: (key: string, opts?: any) => string }) {
+  const steps = [
+    t("teams_page.road_1", { defaultValue: "Build your roster." }),
+    t("teams_page.road_2", { defaultValue: "Compete in Open Cups." }),
+    t("teams_page.road_3", { defaultValue: "Climb the Peak ranks." }),
+    t("teams_page.road_4", { defaultValue: "Reach the Peak Championship." }),
+  ];
+  return (
+    <div className="relative rounded-lg border border-border/70 bg-gradient-to-br from-background/80 to-card/40 p-4 overflow-hidden">
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
+        }}
+      />
+      <div className="relative flex items-start gap-4">
+        {/* Trophy */}
+        <div className="relative shrink-0">
+          {!reduced && (
+            <motion.div
+              className="absolute inset-0 -m-3 rounded-full blur-2xl"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.55), transparent 70%)" }}
+              animate={{ opacity: [0.45, 0.8, 0.45], scale: [1, 1.08, 1] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )}
+          <motion.div
+            className="relative"
+            animate={reduced ? undefined : { y: [0, -3, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src={trophyAsset.url}
+              alt="PeakGG Championship Trophy"
+              loading="lazy"
+              width={96}
+              height={96}
+              className="relative h-24 w-24 object-contain drop-shadow-[0_0_18px_hsl(var(--primary)/0.55)]"
+            />
+            {/* Metallic shimmer sweep */}
+            {!reduced && (
+              <motion.div
+                aria-hidden
+                className="absolute inset-0 overflow-hidden rounded-md mix-blend-screen"
+                style={{
+                  WebkitMaskImage: `url(${trophyAsset.url})`,
+                  maskImage: `url(${trophyAsset.url})`,
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                }}
+              >
+                <motion.div
+                  className="absolute -inset-y-4 w-1/2"
+                  style={{
+                    background:
+                      "linear-gradient(75deg, transparent 30%, hsl(0 0% 100% / 0.55) 50%, transparent 70%)",
+                  }}
+                  animate={{ x: ["-120%", "220%"] }}
+                  transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 9, ease: "easeInOut" }}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="font-display uppercase tracking-widest text-[10px] text-primary">
+            {t("teams_page.road_eyebrow", { defaultValue: "PeakGG" })}
+          </div>
+          <h3 className="font-display uppercase tracking-wider text-base leading-tight mt-0.5">
+            {t("teams_page.road_title", { defaultValue: "Your road to championship" })}
+          </h3>
+          <ul className="mt-2.5 space-y-1.5">
+            {steps.map((s, i) => (
+              <motion.li
+                key={i}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + i * 0.08, duration: 0.35, ease: "easeOut" }}
+                className="flex items-center gap-2 text-[11px] font-body text-muted-foreground"
+              >
+                <span className="font-display text-primary text-[10px] w-4">0{i + 1}</span>
+                <span>{s}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
