@@ -513,52 +513,6 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
           </div>
         </div>
 
-        {/* Success overlay */}
-        <AnimatePresence>
-          {success && (
-            <motion.div
-              className="absolute inset-0 z-30 flex items-center justify-center bg-background/85 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                initial={{ scale: 0.6, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                className="relative flex flex-col items-center gap-4"
-              >
-                <motion.div
-                  className="absolute inset-0 -m-10 rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.25) 45%, transparent 70%)",
-                  }}
-                  animate={{ scale: [1, 1.4, 1.2], opacity: [0.9, 0.2, 0] }}
-                  transition={{ duration: 1.2, ease: "easeOut" }}
-                />
-                <img
-                  src={trophyAsset.url}
-                  alt=""
-                  width={140}
-                  height={140}
-                  className="relative h-32 w-32 object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.7)]"
-                />
-                <div className="relative font-display uppercase tracking-[0.25em] text-lg text-foreground">
-                  {t("teams_page.team_ready", { defaultValue: "Team Ready" })}
-                </div>
-                <div className="relative h-[2px] w-40 overflow-hidden bg-border/50">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-primary to-accent"
-                    initial={{ x: "-100%" }}
-                    animate={{ x: "0%" }}
-                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                  />
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </DialogContent>
     </Dialog>
   );
