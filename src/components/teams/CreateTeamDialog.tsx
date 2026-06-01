@@ -61,13 +61,11 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
   const [slots, setSlots] = useState(2);
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const reset = () => {
     setName(""); setTag("");
     setAdvancedOpen(false); setRecruitment("open"); setDescription(""); setDiscord("");
     setSlots(2); setIsPublic(true);
-    setSuccess(false);
   };
 
   const isValid = name.trim().length > 0 && tag.trim().length > 0;
@@ -115,14 +113,11 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     if (memErr) { toast.error(memErr.message); return; }
 
     toast.success(t("teams_page.team_created_captain", { defaultValue: "Team created. You are now the captain." }));
-    setSuccess(true);
     const teamId = (team as any).id;
-    setTimeout(() => {
-      reset();
-      onOpenChange(false);
-      onCreated?.();
-      navigate(`/teams/${teamId}/manage`);
-    }, 1400);
+    reset();
+    onOpenChange(false);
+    onCreated?.();
+    navigate(`/teams/${teamId}/manage`);
   };
 
   return (
