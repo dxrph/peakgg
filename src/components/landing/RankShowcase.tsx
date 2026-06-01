@@ -370,17 +370,25 @@ export default function RankShowcase() {
                   </div>
 
                   <p className="mt-3 text-sm md:text-base text-foreground/80 font-body max-w-2xl leading-relaxed">
-                    {t(`rank_showcase.${DESC_KEYS[selected.name]}`)}
+                    {t(`rank_showcase.${DESC_KEYS[selected.name]}`, {
+                      defaultValue: DESC_FALLBACK[selected.name],
+                    })}
                   </p>
 
-                  {/* Unlock chip */}
-                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-display uppercase tracking-wide px-3 py-1.5 rounded-md border border-white/10 bg-black/40">
-                    <Trophy className="w-3.5 h-3.5 text-accent" />
-                    <span className="text-muted-foreground">{t("rank_showcase.unlocks")}:</span>
-                    <span className="text-foreground/90">
-                      {t(`rank_showcase.${unlockKey(selected.tier)}`)}
-                    </span>
-                  </div>
+                  {/* Unlock chip — only when this rank actually unlocks something */}
+                  {UNLOCK_FALLBACK[selected.name] && (
+                    <div className="mt-4 inline-flex items-center gap-2 text-xs font-display uppercase tracking-wide px-3 py-1.5 rounded-md border border-accent/30 bg-accent/5">
+                      <Trophy className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-muted-foreground">
+                        {t("rank_showcase.unlocks", { defaultValue: "Unlocks" })}:
+                      </span>
+                      <span className="text-foreground/90">
+                        {t(`rank_showcase.${unlockKey(selected.tier)}`, {
+                          defaultValue: UNLOCK_FALLBACK[selected.name] ?? "",
+                        })}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right: progress / next-rank panel */}
@@ -501,7 +509,9 @@ export default function RankShowcase() {
               className="rounded-md hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
             >
               <Mountain className="mr-2 h-5 w-5" />
-              {t("rank_showcase.cta")}
+              {user
+                ? t("rank_showcase.cta_find_tournament", { defaultValue: ctaLabel })
+                : t("rank_showcase.cta_join_beta", { defaultValue: ctaLabel })}
             </Button>
           </Link>
         </div>
