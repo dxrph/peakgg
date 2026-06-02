@@ -272,6 +272,15 @@ export default function TournamentsPage() {
       description="Compete solo in PeakGG Open Cups. Win matches, gain ELO and unlock higher cups. Or register your team for official team tournaments."
       keywords="solo queue tournament, Valorant cup, free FPS tournament, PeakGG Open Cup, Peak Championship"
       path="/tournaments"
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: FAQ.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
+      }}
     />
   );
 

@@ -194,6 +194,21 @@ export default function LeaguesPage() {
         title="Peak League — Europe's Competitive Valorant League | PeakGG"
         description="Apply with your team, climb the standings, and fight for the playoffs in Peak League — the competitive ladder for European Valorant teams on PeakGG."
         path="/leagues"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "PeakGG",
+            url: "https://peakgg.net",
+            logo: "https://peakgg.net/logo.png",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "PeakGG",
+            url: "https://peakgg.net",
+          },
+        ]}
       />
       <Navbar />
 
