@@ -124,10 +124,8 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreated }: Prop
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent
         className={cn(
-          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)] relative",
-          "bg-card",
-          "data-[state=open]:animate-fade-in",
-          "duration-200"
+          "max-w-5xl p-0 overflow-hidden border-2 w-[calc(100vw-1.5rem)] max-h-[calc(100vh-2rem)]",
+          "bg-card text-card-foreground"
         )}
         style={{ borderColor: "hsl(var(--border))" }}
       >
