@@ -41,8 +41,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO
-        title="PeakGG — Compete. Rise. Dominate. | Competitive Valorant Platform"
-        description="PeakGG is the competitive Valorant platform for serious European players. Ranked Open Cup tournaments, teams, free agents and the Peak rank system."
+        title="PeakGG — Competitive Valorant Platform"
+        description="Competitive Valorant for serious European players: ranked Open Cup tournaments, teams, free agents and the Peak rank system."
         keywords="PeakGG, competitive Valorant, Valorant tournaments, Valorant ranked, esports platform Belgium, Valorant teams Europe, Valorant free agents, Valorant ELO system, Open Cup"
         path="/"
         jsonLd={[orgSchema, siteSchema]}
