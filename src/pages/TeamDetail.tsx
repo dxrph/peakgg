@@ -191,7 +191,20 @@ export default function TeamDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <SEO title={`${team.name} · PeakGG Team`} description={team.description ?? `${team.name} team profile on PeakGG`} />
+      <SEO
+        title={`${team.name} · PeakGG Team`}
+        description={team.description ?? `${team.name} team profile on PeakGG`}
+        path={`/teams/${team.id}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SportsTeam",
+          name: team.name,
+          sport: team.game,
+          url: `https://peakgg.net/teams/${team.id}`,
+          ...(team.avatar_url ? { logo: team.avatar_url } : {}),
+          ...(team.description ? { description: team.description } : {}),
+        }}
+      />
       <Navbar />
       <main className="flex-1 container pt-24 pb-16">
         {/* Breadcrumb */}
