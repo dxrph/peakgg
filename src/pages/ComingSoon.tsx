@@ -11,7 +11,10 @@ export default function ComingSoonPage() {
   const feature = params.get("feature") || "This feature";
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <SEO title={`${feature} — Coming Soon | PeakGG`} description={`${feature} is coming soon to PeakGG.`} />
+      <SEO
+        title={`${feature} — Coming Soon | PeakGG`}
+        description={`${feature} is coming soon to PeakGG — the competitive Valorant platform for European players. Join our Discord to be notified the moment it launches.`}
+      />
       <Navbar />
       <main className="flex-1 container pt-32 pb-20 flex items-center justify-center">
         <div className="max-w-xl w-full text-center rounded-xl border border-border bg-card/60 backdrop-blur p-10 neon-border">
