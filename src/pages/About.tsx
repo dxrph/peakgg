@@ -22,6 +22,24 @@ export default function AboutPage() {
         title="About PeakGG — Built by gamers, for gamers"
         description="PeakGG is a competitive gaming platform born in Brussels, Belgium. Fair matchmaking, real tournaments, and a community that pushes you to your peak."
         path="/about"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "PeakGG",
+            url: "https://peakgg.net",
+            logo: "https://peakgg.net/logo.png",
+            email: "peakgg.official@gmail.com",
+            foundingDate: "2026",
+            foundingLocation: "Brussels, Belgium",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "PeakGG",
+            url: "https://peakgg.net",
+          },
+        ]}
       />
       <Navbar />
       <main className="pt-24">
