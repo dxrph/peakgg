@@ -56,6 +56,7 @@ import ComingSoonPage from "./pages/ComingSoon";
 import ChatWidget from "./components/chat/ChatWidget";
 import GlobalActiveBar from "./components/competitive/GlobalActiveBar";
 import Analytics from "./components/Analytics";
+import CookieBanner from "./components/CookieBanner";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -151,6 +152,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ChatWidget />
+            <CookieBanner />
           </GameProvider>
           </I18nProvider>
         </AuthProvider>
