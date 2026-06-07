@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Trophy, Users, Award, MessageCircle, ChevronDown, CheckCircle2, Swords } from "lucide-react";
+import { ArrowRight, Trophy, Users, Award, ChevronDown, CheckCircle2, Swords } from "lucide-react";
+import DiscordIcon from "@/components/icons/DiscordIcon";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { DISCORD_INVITE } from "@/lib/links";
@@ -140,7 +141,7 @@ export default function HeroSection() {
                   size="lg"
                   className="w-full sm:w-auto h-14 px-7 rounded-lg uppercase tracking-wider font-display font-semibold border-[#5865F2]/40 text-[#c3c8f8] bg-white/[0.03] backdrop-blur-sm hover:bg-[#5865F2]/15 hover:text-white hover:border-[#5865F2]/70 hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  <MessageCircle className="mr-2 h-5 w-5" />
+                  <DiscordIcon className="mr-2 h-5 w-5" />
                   ENTRA NEL DISCORD
                 </Button>
               </a>

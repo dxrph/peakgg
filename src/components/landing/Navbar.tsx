@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, MessageCircle, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
+import DiscordIcon from "@/components/icons/DiscordIcon";
 import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -180,7 +181,7 @@ export default function Navbar() {
               size="sm"
               className="h-8 px-2.5 lg:px-3 rounded-md border-[#5865F2]/40 bg-[#5865F2]/10 text-[#a8b0f7] hover:bg-[#5865F2]/20 hover:text-white hover:border-[#5865F2]/60 font-display font-semibold uppercase tracking-wider text-[11px]"
             >
-              <MessageCircle className="h-3.5 w-3.5 lg:mr-1.5" />
+              <DiscordIcon className="h-4 w-4 lg:mr-1.5" />
               <span className="hidden lg:inline">{t("nav.discord")}</span>
             </Button>
           </a>
@@ -293,7 +294,7 @@ export default function Navbar() {
             className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-[#5865F2] text-white"
             aria-label="Discord"
           >
-            <MessageCircle className="h-4 w-4" />
+            <DiscordIcon className="h-[18px] w-[18px]" />
           </a>
           {user && (
             <Link to={profilePath} aria-label="Profile">
@@ -413,7 +414,7 @@ function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, myTe
       <div className="pt-2 flex flex-col gap-2.5">
         <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" onClick={onClose}>
           <Button className="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white border-0">
-            <MessageCircle className="h-4 w-4 mr-2" /> {t("nav.discord")}
+            <DiscordIcon className="h-[18px] w-[18px] mr-2" /> {t("nav.discord")}
           </Button>
         </a>
         {isLoggedIn ? (
