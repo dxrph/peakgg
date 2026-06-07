@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import BrandLogo from "@/components/BrandLogo";
 
 type SectionRole = "admin" | "moderator" | "organizer";
 
