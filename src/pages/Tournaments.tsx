@@ -312,7 +312,7 @@ export default function TournamentsPage() {
       <main className="flex-1">
         {/* HERO — full-width cinematic background */}
         <section
-          className="relative w-full overflow-hidden pt-20 lg:pt-24 lg:min-h-[720px] flex items-center bg-[position:center_38%] lg:bg-center"
+          className="relative w-full overflow-hidden pt-24 lg:pt-32 lg:min-h-[760px] flex items-center bg-[position:center_38%] lg:bg-center"
           style={{
             backgroundImage: `url(${tournamentsHero.url})`,
             backgroundSize: "cover",
@@ -344,10 +344,10 @@ export default function TournamentsPage() {
             }}
           />
 
-          <div className="relative container grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 py-8 md:py-16 lg:py-20 items-center">
+          <div className="relative container grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 py-8 md:py-16 lg:py-24 items-center lg:px-16 xl:px-20">
             {/* LEFT — title + CTAs */}
-            <div className="lg:col-span-7">
-              <div className="flex flex-wrap items-center gap-2 mb-5">
+            <div className="lg:col-span-7 lg:max-w-[640px]">
+              <div className="flex flex-wrap items-center gap-2 mb-6">
                 <Badge variant="outline" className="border-primary/60 bg-background/40 backdrop-blur text-primary font-display uppercase tracking-widest text-[10px]">
                   <Flame className="h-3 w-3 mr-1" />Season 0 Beta
                 </Badge>
@@ -356,7 +356,7 @@ export default function TournamentsPage() {
                 </Badge>
               </div>
               <h1
-                className="font-black uppercase leading-[0.85] tracking-[-0.03em] lg:tracking-[-0.04em] text-[4rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[8.5rem] max-w-[720px]"
+                className="font-black uppercase leading-[0.85] tracking-[-0.03em] lg:tracking-[-0.04em] text-[4rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[8rem] xl:text-[8.5rem] max-w-[640px]"
                 style={{ fontFamily: "'Bebas Neue', 'Barlow Condensed', 'Rajdhani', sans-serif" }}
               >
                 <span className="block text-[#F4F0EA] drop-shadow-[0_4px_20px_rgba(0,0,0,0.65)]">
@@ -366,15 +366,15 @@ export default function TournamentsPage() {
                   The Peak.
                 </span>
               </h1>
-              <p className="text-base md:text-xl text-foreground/80 font-body mt-4 md:mt-6 max-w-[560px] leading-relaxed">
+              <p className="text-base md:text-xl text-foreground/80 font-body mt-5 md:mt-7 max-w-[560px] leading-relaxed">
                 Play Open Cup, earn ELO, unlock Challenger and rise toward the Peak Championship.
               </p>
-              <p className="text-xs md:text-sm text-muted-foreground font-body mt-2 md:mt-3 italic">
+              <p className="text-xs md:text-sm text-muted-foreground font-body mt-3 md:mt-3.5 italic">
                 Final public format: 5v5 solo queue. Current test size: {teamSize}v{teamSize}.
               </p>
 
               {/* CTA row */}
-              <div className="mt-5 md:mt-7 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 max-w-[360px] sm:max-w-none [&>a]:w-full sm:[&>a]:w-auto [&>button]:w-full sm:[&>button]:w-auto [&_button]:h-14 sm:[&_button]:h-11">
+              <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 max-w-[360px] sm:max-w-none [&>a]:w-full sm:[&>a]:w-auto [&>button]:w-full sm:[&>button]:w-auto [&_button]:h-14 sm:[&_button]:h-11">
                 {queueEnabled && !queueEntry && !activeMatch && (
                   <Button
                     variant="neon" size="lg" onClick={joinQueue} disabled={joining}
