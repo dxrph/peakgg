@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/peakgg-logo.png.asset.json";
+import logoAsset from "@/assets/peakgg-logo-v2.png.asset.json";
 
 type Props = {
   className?: string;
