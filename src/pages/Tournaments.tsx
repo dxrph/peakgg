@@ -356,11 +356,14 @@ export default function TournamentsPage() {
                   Unified Competitive Path
                 </Badge>
               </div>
-              <h1 className="font-display font-black uppercase leading-[0.85] tracking-tight text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem] [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
-                <span className="block text-foreground drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]">
-                  Conquer<span className="lg:hidden"> the</span>
+              <h1
+                className="font-black uppercase leading-[0.82] tracking-[-0.02em] lg:tracking-[-0.04em] text-[4.3rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[8.5rem] max-w-[720px]"
+                style={{ fontFamily: "'Bebas Neue', 'Barlow Condensed', 'Rajdhani', sans-serif" }}
+              >
+                <span className="block text-[#F4F0EA] drop-shadow-[0_4px_20px_rgba(0,0,0,0.65)]">
+                  Conquer<span className="lg:hidden"> The</span>
                 </span>
-                <span className="block bg-gradient-to-r from-[#FF4655] via-[#FF6B47] to-[#FF8A3D] bg-clip-text text-transparent drop-shadow-[0_4px_24px_rgba(255,70,85,0.45)]">
+                <span className="block bg-gradient-to-r from-[#FF4655] via-[#FF3B6A] to-[#FF8A3D] bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(255,70,85,0.35)]">
                   <span className="hidden lg:inline">The </span>Peak.
                 </span>
               </h1>
