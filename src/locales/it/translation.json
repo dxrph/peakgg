@@ -721,5 +721,36 @@
     "current_streak": "Streak Attuale",
     "no_data": "Nessun dato",
     "activity": "Attività Recente"
+  },
+  "home": {
+    "hero": {
+      "status": "CLOSED BETA — LIVE",
+      "title": {
+        "line1": "COMPETI",
+        "line2": "SENZA AVERE",
+        "highlight": "UN'ORG"
+      },
+      "subtitle": "Trova i compagni giusti, unisciti ai tornei e scala i rank Peak contro i migliori player d'Europa.",
+      "subtitle_highlight": "d'Europa",
+      "primaryCta": "ENTRA NELLA BETA",
+      "discordCta": "ENTRA NEL DISCORD",
+      "betaNotice": "La Closed Beta è aperta a tutti i player. Nessun codice invito richiesto.",
+      "howItWorks": "COME FUNZIONA",
+      "peakRank": "PEAK RANK",
+      "features": {
+        "findTeam": {
+          "title": "TROVA TEAM",
+          "description": "Trova player seri e compatibili. Costruisci il tuo team ideale."
+        },
+        "rankPeak": {
+          "title": "RANK PEAK",
+          "description": "Scala i rank Peak e dimostra il tuo valore sul campo."
+        },
+        "openCup": {
+          "title": "OPEN CUP",
+          "description": "Partecipa ai tornei settimanali e conquista la vetta."
+        }
+      }
+    }
   }
 }

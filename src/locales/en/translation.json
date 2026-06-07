@@ -721,5 +721,36 @@
     "current_streak": "Current Streak",
     "no_data": "No data yet",
     "activity": "Recent Activity"
+  },
+  "home": {
+    "hero": {
+      "status": "CLOSED BETA — LIVE",
+      "title": {
+        "line1": "COMPETE",
+        "line2": "WITHOUT",
+        "highlight": "AN ORG"
+      },
+      "subtitle": "Find the right teammates, join tournaments, and climb the Peak ranks against Europe’s best players.",
+      "subtitle_highlight": "Europe’s best",
+      "primaryCta": "ENTER THE BETA",
+      "discordCta": "JOIN DISCORD",
+      "betaNotice": "The Closed Beta is open to all players. No invite code required.",
+      "howItWorks": "HOW IT WORKS",
+      "peakRank": "PEAK RANK",
+      "features": {
+        "findTeam": {
+          "title": "FIND TEAM",
+          "description": "Find serious, compatible players. Build your ideal team."
+        },
+        "rankPeak": {
+          "title": "PEAK RANK",
+          "description": "Climb the Peak ranks and prove your level on the field."
+        },
+        "openCup": {
+          "title": "OPEN CUP",
+          "description": "Join weekly tournaments and conquer the peak."
+        }
+      }
+    }
   }
 }

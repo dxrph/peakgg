@@ -4,6 +4,7 @@ import { ArrowRight, Trophy, Users, Award, ChevronDown, CheckCircle2, Swords } f
 import DiscordIcon from "@/components/icons/DiscordIcon";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { DISCORD_INVITE } from "@/lib/links";
 import heroBg from "@/assets/home-hero-crystal.png.asset.json";
 
@@ -14,6 +15,7 @@ const fadeUp = (delay: number) => ({
 
 export default function HeroSection() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const registerHref = user ? "/play" : "/register";
   const scrollHowItWorks = () => {
     const el = document.getElementById("how-it-works");
@@ -79,7 +81,7 @@ export default function HeroSection() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <span className="text-[11px] md:text-xs text-primary font-display font-semibold tracking-[0.24em]">
-                CLOSED BETA — LIVE
+                {t("home.hero.status")}
               </span>
             </motion.div>
 
@@ -88,8 +90,8 @@ export default function HeroSection() {
               initial="hidden" animate="visible" variants={fadeUp(0.12)}
               className="font-display font-bold uppercase leading-[0.88] tracking-tight mb-6 text-[3rem] xs:text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[5.5rem] xl:text-[6.5rem]"
             >
-              <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">COMPETI</span>
-              <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">SENZA AVERE</span>
+              <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line1")}</span>
+              <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line2")}</span>
               <span
                 className="block bg-clip-text text-transparent"
                 style={{
@@ -98,7 +100,7 @@ export default function HeroSection() {
                   filter: "drop-shadow(0 0 22px rgba(255,70,85,0.45))",
                 }}
               >
-                UN'ORG
+                {t("home.hero.title.highlight")}
               </span>
             </motion.h1>
 
@@ -107,8 +109,7 @@ export default function HeroSection() {
               initial="hidden" animate="visible" variants={fadeUp(0.24)}
               className="text-base md:text-lg lg:text-[1.2rem] text-gray-300 max-w-[560px] mb-8 leading-relaxed font-body"
             >
-              Trova i compagni giusti, unisciti ai tornei e scala i rank Peak contro i migliori player{" "}
-              <span className="text-white font-medium">d'Europa</span>.
+              {t("home.hero.subtitle")}
             </motion.p>
 
             {/* CTAs */}
@@ -126,7 +127,7 @@ export default function HeroSection() {
                   }}
                 >
                   <Swords className="mr-2 h-5 w-5 relative" />
-                  <span className="relative">ENTRA NELLA BETA</span>
+                  <span className="relative">{t("home.hero.primaryCta")}</span>
                   <ArrowRight className="ml-2 h-5 w-5 relative group-hover:translate-x-0.5 transition-transform" />
                 </Button>
               </Link>
@@ -139,10 +140,10 @@ export default function HeroSection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto h-14 px-7 rounded-lg uppercase tracking-wider font-display font-semibold border-[#5865F2]/40 text-[#c3c8f8] bg-white/[0.03] backdrop-blur-sm hover:bg-[#5865F2]/15 hover:text-white hover:border-[#5865F2]/70 hover:-translate-y-0.5 transition-all duration-200"
+                  className="group w-full sm:w-auto h-14 px-7 rounded-lg uppercase tracking-wider font-display font-semibold border-[#5865F2]/40 text-[#C7C8FF] bg-white/[0.03] backdrop-blur-sm hover:bg-[#5865F2]/15 hover:text-white hover:border-[#5865F2]/70 hover:shadow-[0_0_28px_rgba(88,101,242,0.35)] hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  <DiscordIcon className="mr-2 h-5 w-5" />
-                  ENTRA NEL DISCORD
+                  <DiscordIcon className="mr-3 h-[18px] w-[18px] md:h-5 md:w-5 shrink-0 text-[#C7C8FF] group-hover:text-white transition-colors" />
+                  {t("home.hero.discordCta")}
                 </Button>
               </a>
             </motion.div>
@@ -154,7 +155,7 @@ export default function HeroSection() {
             >
               <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <span className="text-xs md:text-sm text-emerald-100/90 font-body leading-snug">
-                La Closed Beta è aperta a tutti i player. Nessun codice invito richiesto.
+                {t("home.hero.betaNotice")}
               </span>
             </motion.div>
 
@@ -165,7 +166,7 @@ export default function HeroSection() {
               className="group inline-flex items-center gap-2 text-[11px] md:text-xs uppercase tracking-[0.24em] text-gray-400 hover:text-primary transition-colors font-display font-semibold"
             >
               <span className="h-px w-6 bg-primary/50" />
-              COME FUNZIONA
+              {t("home.hero.howItWorks")}
               <ChevronDown className="h-3.5 w-3.5 group-hover:translate-y-0.5 transition-transform" />
             </motion.button>
           </div>
@@ -179,7 +180,7 @@ export default function HeroSection() {
               className="absolute top-10 right-4 xl:right-12 flex items-center gap-2 px-3 py-1.5 rounded-sm border border-primary/40 bg-black/40 backdrop-blur-md"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_#FF4655]" />
-              <span className="text-[10px] font-display font-bold tracking-[0.28em] text-white/90">PEAK RANK</span>
+              <span className="text-[10px] font-display font-bold tracking-[0.28em] text-white/90">{t("home.hero.peakRank")}</span>
             </motion.div>
           </div>
         </div>
@@ -190,9 +191,9 @@ export default function HeroSection() {
           className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
           {[
-            { icon: Users, title: "TROVA TEAM", desc: "Trova player seri e compatibili. Costruisci il tuo team ideale.", to: "/teams" },
-            { icon: Award, title: "RANK PEAK", desc: "Scala i rank Peak e dimostra il tuo valore sul campo.", to: "/leaderboard" },
-            { icon: Trophy, title: "OPEN CUP", desc: "Partecipa ai tornei settimanali e conquista la vetta.", to: "/tournaments" },
+            { icon: Users, title: t("home.hero.features.findTeam.title"), desc: t("home.hero.features.findTeam.description"), to: "/teams" },
+            { icon: Award, title: t("home.hero.features.rankPeak.title"), desc: t("home.hero.features.rankPeak.description"), to: "/leaderboard" },
+            { icon: Trophy, title: t("home.hero.features.openCup.title"), desc: t("home.hero.features.openCup.description"), to: "/tournaments" },
           ].map(({ icon: Icon, title, desc, to }) => (
             <Link
               key={title}
