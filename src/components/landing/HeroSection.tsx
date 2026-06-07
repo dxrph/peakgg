@@ -188,7 +188,7 @@ export default function HeroSection() {
         {/* Feature shortcuts */}
         <motion.div
           initial="hidden" animate="visible" variants={fadeUp(0.55)}
-          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="mt-12 md:mt-16 mb-4 grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch"
         >
           {[
             { icon: Users, title: t("home.hero.features.findTeam.title"), desc: t("home.hero.features.findTeam.description"), to: "/teams" },
@@ -198,19 +198,41 @@ export default function HeroSection() {
             <Link
               key={title}
               to={to}
-              className="group relative rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md p-5 transition-all duration-200 hover:border-primary/60 hover:-translate-y-0.5 hover:bg-white/[0.05] hover:shadow-[0_0_28px_rgba(255,70,85,0.18)] overflow-hidden"
+              className="group relative flex h-full flex-col rounded-xl border border-white/10 bg-[rgba(8,9,15,0.72)] backdrop-blur-md p-5 md:p-6 transition-all duration-200 hover:-translate-y-[3px] hover:border-[rgba(255,70,85,0.55)] hover:shadow-[0_12px_40px_-12px_rgba(255,70,85,0.45),0_0_0_1px_rgba(255,70,85,0.15)_inset] overflow-hidden"
             >
-              {/* corner accents */}
-              <span aria-hidden className="absolute top-0 left-0 h-3 w-3 border-t border-l border-primary/60" />
-              <span aria-hidden className="absolute bottom-0 right-0 h-3 w-3 border-b border-r border-primary/60" />
-              <div className="flex items-center gap-3 mb-2">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary/15 border border-primary/40 text-primary group-hover:bg-primary/25 transition-colors">
-                  <Icon className="h-4 w-4" />
+              {/* gradient overlay on hover */}
+              <span
+                aria-hidden
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(255,70,85,0.14) 0%, rgba(8,9,15,0.0) 70%)",
+                }}
+              />
+              {/* ambient glow */}
+              <span
+                aria-hidden
+                className="absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-primary/[0.10] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              />
+              {/* subtle corner accent */}
+              <span aria-hidden className="absolute top-0 left-0 h-3 w-3 border-t border-l border-primary/40 group-hover:border-primary transition-colors" />
+
+              <div className="relative flex items-center gap-3 mb-3">
+                <span
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-md text-primary transition-all duration-200 group-hover:shadow-[0_0_18px_rgba(255,70,85,0.45)]"
+                  style={{
+                    background: "rgba(255,70,85,0.08)",
+                    border: "1px solid rgba(255,70,85,0.35)",
+                  }}
+                >
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
                 </span>
-                <h3 className="font-display font-bold tracking-[0.18em] text-white text-sm uppercase">{title}</h3>
-                <ArrowRight className="ml-auto h-4 w-4 text-gray-500 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <h3 className="font-display font-bold tracking-[0.12em] text-white/95 text-[15px] uppercase">
+                  {title}
+                </h3>
+                <ArrowRight className="ml-auto h-4 w-4 text-gray-500 group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
               </div>
-              <p className="text-sm text-gray-400 font-body leading-relaxed">{desc}</p>
+              <p className="relative text-sm text-gray-400 font-body leading-[1.65]">{desc}</p>
             </Link>
           ))}
         </motion.div>
