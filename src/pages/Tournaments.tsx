@@ -356,14 +356,18 @@ export default function TournamentsPage() {
                   Unified Competitive Path
                 </Badge>
               </div>
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-display font-bold uppercase tracking-tight leading-[0.95] drop-shadow-[0_4px_24px_rgba(255,70,85,0.35)]">
-                Conquer <br className="hidden sm:block" />
-                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">the Peak.</span>
+              <h1 className="font-display font-black uppercase leading-[0.85] tracking-tight text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem] [text-shadow:0_4px_28px_rgba(0,0,0,0.6)]">
+                <span className="block text-foreground drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]">
+                  Conquer<span className="lg:hidden"> the</span>
+                </span>
+                <span className="block bg-gradient-to-r from-[#FF4655] via-[#FF6B47] to-[#FF8A3D] bg-clip-text text-transparent drop-shadow-[0_4px_24px_rgba(255,70,85,0.45)]">
+                  <span className="hidden lg:inline">The </span>Peak.
+                </span>
               </h1>
-              <p className="text-base sm:text-lg text-foreground/90 font-body mt-5 max-w-xl">
+              <p className="text-lg md:text-xl text-foreground/80 font-body mt-6 max-w-[560px] leading-relaxed">
                 Play Open Cup, earn ELO, unlock Challenger and rise toward the Peak Championship.
               </p>
-              <p className="text-xs text-foreground/60 font-body mt-2 italic">
+              <p className="text-sm text-muted-foreground font-body mt-3 italic">
                 Final public format: 5v5 solo queue. Current test size: {teamSize}v{teamSize}.
               </p>
 
