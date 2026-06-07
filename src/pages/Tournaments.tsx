@@ -940,6 +940,7 @@ export default function TournamentsPage() {
         </section>
 
         <DiscordCTA variant="inline" />
+        </div>
       </main>
 
       <Footer />
