@@ -417,7 +417,7 @@ export default function TournamentsPage() {
             </div>
 
             {/* RIGHT — My Progress card */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 mt-4 lg:mt-0 w-full max-w-[380px] lg:max-w-none mx-auto lg:mx-0">
               {user ? (
                 <div className="relative rounded-2xl border border-primary/40 bg-background/55 backdrop-blur-xl p-5 sm:p-6 shadow-2xl shadow-primary/20 ring-1 ring-primary/10">
                   <div className="flex items-center justify-between mb-4">
