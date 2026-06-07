@@ -312,11 +312,10 @@ export default function TournamentsPage() {
       <main className="flex-1">
         {/* HERO — full-width cinematic background */}
         <section
-          className="relative w-full overflow-hidden pt-24 lg:min-h-[720px] flex items-center"
+          className="relative w-full overflow-hidden pt-20 lg:pt-24 lg:min-h-[720px] flex items-center bg-[position:center_38%] lg:bg-center"
           style={{
             backgroundImage: `url(${tournamentsHero.url})`,
             backgroundSize: "cover",
-            backgroundPosition: "center center",
             backgroundRepeat: "no-repeat",
           }}
         >
@@ -345,7 +344,7 @@ export default function TournamentsPage() {
             }}
           />
 
-          <div className="relative container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-12 md:py-20 items-center">
+          <div className="relative container grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 py-8 md:py-16 lg:py-20 items-center">
             {/* LEFT — title + CTAs */}
             <div className="lg:col-span-7">
               <div className="flex flex-wrap items-center gap-2 mb-5">
@@ -357,25 +356,25 @@ export default function TournamentsPage() {
                 </Badge>
               </div>
               <h1
-                className="font-black uppercase leading-[0.82] tracking-[-0.02em] lg:tracking-[-0.04em] text-[4.3rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[8.5rem] max-w-[720px]"
+                className="font-black uppercase leading-[0.85] tracking-[-0.03em] lg:tracking-[-0.04em] text-[4rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[8.5rem] max-w-[720px]"
                 style={{ fontFamily: "'Bebas Neue', 'Barlow Condensed', 'Rajdhani', sans-serif" }}
               >
                 <span className="block text-[#F4F0EA] drop-shadow-[0_4px_20px_rgba(0,0,0,0.65)]">
-                  Conquer<span className="lg:hidden"> The</span>
+                  Conquer
                 </span>
                 <span className="block bg-gradient-to-r from-[#FF4655] via-[#FF3B6A] to-[#FF8A3D] bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(255,70,85,0.35)]">
-                  <span className="hidden lg:inline">The </span>Peak.
+                  The Peak.
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-foreground/80 font-body mt-6 max-w-[560px] leading-relaxed">
+              <p className="text-base md:text-xl text-foreground/80 font-body mt-4 md:mt-6 max-w-[560px] leading-relaxed">
                 Play Open Cup, earn ELO, unlock Challenger and rise toward the Peak Championship.
               </p>
-              <p className="text-sm text-muted-foreground font-body mt-3 italic">
+              <p className="text-xs md:text-sm text-muted-foreground font-body mt-2 md:mt-3 italic">
                 Final public format: 5v5 solo queue. Current test size: {teamSize}v{teamSize}.
               </p>
 
               {/* CTA row */}
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-5 md:mt-7 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 max-w-[360px] sm:max-w-none [&>a]:w-full sm:[&>a]:w-auto [&>button]:w-full sm:[&>button]:w-auto [&_button]:h-14 sm:[&_button]:h-11">
                 {queueEnabled && !queueEntry && !activeMatch && (
                   <Button
                     variant="neon" size="lg" onClick={joinQueue} disabled={joining}
