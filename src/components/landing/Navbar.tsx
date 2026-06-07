@@ -90,8 +90,8 @@ export default function Navbar() {
     >
       <div className="container flex items-center justify-between h-14 lg:h-16 gap-4">
         {/* LEFT: logo */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <BrandLogo className="h-8 w-8 lg:h-9 lg:w-9 drop-shadow-[0_0_10px_rgba(255,70,85,0.45)]" />
+        <Link to="/" className="flex items-center gap-[11px] shrink-0">
+          <BrandLogo className="h-6 w-6 lg:h-[26px] lg:w-[26px] drop-shadow-[0_0_8px_rgba(255,70,85,0.45)]" />
           <span className="font-display font-bold text-lg lg:text-xl tracking-tight hidden sm:inline">PEAKGG</span>
         </Link>
 
