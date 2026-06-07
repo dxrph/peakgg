@@ -720,5 +720,36 @@
     "current_streak": "Série Actuelle",
     "no_data": "Aucune donnée",
     "activity": "Activité Récente"
+  },
+  "home": {
+    "hero": {
+      "status": "BÊTA FERMÉE — LIVE",
+      "title": {
+        "line1": "COMPÉTITION",
+        "line2": "SANS AVOIR",
+        "highlight": "D’ORG"
+      },
+      "subtitle": "Trouve les bons coéquipiers, participe aux tournois et grimpe les ranks Peak face aux meilleurs joueurs d’Europe.",
+      "subtitle_highlight": "d’Europe",
+      "primaryCta": "REJOINDRE LA BÊTA",
+      "discordCta": "REJOINDRE DISCORD",
+      "betaNotice": "La bêta fermée est ouverte à tous les joueurs. Aucun code d’invitation requis.",
+      "howItWorks": "COMMENT ÇA MARCHE",
+      "peakRank": "PEAK RANK",
+      "features": {
+        "findTeam": {
+          "title": "TROUVER UNE TEAM",
+          "description": "Trouve des joueurs sérieux et compatibles. Construis ton équipe idéale."
+        },
+        "rankPeak": {
+          "title": "RANK PEAK",
+          "description": "Grimpe les ranks Peak et prouve ton niveau sur le terrain."
+        },
+        "openCup": {
+          "title": "OPEN CUP",
+          "description": "Participe aux tournois hebdomadaires et conquiers le sommet."
+        }
+      }
+    }
   }
 }
