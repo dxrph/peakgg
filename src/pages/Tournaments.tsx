@@ -29,6 +29,7 @@ import RankBadge from "@/components/RankBadge";
 import QueueLobby from "@/components/competitive/QueueLobby";
 import TournamentCountdown from "@/components/tournaments/TournamentCountdown";
 import ProgressionPath from "@/components/landing/ProgressionPath";
+import tournamentsHero from "@/assets/tournaments-hero.png.asset.json";
 
 // Thresholds for cup unlocks (ELO-based)
 // Aligned with PeakGG Rank thresholds (see src/lib/ranks.ts):
@@ -308,46 +309,61 @@ export default function TournamentsPage() {
       {seo}
       <Navbar />
 
-      <main className="container pt-24 pb-16 flex-1">
-        {/* HERO — premium 2-col with My Progress card */}
-        <section className="relative overflow-hidden rounded-2xl border border-border gradient-hero mb-12 neon-border">
+      <main className="flex-1">
+        {/* HERO — full-width cinematic background */}
+        <section
+          className="relative w-full overflow-hidden pt-24 lg:min-h-[720px] flex items-center"
+          style={{
+            backgroundImage: `url(${tournamentsHero.url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          {/* Left→right darkening for text readability */}
           <div
-            className="absolute inset-0 opacity-[0.07] pointer-events-none"
+            className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage:
-                "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-              maskImage: "radial-gradient(ellipse at 30% 20%, black 0%, transparent 75%)",
+              background:
+                "linear-gradient(90deg, hsl(0 0% 2% / 0.92) 0%, hsl(0 0% 2% / 0.75) 35%, hsl(0 0% 2% / 0.35) 65%, hsl(0 0% 2% / 0.55) 100%)",
             }}
           />
+          {/* Magenta/red glow accents */}
           <div
-            className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, hsl(352 100% 62% / 0.18), transparent 60%)" }}
+            className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsl(352 100% 62% / 0.22), transparent 60%)" }}
           />
           <div
-            className="absolute -bottom-40 -left-20 w-[420px] h-[420px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, hsl(24 100% 63% / 0.12), transparent 60%)" }}
+            className="absolute -bottom-40 -left-20 w-[460px] h-[460px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsl(310 90% 55% / 0.18), transparent 60%)" }}
+          />
+          {/* Bottom fade into next section */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-40 pointer-events-none"
+            style={{
+              background: "linear-gradient(to bottom, transparent, hsl(var(--background)) 95%)",
+            }}
           />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 md:p-12 items-center">
+          <div className="relative container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-12 md:py-20 items-center">
             {/* LEFT — title + CTAs */}
             <div className="lg:col-span-7">
               <div className="flex flex-wrap items-center gap-2 mb-5">
-                <Badge variant="outline" className="border-primary/40 text-primary font-display uppercase tracking-widest text-[10px]">
+                <Badge variant="outline" className="border-primary/60 bg-background/40 backdrop-blur text-primary font-display uppercase tracking-widest text-[10px]">
                   <Flame className="h-3 w-3 mr-1" />Season 0 Beta
                 </Badge>
-                <Badge variant="outline" className="border-border text-muted-foreground font-display uppercase tracking-widest text-[10px]">
+                <Badge variant="outline" className="border-border bg-background/40 backdrop-blur text-foreground/80 font-display uppercase tracking-widest text-[10px]">
                   Unified Competitive Path
                 </Badge>
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight leading-[1.05]">
-                Your climb <br className="hidden sm:block" />
-                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">starts here.</span>
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-display font-bold uppercase tracking-tight leading-[0.95] drop-shadow-[0_4px_24px_rgba(255,70,85,0.35)]">
+                Conquer <br className="hidden sm:block" />
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">the Peak.</span>
               </h1>
-              <p className="text-base sm:text-lg text-muted-foreground font-body mt-5 max-w-xl">
-                Play Open Cup, gain ELO, unlock Challenger and fight for a place in the Peak Championship.
+              <p className="text-base sm:text-lg text-foreground/90 font-body mt-5 max-w-xl">
+                Play Open Cup, earn ELO, unlock Challenger and rise toward the Peak Championship.
               </p>
-              <p className="text-xs text-muted-foreground/70 font-body mt-2 italic">
+              <p className="text-xs text-foreground/60 font-body mt-2 italic">
                 Final public format: 5v5 solo queue. Current test size: {teamSize}v{teamSize}.
               </p>
 
@@ -397,7 +413,7 @@ export default function TournamentsPage() {
             {/* RIGHT — My Progress card */}
             <div className="lg:col-span-5">
               {user ? (
-                <div className="relative rounded-2xl border border-primary/30 bg-card/80 backdrop-blur p-5 sm:p-6 shadow-xl shadow-primary/10">
+                <div className="relative rounded-2xl border border-primary/40 bg-background/55 backdrop-blur-xl p-5 sm:p-6 shadow-2xl shadow-primary/20 ring-1 ring-primary/10">
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-[10px] font-display uppercase tracking-widest text-muted-foreground">Your Progress</div>
                     <Badge variant="outline" className="border-success/40 text-success font-display uppercase text-[10px]">Tier 1 · Open Cup</Badge>
@@ -459,12 +475,12 @@ export default function TournamentsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="relative rounded-2xl border border-border bg-card/80 backdrop-blur p-6 text-center">
+                <div className="relative rounded-2xl border border-primary/40 bg-background/55 backdrop-blur-xl p-6 text-center shadow-2xl shadow-primary/20">
                   <div className="w-14 h-14 mx-auto rounded-full gradient-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/30">
                     <Trophy className="h-7 w-7 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-lg uppercase">Track your climb</h3>
-                  <p className="text-sm text-muted-foreground font-body mt-1">
+                  <p className="text-sm text-foreground/80 font-body mt-1">
                     Create an account to track your ELO and unlock competitive tiers.
                   </p>
                   <Button variant="neon" size="sm" className="mt-4" asChild>
@@ -476,10 +492,11 @@ export default function TournamentsPage() {
           </div>
         </section>
 
-        {/* Unified progression explainer */}
-        <section className="mb-16">
-          <ProgressionPath />
-        </section>
+        <div className="container pb-16">
+          {/* Unified progression explainer */}
+          <section className="mb-16 mt-12">
+            <ProgressionPath />
+          </section>
 
         {/* FEATURED TOURNAMENT — PeakGG Community Cup #1 (current flagship) */}
         {featured && (
@@ -923,6 +940,7 @@ export default function TournamentsPage() {
         </section>
 
         <DiscordCTA variant="inline" />
+        </div>
       </main>
 
       <Footer />
