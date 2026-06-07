@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mountain, Menu, X, LogOut, MessageCircle, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, MessageCircle, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -90,9 +91,7 @@ export default function Navbar() {
       <div className="container flex items-center justify-between h-14 lg:h-16 gap-4">
         {/* LEFT: logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-            <Mountain className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <BrandLogo className="h-8 w-8 lg:h-9 lg:w-9 drop-shadow-[0_0_10px_rgba(255,70,85,0.45)]" />
           <span className="font-display font-bold text-lg lg:text-xl tracking-tight hidden sm:inline">PEAKGG</span>
         </Link>
 

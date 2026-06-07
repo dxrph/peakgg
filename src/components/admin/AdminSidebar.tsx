@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import BrandLogo from "@/components/BrandLogo";
 
 type SectionRole = "admin" | "moderator" | "organizer";
 
@@ -47,9 +48,12 @@ export default function AdminSidebar() {
 
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-card/30 backdrop-blur min-h-[calc(100vh-4rem)] hidden md:flex flex-col">
-      <div className="px-4 py-4 border-b border-border">
-        <p className="text-xs font-display uppercase tracking-widest text-muted-foreground">PeakGG</p>
-        <p className="text-sm font-display font-bold">Admin Panel</p>
+      <div className="px-4 py-4 border-b border-border flex items-center gap-3">
+        <BrandLogo className="h-9 w-9 drop-shadow-[0_0_10px_rgba(255,70,85,0.4)]" />
+        <div>
+          <p className="text-xs font-display uppercase tracking-widest text-muted-foreground">PeakGG</p>
+          <p className="text-sm font-display font-bold">Admin Panel</p>
+        </div>
       </div>
       <nav className="flex-1 py-3 space-y-0.5">
         {visible.map((s) => {

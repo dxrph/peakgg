@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import BrandLogo from "@/components/BrandLogo";
 
 const MICRO_COPY = [
   "Preparing the arena",
@@ -87,7 +88,7 @@ export default function LoadingScreen() {
       {/* Centered stack */}
       <div className="relative flex flex-col items-center gap-7 px-6">
         {/* Peak logo with energy outline */}
-        <div className="relative w-[140px] h-[140px] sm:w-[170px] sm:h-[170px]">
+        <div className="relative w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] flex items-center justify-center">
           <span
             aria-hidden
             className="absolute inset-0 rounded-full blur-2xl"
@@ -97,67 +98,9 @@ export default function LoadingScreen() {
               animation: "ls-pulse 2.4s ease-in-out infinite",
             }}
           />
-          <svg
-            viewBox="0 0 120 120"
-            className="relative w-full h-full"
-            fill="none"
-          >
-            <defs>
-              <linearGradient id="ls-peak" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stopColor="#FF4655" />
-                <stop offset="60%" stopColor="#FF3BA0" />
-                <stop offset="100%" stopColor="#FF8A3D" />
-              </linearGradient>
-            </defs>
-            {/* Outer hex frame */}
-            <path
-              d="M60 6 L108 33 L108 87 L60 114 L12 87 L12 33 Z"
-              stroke="rgba(255,255,255,0.10)"
-              strokeWidth="1.5"
-            />
-            {/* Peak outline being drawn */}
-            <path
-              d="M22 88 L48 52 L62 70 L78 38 L98 88 Z"
-              stroke="url(#ls-peak)"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                filter: "drop-shadow(0 0 8px rgba(255,70,85,0.55))",
-                strokeDasharray: 260,
-                strokeDashoffset: 260,
-                animation:
-                  "ls-draw 2.8s ease-in-out infinite, ls-flash 2.8s ease-in-out infinite",
-              }}
-            />
-            {/* Energy spark rising to peak */}
-            <circle
-              r="2.6"
-              fill="#fff"
-              style={{
-                filter: "drop-shadow(0 0 6px #FF4655)",
-                animation: "ls-spark 2.8s ease-in-out infinite",
-              }}
-            >
-              <animateMotion
-                dur="2.8s"
-                repeatCount="indefinite"
-                path="M22 88 L48 52 L62 70 L78 38"
-              />
-            </circle>
-            {/* Peak flash */}
-            <circle
-              cx="78"
-              cy="38"
-              r="4"
-              fill="#fff"
-              style={{
-                filter: "drop-shadow(0 0 12px #FF4655)",
-                animation: "ls-tip 2.8s ease-in-out infinite",
-                transformOrigin: "78px 38px",
-              }}
-            />
-          </svg>
+          <BrandLogo
+            className="relative w-[78%] h-[78%] drop-shadow-[0_0_22px_rgba(255,70,85,0.6)]"
+          />
         </div>
 
         {/* Main copy */}

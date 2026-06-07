@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Mountain, MessageCircle, Instagram, Youtube, Twitch, Music2, Twitter, ArrowRight } from "lucide-react";
+import { MessageCircle, Instagram, Youtube, Twitch, Music2, Twitter, ArrowRight } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -101,7 +102,7 @@ export default function Footer() {
               size="xl"
               className="hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
             >
-              <Mountain className="mr-2 h-5 w-5" />
+              <BrandLogo className="mr-2 h-5 w-5" />
               {user
                 ? t("footer.cta_dashboard", { defaultValue: "Go to Dashboard" })
                 : t("footer.cta_button", { defaultValue: "Join Beta" })}
@@ -116,10 +117,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-12 gap-10 md:gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-4">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 rounded-md gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <Mountain className="h-4 w-4 text-primary-foreground" />
-              </div>
+            <div className="flex items-center gap-2.5 mb-5">
+              <BrandLogo className="h-9 w-9 drop-shadow-[0_0_12px_rgba(255,70,85,0.45)]" />
               <span className="font-display font-bold text-xl text-primary tracking-wider">
                 PEAKGG
               </span>
