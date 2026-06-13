@@ -352,6 +352,13 @@ export const emptyWizardForm: WizardForm = {
   moderation: defaultModeration,
   staff: defaultStaff,
   admin_notes: "",
+  route_label: "",
+  permit_number: "",
+  serial: "",
+  stamp_line1: "Free entry",
+  stamp_line2: "· Approved ·",
+  show_stamp: true,
+  summit_accent: "",
 };
 
 export const STEPS = [
