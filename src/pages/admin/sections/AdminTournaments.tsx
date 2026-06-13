@@ -311,7 +311,51 @@ export default function AdminTournaments() {
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)} title="Modifica">
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setWizardInitial({ id: t.id, name: t.name, game: (t.game as any) ?? "valorant", description: t.description ?? "", max_teams: t.max_teams, status: t.status }); setWizardOpen(true); }} title="Edit advanced">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={async () => {
+                      const { data: full } = await supabase
+                        .from("tournaments")
+                        .select("*")
+                        .eq("id", t.id)
+                        .maybeSingle();
+                      const row: any = full ?? t;
+                      setWizardInitial({
+                        id: row.id,
+                        name: row.name,
+                        slug: row.slug ?? "",
+                        game: (row.game as any) ?? "valorant",
+                        description: row.description ?? "",
+                        short_description: row.short_description ?? "",
+                        max_teams: row.max_teams,
+                        min_teams: row.min_teams ?? 4,
+                        team_size: row.team_size ?? "5v5",
+                        status: row.status,
+                        visibility: row.visibility ?? "draft",
+                        featured: row.featured ?? false,
+                        tier_label: row.tier_label ?? "Open Cup",
+                        tournament_type: row.tournament_type ?? "official",
+                        language: row.language ?? "en",
+                        timezone: row.timezone ?? "Europe/Brussels",
+                        start_date: row.start_date ?? "",
+                        end_date: row.end_date ?? "",
+                        registration_open_at: row.registration_open_at ?? "",
+                        registration_close_at: row.registration_close_at ?? "",
+                        checkin_open_at: row.checkin_open_at ?? "",
+                        checkin_close_at: row.checkin_close_at ?? "",
+                        prize_pool: row.prize_pool ?? "",
+                        prize_currency: row.prize_currency ?? "PeakCoins",
+                        entry_type: row.entry_type ?? "open",
+                        entry_cost_coins: row.entry_cost_coins ?? 0,
+                        // Summit Pass overrides
+                        route_label: row.route_label ?? "",
+                        permit_number: row.permit_number ?? "",
+                        serial: row.serial ?? "",
+                        stamp_line1: row.stamp_line1 ?? "Free entry",
+                        stamp_line2: row.stamp_line2 ?? "· Approved ·",
+                        show_stamp: row.show_stamp ?? true,
+                        summit_accent: row.summit_accent ?? "",
+                      });
+                      setWizardOpen(true);
+                    }} title="Edit advanced">
                       <Pencil className="h-3.5 w-3.5 text-primary" />
                     </Button>
                     {t.status !== "completed" && (
