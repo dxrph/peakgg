@@ -242,6 +242,14 @@ export type WizardForm = {
   moderation: ModerationSettings;
   staff: StaffSettings;
   admin_notes: string;
+  // Summit Pass overrides (optional, stored on tournaments row)
+  route_label?: string;
+  permit_number?: string;
+  serial?: string;
+  stamp_line1?: string;
+  stamp_line2?: string;
+  show_stamp?: boolean;
+  summit_accent?: string;
 };
 
 export const defaultEligibility: Eligibility = {
