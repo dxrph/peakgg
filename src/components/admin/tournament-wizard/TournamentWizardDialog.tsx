@@ -15,6 +15,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { sanitizeText } from "@/lib/security";
 import { logAdminAction } from "@/lib/admin";
 import { WizardShell, Section, Field, Grid2 } from "./WizardShell";
+import SummitPassBanner from "@/components/summit-pass/SummitPassBanner";
+import { tournamentToSummitPass, type TournamentRow } from "@/components/summit-pass/adapter";
 import {
   emptyWizardForm, STEPS, slugify, validateForPublish,
   GAME_MAPS, TIER_LABELS, TOURNAMENT_TYPES, VISIBILITIES, LANGUAGES,
@@ -105,6 +107,14 @@ export default function TournamentWizardDialog({
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       created_by: user.id,
+      // Summit Pass overrides
+      route_label: form.route_label?.trim() || null,
+      permit_number: form.permit_number?.trim() || null,
+      serial: form.serial?.trim() || null,
+      stamp_line1: form.stamp_line1 ?? null,
+      stamp_line2: form.stamp_line2 ?? null,
+      show_stamp: form.show_stamp ?? true,
+      summit_accent: form.summit_accent?.trim() || null,
     };
 
     let tournamentId = form.id;
