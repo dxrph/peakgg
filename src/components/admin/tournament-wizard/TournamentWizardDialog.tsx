@@ -15,6 +15,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { sanitizeText } from "@/lib/security";
 import { logAdminAction } from "@/lib/admin";
 import { WizardShell, Section, Field, Grid2 } from "./WizardShell";
+import SummitPassBanner from "@/components/summit-pass/SummitPassBanner";
+import { tournamentToSummitPass, type TournamentRow } from "@/components/summit-pass/adapter";
 import {
   emptyWizardForm, STEPS, slugify, validateForPublish,
   GAME_MAPS, TIER_LABELS, TOURNAMENT_TYPES, VISIBILITIES, LANGUAGES,
@@ -105,6 +107,14 @@ export default function TournamentWizardDialog({
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       created_by: user.id,
+      // Summit Pass overrides
+      route_label: form.route_label?.trim() || null,
+      permit_number: form.permit_number?.trim() || null,
+      serial: form.serial?.trim() || null,
+      stamp_line1: form.stamp_line1 ?? null,
+      stamp_line2: form.stamp_line2 ?? null,
+      show_stamp: form.show_stamp ?? true,
+      summit_accent: form.summit_accent?.trim() || null,
     };
 
     let tournamentId = form.id;
@@ -723,6 +733,32 @@ function StepRewards({ form, update }: { form: WizardForm; update: (p: Partial<W
 function StepVisibility({ form, update }: { form: WizardForm; update: (p: Partial<WizardForm>) => void }) {
   const v = form.visibility_advanced;
   const setV = (patch: Partial<typeof v>) => update({ visibility_advanced: { ...v, ...patch } });
+
+  // Live preview config — re-renders on every edit.
+  const previewRow: TournamentRow = {
+    id: form.id ?? "preview",
+    slug: form.slug || "preview",
+    name: form.name || "Tournament",
+    game: form.game,
+    status: form.status,
+    short_description: form.short_description || null,
+    description: form.description || null,
+    start_date: form.start_date || null,
+    registration_close_at: form.registration_close_at || null,
+    max_teams: form.max_teams,
+    team_size: form.team_size,
+    format: form.format_advanced.format,
+    entry_cost_coins: form.entry_cost_coins,
+    route_label: form.route_label || null,
+    permit_number: form.permit_number || null,
+    serial: form.serial || null,
+    stamp_line1: form.stamp_line1 || null,
+    stamp_line2: form.stamp_line2 || null,
+    show_stamp: form.show_stamp ?? true,
+    summit_accent: form.summit_accent || null,
+  };
+  const previewCfg = tournamentToSummitPass(previewRow, 0);
+
   return (
     <>
       <Section title="Visibility" hint="Draft tournaments are only visible to admins.">
@@ -768,6 +804,40 @@ function StepVisibility({ form, update }: { form: WizardForm; update: (p: Partia
         }}>
           Auto-generate announcement
         </Button>
+      </Section>
+
+      <Section title="Summit Pass Banner" hint="Overrides for the featured pass banner. Leave fields blank to use the derived defaults.">
+        <Grid2>
+          <Field label="Title accent" hint='red suffix after the title, e.g. "#1"'>
+            <Input value={form.summit_accent ?? ""} onChange={(e) => update({ summit_accent: e.target.value })} maxLength={12} placeholder="#1" />
+          </Field>
+          <Field label="Route label" hint='e.g. "EU — West Face"'>
+            <Input value={form.route_label ?? ""} onChange={(e) => update({ route_label: e.target.value })} maxLength={60} placeholder="EU — Open Face" />
+          </Field>
+          <Field label="Permit number">
+            <Input value={form.permit_number ?? ""} onChange={(e) => update({ permit_number: e.target.value })} maxLength={20} placeholder="Nº 001" />
+          </Field>
+          <Field label="Serial (override)" hint="leave empty to auto-derive">
+            <Input value={form.serial ?? ""} onChange={(e) => update({ serial: e.target.value })} maxLength={48} placeholder="PGG-VAL-EU-260516-CC1" />
+          </Field>
+          <Field label="Stamp line 1"><Input value={form.stamp_line1 ?? ""} onChange={(e) => update({ stamp_line1: e.target.value })} maxLength={24} /></Field>
+          <Field label="Stamp line 2"><Input value={form.stamp_line2 ?? ""} onChange={(e) => update({ stamp_line2: e.target.value })} maxLength={24} /></Field>
+          <Field label="Show stamp">
+            <div className="flex items-center gap-2">
+              <Switch checked={form.show_stamp ?? true} onCheckedChange={(val) => update({ show_stamp: val })} />
+              <span className="text-xs text-muted-foreground">{form.show_stamp ?? true ? "Visible" : "Hidden"}</span>
+            </div>
+          </Field>
+          <Field label="Registration closes at" hint="drives the countdown; defaults to start date">
+            <Input type="datetime-local" value={form.registration_close_at?.slice(0, 16) ?? ""} onChange={(e) => update({ registration_close_at: e.target.value ? new Date(e.target.value).toISOString() : "" })} />
+          </Field>
+        </Grid2>
+        <div className="mt-4">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-display mb-2">Live preview</div>
+          <div className="bg-background/40 rounded-md p-3 border border-border overflow-hidden">
+            <SummitPassBanner config={previewCfg} />
+          </div>
+        </div>
       </Section>
     </>
   );

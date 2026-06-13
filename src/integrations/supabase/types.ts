@@ -3005,6 +3005,7 @@ export type Database = {
           name: string
           organizer_discord: string | null
           organizer_name: string | null
+          permit_number: string | null
           prize_currency: string | null
           prize_pool: string | null
           rank_max: number | null
@@ -3014,13 +3015,19 @@ export type Database = {
           reward_badge: string | null
           reward_banner: string | null
           reward_trophies: number
+          route_label: string | null
           rules: string | null
           rules_url: string | null
           seeding_enabled: boolean
+          serial: string | null
           short_description: string | null
+          show_stamp: boolean | null
           slug: string | null
+          stamp_line1: string | null
+          stamp_line2: string | null
           start_date: string | null
           status: string
+          summit_accent: string | null
           tagline: string | null
           team_size: string | null
           third_place_enabled: boolean
@@ -3064,6 +3071,7 @@ export type Database = {
           name: string
           organizer_discord?: string | null
           organizer_name?: string | null
+          permit_number?: string | null
           prize_currency?: string | null
           prize_pool?: string | null
           rank_max?: number | null
@@ -3073,13 +3081,19 @@ export type Database = {
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
+          route_label?: string | null
           rules?: string | null
           rules_url?: string | null
           seeding_enabled?: boolean
+          serial?: string | null
           short_description?: string | null
+          show_stamp?: boolean | null
           slug?: string | null
+          stamp_line1?: string | null
+          stamp_line2?: string | null
           start_date?: string | null
           status?: string
+          summit_accent?: string | null
           tagline?: string | null
           team_size?: string | null
           third_place_enabled?: boolean
@@ -3123,6 +3137,7 @@ export type Database = {
           name?: string
           organizer_discord?: string | null
           organizer_name?: string | null
+          permit_number?: string | null
           prize_currency?: string | null
           prize_pool?: string | null
           rank_max?: number | null
@@ -3132,13 +3147,19 @@ export type Database = {
           reward_badge?: string | null
           reward_banner?: string | null
           reward_trophies?: number
+          route_label?: string | null
           rules?: string | null
           rules_url?: string | null
           seeding_enabled?: boolean
+          serial?: string | null
           short_description?: string | null
+          show_stamp?: boolean | null
           slug?: string | null
+          stamp_line1?: string | null
+          stamp_line2?: string | null
           start_date?: string | null
           status?: string
+          summit_accent?: string | null
           tagline?: string | null
           team_size?: string | null
           third_place_enabled?: boolean

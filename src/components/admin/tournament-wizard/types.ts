@@ -242,6 +242,14 @@ export type WizardForm = {
   moderation: ModerationSettings;
   staff: StaffSettings;
   admin_notes: string;
+  // Summit Pass overrides (optional, stored on tournaments row)
+  route_label?: string;
+  permit_number?: string;
+  serial?: string;
+  stamp_line1?: string;
+  stamp_line2?: string;
+  show_stamp?: boolean;
+  summit_accent?: string;
 };
 
 export const defaultEligibility: Eligibility = {
@@ -344,6 +352,13 @@ export const emptyWizardForm: WizardForm = {
   moderation: defaultModeration,
   staff: defaultStaff,
   admin_notes: "",
+  route_label: "",
+  permit_number: "",
+  serial: "",
+  stamp_line1: "Free entry",
+  stamp_line2: "· Approved ·",
+  show_stamp: true,
+  summit_accent: "",
 };
 
 export const STEPS = [
