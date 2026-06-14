@@ -391,6 +391,8 @@ function SettingsTab({ tournament, onChanged }: { tournament: Tournament; onChan
         <FieldA label="Rules (markdown allowed)"><Textarea rows={6} value={f.rules ?? ""} onChange={(e) => upd("rules", e.target.value)} /></FieldA>
       </SettingsCard>
 
+      <SummitPassSection f={f} upd={upd} />
+
       <div className="flex justify-end">
         <Button variant="neon" onClick={save} disabled={saving} className="uppercase tracking-wider">
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Save Settings
