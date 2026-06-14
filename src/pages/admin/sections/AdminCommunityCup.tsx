@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff, FlaskConical, Play, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import SummitPassBanner from "@/components/summit-pass/SummitPassBanner";
+import { tournamentToSummitPass, type TournamentRow } from "@/components/summit-pass/adapter";
 import {
   DEFAULT_VALORANT_MAP_POOL,
   MAP_SELECTION_MODE_LABEL,
@@ -53,6 +55,14 @@ type Tournament = {
   third_place_enabled?: boolean | null;
   forfeit_grace_minutes?: number | null;
   team_size: string | null;
+  // Summit Pass banner overrides
+  route_label?: string | null;
+  permit_number?: string | null;
+  serial?: string | null;
+  stamp_line1?: string | null;
+  stamp_line2?: string | null;
+  show_stamp?: boolean | null;
+  summit_accent?: string | null;
 };
 
 type MapPoolRow = { id: string; tournament_id: string; map_name: string; is_active: boolean; display_order: number; image_url: string | null };
