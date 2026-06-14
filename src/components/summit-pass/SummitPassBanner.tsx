@@ -139,7 +139,10 @@ export default function SummitPassBanner({ config }: Props) {
         </div>
 
         {cfg.stamp.show && (
-          <div className="sp-stamp" aria-hidden="true">
+          <div
+            className={`sp-stamp${cfg.stamp.line1?.toLowerCase() === "summited" ? " summited" : ""}`}
+            aria-hidden="true"
+          >
             {cfg.stamp.line1}
             <small>{cfg.stamp.line2}</small>
           </div>

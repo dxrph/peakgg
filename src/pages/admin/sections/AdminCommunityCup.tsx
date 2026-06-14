@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { Loader2, Download, Trophy, ChevronUp, ChevronDown, Plus, Trash2, RotateCcw, Sparkles, Star, AlertTriangle, Map as MapIcon, Info, LayoutGrid, Eye, EyeOff, FlaskConical, Play, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import SummitPassBanner from "@/components/summit-pass/SummitPassBanner";
+import { tournamentToSummitPass, type TournamentRow } from "@/components/summit-pass/adapter";
 import {
   DEFAULT_VALORANT_MAP_POOL,
   MAP_SELECTION_MODE_LABEL,
@@ -53,6 +55,14 @@ type Tournament = {
   third_place_enabled?: boolean | null;
   forfeit_grace_minutes?: number | null;
   team_size: string | null;
+  // Summit Pass banner overrides
+  route_label?: string | null;
+  permit_number?: string | null;
+  serial?: string | null;
+  stamp_line1?: string | null;
+  stamp_line2?: string | null;
+  show_stamp?: boolean | null;
+  summit_accent?: string | null;
 };
 
 type MapPoolRow = { id: string; tournament_id: string; map_name: string; is_active: boolean; display_order: number; image_url: string | null };
@@ -272,6 +282,14 @@ function SettingsTab({ tournament, onChanged }: { tournament: Tournament; onChan
       result_confirmation_mode: f.result_confirmation_mode ?? "admin_manual",
       third_place_enabled: !!f.third_place_enabled,
       forfeit_grace_minutes: Number(f.forfeit_grace_minutes ?? 10),
+      // Summit Pass banner overrides
+      route_label: f.route_label ?? null,
+      permit_number: f.permit_number ?? null,
+      serial: f.serial ?? null,
+      stamp_line1: f.stamp_line1 ?? null,
+      stamp_line2: f.stamp_line2 ?? null,
+      show_stamp: f.show_stamp ?? true,
+      summit_accent: f.summit_accent ?? null,
     };
     const { error } = await supabase.from("tournaments").update(payload as never).eq("id", tournament.id);
     setSaving(false);
@@ -373,6 +391,8 @@ function SettingsTab({ tournament, onChanged }: { tournament: Tournament; onChan
         <FieldA label="Rules (markdown allowed)"><Textarea rows={6} value={f.rules ?? ""} onChange={(e) => upd("rules", e.target.value)} /></FieldA>
       </SettingsCard>
 
+      <SummitPassSection f={f} upd={upd} />
+
       <div className="flex justify-end">
         <Button variant="neon" onClick={save} disabled={saving} className="uppercase tracking-wider">
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Save Settings
@@ -383,6 +403,134 @@ function SettingsTab({ tournament, onChanged }: { tournament: Tournament; onChan
 }
 
 /* ──────────────── REGISTRATIONS ──────────────── */
+
+function SummitPassSection({
+  f,
+  upd,
+}: {
+  f: Tournament;
+  upd: (k: keyof Tournament, v: unknown) => void;
+}) {
+  const previewRow: TournamentRow = {
+    id: f.id,
+    slug: f.slug,
+    name: f.name,
+    game: f.game,
+    status: f.status,
+    short_description: f.short_description,
+    description: f.description,
+    start_date: f.start_date,
+    registration_close_at: f.registration_close_at,
+    max_teams: f.max_teams,
+    team_size: f.team_size,
+    format: null,
+    entry_cost_coins: 0,
+    route_label: f.route_label ?? null,
+    permit_number: f.permit_number ?? null,
+    serial: f.serial ?? null,
+    stamp_line1: f.stamp_line1 ?? null,
+    stamp_line2: f.stamp_line2 ?? null,
+    show_stamp: f.show_stamp ?? true,
+    summit_accent: f.summit_accent ?? null,
+  };
+  const cfg = tournamentToSummitPass(previewRow, 0);
+
+  // Validation warnings (non-blocking)
+  const warnings: string[] = [];
+  if (f.registration_close_at) {
+    const close = new Date(f.registration_close_at).getTime();
+    if (close < Date.now()) warnings.push("Registration closes in the past.");
+    if (f.start_date && close > new Date(f.start_date).getTime())
+      warnings.push("Registration closes after tournament start.");
+  }
+
+  return (
+    <SettingsCard title="Summit Pass Banner">
+      <p className="text-xs text-muted-foreground -mt-1 mb-3">
+        Controls the public Summit Pass banner. Countdown is driven by{" "}
+        <span className="font-mono">registration_close_at</span> (falls back to start date).
+      </p>
+
+      <div className="rounded-md border border-border/60 bg-black/30 p-3 mb-4 overflow-x-auto">
+        <SummitPassBanner config={cfg} />
+      </div>
+
+      {warnings.length > 0 && (
+        <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-xs text-amber-300 space-y-1">
+          {warnings.map((w, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <AlertTriangle className="h-3.5 w-3.5" /> {w}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Row2>
+        <FieldA label="Summit accent (red suffix after the title)">
+          <Input
+            value={f.summit_accent ?? ""}
+            onChange={(e) => upd("summit_accent", e.target.value)}
+            placeholder="#1"
+          />
+        </FieldA>
+        <FieldA label="Route label">
+          <Input
+            value={f.route_label ?? ""}
+            onChange={(e) => upd("route_label", e.target.value)}
+            placeholder="EU — West Face"
+          />
+        </FieldA>
+      </Row2>
+      <Row2>
+        <FieldA label="Permit number">
+          <Input
+            value={f.permit_number ?? ""}
+            onChange={(e) => upd("permit_number", e.target.value)}
+            placeholder="Nº 001"
+          />
+        </FieldA>
+        <FieldA label="Serial (auto if empty)">
+          <Input
+            value={f.serial ?? ""}
+            onChange={(e) => upd("serial", e.target.value)}
+            placeholder={cfg.serial ?? "PGG-VAL-EU-260516-CC1"}
+          />
+        </FieldA>
+      </Row2>
+      <Row2>
+        <FieldA label="Stamp line 1">
+          <Input
+            value={f.stamp_line1 ?? ""}
+            onChange={(e) => upd("stamp_line1", e.target.value)}
+            placeholder="Free entry"
+          />
+        </FieldA>
+        <FieldA label="Stamp line 2">
+          <Input
+            value={f.stamp_line2 ?? ""}
+            onChange={(e) => upd("stamp_line2", e.target.value)}
+            placeholder="· Approved ·"
+          />
+        </FieldA>
+      </Row2>
+      <Row2>
+        <FieldA label="Registration closes at (drives countdown)">
+          <DateTimeInput
+            value={f.registration_close_at}
+            onChange={(v) => upd("registration_close_at", v)}
+          />
+        </FieldA>
+        <div className="flex items-end gap-3 pb-2">
+          <Switch
+            checked={f.show_stamp ?? true}
+            onCheckedChange={(v) => upd("show_stamp", v)}
+          />
+          <span className="text-sm">Show stamp on banner</span>
+        </div>
+      </Row2>
+    </SettingsCard>
+  );
+}
 
 function RegistrationsTab({ signups, counts, onChanged, onOpen }: {
   signups: Signup[]; counts: Record<string, number>; onChanged: () => void; onOpen: (s: Signup) => void;
