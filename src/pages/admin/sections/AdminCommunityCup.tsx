@@ -282,6 +282,14 @@ function SettingsTab({ tournament, onChanged }: { tournament: Tournament; onChan
       result_confirmation_mode: f.result_confirmation_mode ?? "admin_manual",
       third_place_enabled: !!f.third_place_enabled,
       forfeit_grace_minutes: Number(f.forfeit_grace_minutes ?? 10),
+      // Summit Pass banner overrides
+      route_label: f.route_label ?? null,
+      permit_number: f.permit_number ?? null,
+      serial: f.serial ?? null,
+      stamp_line1: f.stamp_line1 ?? null,
+      stamp_line2: f.stamp_line2 ?? null,
+      show_stamp: f.show_stamp ?? true,
+      summit_accent: f.summit_accent ?? null,
     };
     const { error } = await supabase.from("tournaments").update(payload as never).eq("id", tournament.id);
     setSaving(false);
