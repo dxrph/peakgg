@@ -1,10 +1,7 @@
 import Navbar from "@/components/landing/Navbar";
 import SEO from "@/components/SEO";
 import HeroSection from "@/components/landing/HeroSection";
-import CommunityCupBanner from "@/components/landing/CommunityCupBanner";
-import PlatformStatsStrip from "@/components/landing/PlatformStatsStrip";
 import StartCompetingSection from "@/components/landing/StartCompetingSection";
-import PreLaunchCTA from "@/components/landing/PreLaunchCTA";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
 import ProgressionPath from "@/components/landing/ProgressionPath";
@@ -39,7 +36,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="page-shell overflow-hidden">
       <SEO
         title="PeakGG — Competitive Valorant Platform"
         description="Competitive Valorant for serious European players: ranked Open Cup tournaments, teams, free agents and the Peak rank system."
@@ -50,10 +47,7 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <CommunityCupBanner />
-        <PreLaunchCTA />
         <StartCompetingSection />
-        <PlatformStatsStrip />
         <FeaturesSection />
         <HowItWorksSteps />
         <section className="container py-16 md:py-20">
@@ -69,3 +63,4 @@ const Index = () => {
 };
 
 export default Index;
+

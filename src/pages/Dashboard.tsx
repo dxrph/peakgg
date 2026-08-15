@@ -192,13 +192,14 @@ export default function DashboardPage() {
   const peakRank = stats?.peak_rank ?? "Rookie";
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="page-shell">
       <Navbar />
-      <div className="container pt-24 pb-16">
+      <div className="page-container">
         <SeasonBanner />
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-5 mb-8 md:mb-10">
           <div>
-            <h1 className="text-3xl font-display font-bold">
+            <p className="eyebrow mb-3">// Competitive command center</p>
+            <h1 className="text-4xl md:text-5xl font-display font-bold uppercase leading-none">
               {t("dashboard.welcome", { defaultValue: "Welcome back" })},{" "}
               <span className="text-primary">{profileName}</span>
             </h1>
@@ -232,7 +233,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ELO Progress */}
-        <div className="rounded-lg border border-border bg-card p-5 neon-border mb-6">
+        <div className="tactical-panel p-5 md:p-6 mb-6">
           <div className="flex items-center gap-4 mb-3 flex-wrap">
             <RankBadge elo={elo} size="lg" showElo />
             <span className="text-sm text-muted-foreground font-body">
@@ -251,18 +252,18 @@ export default function DashboardPage() {
             { icon: Swords, label: t("dashboard.matches", { defaultValue: "Matches" }), value: String(stats?.matches_played ?? 0), color: "text-foreground" },
             { icon: Trophy, label: t("dashboard.tournaments_won", { defaultValue: "Tournaments Won" }), value: String(tournamentsWon), color: "text-yellow-400" },
           ].map((s) => (
-            <div key={s.label} className="rounded-lg border border-border bg-card p-5 neon-border">
+            <div key={s.label} className="tactical-panel p-4 md:p-5 min-h-[112px] flex flex-col justify-between">
               <div className="flex items-center gap-2 mb-2">
                 <s.icon className={`h-4 w-4 ${s.color}`} />
                 <span className="text-xs text-muted-foreground font-display uppercase tracking-wider">{s.label}</span>
               </div>
-              <div className={`text-2xl font-display font-bold ${s.color}`}>{s.value}</div>
+              <div className={`text-3xl font-display font-bold tracking-tight ${s.color}`}>{s.value}</div>
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-lg border border-border bg-card p-5 neon-border">
+          <div className="lg:col-span-2 tactical-panel p-5 md:p-6">
             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
               {t("dashboard.recent_matches", { defaultValue: "Recent Matches" })}
@@ -322,7 +323,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-lg border border-border bg-card p-5 neon-border">
+          <div className="tactical-panel p-5 md:p-6">
             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
               <Bell className="h-5 w-5 text-accent" />
               {t("dashboard.notifications", { defaultValue: "Notifications" })}
@@ -367,7 +368,7 @@ export default function DashboardPage() {
               const path = item.key === "my_profile" ? profilePath : resolvePath(item);
               return (
                 <Link key={item.key} to={path}>
-                  <div className="group relative rounded-lg border border-border bg-card p-4 hover:border-primary/40 hover:bg-card/80 transition-all cursor-pointer neon-border h-full flex flex-col items-center justify-center text-center min-h-[110px]">
+                  <div className="group relative tactical-panel p-4 hover:border-primary/35 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center min-h-[118px]">
                     <Icon className="h-7 w-7 mb-2 text-primary group-hover:scale-110 transition-transform" />
                     <span className="font-display font-bold text-sm leading-tight">{tr(item)}</span>
                     {item.comingSoon && (
@@ -406,3 +407,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

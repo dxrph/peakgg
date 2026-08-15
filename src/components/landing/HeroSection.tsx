@@ -22,11 +22,11 @@ export default function HeroSection() {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <section className="relative min-h-[760px] md:min-h-[820px] flex items-center overflow-hidden bg-[#050505]">
+    <section className="relative min-h-[680px] md:min-h-[760px] flex items-center overflow-hidden bg-[#05050a] border-b border-white/[0.06]">
       {/* Background artwork */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-center md:bg-[center_right] scale-105 md:scale-100"
+        className="absolute inset-0 bg-cover bg-[62%_center] md:bg-[center_right] scale-[1.08] md:scale-100"
         style={{ backgroundImage: `url(${heroBg.url})` }}
       />
 
@@ -36,7 +36,7 @@ export default function HeroSection() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(90deg, rgba(3,3,6,0.96) 0%, rgba(3,3,6,0.85) 30%, rgba(3,3,6,0.45) 55%, rgba(3,3,6,0.05) 80%)",
+            "linear-gradient(90deg, rgba(3,3,8,0.98) 0%, rgba(3,3,8,0.88) 32%, rgba(3,3,8,0.48) 58%, rgba(3,3,8,0.12) 82%)",
         }}
       />
       <div
@@ -68,13 +68,13 @@ export default function HeroSection() {
         }}
       />
 
-      <div className="container relative z-10 pt-24 pb-16 md:pt-28 md:pb-20">
+      <div className="container relative z-10 pt-24 pb-12 md:pt-28 md:pb-16">
         <div className="grid lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7 xl:col-span-6 lg:pl-4 xl:pl-8 max-w-2xl">
+          <div className="lg:col-span-7 xl:col-span-6 max-w-2xl">
             {/* Status pill */}
             <motion.div
               initial="hidden" animate="visible" variants={fadeUp(0)}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-sm border border-primary/50 bg-primary/[0.08] backdrop-blur-sm mb-6 uppercase"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary/35 bg-primary/[0.07] backdrop-blur-xl mb-6 uppercase"
             >
               <span className="relative inline-flex h-2 w-2">
                 <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-60" />
@@ -88,7 +88,7 @@ export default function HeroSection() {
             {/* Headline */}
             <motion.h1
               initial="hidden" animate="visible" variants={fadeUp(0.12)}
-              className="font-display font-bold uppercase leading-[0.88] tracking-tight mb-6 text-[3rem] xs:text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[5.5rem] xl:text-[6.5rem]"
+              className="font-display font-bold uppercase leading-[0.86] tracking-[-0.045em] mb-6 text-[2.75rem] xs:text-[3.25rem] sm:text-[4.4rem] md:text-[5.3rem] lg:text-[5.5rem] xl:text-[6.2rem]"
             >
               <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line1")}</span>
               <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line2")}</span>
@@ -107,7 +107,7 @@ export default function HeroSection() {
             {/* Subheadline */}
             <motion.p
               initial="hidden" animate="visible" variants={fadeUp(0.24)}
-              className="text-base md:text-lg lg:text-[1.2rem] text-gray-300 max-w-[560px] mb-8 leading-relaxed font-body"
+              className="text-[15px] md:text-lg text-slate-300 max-w-[540px] mb-7 leading-relaxed font-body"
             >
               {t("home.hero.subtitle")}
             </motion.p>
@@ -120,7 +120,7 @@ export default function HeroSection() {
               <Link to={registerHref} className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="group relative w-full sm:w-auto h-14 px-8 rounded-lg uppercase tracking-wider font-display font-bold text-base text-white border-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 shadow-[0_0_32px_rgba(255,70,85,0.45),0_0_70px_rgba(255,70,85,0.18)] hover:shadow-[0_0_48px_rgba(255,70,85,0.7),0_0_100px_rgba(255,70,85,0.3)]"
+                  className="group relative w-full sm:w-auto h-14 px-8 rounded-xl uppercase tracking-wider font-display font-bold text-sm text-white border-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 shadow-[0_16px_44px_-20px_rgba(255,70,85,0.9)] hover:shadow-[0_18px_52px_-18px_rgba(255,70,85,0.95)]"
                   style={{
                     backgroundImage:
                       "linear-gradient(95deg, #FF4655 0%, #FF5A3D 55%, #FF7A30 100%)",
@@ -140,7 +140,7 @@ export default function HeroSection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="group w-full sm:w-auto h-14 px-7 rounded-lg uppercase tracking-wider font-display font-semibold border-[#5865F2]/40 text-[#C7C8FF] bg-white/[0.03] backdrop-blur-sm hover:bg-[#5865F2]/15 hover:text-white hover:border-[#5865F2]/70 hover:shadow-[0_0_28px_rgba(88,101,242,0.35)] hover:-translate-y-0.5 transition-all duration-200"
+                  className="group w-full sm:w-auto h-14 px-7 rounded-xl uppercase tracking-wider font-display font-semibold border-white/15 text-[#D9DBFF] bg-white/[0.035] backdrop-blur-xl hover:bg-[#5865F2]/15 hover:text-white hover:border-[#5865F2]/60 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <DiscordIcon className="mr-3 h-[18px] w-[18px] md:h-5 md:w-5 shrink-0 text-[#C7C8FF] group-hover:text-white transition-colors" />
                   {t("home.hero.discordCta")}
@@ -151,7 +151,7 @@ export default function HeroSection() {
             {/* Beta status banner */}
             <motion.div
               initial="hidden" animate="visible" variants={fadeUp(0.4)}
-              className="inline-flex items-start gap-2 px-3.5 py-2 rounded-md border border-emerald-500/30 bg-emerald-500/[0.06] backdrop-blur-sm max-w-[560px] mb-7"
+              className="inline-flex items-start gap-2 px-3.5 py-2 rounded-lg border border-emerald-400/20 bg-emerald-400/[0.055] backdrop-blur-xl max-w-[560px] mb-7"
             >
               <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <span className="text-xs md:text-sm text-emerald-100/90 font-body leading-snug">
@@ -245,3 +245,4 @@ export default function HeroSection() {
     </section>
   );
 }
+
