@@ -23,6 +23,11 @@ export function buildMatchUrl(id: unknown): string | null {
   return `/matches/${id}`;
 }
 
+export function buildBroadcastMatchUrl(id: unknown): string | null {
+  if (!isValidMatchId(id)) return null;
+  return `/broadcast/matches/${id}`;
+}
+
 export function buildTournamentMatchUrl(
   slug: string | null | undefined,
   id: unknown,
@@ -41,3 +46,4 @@ export function sanitizeMatchUrl(url: string | null | undefined): string | null 
   if (match && !isValidMatchId(match[1])) return null;
   return url;
 }
+

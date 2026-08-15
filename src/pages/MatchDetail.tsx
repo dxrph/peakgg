@@ -19,12 +19,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info, AlertTriangle, Trophy, Clock, FileWarning, Shield } from "lucide-react";
+import { ChevronLeft, ShieldAlert, Check, Send, Gavel, MessageCircle, Info, AlertTriangle, Trophy, Clock, FileWarning, Shield, MonitorUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { DISCORD_INVITE } from "@/lib/links";
 import { toast } from "sonner";
+import PeakMomentCard from "@/components/matches/PeakMomentCard";
+import { buildBroadcastMatchUrl } from "@/lib/match-url";
 
 interface MatchRow {
   id: string; game: string; map: string | null;
@@ -609,6 +611,7 @@ export default function MatchDetailPage() {
               </Button>
             )}
             {canAdminResolve && <Button variant="secondary" onClick={openAdminResolve} className="w-full sm:w-auto"><Gavel className="h-4 w-4 mr-1.5" /> Admin Resolve</Button>}
+            <Button variant="outline" asChild className="w-full sm:w-auto"><Link to={buildBroadcastMatchUrl(match.id) ?? "/dashboard"} target="_blank"><MonitorUp className="h-4 w-4 mr-1.5" />Broadcast</Link></Button>
           </div>
 
           {match.elo_processed_at && eloDeltas.length === 0 && (
@@ -618,6 +621,17 @@ export default function MatchDetailPage() {
             <div className="mt-4 text-center text-xs text-muted-foreground">ELO update pending…</div>
           )}
         </Card>
+
+        {(["confirmed", "admin_resolved"].includes(match.result_status) || match.status === "completed") && (
+          <PeakMomentCard
+            sideA={is1v1 ? (playerA?.display_name ?? playerA?.username ?? "Player A") : (teamA?.name ?? "Side A")}
+            sideB={is1v1 ? (playerB?.display_name ?? playerB?.username ?? "Player B") : (teamB?.name ?? "Side B")}
+            scoreA={match.score_a ?? 0}
+            scoreB={match.score_b ?? 0}
+            game={match.game}
+            map={match.map}
+          />
+        )}
 
         {/* === RESULT STATUS PANEL === */}
         <Card className="p-4 sm:p-5 mb-6">
@@ -1094,3 +1108,4 @@ export default function MatchDetailPage() {
     </div>
   );
 }
+

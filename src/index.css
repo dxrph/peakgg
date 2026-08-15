@@ -497,3 +497,162 @@
   to { transform: rotate(-25deg) translate3d(4%, 8%, 0); }
 }
 
+/* ─── PeakGG OS: navigation, competitive surfaces and share moments ─── */
+body.peak-mobile-dock { padding-bottom: 5.25rem; }
+
+.peak-mobile-dock {
+  position: fixed;
+  z-index: 48;
+  left: .65rem;
+  right: .65rem;
+  bottom: max(.65rem, env(safe-area-inset-bottom));
+  height: 4.15rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  padding: .35rem;
+  border: 1px solid hsl(var(--border) / .9);
+  border-radius: 1.25rem;
+  background: hsl(var(--background) / .9);
+  box-shadow: 0 18px 55px hsl(0 0% 0% / .65), inset 0 1px hsl(0 0% 100% / .04);
+  backdrop-filter: blur(22px);
+}
+.peak-mobile-dock__item {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  border-radius: .85rem;
+  color: hsl(var(--muted-foreground));
+  font: 700 9px/1 "Rajdhani", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: color .2s ease, background .2s ease, transform .2s ease;
+}
+.peak-mobile-dock__item.is-active { color: hsl(var(--primary)); background: hsl(var(--primary) / .09); }
+.peak-mobile-dock__item.is-primary .peak-mobile-dock__icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  margin-top: -1.15rem;
+  display: grid;
+  place-items: center;
+  color: white;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 24px hsl(var(--primary) / .42);
+}
+.peak-mobile-dock__item:active { transform: scale(.94); }
+
+.party-board,
+.tournament-cockpit,
+.player-passport,
+.club-command-card,
+.peak-moment { isolation: isolate; }
+
+.party-board { box-shadow: 0 30px 90px -55px hsl(var(--primary) / .65); }
+.cockpit-phase-active { box-shadow: inset 0 -3px hsl(var(--primary)); }
+.cockpit-phase-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, transparent 35%, hsl(var(--primary) / .08));
+  animation: cockpit-pulse 2.5s ease-in-out infinite alternate;
+}
+
+.player-passport {
+  border: 1px solid hsl(var(--primary) / .34);
+  clip-path: polygon(0 1.5%, 5% 0, 11% 1%, 18% 0, 26% .8%, 36% 0, 47% .8%, 57% 0, 68% .9%, 79% 0, 90% 1%, 100% 0, 99.5% 98%, 92% 100%, 83% 99%, 73% 100%, 63% 99%, 52% 100%, 41% 99%, 30% 100%, 20% 99%, 9% 100%, .5% 98%);
+  box-shadow: 0 36px 100px -58px hsl(var(--primary) / .7);
+}
+.passport-scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background: repeating-linear-gradient(0deg, transparent 0 5px, hsl(var(--primary) / .16) 6px);
+  mask-image: linear-gradient(90deg, black, transparent 78%);
+}
+
+.club-command-card {
+  position: relative;
+  border-color: hsl(var(--primary) / .25);
+  background: linear-gradient(120deg, hsl(var(--card)), hsl(var(--primary) / .055));
+}
+.club-command-card::after {
+  content: "CLUB HQ";
+  position: absolute;
+  right: -.04em;
+  bottom: -.22em;
+  color: hsl(var(--foreground) / .028);
+  font: 900 clamp(4rem, 10vw, 8rem)/1 "Rajdhani", sans-serif;
+  pointer-events: none;
+}
+
+.peak-moment {
+  position: relative;
+  border: 1px solid hsl(var(--primary) / .4);
+  border-radius: 1rem;
+  background:
+    linear-gradient(120deg, hsl(var(--background) / .96), hsl(var(--primary) / .09)),
+    repeating-linear-gradient(90deg, transparent 0 49px, hsl(var(--primary) / .08) 50px);
+  box-shadow: 0 28px 80px -52px hsl(var(--primary) / .7);
+}
+.peak-moment__beam {
+  position: absolute;
+  width: 42%;
+  height: 180%;
+  right: -15%;
+  top: -45%;
+  transform: rotate(-24deg);
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / .16), transparent);
+  animation: moment-beam 6s ease-in-out infinite alternate;
+}
+
+@keyframes cockpit-pulse { from { opacity: .35; } to { opacity: 1; } }
+@keyframes moment-beam { from { transform: rotate(-24deg) translateX(-8%); } to { transform: rotate(-24deg) translateX(8%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cockpit-phase-active::after,
+  .peak-moment__beam,
+  .peak-mobile-dock__item { animation: none; transition: none; }
+}
+
+.broadcast-arena {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  background:
+    radial-gradient(circle at 70% 22%, hsl(var(--primary) / .2), transparent 36%),
+    linear-gradient(135deg, hsl(235 28% 4%), hsl(18 30% 7%));
+}
+.broadcast-grid {
+  position: absolute;
+  inset: 0;
+  opacity: .3;
+  background-image: linear-gradient(hsl(var(--primary) / .12) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / .12) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black, transparent 85%);
+}
+.broadcast-slash {
+  position: absolute;
+  width: 65vw;
+  height: 130vh;
+  right: -32vw;
+  top: -18vh;
+  transform: rotate(24deg);
+  border-left: 1px solid hsl(var(--primary) / .4);
+  background: linear-gradient(90deg, hsl(var(--primary) / .02), hsl(var(--primary) / .16));
+}
+.broadcast-score {
+  min-width: 3.2em;
+  text-align: center;
+  font: 900 clamp(3.2rem, 10vw, 9rem)/.8 "Rajdhani", sans-serif;
+  letter-spacing: -.08em;
+  text-shadow: 0 0 42px hsl(var(--primary) / .24);
+}
+

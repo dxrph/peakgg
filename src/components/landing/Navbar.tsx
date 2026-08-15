@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, ChevronDown, Shield, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, ChevronDown, Shield, LayoutDashboard, Search } from "lucide-react";
 import DiscordIcon from "@/components/icons/DiscordIcon";
 import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect } from "react";
@@ -28,6 +28,7 @@ import {
 } from "@/config/navigation";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { supabase } from "@/integrations/supabase/client";
+import { openPeakCommand } from "@/components/navigation/PeakCommandPalette";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -175,6 +176,18 @@ export default function Navbar() {
 
         {/* RIGHT: utility */}
         <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
+          {user && (
+            <button
+              type="button"
+              onClick={openPeakCommand}
+              className="h-8 px-2.5 rounded-md border border-border/70 bg-card/45 hover:border-primary/40 hover:text-primary transition-colors inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-display text-muted-foreground"
+              aria-label="Apri ricerca rapida"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span className="hidden xl:inline">Cerca</span>
+              <kbd className="hidden lg:inline-flex text-[9px] border border-border rounded px-1 py-0.5">⌘K</kbd>
+            </button>
+          )}
           <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" aria-label="Discord">
             <Button
               variant="outline"
@@ -435,3 +448,4 @@ function MobileMenu({ onClose, onSignOut, isAdmin, profilePath, isLoggedIn, myTe
     </div>
   );
 }
+

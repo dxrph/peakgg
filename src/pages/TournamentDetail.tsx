@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format as fmtDate } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DISCORD_INVITE } from "@/lib/links";
+import TournamentCockpit from "@/components/tournaments/TournamentCockpit";
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
@@ -161,6 +162,8 @@ export default function TournamentDetailPage() {
           </div>
         </div>
 
+        <TournamentCockpit tournament={t} participants={realParticipantsCount} />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-lg border border-border bg-card p-6">
@@ -243,3 +246,4 @@ export default function TournamentDetailPage() {
     </div>
   );
 }
+
