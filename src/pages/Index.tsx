@@ -47,15 +47,18 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <StartCompetingSection />
-        <FeaturesSection />
-        <HowItWorksSteps />
-        <section className="container py-16 md:py-20">
-          <ProgressionPath />
+        <div className="signal-marquee" aria-hidden>
+          <div>PLAY YOUR ROLE • BUILD YOUR ROSTER • ENTER THE CUP • CLIMB THE PEAK • PLAY YOUR ROLE • BUILD YOUR ROSTER • ENTER THE CUP • CLIMB THE PEAK •</div>
+        </div>
+        <section className="editorial-section" data-index="01"><StartCompetingSection /></section>
+        <section className="editorial-section" data-index="02"><FeaturesSection /></section>
+        <section className="editorial-section" data-index="03"><HowItWorksSteps /></section>
+        <section className="container py-16 md:py-24 editorial-section" data-index="04">
+          <div className="paper-cut p-5 md:p-10"><ProgressionPath /></div>
         </section>
-        <RankShowcase />
-        <TopPlayersWeek />
-        <DiscordCTA />
+        <section className="editorial-section" data-index="05"><RankShowcase /></section>
+        <section className="editorial-section" data-index="06"><TopPlayersWeek /></section>
+        <section className="editorial-section" data-index="07"><DiscordCTA /></section>
       </main>
       <Footer />
     </div>

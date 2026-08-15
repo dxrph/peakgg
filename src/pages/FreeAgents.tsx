@@ -26,6 +26,7 @@ import {
   freeAgentCtaLabel,
   isFreeAgentListed,
 } from "@/lib/free-agent";
+import PartyFinderBoard from "@/components/competitive/PartyFinderBoard";
 
 type AgentRow = {
   id: string;
@@ -406,6 +407,8 @@ export default function FreeAgentsPage() {
           )}
         </div>
       </section>
+
+      <PartyFinderBoard />
 
       {/* For Players / For Teams cards */}
       <section className="container max-w-6xl py-10">
@@ -879,3 +882,4 @@ function AgentCard({ agent }: { agent: AgentRow }) {
     </Link>
   );
 }
+

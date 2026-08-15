@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import MfaSection from "@/components/settings/MfaSection";
+import PasskeySection from "@/components/settings/PasskeySection";
 
 type GdprRequest = {
   id: string;
@@ -158,6 +159,7 @@ export default function SettingsPage() {
 
         {/* MFA */}
         {user && <MfaSection />}
+        {user && <PasskeySection />}
 
         {/* Data export */}
         <section className="rounded-lg border border-border bg-card p-6 mb-6">
@@ -322,3 +324,4 @@ function X(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+

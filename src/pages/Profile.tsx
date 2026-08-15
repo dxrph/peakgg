@@ -76,6 +76,7 @@ import { useI18n } from "@/i18n";
 import { GAMES, getActiveGames, getGameById, type GameId, getRankByElo, getEloProgress } from "@/lib/ranks";
 import GameIcon from "@/components/GameIcon";
 import SeasonBadge from "@/components/seasons/SeasonBadge";
+import PlayerPassport from "@/components/profile/PlayerPassport";
 
 type Profile = {
   id: string;
@@ -472,6 +473,16 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <PlayerPassport
+        profile={profile}
+        elo={headerElo}
+        rank={rankInfo.name}
+        winRate={matchStats.winRate}
+        matches={matchStats.played}
+        trophies={trophies.length}
+        teamName={team?.name}
+      />
 
       {isOwnProfile && team && (
         <div className="container mt-6">
@@ -1409,3 +1420,4 @@ function EditProfileDialog({
     </Dialog>
   );
 }
+

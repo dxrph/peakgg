@@ -11,14 +11,15 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ title, description, actions, children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="page-shell admin-shell">
       <Navbar />
       <div className="pt-16 flex">
         <AdminSidebar />
-        <main className="flex-1 min-w-0 p-6 md:p-8">
-          <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <main className="flex-1 min-w-0 p-5 md:p-8 lg:p-10">
+          <header className="mb-8 md:mb-10 flex items-end justify-between gap-4 flex-wrap border-b border-border pb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-display font-bold">{title}</h1>
+              <p className="eyebrow mb-2">// Operations control</p>
+              <h1 className="brush-title text-3xl md:text-5xl uppercase font-display font-bold">{title}</h1>
               {description && (
                 <p className="text-sm text-muted-foreground font-body mt-1">{description}</p>
               )}
@@ -31,3 +32,4 @@ export default function AdminLayout({ title, description, actions, children }: A
     </div>
   );
 }
+

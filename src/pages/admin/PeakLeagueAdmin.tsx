@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import StatusPill from "@/components/leagues/StatusPill";
+import { buildMatchUrl } from "@/lib/match-url";
 
 interface League {
   id: string; name: string; slug: string; game: string; status: string;
@@ -899,7 +900,7 @@ function MatchesTable({ matches, teamMap, busy, setBusy, onChange }: {
                 <TableCell><StatusPill status={m.status} /></TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button asChild size="sm" variant="ghost"><Link to={`/matches/${m.id}`}>Open</Link></Button>
+                    <Button asChild size="sm" variant="ghost"><Link to={buildMatchUrl(m.id) ?? "/admin/matches"}>Open</Link></Button>
                     <Button size="sm" variant="outline" onClick={() => open(m)}>Edit</Button>
                     {m.status !== "live" && <Button size="sm" variant="outline" onClick={() => setStatus(m, "live")} disabled={busy}>Live</Button>}
                     <AlertDialog>
@@ -993,7 +994,7 @@ function ResultsTab({ matches, teamMap, seasonId, onChange }: {
                   {m.proof_url && <a href={m.proof_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">View proof</a>}
                 </div>
                 <div className="flex gap-2">
-                  <Button asChild size="sm" variant="outline"><Link to={`/matches/${m.id}`}>Open</Link></Button>
+                  <Button asChild size="sm" variant="outline"><Link to={buildMatchUrl(m.id) ?? "/admin/matches"}>Open</Link></Button>
                   <Button size="sm" onClick={() => force(m.id)}><Check className="h-3 w-3 mr-1" /> Approve</Button>
                   <Button size="sm" variant="outline" onClick={() => reject(m.id)}><X className="h-3 w-3 mr-1" /> Reject</Button>
                 </div>
@@ -1215,3 +1216,4 @@ function SettingsTab({ season, completedMatches, onArchive, onReopen, onResetFor
     </Card>
   );
 }
+

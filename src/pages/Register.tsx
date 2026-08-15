@@ -1,200 +1,87 @@
 import { useState } from "react";
 import SEO from "@/components/SEO";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, Loader2, Mail, User, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mountain, Mail, Lock, User, Eye, EyeOff, Loader2, Check, X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import AuthStage from "@/components/auth/AuthStage";
 import GoogleButton from "@/components/GoogleButton";
-import {
-  passwordSchema,
-  passwordStrength,
-  emailSchema,
-  usernameSchema,
-  isDisposableEmail,
-} from "@/lib/security";
+import { useAuth } from "@/hooks/useAuth";
+import { emailSchema, usernameSchema, isDisposableEmail } from "@/lib/security";
 import { containsProfanity } from "@/lib/profanity";
-import { useI18n } from "@/i18n";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
-  const navigate = useNavigate();
-  const { t } = useI18n();
+  const [sent, setSent] = useState(false);
+  const { signInWithMagicLink } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username || !email || !password) {
-      toast.error(t("auth.fill_all_fields"));
-      return;
-    }
-
-    const usernameCheck = usernameSchema.safeParse(username);
-    if (!usernameCheck.success) {
-      toast.error(usernameCheck.error.issues[0].message);
-      return;
-    }
-    if (containsProfanity(usernameCheck.data)) {
-      toast.error(t("auth.username_taken_check"));
-      return;
-    }
-
-    const emailCheck = emailSchema.safeParse(email);
-    if (!emailCheck.success) {
-      toast.error(emailCheck.error.issues[0].message);
-      return;
-    }
-
-    const pwCheck = passwordSchema.safeParse(password);
-    if (!pwCheck.success) {
-      toast.error(pwCheck.error.issues[0].message);
-      return;
-    }
-
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const validUsername = usernameSchema.safeParse(username.trim());
+    if (!validUsername.success || containsProfanity(username)) return toast.error("Scegli un nickname valido.");
+    const validEmail = emailSchema.safeParse(email.trim());
+    if (!validEmail.success) return toast.error("Inserisci un indirizzo email valido.");
     setIsLoading(true);
-    if (await isDisposableEmail(emailCheck.data)) {
+    if (await isDisposableEmail(validEmail.data)) {
       setIsLoading(false);
-      toast.error(t("auth.disposable_not_allowed"));
-      return;
+      return toast.error("Le email temporanee non sono ammesse.");
     }
-
-    const { error } = await signUp(emailCheck.data, pwCheck.data, usernameCheck.data);
+    const { error } = await signInWithMagicLink(validEmail.data, validUsername.data);
     setIsLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(t("auth.account_created"));
-      navigate("/login");
-    }
+    if (error) return toast.error(error.message);
+    setSent(true);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      <div className="hidden lg:flex flex-1 gradient-hero items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 scanline pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-accent/[0.05] blur-[120px]" />
-        <div className="relative z-10 text-center px-12">
-          <div className="w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-6">
-            <Mountain className="h-8 w-8 text-primary-foreground" />
+    <>
+      <SEO title="Crea il profilo — PeakGG" description="Entra nella piattaforma competitiva PeakGG senza password." path="/register" />
+      <AuthStage
+        eyebrow="// New challenger detected"
+        title="Build your legacy."
+        copy="Crea la tua identità competitiva, trova il roster giusto e conquista tornei, rank e riconoscimenti."
+      >
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 text-primary text-xs uppercase tracking-[.2em] font-display font-bold mb-4">
+            <Zap className="h-3.5 w-3.5" /> Create player identity
           </div>
-          <h1 className="text-5xl font-display font-bold mb-4">PEAKGG</h1>
-          <p className="text-muted-foreground text-lg font-body">{t("auth.join_community")}</p>
+          <h2 className="font-display uppercase font-bold text-4xl md:text-5xl leading-none tracking-[-.04em]">Il tuo climb parte qui.</h2>
+          <p className="text-muted-foreground mt-4">Nessuna password: conferma l'email e completa il profilo dopo l'accesso.</p>
         </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center px-6">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded gradient-primary flex items-center justify-center">
-              <Mountain className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-xl">PEAKGG</span>
+        {sent ? (
+          <div className="torn-panel p-7">
+            <CheckCircle2 className="h-9 w-9 text-success mb-5" />
+            <h3 className="font-display uppercase text-2xl font-bold">Profilo quasi pronto</h3>
+            <p className="text-sm text-muted-foreground mt-2">Apri il link inviato a <strong className="text-foreground">{email}</strong> per attivare <strong className="text-foreground">{username}</strong>.</p>
           </div>
-
-          <h2 className="text-3xl font-display font-bold mb-2">{t("auth.create_account")}</h2>
-          <p className="text-muted-foreground mb-8 font-body">{t("auth.create_account_sub")}</p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+        ) : (
+          <form onSubmit={submit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username" className="font-body">{t("auth.username")}</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="username" placeholder={t("auth.username_placeholder")} value={username}
-                  onChange={(e) => setUsername(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
+              <Label htmlFor="username" className="text-xs uppercase tracking-[.18em] font-display">Nickname Peak</Label>
+              <div className="relative"><User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="username" autoComplete="username" placeholder="YourCallsign" value={username} onChange={(e) => setUsername(e.target.value)} className="h-14 pl-11 bg-card/65 border-white/10 rounded-xl" />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-body">{t("auth.email")}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" placeholder={t("auth.email_placeholder")} value={email}
-                  onChange={(e) => setEmail(e.target.value)} className="pl-10 bg-card border-border" disabled={isLoading} />
+              <Label htmlFor="email" className="text-xs uppercase tracking-[.18em] font-display">Email account</Label>
+              <div className="relative"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="email" type="email" autoComplete="email" placeholder="player@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 pl-11 bg-card/65 border-white/10 rounded-xl" />
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="font-body">{t("auth.password")}</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder={t("auth.password_hint")}
-                  value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-card border-border" disabled={isLoading} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <PasswordChecklist password={password} />
-            </div>
-
-            <Button variant="neon" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("auth.creating_account")}</> : t("auth.create_account")}
+            <Button className="w-full h-14 rounded-xl uppercase tracking-[.14em] font-display font-bold signal-button" disabled={isLoading}>
+              {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Crea profilo <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </form>
-
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground font-body">{t("auth.or")}</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <GoogleButton label={t("auth.signup_google")} />
-
-          <p className="text-sm text-muted-foreground text-center mt-4 font-body">
-            {t("auth.agree_terms")} <Link to="/terms" className="text-primary hover:underline">{t("auth.terms_link")}</Link> {t("auth.and")} <Link to="/privacy" className="text-primary hover:underline">{t("auth.privacy_link")}</Link>
-          </p>
-
-          <p className="text-center text-sm text-muted-foreground mt-6 font-body">
-            {t("auth.have_account")} <Link to="/login" className="text-primary hover:underline font-medium">{t("auth.sign_in")}</Link>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PasswordChecklist({ password }: { password: string }) {
-  const { t } = useI18n();
-  const checks = [
-    { label: t("auth.pw_check_8"), ok: password.length >= 8 },
-    { label: t("auth.pw_check_upper"), ok: /[A-Z]/.test(password) },
-    { label: t("auth.pw_check_number"), ok: /[0-9]/.test(password) },
-    { label: t("auth.pw_check_special"), ok: /[^A-Za-z0-9]/.test(password) },
-  ];
-  const { score, label } = passwordStrength(password);
-  const barColors = ["bg-destructive", "bg-destructive", "bg-warning", "bg-primary", "bg-success"];
-  return (
-    <div className="space-y-2">
-      <div className="flex gap-1">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i < score ? barColors[score] : "bg-border"
-            }`}
-          />
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-body">
-        {checks.map((c) => (
-          <span
-            key={c.label}
-            className={`flex items-center gap-1 ${c.ok ? "text-success" : "text-muted-foreground"}`}
-          >
-            {c.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-            {c.label}
-          </span>
-        ))}
-        {password.length > 0 && (
-          <span className="ml-auto text-muted-foreground">{label}</span>
         )}
-      </div>
-    </div>
+        <div className="my-7 flex items-center gap-4"><span className="h-px flex-1 bg-border" /><span className="text-[10px] uppercase tracking-[.24em] text-muted-foreground">oppure</span><span className="h-px flex-1 bg-border" /></div>
+        <GoogleButton label="Continua con Google" />
+        <p className="text-center text-sm text-muted-foreground mt-7">Hai già un profilo? <Link to="/login" className="text-primary font-semibold hover:underline">Accedi</Link></p>
+      </AuthStage>
+    </>
   );
 }
+

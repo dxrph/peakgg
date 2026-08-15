@@ -2,29 +2,12 @@ import { useState } from "react";
 import { getRankByElo, getRankByName, type RankInfo, type RankTier } from "@/lib/ranks";
 import { useI18n } from "@/i18n";
 import { useRankDefinitions, getCachedEmblemUrl } from "@/hooks/useRankDefinitions";
-import rookieImg from "@/assets/ranks/rookie.png";
-import contenderImg from "@/assets/ranks/contender.png";
-import rivalImg from "@/assets/ranks/rival.png";
-import expertImg from "@/assets/ranks/expert.png";
-import eliteImg from "@/assets/ranks/elite.png";
-import masterImg from "@/assets/ranks/master.png";
-import apexImg from "@/assets/ranks/apex.png";
 
 /**
  * Official PeakGG rank artwork. These bundled PNGs are the SINGLE source of
  * truth for rank visuals across the platform. If an asset ever fails to load
  * we fall back to the procedural SVG emblem below so the UI never breaks.
  */
-export const RANK_IMAGES: Record<RankTier, string> = {
-  Rookie: rookieImg,
-  Contender: contenderImg,
-  Rival: rivalImg,
-  Expert: expertImg,
-  Elite: eliteImg,
-  Master: masterImg,
-  Apex: apexImg,
-};
-
 /**
  * RankBadge — premium SVG rank emblem for PeakGG.
  *
@@ -84,9 +67,8 @@ export default function RankBadge({
   const [imgFailed, setImgFailed] = useState(false);
   // Prefer the bundled official artwork; fall back to a DB-configured emblem
   // (legacy) and finally to the procedural SVG if everything fails to load.
-  const bundledSrc = RANK_IMAGES[info.name as RankTier] ?? null;
   const dbEmblem = forceProcedural ? null : getCachedEmblemUrl(info.name);
-  const customSrc = !forceProcedural && !imgFailed ? bundledSrc ?? dbEmblem ?? null : null;
+  const customSrc = !forceProcedural && !imgFailed ? dbEmblem ?? null : null;
 
   return (
     <span
@@ -482,3 +464,4 @@ const GLYPHS: Record<RankTier, GlyphFn> = {
   Master:    MasterGlyph,
   Apex:      ApexGlyph,
 };
+

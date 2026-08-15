@@ -198,7 +198,7 @@ export default function TeamDashboard() {
         </Button>
 
         <div className="text-[10px] font-display uppercase tracking-[0.25em] text-primary/80 mb-2">Team Dashboard · Internal HQ</div>
-        <Card className="p-6 mb-6">
+        <Card className="club-command-card p-6 mb-4 overflow-hidden">
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <TeamLogo name={team.name} tag={team.tag} avatarUrl={team.avatar_url} color={team.color} size={64} rounded="lg" />
             <div className="flex-1">
@@ -222,6 +222,37 @@ export default function TeamDashboard() {
             </div>
           </div>
         </Card>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {upcoming[0] ? (
+            <Link to={buildMatchUrl(upcoming[0].id) ?? "/dashboard"} className="tactical-panel p-4 hover:border-primary/45 transition-colors group">
+              <div className="flex items-center justify-between"><Swords className="h-4 w-4 text-primary" /><span className="text-[9px] uppercase tracking-wider text-primary">Next action</span></div>
+              <div className="font-display uppercase font-bold mt-4 truncate group-hover:text-primary">Apri match room</div>
+              <div className="text-[10px] text-muted-foreground mt-1">{upcoming[0].scheduled_at ? new Date(upcoming[0].scheduled_at).toLocaleString() : "Da programmare"}</div>
+            </Link>
+          ) : (
+            <Link to="/tournaments" className="tactical-panel p-4 hover:border-primary/45 transition-colors">
+              <div className="flex items-center justify-between"><Swords className="h-4 w-4 text-primary" /><span className="text-[9px] uppercase tracking-wider text-muted-foreground">Next action</span></div>
+              <div className="font-display uppercase font-bold mt-4">Trova competizione</div>
+              <div className="text-[10px] text-muted-foreground mt-1">Nessuna partita pianificata</div>
+            </Link>
+          )}
+          <div className="tactical-panel p-4">
+            <div className="flex items-center justify-between"><Users className="h-4 w-4 text-primary" /><span className="text-[9px] uppercase tracking-wider text-muted-foreground">Roster readiness</span></div>
+            <div className="font-display uppercase font-bold mt-4">{members.length}/{team.slots} player</div>
+            <div className="mt-2 h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-primary" style={{ width: `${Math.min(100, (members.length / Math.max(1, team.slots)) * 100)}%` }} /></div>
+          </div>
+          <div className={`tactical-panel p-4 ${requests.length > 0 ? "border-accent/40" : ""}`}>
+            <div className="flex items-center justify-between"><Inbox className="h-4 w-4 text-accent" /><span className="text-[9px] uppercase tracking-wider text-muted-foreground">Recruitment</span></div>
+            <div className="font-display uppercase font-bold mt-4">{requests.length} candidature</div>
+            <div className="text-[10px] text-muted-foreground mt-1">{team.looking_for_players ? "Ricerca giocatori attiva" : "Roster non in ricerca"}</div>
+          </div>
+          <div className="tactical-panel p-4">
+            <div className="flex items-center justify-between"><Trophy className="h-4 w-4 text-primary" /><span className="text-[9px] uppercase tracking-wider text-muted-foreground">Season pulse</span></div>
+            <div className="font-display uppercase font-bold mt-4">{standing ? `#${standing.position ?? "—"}` : registration?.status ?? "Non iscritti"}</div>
+            <div className="text-[10px] text-muted-foreground mt-1 truncate">{season?.name ?? "Entra nella prossima stagione"}</div>
+          </div>
+        </div>
 
         <Tabs defaultValue="overview">
           <div className="overflow-x-auto -mx-4 px-4">
@@ -625,3 +656,4 @@ function SettingsPanel({ team, reload }: { team: Team; reload: () => void }) {
     </div>
   );
 }
+

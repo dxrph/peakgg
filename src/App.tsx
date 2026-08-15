@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { GameProvider } from "@/lib/game-context";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -62,8 +62,25 @@ import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import RoleGuard from "./components/RoleGuard";
+import PeakCommandPalette from "./components/navigation/PeakCommandPalette";
+import MobileDock from "./components/navigation/MobileDock";
+import BroadcastMatchPage from "./pages/BroadcastMatch";
 
 const queryClient = new QueryClient();
+
+function AppOverlays() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/broadcast/")) return null;
+  return (
+    <>
+      <GlobalActiveBar />
+      <PeakCommandPalette />
+      <MobileDock />
+      <ChatWidget />
+      <CookieBanner />
+    </>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -77,7 +94,6 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Analytics />
-            <GlobalActiveBar />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
@@ -127,6 +143,7 @@ const App = () => (
               <Route path="/matches/undefined" element={<Navigate to="/dashboard" replace />} />
               <Route path="/matches/null" element={<Navigate to="/dashboard" replace />} />
               <Route path="/matches/:matchId" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
+              <Route path="/broadcast/matches/:matchId" element={<BroadcastMatchPage />} />
               <Route
                 path="/admin/security"
                 element={
@@ -151,8 +168,7 @@ const App = () => (
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <ChatWidget />
-            <CookieBanner />
+            <AppOverlays />
           </GameProvider>
           </I18nProvider>
         </AuthProvider>
@@ -163,3 +179,4 @@ const App = () => (
 );
 
 export default App;
+

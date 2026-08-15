@@ -175,6 +175,31 @@ export default function AdminDashboard() {
             <StatCard icon={Ban}          label="Player bannati"  value={stats.bannedPlayers} />
           </div>
 
+          <div className="grid lg:grid-cols-[1.35fr_.65fr] gap-6 mt-8">
+            <div className="tactical-panel overflow-hidden">
+              <div className="p-5 border-b border-border/70 flex items-center justify-between gap-3">
+                <div><div className="text-[10px] uppercase tracking-[.24em] text-primary font-display">Live operations queue</div><h2 className="font-display uppercase font-bold text-xl mt-1">Interventi prioritari</h2></div>
+                <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-success"><span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />Realtime</span>
+              </div>
+              <div className="divide-y divide-border/70">
+                <OpsRow to="/admin/disputes" icon={Gavel} label="Contestazioni aperte" value={stats.openDisputes} urgent={stats.openDisputes > 0} />
+                <OpsRow to="/admin/matches" icon={Hourglass} label="Risultati da confermare" value={stats.pendingMatches} urgent={stats.pendingMatches > 5} />
+                <OpsRow to="/admin/tickets" icon={AlertTriangle} label="Ticket in revisione" value={stats.openTickets} urgent={stats.openTickets > 0} />
+                <OpsRow to="/admin/players" icon={Ban} label="Account bannati" value={stats.bannedPlayers} />
+              </div>
+            </div>
+            <div className="tactical-panel p-5">
+              <div className="text-[10px] uppercase tracking-[.24em] text-primary font-display">Launchpad</div>
+              <h2 className="font-display uppercase font-bold text-xl mt-1 mb-4">Azioni rapide</h2>
+              <div className="grid gap-2">
+                <QuickAction to="/admin/tournaments" icon={Trophy} label="Crea torneo" />
+                <QuickAction to="/admin/announcements" icon={Activity} label="Invia annuncio" />
+                <QuickAction to="/admin/seasons" icon={TrendingUp} label="Gestisci stagione" />
+                <QuickAction to="/admin/security" icon={Ban} label="Security center" />
+              </div>
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-6 mt-8">
             <ChartCard title="Registrazioni ultimi 30 giorni" icon={TrendingUp}>
               <SignupsChart data={stats.signupsLast30} />
@@ -189,6 +214,20 @@ export default function AdminDashboard() {
   );
 }
 
+function OpsRow({ to, icon: Icon, label, value, urgent = false }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; value: number; urgent?: boolean }) {
+  return (
+    <Link to={to} className="p-4 flex items-center gap-3 hover:bg-secondary/40 transition-colors group">
+      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${urgent ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground"}`}><Icon className="h-4 w-4" /></div>
+      <span className="font-display uppercase text-xs flex-1 group-hover:text-primary">{label}</span>
+      <span className={`font-display text-xl ${urgent ? "text-destructive" : ""}`}>{value}</span>
+    </Link>
+  );
+}
+
+function QuickAction({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string }) {
+  return <Link to={to} className="rounded-lg border border-border bg-background/45 p-3 flex items-center gap-3 text-xs font-display uppercase hover:border-primary/40 hover:text-primary transition-colors"><Icon className="h-4 w-4" />{label}<span className="ml-auto">↗</span></Link>;
+}
+
 function StatCard({
   icon: Icon, label, value, badge, to,
 }: {
@@ -199,7 +238,7 @@ function StatCard({
   to?: string;
 }) {
   const inner = (
-    <div className="rounded-lg border border-border bg-card p-4 hover:border-primary/40 transition-colors">
+    <div className="tactical-panel p-4 min-h-[124px] hover:border-primary/40 transition-all hover:-translate-y-0.5">
       <div className="flex items-start justify-between">
         <Icon className="h-5 w-5 text-muted-foreground" />
         {badge}
@@ -219,7 +258,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="tactical-panel p-5 md:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Icon className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-display uppercase tracking-wider">{title}</h3>
@@ -274,3 +313,4 @@ function RankChart({ data }: { data: { rank: string; count: number }[] }) {
     </div>
   );
 }
+
