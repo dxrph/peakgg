@@ -326,3 +326,174 @@
   }
 }
 
+/* ───────── PeakGG / AFTERBURN identity ─────────
+   Editorial gaming language: torn paper, carbon ink, signal orange and motion. */
+.ink-noise {
+  background-image:
+    radial-gradient(circle at 20% 10%, hsl(var(--primary) / .07), transparent 24%),
+    repeating-radial-gradient(circle at 0 0, transparent 0, hsl(0 0% 100% / .018) 1px, transparent 2px);
+  background-size: auto, 5px 5px;
+}
+
+.auth-art {
+  background:
+    linear-gradient(112deg, hsl(12 88% 48% / .96), hsl(26 100% 58% / .84)),
+    radial-gradient(circle at 68% 42%, #ffb36b 0, #d52518 38%, #140606 78%);
+}
+
+.auth-art::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  background:
+    linear-gradient(165deg, transparent 0 38%, hsl(235 24% 4% / .96) 38.3% 48%, transparent 48.3%),
+    linear-gradient(14deg, transparent 0 63%, hsl(0 0% 100% / .13) 63.3% 64%, transparent 64.3%),
+    repeating-linear-gradient(105deg, transparent 0 70px, hsl(0 0% 0% / .08) 71px 72px);
+  animation: art-drift 18s ease-in-out infinite alternate;
+}
+
+.auth-art::after {
+  content: "PLAY  •  CLIMB  •  CONQUER  •  PEAKGG  •  ";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 47%;
+  padding: .8rem 0;
+  color: hsl(0 0% 100% / .9);
+  background: hsl(235 24% 4% / .88);
+  font: 800 12px/1 "Rajdhani", sans-serif;
+  letter-spacing: .45em;
+  white-space: nowrap;
+  transform: rotate(-4deg);
+  box-shadow: 0 0 0 1px hsl(0 0% 100% / .08);
+}
+
+.auth-statement {
+  max-width: 9ch;
+  text-shadow: 0 10px 44px hsl(0 0% 0% / .28);
+}
+
+.torn-panel {
+  position: relative;
+  background: linear-gradient(145deg, hsl(232 20% 10% / .98), hsl(235 24% 6% / .98));
+  border: 1px solid hsl(var(--border));
+  clip-path: polygon(0 2%, 3% 0, 9% 1.2%, 14% 0, 23% 1.4%, 31% .2%, 39% 1.1%, 48% 0, 58% 1.2%, 67% .2%, 76% 1%, 85% 0, 94% 1.4%, 100% .3%, 99% 97%, 95% 100%, 87% 98.8%, 78% 100%, 70% 98.7%, 61% 100%, 52% 98.8%, 43% 100%, 34% 98.7%, 25% 100%, 16% 98.9%, 8% 100%, 1% 98%);
+}
+
+.signal-button {
+  color: white;
+  border: 0;
+  background: linear-gradient(100deg, hsl(355 100% 61%), hsl(22 100% 58%));
+  box-shadow: 0 16px 50px -24px hsl(var(--primary) / .95);
+  position: relative;
+  overflow: hidden;
+}
+
+.signal-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-130%) skewX(-18deg);
+  width: 45%;
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / .26), transparent);
+  transition: transform .6s ease;
+}
+.signal-button:hover::after { transform: translateX(260%) skewX(-18deg); }
+
+.brush-title {
+  position: relative;
+  width: fit-content;
+  isolation: isolate;
+}
+.brush-title::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -.06em;
+  right: -.16em;
+  bottom: .06em;
+  height: .28em;
+  background: hsl(var(--primary));
+  clip-path: polygon(0 18%, 96% 0, 100% 66%, 3% 100%);
+  transform: rotate(-1.5deg);
+  opacity: .9;
+}
+
+.editorial-section {
+  position: relative;
+}
+.editorial-section::before {
+  content: attr(data-index);
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: hsl(var(--foreground) / .035);
+  font: 900 clamp(5rem, 15vw, 13rem)/.8 "Rajdhani", sans-serif;
+  letter-spacing: -.08em;
+  pointer-events: none;
+}
+
+@keyframes art-drift {
+  from { transform: translate3d(-1.2%, -.6%, 0) scale(1.02); }
+  to { transform: translate3d(1.5%, .8%, 0) scale(1.06); }
+}
+
+.signal-marquee {
+  overflow: hidden;
+  border-block: 1px solid hsl(var(--primary) / .35);
+  background: hsl(var(--primary));
+  color: white;
+  transform: rotate(-1.25deg) scale(1.02);
+  margin-block: -1rem 2rem;
+  position: relative;
+  z-index: 10;
+}
+.signal-marquee > div {
+  width: max-content;
+  padding: .72rem 0;
+  font: 800 12px/1 "Rajdhani", sans-serif;
+  letter-spacing: .32em;
+  animation: marquee-run 28s linear infinite;
+}
+
+.paper-cut {
+  color: hsl(235 24% 6%);
+  background: hsl(35 25% 95%);
+  clip-path: polygon(0 2%, 5% 0, 11% 1%, 18% 0, 25% 1%, 32% 0, 41% 1%, 50% 0, 58% 1%, 66% 0, 75% 1%, 84% 0, 92% 1%, 100% 0, 99% 98%, 93% 100%, 85% 99%, 76% 100%, 67% 99%, 57% 100%, 48% 99%, 39% 100%, 30% 99%, 21% 100%, 12% 99%, 4% 100%, 1% 98%);
+  box-shadow: 0 28px 80px -42px hsl(0 0% 0% / .8);
+}
+.paper-cut :is(h1,h2,h3,h4,strong) { color: hsl(235 24% 5%); }
+.paper-cut :is(p,span) { color: hsl(235 15% 28%); }
+
+.hero-slash {
+  position: absolute;
+  width: 56vw;
+  height: 15vh;
+  right: -12vw;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / .18), hsl(var(--accent) / .28));
+  border-block: 1px solid hsl(0 0% 100% / .08);
+  transform: rotate(-28deg);
+  filter: blur(.2px);
+}
+.hero-slash-a { top: 12%; animation: slash-float 9s ease-in-out infinite alternate; }
+.hero-slash-b { bottom: 4%; opacity: .45; animation: slash-float 12s ease-in-out -4s infinite alternate-reverse; }
+
+.hero-brush span:last-child { position: relative; width: fit-content; }
+.hero-brush span:last-child::after {
+  content: "";
+  position: absolute;
+  inset: auto -.08em -.06em -.04em;
+  height: .18em;
+  background: hsl(var(--primary));
+  clip-path: polygon(0 20%, 97% 0, 100% 55%, 3% 100%);
+  opacity: .8;
+}
+
+@keyframes marquee-run { to { transform: translateX(-50%); } }
+@keyframes slash-float {
+  from { transform: rotate(-28deg) translate3d(-2%, -4%, 0); }
+  to { transform: rotate(-25deg) translate3d(4%, 8%, 0); }
+}
+

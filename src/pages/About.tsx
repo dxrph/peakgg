@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Target, Zap, Users, Lock, ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
-import onyzukaAvatar from "@/assets/onyzuka.jpg";
 
 export default function AboutPage() {
   const { t } = useI18n();
@@ -106,13 +105,12 @@ export default function AboutPage() {
                 }}
               />
               <div className="relative">
-                <div className="w-28 h-28 rounded-full mx-auto mb-5 overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20">
-                  <img
-                    src={onyzukaAvatar}
-                    alt="Onyzuka — Founder of PeakGG"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                <div
+                  className="w-28 h-28 rounded-full mx-auto mb-5 overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20 grid place-items-center text-5xl font-display font-black text-white"
+                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
+                  aria-label="Onyzuka — Founder of PeakGG"
+                >
+                  O
                 </div>
                 <h3 className="font-display font-bold text-2xl uppercase tracking-wide">Onyzuka</h3>
                 <div className="w-12 h-0.5 gradient-primary mx-auto my-4 rounded-full opacity-60" />
@@ -138,3 +136,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

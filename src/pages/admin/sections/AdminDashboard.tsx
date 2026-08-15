@@ -199,7 +199,7 @@ function StatCard({
   to?: string;
 }) {
   const inner = (
-    <div className="rounded-lg border border-border bg-card p-4 hover:border-primary/40 transition-colors">
+    <div className="tactical-panel p-4 min-h-[124px] hover:border-primary/40 transition-all hover:-translate-y-0.5">
       <div className="flex items-start justify-between">
         <Icon className="h-5 w-5 text-muted-foreground" />
         {badge}
@@ -219,7 +219,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="tactical-panel p-5 md:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Icon className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-display uppercase tracking-wider">{title}</h3>
@@ -274,3 +274,4 @@ function RankChart({ data }: { data: { rank: string; count: number }[] }) {
     </div>
   );
 }
+

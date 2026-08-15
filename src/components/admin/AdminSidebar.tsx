@@ -47,7 +47,7 @@ export default function AdminSidebar() {
   );
 
   return (
-    <aside className="w-60 shrink-0 border-r border-border bg-card/30 backdrop-blur min-h-[calc(100vh-4rem)] hidden md:flex flex-col">
+    <aside className="w-64 shrink-0 border-r border-border bg-[#08080d]/90 backdrop-blur-xl min-h-[calc(100vh-4rem)] hidden md:flex flex-col sticky top-16">
       <div className="px-4 py-4 border-b border-border flex items-center gap-3">
         <BrandLogo className="h-9 w-9 drop-shadow-[0_0_10px_rgba(255,70,85,0.4)]" />
         <div>
@@ -55,7 +55,7 @@ export default function AdminSidebar() {
           <p className="text-sm font-display font-bold">Admin Panel</p>
         </div>
       </div>
-      <nav className="flex-1 py-3 space-y-0.5">
+      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto max-h-[calc(100vh-9rem)]">
         {visible.map((s) => {
           const isActive = s.to === "/admin" ? pathname === "/admin" : pathname.startsWith(s.to);
           return (
@@ -64,10 +64,10 @@ export default function AdminSidebar() {
               to={s.to}
               end={s.to === "/admin"}
               className={cn(
-                "flex items-center gap-3 px-4 py-2.5 text-sm font-display uppercase tracking-wider transition-colors border-l-2",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-display uppercase tracking-[.12em] transition-all border",
                 isActive
-                  ? "border-primary text-primary bg-primary/5"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  ? "border-primary/35 text-white bg-gradient-to-r from-primary/18 to-transparent shadow-[inset_3px_0_0_hsl(var(--primary))]"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/20"
               )}
             >
               <s.icon className="h-4 w-4" />
@@ -79,3 +79,4 @@ export default function AdminSidebar() {
     </aside>
   );
 }
+

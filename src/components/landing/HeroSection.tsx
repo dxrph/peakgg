@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { DISCORD_INVITE } from "@/lib/links";
-import heroBg from "@/assets/home-hero-crystal.png.asset.json";
+import heroBg from "@/assets/peakgg-afterburn-hero.webp";
 
 const fadeUp = (delay: number) => ({
   hidden: { opacity: 0, y: 30 },
@@ -22,12 +22,14 @@ export default function HeroSection() {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <section className="relative min-h-[680px] md:min-h-[760px] flex items-center overflow-hidden bg-[#05050a] border-b border-white/[0.06]">
+    <section className="cinematic-hero relative min-h-[690px] md:min-h-[790px] flex items-center overflow-hidden bg-[#05050a] border-b border-white/[0.06]">
+      <div aria-hidden className="hero-slash hero-slash-a" />
+      <div aria-hidden className="hero-slash hero-slash-b" />
       {/* Background artwork */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-[62%_center] md:bg-[center_right] scale-[1.08] md:scale-100"
-        style={{ backgroundImage: `url(${heroBg.url})` }}
+        style={{ backgroundImage: `url(${heroBg})` }}
       />
 
       {/* Readability overlays */}
@@ -88,7 +90,7 @@ export default function HeroSection() {
             {/* Headline */}
             <motion.h1
               initial="hidden" animate="visible" variants={fadeUp(0.12)}
-              className="font-display font-bold uppercase leading-[0.86] tracking-[-0.045em] mb-6 text-[2.75rem] xs:text-[3.25rem] sm:text-[4.4rem] md:text-[5.3rem] lg:text-[5.5rem] xl:text-[6.2rem]"
+              className="hero-brush font-display font-bold uppercase leading-[0.84] tracking-[-0.055em] mb-6 text-[2.75rem] xs:text-[3.25rem] sm:text-[4.4rem] md:text-[5.3rem] lg:text-[5.5rem] xl:text-[6.2rem]"
             >
               <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line1")}</span>
               <span className="block text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.6)]">{t("home.hero.title.line2")}</span>
