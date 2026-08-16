@@ -2,12 +2,13 @@
 
 ## Core
 PeakGG: Multi-game platform (VALORANT, CS2, R6) targeting Europe (Europe/Brussels timezone).
-Dark Cyberpunk UI: Primary neon red #ff4655, Accent #ff8c42. Rajdhani (headings), DM Sans (body).
+Broadcast Studio UI: matte graphite base, primary red #ff4655, orange accent, lime ONLY for LIVE. Barlow Condensed (display/numbers), Rajdhani (labels), DM Sans (body). Sharp corners (radius .25rem), hairline borders, no glow/purple/paper-torn effects.
 Stack: React 18, Supabase (RLS, Edge Functions for Elo/Matchmaking), Tailwind.
 Constraint: DO NOT upgrade Radix UI beyond React 18 compatible versions (e.g., Accordion 1.2.2).
 Unified ELO system for overall ranking, but separate performance stats per game.
 
 ## Memories
+- [Broadcast design system](mem://design/broadcast-system) — .bc-* primitives, tokens, homepage module architecture
 - [Style & Language](mem://stile/estetica-e-lingua) — Dark Cyberpunk design, colors, fonts, UI language
 - [Layout & Navigation](mem://stile/layout-e-navigazione) — Mobile-first sidebar/bottom nav, global game switcher
 - [Tech Stack](mem://tech/stack-tecnologico) — React+Vite, Supabase integration, Stripe planned
