@@ -56,6 +56,9 @@ export default function NextCupModule() {
       })
     : t("home.cup.tbd", { defaultValue: "Date TBD" });
 
+  const rawSize = cup?.team_size;
+  const sizeLabel =
+    typeof rawSize === "string" && /v/i.test(rawSize) ? rawSize.toLowerCase() : `${rawSize ?? 5}v${rawSize ?? 5}`;
   const slots = cup?.max_teams ?? 16;
   const pct = Math.min(100, Math.round((signups / Math.max(1, slots)) * 100));
 
@@ -124,7 +127,7 @@ export default function NextCupModule() {
                 {
                   icon: Swords,
                   label: t("home.cup.meta_size", { defaultValue: "Team size" }),
-                  value: `${cup?.team_size ?? 5}v${cup?.team_size ?? 5}`,
+                  value: sizeLabel,
                 },
               ].map((m) => (
                 <div key={m.label} className="flex items-center justify-between px-5 py-5">
