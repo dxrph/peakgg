@@ -70,7 +70,7 @@ export default function Index() {
         <LadderModule />
         <CommunityModule />
       </main>
-      <Footer />
+      <Footer hideCta />
     </div>
   );
 }

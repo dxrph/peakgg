@@ -32,7 +32,7 @@ const RESOURCES_LINKS: FooterLink[] = [
   { label: "Contact", to: "/contact" },
 ];
 
-export default function Footer() {
+export default function Footer({ hideCta = false }: { hideCta?: boolean } = {}) {
   const { t } = useI18n();
   const { user } = useAuth();
   const socials = getActiveSocials();
@@ -75,6 +75,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-background mt-8">
       {/* Pre-footer CTA */}
+      {!hideCta && (
       <section className="relative overflow-hidden border-b border-border bc-rules">
         <div className="container relative z-10 py-16 md:py-20 flex flex-col items-center text-center">
           <span className="bc-chip border-primary/40 text-primary mb-5">
@@ -104,6 +105,7 @@ export default function Footer() {
           </Link>
         </div>
       </section>
+      )}
 
       {/* Columns */}
       <div className="container py-14 md:py-16">
