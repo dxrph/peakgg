@@ -13,7 +13,7 @@ type Row = {
   status: string | null;
   start_date: string | null;
   max_teams: number | null;
-  team_size: number | null;
+  team_size: number | string | null;
   format: string | null;
   short_description: string | null;
 };
