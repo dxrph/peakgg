@@ -1,27 +1,20 @@
 import { ArrowUpRight, ChevronRight, Menu, Play, Trophy, Users, Swords, BarChart3, Shield, Globe2 } from "lucide-react";
 import SEO from "@/components/SEO";
+import { peakRaster } from "@/data/peakRaster";
 
 const nav = ["Tournaments", "Teams", "Players", "Ranks", "Leagues", "Community"];
 
-const rasterAssets = {
-  hero: "/peak-assets/hero-team-banner.webp",
-  trophy: "/peak-assets/featured-tournament-trophy.webp",
-  playerA: "/peak-assets/player-find.webp",
-  playerB: "/peak-assets/player-teams.webp",
-  crowd: "/peak-assets/journey-crowd.webp",
-};
-
 const tournaments = [
-  { eyebrow: "UPCOMING TOURNAMENT", title: "COMMUNITY CUP #04", meta: "MAY 24 — 25", cta: "VIEW TOURNAMENT", image: rasterAssets.trophy },
-  { eyebrow: "UPCOMING TOURNAMENT", title: "SOLO QUEUE CUP #02", meta: "MAY 31 · FREE ENTRY", cta: "JOIN NOW", image: rasterAssets.hero },
-  { eyebrow: "PEAK LEAGUE", title: "SEASON 1", meta: "ONGOING", cta: "OPEN LEAGUE", image: rasterAssets.trophy },
+  { eyebrow: "UPCOMING TOURNAMENT", title: "COMMUNITY CUP #04", meta: "MAY 24 — 25", cta: "VIEW TOURNAMENT", image: peakRaster.trophy },
+  { eyebrow: "UPCOMING TOURNAMENT", title: "SOLO QUEUE CUP #02", meta: "MAY 31 · FREE ENTRY", cta: "JOIN NOW", image: peakRaster.hero },
+  { eyebrow: "PEAK LEAGUE", title: "SEASON 1", meta: "ONGOING", cta: "OPEN LEAGUE", image: peakRaster.trophy },
 ];
 
 const players = [
-  ["01", "RAZEKING", "2,184 ELO", "+42", rasterAssets.playerA],
-  ["02", "SIHRO", "2,056 ELO", "+18", rasterAssets.playerB],
-  ["03", "NEPTUNE", "1,987 ELO", "+31", rasterAssets.playerA],
-  ["04", "BOTEX", "1,875 ELO", "-9", rasterAssets.playerB],
+  ["01", "RAZEKING", "2,184 ELO", "+42", peakRaster.player],
+  ["02", "SIHRO", "2,056 ELO", "+18", peakRaster.hero],
+  ["03", "NEPTUNE", "1,987 ELO", "+31", peakRaster.player],
+  ["04", "BOTEX", "1,875 ELO", "-9", peakRaster.hero],
 ];
 
 function PeakMark({ small = false }: { small?: boolean }) {
@@ -53,11 +46,7 @@ export default function Index() {
             <p>Find teammates.<br/>Enter tournaments.<br/>Climb the Peak ranks.</p>
             <div className="hero-actions"><a className="btn-red" href="/register">PLAY NOW <ArrowUpRight size={16}/></a><a className="btn-ghost" href="#how"><span className="play-dot"><Play size={12} fill="currentColor"/></span> HOW IT WORKS</a></div>
           </div>
-          <div className="hero-raster-art" aria-hidden="true">
-            <div className="hero-raster-slash hero-raster-slash--a" />
-            <div className="hero-raster-slash hero-raster-slash--b" />
-            <img src={rasterAssets.hero} alt="" />
-          </div>
+          <div className="hero-raster-art" aria-hidden="true"><div className="hero-raster-slash hero-raster-slash--a"/><div className="hero-raster-slash hero-raster-slash--b"/><img src={peakRaster.hero} alt="" /></div>
           <div className="hero-stats">{[['3,847','PLAYERS ONLINE'],['1,263','TEAMS'],['24','LIVE TOURNAMENTS'],['$12,450','PRIZE POOL LIVE']].map(([n,l]) => <div className="stat" key={l}><strong>{n}</strong><span>{l}</span><i/></div>)}</div>
         </section>
 
@@ -75,7 +64,7 @@ export default function Index() {
 
         <section className="pg-ranks"><div className="ranks-copy"><small>7 RANKS. ONE PEAK.</small><h2>CLIMB UNTIL<br/><span>THEY KNOW YOUR NAME.</span></h2></div><div className="rank-track">{['ROOKIE','CONTENDER','RIVAL','EXPERT','ELITE','MASTER','APEX'].map((rank, i) => <div className={`rank-node r${i}`} key={rank}><div className="rank-glyph"><span>{i+1}</span></div><b>{rank}</b>{i<6 && <i/>}</div>)}</div></section>
 
-        <section className="pg-cta pg-cta-raster"><img src={rasterAssets.crowd} alt=""/><div className="cta-overlay"/><div className="cta-content"><small>THIS IS YOUR PEAK</small><h2>YOUR JOURNEY<br/><span>STARTS HERE.</span></h2><a className="btn-red" href="/register">CREATE ACCOUNT <ArrowUpRight size={16}/></a></div></section>
+        <section className="pg-cta pg-cta-raster"><img src={peakRaster.crowd} alt=""/><div className="cta-overlay"/><div className="cta-content"><small>THIS IS YOUR PEAK</small><h2>YOUR JOURNEY<br/><span>STARTS HERE.</span></h2><a className="btn-red" href="/register">CREATE ACCOUNT <ArrowUpRight size={16}/></a></div></section>
       </main>
 
       <footer className="pg-footer"><div className="footer-brand"><div className="pg-brand inverse"><PeakMark small/><span>PEAK<span>GG</span></span></div><p>The competitive platform for players who want more than ranked.</p></div><div><b>PLAY</b><a href="/tournaments">Tournaments</a><a href="/teams">Teams</a><a href="/free-agents">Players</a><a href="/leagues">Leagues</a></div><div><b>COMPETE</b><a href="/leaderboard">Leaderboards</a><a href="/elo">Peak ELO</a><a href="/faq">Rules</a></div><div><b>COMMUNITY</b><a href="/free-agents">Find Players</a><a href="/contact">Discord</a><a href="/faq">Support</a></div><div><b>COMPANY</b><a href="/about">About Us</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div><p className="copyright">© 2026 PeakGG. All rights reserved.</p></footer>
