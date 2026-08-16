@@ -20,6 +20,7 @@ export default {
     extend: {
       fontFamily: {
         display: ["Rajdhani", "sans-serif"],
+        condensed: ["Barlow Condensed", "Rajdhani", "sans-serif"],
         body: ["DM Sans", "system-ui", "sans-serif"],
       },
       colors: {
@@ -58,6 +59,7 @@ export default {
         },
         surface: "hsl(var(--surface))",
         success: "hsl(var(--success))",
+        live: "hsl(var(--live))",
         warning: "hsl(var(--warning))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

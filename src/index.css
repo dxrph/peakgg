@@ -6,28 +6,29 @@
 
 @layer base {
   :root {
-    --background: 235 24% 4%;
-    --foreground: 220 24% 96%;
-    --card: 234 20% 7%;
-    --card-foreground: 220 24% 96%;
-    --popover: 234 20% 7%;
-    --popover-foreground: 220 24% 96%;
-    --primary: 355 100% 64%;
+    --background: 228 14% 5%;
+    --foreground: 220 12% 96%;
+    --card: 228 12% 8%;
+    --card-foreground: 220 12% 96%;
+    --popover: 228 14% 7%;
+    --popover-foreground: 220 12% 96%;
+    --primary: 353 100% 63%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 231 16% 12%;
-    --secondary-foreground: 220 20% 88%;
-    --muted: 232 14% 12%;
-    --muted-foreground: 224 10% 60%;
-    --accent: 28 100% 65%;
+    --secondary: 228 10% 13%;
+    --secondary-foreground: 220 10% 88%;
+    --muted: 228 10% 12%;
+    --muted-foreground: 224 6% 58%;
+    --accent: 22 100% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 230 14% 18%;
-    --input: 230 14% 18%;
-    --ring: 355 100% 64%;
-    --radius: 0.875rem;
+    --border: 228 10% 16%;
+    --input: 228 10% 16%;
+    --ring: 353 100% 63%;
+    --radius: 0.25rem;
 
-    --surface: 240 15% 7%;
+    --live: 82 80% 55%;
+    --surface: 228 12% 8%;
     --glow-primary: 352 100% 62%;
     --glow-accent: 24 100% 63%;
     --neon-red: 352 100% 62%;
@@ -43,9 +44,9 @@
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
 
-    --sidebar-background: 240 20% 5%;
-    --sidebar-foreground: 240 5% 70%;
-    --sidebar-primary: 352 100% 62%;
+    --sidebar-background: 228 14% 4%;
+    --sidebar-foreground: 224 6% 66%;
+    --sidebar-primary: 353 100% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 15% 12%;
     --sidebar-accent-foreground: 0 0% 90%;
@@ -64,20 +65,18 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     background-image:
-      radial-gradient(ellipse 72% 45% at 8% -8%, hsl(355 100% 64% / 0.09), transparent 62%),
-      radial-gradient(ellipse 52% 42% at 100% 88%, hsl(28 100% 65% / 0.05), transparent 65%),
-      linear-gradient(hsl(220 25% 98% / 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(220 25% 98% / 0.018) 1px, transparent 1px);
-    background-size: auto, auto, 56px 56px, 56px 56px;
+      linear-gradient(180deg, hsl(228 16% 7%) 0%, hsl(228 14% 5%) 55%, hsl(228 14% 4%) 100%),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.022) 1px, transparent 1px);
+    background-size: auto, 96px 100%;
     background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Rajdhani', sans-serif;
-    @apply font-bold tracking-tight;
-    letter-spacing: -0.025em;
+    font-family: 'Barlow Condensed', 'Rajdhani', sans-serif;
+    @apply font-black uppercase;
+    letter-spacing: -0.015em;
   }
-  h1 { @apply text-3xl md:text-4xl lg:text-5xl; line-height: 1.1; }
-  h2 { @apply text-2xl md:text-3xl; line-height: 1.15; }
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl; line-height: 0.9; }
+  h2 { @apply text-3xl md:text-4xl; line-height: 0.92; }
   h3 { @apply text-xl md:text-2xl; line-height: 1.2; }
   p  { line-height: 1.6; }
 
@@ -96,7 +95,8 @@
 
 @layer utilities {
   .text-glow-red {
-    text-shadow: 0 0 20px hsl(352 100% 62% / 0.6), 0 0 60px hsl(352 100% 62% / 0.2);
+    color: hsl(var(--primary));
+    text-shadow: none;
   }
   .text-glow-orange {
     text-shadow: 0 0 20px hsl(24 100% 63% / 0.6), 0 0 60px hsl(24 100% 63% / 0.2);
@@ -112,16 +112,16 @@
     box-shadow: 0 0 10px hsl(352 100% 62% / 0.1), inset 0 0 10px hsl(352 100% 62% / 0.03);
   }
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(352 100% 62%), hsl(24 100% 63%));
+    background: hsl(var(--primary));
   }
   .gradient-surface {
-    background: linear-gradient(180deg, hsl(240 15% 8%), hsl(240 20% 4%));
+    background: linear-gradient(180deg, hsl(228 12% 8%), hsl(228 14% 5%));
   }
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(240 20% 4%) 0%, hsl(240 20% 7%) 40%, hsl(352 30% 8%) 100%);
+    background: linear-gradient(180deg, hsl(228 16% 7%), hsl(228 14% 4%));
   }
   .gradient-card {
-    background: linear-gradient(145deg, hsl(240 15% 10%), hsl(240 15% 7%));
+    background: linear-gradient(180deg, hsl(228 12% 9%), hsl(228 14% 6%));
   }
   .neon-border {
     position: relative;
@@ -326,177 +326,243 @@
   }
 }
 
-/* ───────── PeakGG / AFTERBURN identity ─────────
-   Editorial gaming language: torn paper, carbon ink, signal orange and motion. */
-.ink-noise {
-  background-image:
-    radial-gradient(circle at 20% 10%, hsl(var(--primary) / .07), transparent 24%),
-    repeating-radial-gradient(circle at 0 0, transparent 0, hsl(0 0% 100% / .018) 1px, transparent 2px);
-  background-size: auto, 5px 5px;
-}
+/* ═══════════════ PeakGG BROADCAST SYSTEM ═══════════════
+   Competitive broadcast studio language: matte graphite, hairline rules,
+   oversized condensed data, red only where it means "compete / live". */
 
-.auth-art {
-  background:
-    linear-gradient(112deg, hsl(12 88% 48% / .96), hsl(26 100% 58% / .84)),
-    radial-gradient(circle at 68% 42%, #ffb36b 0, #d52518 38%, #140606 78%);
+/* Rails — small uppercase labels used to caption every module */
+.bc-rail {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  font: 700 10px/1 "Rajdhani", sans-serif;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
 }
-
-.auth-art::before {
+.bc-rail::before {
   content: "";
-  position: absolute;
-  inset: -8%;
-  background:
-    linear-gradient(165deg, transparent 0 38%, hsl(235 24% 4% / .96) 38.3% 48%, transparent 48.3%),
-    linear-gradient(14deg, transparent 0 63%, hsl(0 0% 100% / .13) 63.3% 64%, transparent 64.3%),
-    repeating-linear-gradient(105deg, transparent 0 70px, hsl(0 0% 0% / .08) 71px 72px);
-  animation: art-drift 18s ease-in-out infinite alternate;
+  width: 14px;
+  height: 2px;
+  background: hsl(var(--primary));
 }
+.bc-rail--muted::before { background: hsl(var(--border)); }
 
-.auth-art::after {
-  content: "PLAY  •  CLIMB  •  CONQUER  •  PEAKGG  •  ";
-  position: absolute;
-  left: -4%;
-  right: -4%;
-  top: 47%;
-  padding: .8rem 0;
-  color: hsl(0 0% 100% / .9);
-  background: hsl(235 24% 4% / .88);
-  font: 800 12px/1 "Rajdhani", sans-serif;
-  letter-spacing: .45em;
-  white-space: nowrap;
-  transform: rotate(-4deg);
-  box-shadow: 0 0 0 1px hsl(0 0% 100% / .08);
-}
-
-.auth-statement {
-  max-width: 9ch;
-  text-shadow: 0 10px 44px hsl(0 0% 0% / .28);
-}
-
-.torn-panel {
+/* Matte broadcast panel with a single cut corner */
+.bc-panel {
   position: relative;
-  background: linear-gradient(145deg, hsl(232 20% 10% / .98), hsl(235 24% 6% / .98));
+  background: linear-gradient(180deg, hsl(228 12% 9% / .92), hsl(228 14% 6% / .96));
   border: 1px solid hsl(var(--border));
-  clip-path: polygon(0 2%, 3% 0, 9% 1.2%, 14% 0, 23% 1.4%, 31% .2%, 39% 1.1%, 48% 0, 58% 1.2%, 67% .2%, 76% 1%, 85% 0, 94% 1.4%, 100% .3%, 99% 97%, 95% 100%, 87% 98.8%, 78% 100%, 70% 98.7%, 61% 100%, 52% 98.8%, 43% 100%, 34% 98.7%, 25% 100%, 16% 98.9%, 8% 100%, 1% 98%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.bc-panel:hover { border-color: hsl(var(--primary) / .38); }
+.bc-panel--flat { clip-path: none; }
+.bc-panel--accent { border-left: 2px solid hsl(var(--primary)); }
+
+/* Hairline separators */
+.bc-hairline { height: 1px; background: hsl(var(--border)); }
+.bc-hairline--fade { background: linear-gradient(90deg, hsl(var(--border)), transparent); }
+
+/* Oversized condensed data numerals */
+.bc-num {
+  font-family: "Barlow Condensed", "Rajdhani", sans-serif;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  line-height: .86;
 }
 
-.signal-button {
-  color: white;
-  border: 0;
-  background: linear-gradient(100deg, hsl(355 100% 61%), hsl(22 100% 58%));
-  box-shadow: 0 16px 50px -24px hsl(var(--primary) / .95);
-  position: relative;
+/* Display headline — poster scale, condensed, tight */
+.bc-display {
+  font-family: "Barlow Condensed", "Rajdhani", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: .84;
+  letter-spacing: -.015em;
+}
+
+/* LIVE indicator (lime is reserved for live states only) */
+.bc-live {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .2rem .5rem;
+  border: 1px solid hsl(var(--live) / .45);
+  background: hsl(var(--live) / .1);
+  color: hsl(var(--live));
+  font: 700 10px/1 "Rajdhani", sans-serif;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.bc-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--live));
+  box-shadow: 0 0 10px hsl(var(--live) / .8);
+  animation: bc-blink 1.8s ease-in-out infinite;
+}
+@keyframes bc-blink { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+
+/* Straight broadcast ticker (no rotation, no gimmick) */
+.bc-ticker {
   overflow: hidden;
+  border-block: 1px solid hsl(var(--border));
+  background: hsl(228 14% 6%);
+}
+.bc-ticker__track {
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding: .6rem 0;
+  font: 700 11px/1 "Rajdhani", sans-serif;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  animation: bc-run 38s linear infinite;
+}
+.bc-ticker__track b { color: hsl(var(--foreground)); font-weight: 700; }
+.bc-ticker__track i { color: hsl(var(--primary)); font-style: normal; }
+@keyframes bc-run { to { transform: translateX(-50%); } }
+
+/* Chips / metadata pills */
+.bc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .25rem .55rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(228 14% 8%);
+  font: 600 10px/1 "Rajdhani", sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
 }
 
-.signal-button::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-130%) skewX(-18deg);
-  width: 45%;
-  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / .26), transparent);
-  transition: transform .6s ease;
-}
-.signal-button:hover::after { transform: translateX(260%) skewX(-18deg); }
+/* Section frame used across the site */
+.bc-section { position: relative; padding-block: clamp(3.5rem, 7vw, 6.5rem); }
+.bc-section + .bc-section { border-top: 1px solid hsl(var(--border) / .7); }
 
-.brush-title {
+/* Faint vertical studio rules for hero / feature backdrops */
+.bc-rules {
+  background-image: linear-gradient(90deg, hsl(0 0% 100% / .035) 1px, transparent 1px);
+  background-size: 84px 100%;
+}
+.bc-scanlines {
+  background-image: repeating-linear-gradient(0deg, hsl(0 0% 100% / .028) 0 1px, transparent 1px 3px);
+}
+
+/* ── Legacy identity classes remapped to the broadcast system ──
+   Older pages still reference these names; they now render the new language. */
+.torn-panel,
+.tactical-panel,
+.paper-cut {
   position: relative;
-  width: fit-content;
-  isolation: isolate;
+  color: hsl(var(--foreground));
+  background: linear-gradient(180deg, hsl(228 12% 9% / .94), hsl(228 14% 6% / .97));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  box-shadow: none;
 }
+.tactical-panel::before { content: none; }
+.paper-cut :is(h1,h2,h3,h4,strong) { color: hsl(var(--foreground)); }
+.paper-cut :is(p,span) { color: hsl(var(--muted-foreground)); }
+
+.brush-title { position: relative; width: fit-content; }
 .brush-title::after {
   content: "";
   position: absolute;
-  z-index: -1;
-  left: -.06em;
-  right: -.16em;
-  bottom: .06em;
-  height: .28em;
-  background: hsl(var(--primary));
-  clip-path: polygon(0 18%, 96% 0, 100% 66%, 3% 100%);
-  transform: rotate(-1.5deg);
-  opacity: .9;
-}
-
-.editorial-section {
-  position: relative;
-}
-.editorial-section::before {
-  content: attr(data-index);
-  position: absolute;
-  top: 0;
+  left: 0;
   right: 0;
-  color: hsl(var(--foreground) / .035);
-  font: 900 clamp(5rem, 15vw, 13rem)/.8 "Rajdhani", sans-serif;
-  letter-spacing: -.08em;
-  pointer-events: none;
+  bottom: -.18em;
+  height: 3px;
+  background: hsl(var(--primary));
+  clip-path: none;
+  transform: none;
+  opacity: 1;
 }
 
-@keyframes art-drift {
-  from { transform: translate3d(-1.2%, -.6%, 0) scale(1.02); }
-  to { transform: translate3d(1.5%, .8%, 0) scale(1.06); }
+.signal-button {
+  color: hsl(var(--primary-foreground));
+  border: 0;
+  border-radius: 0;
+  background: hsl(var(--primary));
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  transition: background .2s ease, transform .2s ease;
 }
+.signal-button::after { content: none; }
+.signal-button:hover { background: hsl(353 100% 57%); }
 
 .signal-marquee {
   overflow: hidden;
-  border-block: 1px solid hsl(var(--primary) / .35);
-  background: hsl(var(--primary));
-  color: white;
-  transform: rotate(-1.25deg) scale(1.02);
-  margin-block: -1rem 2rem;
+  transform: none;
+  margin-block: 0;
+  border-block: 1px solid hsl(var(--border));
+  background: hsl(228 14% 6%);
+  color: hsl(var(--muted-foreground));
   position: relative;
   z-index: 10;
 }
 .signal-marquee > div {
   width: max-content;
-  padding: .72rem 0;
-  font: 800 12px/1 "Rajdhani", sans-serif;
-  letter-spacing: .32em;
-  animation: marquee-run 28s linear infinite;
+  padding: .62rem 0;
+  font: 700 11px/1 "Rajdhani", sans-serif;
+  letter-spacing: .24em;
+  animation: bc-run 34s linear infinite;
 }
 
-.paper-cut {
-  color: hsl(235 24% 6%);
-  background: hsl(35 25% 95%);
-  clip-path: polygon(0 2%, 5% 0, 11% 1%, 18% 0, 25% 1%, 32% 0, 41% 1%, 50% 0, 58% 1%, 66% 0, 75% 1%, 84% 0, 92% 1%, 100% 0, 99% 98%, 93% 100%, 85% 99%, 76% 100%, 67% 99%, 57% 100%, 48% 99%, 39% 100%, 30% 99%, 21% 100%, 12% 99%, 4% 100%, 1% 98%);
-  box-shadow: 0 28px 80px -42px hsl(0 0% 0% / .8);
-}
-.paper-cut :is(h1,h2,h3,h4,strong) { color: hsl(235 24% 5%); }
-.paper-cut :is(p,span) { color: hsl(235 15% 28%); }
+.editorial-section { position: relative; }
+.editorial-section::before { content: none; }
 
-.hero-slash {
-  position: absolute;
-  width: 56vw;
-  height: 15vh;
-  right: -12vw;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, hsl(var(--primary) / .18), hsl(var(--accent) / .28));
-  border-block: 1px solid hsl(0 0% 100% / .08);
-  transform: rotate(-28deg);
-  filter: blur(.2px);
-}
-.hero-slash-a { top: 12%; animation: slash-float 9s ease-in-out infinite alternate; }
-.hero-slash-b { bottom: 4%; opacity: .45; animation: slash-float 12s ease-in-out -4s infinite alternate-reverse; }
+.hero-slash, .hero-slash-a, .hero-slash-b { display: none; }
+.hero-brush span:last-child::after { content: none; }
 
-.hero-brush span:last-child { position: relative; width: fit-content; }
-.hero-brush span:last-child::after {
+.ink-noise {
+  background-image: repeating-linear-gradient(0deg, hsl(0 0% 100% / .022) 0 1px, transparent 1px 3px);
+  background-size: auto;
+}
+
+/* Broadcast auth artwork panel */
+.auth-art {
+  background:
+    linear-gradient(180deg, hsl(228 14% 7%), hsl(228 16% 4%));
+}
+.auth-art::before {
   content: "";
   position: absolute;
-  inset: auto -.08em -.06em -.04em;
-  height: .18em;
-  background: hsl(var(--primary));
-  clip-path: polygon(0 20%, 97% 0, 100% 55%, 3% 100%);
-  opacity: .8;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, hsl(0 0% 100% / .04) 1px, transparent 1px),
+    radial-gradient(circle at 78% 18%, hsl(var(--primary) / .16), transparent 46%);
+  background-size: 88px 100%, auto;
+  animation: none;
 }
-
-@keyframes marquee-run { to { transform: translateX(-50%); } }
-@keyframes slash-float {
-  from { transform: rotate(-28deg) translate3d(-2%, -4%, 0); }
-  to { transform: rotate(-25deg) translate3d(4%, 8%, 0); }
+.auth-art::after {
+  content: "COMPETE  ·  RISE  ·  DOMINATE";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.2rem;
+  padding: .7rem 2.5rem;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+  border-top: 1px solid hsl(var(--border));
+  font: 700 11px/1 "Rajdhani", sans-serif;
+  letter-spacing: .34em;
+  white-space: nowrap;
+  transform: none;
+  box-shadow: none;
 }
+.auth-statement { max-width: 14ch; text-shadow: none; }
 
+@media (prefers-reduced-motion: reduce) {
+  .bc-ticker__track, .signal-marquee > div, .bc-live-dot { animation: none; }
+}
 /* ─── PeakGG OS: navigation, competitive surfaces and share moments ─── */
 body.peak-mobile-dock { padding-bottom: 5.25rem; }
 

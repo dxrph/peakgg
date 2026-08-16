@@ -84,17 +84,18 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 border-b border-border/40 backdrop-blur-xl transition-all duration-300 ${
-        scrolled
-          ? "bg-background/75 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.7)]"
-          : "bg-background/45"
+      className={`fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300 backdrop-blur-xl ${
+        scrolled ? "bg-background/90 border-border" : "bg-background/60 border-border/60"
       }`}
     >
-      <div className="container flex items-center justify-between h-14 lg:h-16 gap-4">
+      <div className="container flex items-center justify-between h-14 lg:h-[60px] gap-4">
         {/* LEFT: logo */}
-        <Link to="/" className="flex items-center gap-[10px] shrink-0">
+        <Link to="/" className="flex items-center gap-[10px] shrink-0 group">
+          <span className="hidden lg:block h-6 w-[3px] bg-primary" aria-hidden />
           <BrandLogo className="h-[20px] w-[20px] lg:h-[22px] lg:w-[22px] bg-transparent" />
-          <span className="font-display font-bold text-lg lg:text-xl tracking-tight hidden sm:inline">PEAKGG</span>
+          <span className="font-condensed font-black text-xl lg:text-2xl uppercase tracking-[0.02em] leading-none hidden sm:inline">
+            PEAKGG
+          </span>
         </Link>
 
         {/* CENTER: main nav + More */}
@@ -104,7 +105,7 @@ export default function Navbar() {
               key={item.key}
               to={resolvePath(item)}
               className={({ isActive }) =>
-                `group relative text-[12px] lg:text-[13px] transition-colors font-display font-medium uppercase tracking-[0.14em] whitespace-nowrap ${
+                `group relative py-2 text-[11px] lg:text-[12px] transition-colors font-display font-bold uppercase tracking-[0.2em] whitespace-nowrap ${
                   isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`
               }
@@ -120,7 +121,7 @@ export default function Navbar() {
                     )}
                   </span>
                   <span
-                    className={`absolute left-0 right-0 -bottom-1.5 h-px bg-primary transition-transform origin-center ${
+                    className={`absolute left-0 right-0 -bottom-2 h-[2px] bg-primary transition-transform origin-left ${
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                     }`}
                   />
@@ -134,7 +135,7 @@ export default function Navbar() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className={`group relative inline-flex items-center gap-1 text-[12px] lg:text-[13px] font-display font-medium uppercase tracking-[0.14em] transition-colors focus:outline-none ${
+                className={`group relative inline-flex items-center gap-1 py-2 text-[11px] lg:text-[12px] font-display font-bold uppercase tracking-[0.2em] transition-colors focus:outline-none ${
                   moreActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -180,7 +181,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={openPeakCommand}
-              className="h-8 px-2.5 rounded-md border border-border/70 bg-card/45 hover:border-primary/40 hover:text-primary transition-colors inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-display text-muted-foreground"
+              className="h-8 px-2.5 rounded-none border border-border bg-card/45 hover:border-primary/40 hover:text-primary transition-colors inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-display text-muted-foreground"
               aria-label="Apri ricerca rapida"
             >
               <Search className="h-3.5 w-3.5" />
@@ -192,7 +193,7 @@ export default function Navbar() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 lg:px-3 rounded-md border-[#5865F2]/40 bg-[#5865F2]/10 text-[#a8b0f7] hover:bg-[#5865F2]/20 hover:text-white hover:border-[#5865F2]/60 font-display font-semibold uppercase tracking-wider text-[11px]"
+              className="h-8 px-2.5 lg:px-3 rounded-none border-border bg-transparent text-[#C7C8FF] hover:bg-[#5865F2]/15 hover:border-[#5865F2]/60 font-display font-bold uppercase tracking-[0.18em] text-[10px]"
             >
               <DiscordIcon className="h-4 w-4 lg:mr-1.5" />
               <span className="hidden lg:inline">{t("nav.discord")}</span>
@@ -211,9 +212,9 @@ export default function Navbar() {
                     className="flex items-center gap-1.5 rounded-md p-1 lg:pr-2 hover:bg-foreground/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                     aria-label={profile?.username ?? "Account"}
                   >
-                    <Avatar className="h-7 w-7 border border-border">
+                    <Avatar className="h-7 w-7 rounded-none border border-border">
                       <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
-                      <AvatarFallback className="text-[10px]">
+                      <AvatarFallback className="rounded-none text-[10px]">
                         {(profile?.username ?? "U").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -290,7 +291,7 @@ export default function Navbar() {
                 <Button variant="ghost" size="sm" className="h-8">{t("auth.login")}</Button>
               </Link>
               <Link to="/register">
-                <Button variant="neon" size="sm" className="h-8 rounded-md uppercase tracking-wider text-[11px]">
+                <Button size="sm" className="h-8 rounded-none uppercase tracking-[0.18em] text-[10px] font-display font-bold">
                   {t("auth.register")}
                 </Button>
               </Link>
@@ -304,7 +305,7 @@ export default function Navbar() {
             href={DISCORD_INVITE}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-[#5865F2] text-white"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-none border border-border text-[#C7C8FF]"
             aria-label="Discord"
           >
             <DiscordIcon className="h-[18px] w-[18px]" />
@@ -313,7 +314,7 @@ export default function Navbar() {
             <Link to={profilePath} aria-label="Profile">
               <Avatar className="h-8 w-8 border border-border">
                 <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.username ?? "user"} />
-                <AvatarFallback className="text-[10px]">
+                <AvatarFallback className="rounded-none text-[10px]">
                   {(profile?.username ?? "U").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

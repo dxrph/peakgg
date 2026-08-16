@@ -61,10 +61,10 @@ export default function LoginPage() {
               <Label htmlFor="email" className="text-xs uppercase tracking-[.18em] font-display">Email account</Label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="email" type="email" autoComplete="email" placeholder="player@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 pl-11 bg-card/65 border-white/10 rounded-xl" disabled={isLoading} />
+                <Input id="email" type="email" autoComplete="email" placeholder="player@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 pl-11 bg-card/65 border-white/10 rounded-none" disabled={isLoading} />
               </div>
             </div>
-            <Button className="w-full h-14 rounded-xl uppercase tracking-[.14em] font-display font-bold signal-button" disabled={isLoading}>
+            <Button className="w-full h-14 rounded-none uppercase tracking-[.14em] font-display font-bold signal-button" disabled={isLoading}>
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
               Invia link sicuro <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

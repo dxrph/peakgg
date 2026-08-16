@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,64 +8,64 @@ import { HelmetProvider } from "react-helmet-async";
 import { GameProvider } from "@/lib/game-context";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider } from "@/i18n";
-import Index from "./pages/Index";
-import LoginPage from "./pages/Login";
-import RegisterPage from "./pages/Register";
-import DashboardPage from "./pages/Dashboard";
-import ProfilePage from "./pages/Profile";
-import TournamentsPage from "./pages/Tournaments";
-import TeamsPage from "./pages/Teams";
-import LeaderboardPage from "./pages/Leaderboard";
-import PlayPage from "./pages/Play";
-import ScrimsPage from "./pages/Scrims";
-import TournamentDetailPage from "./pages/TournamentDetail";
-import TeamDetailPage from "./pages/TeamDetail";
-import AdminSecurityPage from "./pages/admin/Security";
-import AdminDashboard from "./pages/admin/sections/AdminDashboard";
-import AdminTournaments from "./pages/admin/sections/AdminTournaments";
-import AdminCommunityCup from "./pages/admin/sections/AdminCommunityCup";
-import CommunityCupMatchRoom from "./pages/CommunityCupMatchRoom";
-import AdminMatches from "./pages/admin/sections/AdminMatches";
-import AdminTickets from "./pages/admin/sections/AdminTickets";
-import AdminPlayers from "./pages/admin/sections/AdminPlayers";
-import AdminReputation from "./pages/admin/sections/AdminReputation";
-import AdminDisputes from "./pages/admin/sections/AdminDisputes";
-import AdminScrims from "./pages/admin/sections/AdminScrims";
-import AdminChat from "./pages/admin/sections/AdminChat";
-import AdminEconomy from "./pages/admin/sections/AdminEconomy";
-import AdminAnnouncements from "./pages/admin/sections/AdminAnnouncements";
-import AdminSeasons from "./pages/admin/sections/AdminSeasons";
-import AdminElo from "./pages/admin/sections/AdminElo";
-import AdminLeagues from "./pages/admin/sections/AdminLeagues";
-import PeakLeagueAdmin from "./pages/admin/PeakLeagueAdmin";
-import LeaguesPage from "./pages/Leagues";
-import LeagueDetailPage from "./pages/LeagueDetail";
-import MatchDetailPage from "./pages/MatchDetail";
-import TeamDashboardPage from "./pages/TeamDashboard";
-import AimGuidePage from "./pages/AimGuide";
-import FreeAgentsPage from "./pages/FreeAgents";
-import FreeAgentsCompletePage from "./pages/FreeAgentsComplete";
-import NotificationsPage from "./pages/Notifications";
-import SettingsPage from "./pages/Settings";
-import EloExplainedPage from "./pages/EloExplained";
-import AboutPage from "./pages/About";
-import FAQPage from "./pages/FAQ";
-import ContactPage from "./pages/Contact";
-import PrivacyPage from "./pages/Privacy";
-import TermsPage from "./pages/Terms";
-import ComingSoonPage from "./pages/ComingSoon";
+const Index = lazy(() => import("./pages/Index"));
+const LoginPage = lazy(() => import("./pages/Login"));
+const RegisterPage = lazy(() => import("./pages/Register"));
+const DashboardPage = lazy(() => import("./pages/Dashboard"));
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const TournamentsPage = lazy(() => import("./pages/Tournaments"));
+const TeamsPage = lazy(() => import("./pages/Teams"));
+const LeaderboardPage = lazy(() => import("./pages/Leaderboard"));
+const PlayPage = lazy(() => import("./pages/Play"));
+const ScrimsPage = lazy(() => import("./pages/Scrims"));
+const TournamentDetailPage = lazy(() => import("./pages/TournamentDetail"));
+const TeamDetailPage = lazy(() => import("./pages/TeamDetail"));
+const AdminSecurityPage = lazy(() => import("./pages/admin/Security"));
+const AdminDashboard = lazy(() => import("./pages/admin/sections/AdminDashboard"));
+const AdminTournaments = lazy(() => import("./pages/admin/sections/AdminTournaments"));
+const AdminCommunityCup = lazy(() => import("./pages/admin/sections/AdminCommunityCup"));
+const CommunityCupMatchRoom = lazy(() => import("./pages/CommunityCupMatchRoom"));
+const AdminMatches = lazy(() => import("./pages/admin/sections/AdminMatches"));
+const AdminTickets = lazy(() => import("./pages/admin/sections/AdminTickets"));
+const AdminPlayers = lazy(() => import("./pages/admin/sections/AdminPlayers"));
+const AdminReputation = lazy(() => import("./pages/admin/sections/AdminReputation"));
+const AdminDisputes = lazy(() => import("./pages/admin/sections/AdminDisputes"));
+const AdminScrims = lazy(() => import("./pages/admin/sections/AdminScrims"));
+const AdminChat = lazy(() => import("./pages/admin/sections/AdminChat"));
+const AdminEconomy = lazy(() => import("./pages/admin/sections/AdminEconomy"));
+const AdminAnnouncements = lazy(() => import("./pages/admin/sections/AdminAnnouncements"));
+const AdminSeasons = lazy(() => import("./pages/admin/sections/AdminSeasons"));
+const AdminElo = lazy(() => import("./pages/admin/sections/AdminElo"));
+const AdminLeagues = lazy(() => import("./pages/admin/sections/AdminLeagues"));
+const PeakLeagueAdmin = lazy(() => import("./pages/admin/PeakLeagueAdmin"));
+const LeaguesPage = lazy(() => import("./pages/Leagues"));
+const LeagueDetailPage = lazy(() => import("./pages/LeagueDetail"));
+const MatchDetailPage = lazy(() => import("./pages/MatchDetail"));
+const TeamDashboardPage = lazy(() => import("./pages/TeamDashboard"));
+const AimGuidePage = lazy(() => import("./pages/AimGuide"));
+const FreeAgentsPage = lazy(() => import("./pages/FreeAgents"));
+const FreeAgentsCompletePage = lazy(() => import("./pages/FreeAgentsComplete"));
+const NotificationsPage = lazy(() => import("./pages/Notifications"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const EloExplainedPage = lazy(() => import("./pages/EloExplained"));
+const AboutPage = lazy(() => import("./pages/About"));
+const FAQPage = lazy(() => import("./pages/FAQ"));
+const ContactPage = lazy(() => import("./pages/Contact"));
+const PrivacyPage = lazy(() => import("./pages/Privacy"));
+const TermsPage = lazy(() => import("./pages/Terms"));
+const ComingSoonPage = lazy(() => import("./pages/ComingSoon"));
 import ChatWidget from "./components/chat/ChatWidget";
 import GlobalActiveBar from "./components/competitive/GlobalActiveBar";
 import Analytics from "./components/Analytics";
 import CookieBanner from "./components/CookieBanner";
-import NotFound from "./pages/NotFound";
+const NotFound = lazy(() => import("./pages/NotFound"));
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import RoleGuard from "./components/RoleGuard";
 import PeakCommandPalette from "./components/navigation/PeakCommandPalette";
 import MobileDock from "./components/navigation/MobileDock";
-import BroadcastMatchPage from "./pages/BroadcastMatch";
+const BroadcastMatchPage = lazy(() => import("./pages/BroadcastMatch"));
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Analytics />
+            <Suspense fallback={<div className="min-h-screen bg-background" />}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
@@ -168,6 +170,7 @@ const App = () => (
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
             <AppOverlays />
           </GameProvider>
           </I18nProvider>

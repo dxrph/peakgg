@@ -1,69 +1,76 @@
 import Navbar from "@/components/landing/Navbar";
-import SEO from "@/components/SEO";
-import HeroSection from "@/components/landing/HeroSection";
-import StartCompetingSection from "@/components/landing/StartCompetingSection";
-import FeaturesSection from "@/components/landing/FeaturesSection";
-import HowItWorksSteps from "@/components/landing/HowItWorksSteps";
-import ProgressionPath from "@/components/landing/ProgressionPath";
-import RankShowcase from "@/components/landing/RankShowcase";
-import TopPlayersWeek from "@/components/landing/TopPlayersWeek";
 import Footer from "@/components/landing/Footer";
-import DiscordCTA from "@/components/landing/DiscordCTA";
+import SEO from "@/components/SEO";
+import { Ticker } from "@/components/system";
+import HomeHero from "@/components/home/HomeHero";
+import NextCupModule from "@/components/home/NextCupModule";
+import PathModule from "@/components/home/PathModule";
+import RosterModule from "@/components/home/RosterModule";
+import RanksModule from "@/components/home/RanksModule";
+import LadderModule from "@/components/home/LadderModule";
+import CommunityModule from "@/components/home/CommunityModule";
 
-const Index = () => {
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "PeakGG",
-    url: "https://peakgg.net",
-    logo: "https://peakgg.net/logo.png",
-    description: "Competitive Valorant platform — ranked, tournaments, teams and free agents for serious players in Europe.",
-    email: "peakgg.official@gmail.com",
-    foundingDate: "2026",
-    foundingLocation: "Brussels, Belgium",
-    sameAs: [
-      "https://instagram.com/peakgg",
-      "https://tiktok.com/@peakgg",
-      "https://x.com/peakgg",
-      "https://discord.gg/peakgg",
-    ],
-  };
-  const siteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "PeakGG",
-    url: "https://peakgg.net",
-  };
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "PeakGG",
+  url: "https://peakgg.net",
+  logo: "https://peakgg.net/logo.png",
+  description:
+    "Competitive Valorant platform — cups, teams, free agents and the Peak rating system for European players.",
+  email: "peakgg.official@gmail.com",
+  foundingDate: "2026",
+  foundingLocation: "Brussels, Belgium",
+  sameAs: ["https://discord.gg/peakgg"],
+};
 
+const siteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "PeakGG",
+  url: "https://peakgg.net",
+};
+
+const TICKER = [
+  <>
+    <b>Community Cup #1</b> <i>registration open</i>
+  </>,
+  <>
+    <b>Free agent board</b> live
+  </>,
+  <>
+    <i>Peak rating</i> season 1
+  </>,
+  <>
+    <b>5v5</b> single elimination
+  </>,
+  <>
+    Valorant <i>live</i> · CS2 soon · R6 soon
+  </>,
+];
+
+export default function Index() {
   return (
-    <div className="page-shell overflow-hidden">
+    <div className="page-shell">
       <SEO
-        title="PeakGG — Competitive Valorant Platform"
-        description="Competitive Valorant for serious European players: ranked Open Cup tournaments, teams, free agents and the Peak rank system."
-        keywords="PeakGG, competitive Valorant, Valorant tournaments, Valorant ranked, esports platform Belgium, Valorant teams Europe, Valorant free agents, Valorant ELO system, Open Cup"
+        title="PeakGG — Competitive Valorant Cups & Ladder"
+        description="Build a roster, enter verified Valorant cups and climb the Peak rating. Competitive play for European players, no org required."
+        keywords="PeakGG, competitive Valorant, Valorant tournaments, Valorant teams Europe, free agents, Peak rating, Open Cup"
         path="/"
         jsonLd={[orgSchema, siteSchema]}
       />
       <Navbar />
       <main>
-        <HeroSection />
-        <div className="signal-marquee" aria-hidden>
-          <div>PLAY YOUR ROLE • BUILD YOUR ROSTER • ENTER THE CUP • CLIMB THE PEAK • PLAY YOUR ROLE • BUILD YOUR ROSTER • ENTER THE CUP • CLIMB THE PEAK •</div>
-        </div>
-        <section className="editorial-section" data-index="01"><StartCompetingSection /></section>
-        <section className="editorial-section" data-index="02"><FeaturesSection /></section>
-        <section className="editorial-section" data-index="03"><HowItWorksSteps /></section>
-        <section className="container py-16 md:py-24 editorial-section" data-index="04">
-          <div className="paper-cut p-5 md:p-10"><ProgressionPath /></div>
-        </section>
-        <section className="editorial-section" data-index="05"><RankShowcase /></section>
-        <section className="editorial-section" data-index="06"><TopPlayersWeek /></section>
-        <section className="editorial-section" data-index="07"><DiscordCTA /></section>
+        <HomeHero />
+        <Ticker items={TICKER} />
+        <NextCupModule />
+        <PathModule />
+        <RosterModule />
+        <RanksModule />
+        <LadderModule />
+        <CommunityModule />
       </main>
-      <Footer />
+      <Footer hideCta />
     </div>
   );
-};
-
-export default Index;
-
+}
