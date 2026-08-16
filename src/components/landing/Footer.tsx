@@ -73,17 +73,14 @@ export default function Footer() {
     );
 
   return (
-    <footer className="border-t border-border/60 bg-gradient-to-b from-card/20 to-background mt-8">
+    <footer className="border-t border-border bg-background mt-8">
       {/* Pre-footer CTA */}
-      <section className="relative overflow-hidden border-b border-border/60">
-        <div className="absolute inset-0 gradient-hero opacity-80 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] rounded-full bg-primary/[0.07] blur-[140px] pointer-events-none" />
+      <section className="relative overflow-hidden border-b border-border bc-rules">
         <div className="container relative z-10 py-16 md:py-20 flex flex-col items-center text-center">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-[10px] uppercase tracking-[0.2em] font-display text-primary mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <span className="bc-chip border-primary/40 text-primary mb-5">
             {t("footer.cta_eyebrow", { defaultValue: "Closed Beta — Europe" })}
           </span>
-          <h2 className="font-display font-bold tracking-tight text-4xl md:text-6xl lg:text-7xl mb-4">
+          <h2 className="bc-display text-5xl md:text-7xl mb-4">
             {t("footer.cta_title_pre", { defaultValue: "Ready to" })}{" "}
             <span className="text-primary text-glow-red">
               {t("footer.cta_title_accent", { defaultValue: "Compete" })}
@@ -97,11 +94,7 @@ export default function Footer() {
             })}
           </p>
           <Link to={user ? "/dashboard" : "/register"}>
-            <Button
-              variant="neon"
-              size="xl"
-              className="hover:shadow-[0_0_30px_hsl(var(--primary)/0.55),0_0_70px_hsl(var(--primary)/0.25)] transition-shadow"
-            >
+            <Button size="xl" className="rounded-none font-display font-bold uppercase tracking-[0.18em]">
               <BrandLogo className="mr-2 h-5 w-5" />
               {user
                 ? t("footer.cta_dashboard", { defaultValue: "Go to Dashboard" })
@@ -140,7 +133,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     aria-label={s.label}
                     title={s.label}
-                    className="w-9 h-9 rounded-md border border-border bg-background/60 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/60 hover:shadow-[0_0_18px_hsl(var(--primary)/0.25)] transition-all"
+                    className="w-9 h-9 rounded-none border border-border bg-transparent flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/60 hover:shadow-[0_0_18px_hsl(var(--primary)/0.25)] transition-all"
                   >
                     <Icon className="h-4 w-4" />
                   </a>
@@ -152,10 +145,8 @@ export default function Footer() {
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title} className="md:col-span-2 lg:col-span-2">
-              <h4 className="font-display font-bold mb-5 uppercase tracking-[0.18em] text-xs text-foreground/90">
-                <span className="inline-block border-b-2 border-primary pb-1">
-                  {col.title}
-                </span>
+              <h4 className="mb-5">
+                <span className="bc-rail">{col.title}</span>
               </h4>
               <ul className="space-y-3">
                 {col.items.map((item) => (
