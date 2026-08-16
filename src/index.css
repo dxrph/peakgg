@@ -6,28 +6,29 @@
 
 @layer base {
   :root {
-    --background: 235 24% 4%;
-    --foreground: 220 24% 96%;
-    --card: 234 20% 7%;
-    --card-foreground: 220 24% 96%;
-    --popover: 234 20% 7%;
-    --popover-foreground: 220 24% 96%;
-    --primary: 355 100% 64%;
+    --background: 228 14% 5%;
+    --foreground: 220 12% 96%;
+    --card: 228 12% 8%;
+    --card-foreground: 220 12% 96%;
+    --popover: 228 14% 7%;
+    --popover-foreground: 220 12% 96%;
+    --primary: 353 100% 63%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 231 16% 12%;
-    --secondary-foreground: 220 20% 88%;
-    --muted: 232 14% 12%;
-    --muted-foreground: 224 10% 60%;
-    --accent: 28 100% 65%;
+    --secondary: 228 10% 13%;
+    --secondary-foreground: 220 10% 88%;
+    --muted: 228 10% 12%;
+    --muted-foreground: 224 6% 58%;
+    --accent: 22 100% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 230 14% 18%;
-    --input: 230 14% 18%;
-    --ring: 355 100% 64%;
-    --radius: 0.875rem;
+    --border: 228 10% 16%;
+    --input: 228 10% 16%;
+    --ring: 353 100% 63%;
+    --radius: 0.25rem;
 
-    --surface: 240 15% 7%;
+    --live: 82 80% 55%;
+    --surface: 228 12% 8%;
     --glow-primary: 352 100% 62%;
     --glow-accent: 24 100% 63%;
     --neon-red: 352 100% 62%;
@@ -43,9 +44,9 @@
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
 
-    --sidebar-background: 240 20% 5%;
-    --sidebar-foreground: 240 5% 70%;
-    --sidebar-primary: 352 100% 62%;
+    --sidebar-background: 228 14% 4%;
+    --sidebar-foreground: 224 6% 66%;
+    --sidebar-primary: 353 100% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 15% 12%;
     --sidebar-accent-foreground: 0 0% 90%;
@@ -64,20 +65,18 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     background-image:
-      radial-gradient(ellipse 72% 45% at 8% -8%, hsl(355 100% 64% / 0.09), transparent 62%),
-      radial-gradient(ellipse 52% 42% at 100% 88%, hsl(28 100% 65% / 0.05), transparent 65%),
-      linear-gradient(hsl(220 25% 98% / 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(220 25% 98% / 0.018) 1px, transparent 1px);
-    background-size: auto, auto, 56px 56px, 56px 56px;
+      linear-gradient(180deg, hsl(228 16% 7%) 0%, hsl(228 14% 5%) 55%, hsl(228 14% 4%) 100%),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.022) 1px, transparent 1px);
+    background-size: auto, 96px 100%;
     background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Rajdhani', sans-serif;
-    @apply font-bold tracking-tight;
-    letter-spacing: -0.025em;
+    font-family: 'Barlow Condensed', 'Rajdhani', sans-serif;
+    @apply font-black uppercase;
+    letter-spacing: -0.015em;
   }
-  h1 { @apply text-3xl md:text-4xl lg:text-5xl; line-height: 1.1; }
-  h2 { @apply text-2xl md:text-3xl; line-height: 1.15; }
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl; line-height: 0.9; }
+  h2 { @apply text-3xl md:text-4xl; line-height: 0.92; }
   h3 { @apply text-xl md:text-2xl; line-height: 1.2; }
   p  { line-height: 1.6; }
 
