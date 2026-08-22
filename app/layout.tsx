@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PeakGG — Reach Your Competitive Peak',
     description: 'Competizioni, ranking verificati e scouting per la nuova generazione di player.',
-    images: [{ url: '/og.png', width: 1732, height: 908, alt: 'PeakGG — Il tuo gioco. Il tuo picco.' }],
+    images: [{ url: '/og.png', width: 1731, height: 909, alt: 'PeakGG — Il tuo gioco. Il tuo picco.' }],
   },
   twitter: {
     card: 'summary_large_image',
