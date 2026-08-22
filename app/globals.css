@@ -39,3 +39,4 @@
 /* Generated v2 artwork already follows the PeakGG palette; preserve its reds. */
 .cinema-frame{filter:contrast(1.2) brightness(.5) saturate(1.12)}
 .hero-art>img,.image-story>img,.team-poster>img{filter:contrast(1.18) brightness(.7) saturate(1.08)}
+.rank-row::after{background-image:url('/assets/peakgg-team-v3.webp')}

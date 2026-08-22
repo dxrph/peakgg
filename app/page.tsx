@@ -17,9 +17,9 @@ export default function Home() {
     <PeakMotion>
       <main className="site-shell">
         <div className="cinema-backdrop" aria-hidden="true">
-          <img className="cinema-frame frame-hero" src="/assets/peakgg-hero-v2.webp" alt="" />
-          <img className="cinema-frame frame-story" src="/assets/peakgg-story-v2.webp" alt="" />
-          <img className="cinema-frame frame-team" src="/assets/peakgg-team-v2.webp" alt="" />
+          <img className="cinema-frame frame-hero" src="/assets/peakgg-hero-v3.webp" alt="" />
+          <img className="cinema-frame frame-story" src="/assets/peakgg-story-v3.webp" alt="" />
+          <img className="cinema-frame frame-team" src="/assets/peakgg-team-v3.webp" alt="" />
           <div className="cinema-grade" />
           <div className="cinema-noise" />
         </div>
@@ -39,7 +39,7 @@ export default function Home() {
             <div className="proof hero-reveal" aria-label="Statistiche dimostrative PeakGG"><div><strong>12.8K</strong><span>Player attivi</span></div><div><strong>480+</strong><span>Team verificati</span></div><div><strong>€35K</strong><span>Prize pool mensile</span></div></div>
           </div>
           <div className="hero-art hero-console">
-            <img src="/assets/peakgg-hero-v2.webp" alt="Portale monumentale che conduce all'arena competitiva PeakGG" />
+            <img src="/assets/peakgg-hero-v3.webp" alt="Site di una mappa tactical shooter competitiva PeakGG" />
             <div className="hero-art-stamp"><span>SEASON // 01</span><strong>ENTER<br />THE PEAK</strong></div>
             <div className="match-console" aria-label="Partite competitive">
               <div className="console-head"><span>MATCH CENTER</span><span className="system-status">LIVE</span></div>
@@ -51,7 +51,7 @@ export default function Home() {
         <div className="ticker" aria-label="Giochi supportati"><div className="ticker-track"><span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span><i /> <span>ROCKET LEAGUE</span><i /> <span>LEAGUE OF LEGENDS</span><i /> <span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span></div></div>
 
         <section className="image-story cinema-chapter" data-frame="story" aria-label="La storia PeakGG">
-          <img src="/assets/peakgg-story-v2.webp" alt="Montagna digitale attraversata da flussi di dati competitivi" />
+          <img src="/assets/peakgg-story-v3.webp" alt="Mappa tactical shooter con obiettivo e proiezione strategica" />
           <div className="story-copy reveal-item"><span>THIS IS PEAKGG // 001</span><h2>NON È SOLO<br />UN ALTRO MATCH.</h2><p>È il momento in cui il talento trova una misura, un team trova il suo quinto e una performance diventa reputazione. PeakGG connette tutto ciò che succede prima, durante e dopo la competizione.</p><a href="#competition">SCOPRI L'ECOSISTEMA →</a></div>
         </section>
 
@@ -84,7 +84,7 @@ export default function Home() {
         </section>
 
         <section className="team-poster cinema-chapter" data-frame="team" aria-label="Community PeakGG">
-          <img src="/assets/peakgg-team-v2.webp" alt="Cinque monoliti rappresentano i ruoli di un team PeakGG" />
+          <img src="/assets/peakgg-team-v3.webp" alt="Cinque postazioni loadout nello spawn competitivo PeakGG" />
           <div className="team-title reveal-item"><span>THE COMMUNITY</span><h2>NOI SIAMO<br /><b>PEAKGG.</b></h2><p>PLAYER · TEAM · COACH · CREATOR</p></div>
         </section>
 
