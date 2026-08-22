@@ -40,3 +40,9 @@
 .cinema-frame{filter:contrast(1.2) brightness(.5) saturate(1.12)}
 .hero-art>img,.image-story>img,.team-poster>img{filter:contrast(1.18) brightness(.7) saturate(1.08)}
 .rank-row::after{background-image:url('/assets/peakgg-team-v3.webp')}
+
+/* v4 cartoon-game art direction */
+.cinema-frame{filter:contrast(1.08) brightness(.68) saturate(1.02)}
+.hero-art>img,.image-story>img,.team-poster>img{filter:contrast(1.06) brightness(.82) saturate(1.04)}
+.cinema-grade{background:linear-gradient(100deg,rgba(3,3,3,.92) 0%,rgba(3,3,3,.5) 36%,rgba(3,3,3,.08) 74%),linear-gradient(0deg,#050505 0%,transparent 18%,transparent 82%,rgba(5,5,5,.58) 100%),radial-gradient(circle at 78% 44%,rgba(255,0,0,.1),transparent 34%)}
+.rank-row::after{background-image:url('/assets/peakgg-team-v4.webp')}
