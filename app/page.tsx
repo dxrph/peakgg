@@ -16,6 +16,13 @@ export default function Home() {
   return (
     <PeakMotion>
       <main className="site-shell">
+        <div className="cinema-backdrop" aria-hidden="true">
+          <img className="cinema-frame frame-hero" src="/assets/peakgg-hero.webp" alt="" />
+          <img className="cinema-frame frame-story" src="/assets/peakgg-story.webp" alt="" />
+          <img className="cinema-frame frame-team" src="/assets/peakgg-team.webp" alt="" />
+          <div className="cinema-grade" />
+          <div className="cinema-noise" />
+        </div>
         <nav className="nav" aria-label="Navigazione principale">
           <a className="brand" href="#top" aria-label="PeakGG home"><img className="brand-logo" src="/assets/peakgg-logo.png" alt="" /><span>PEAK<span className="accent">GG</span></span></a>
           <div className="nav-links"><a href="#competition">Competizioni</a><a href="#rankings">Rankings</a><a href="#teams">Teams</a></div>
@@ -43,12 +50,12 @@ export default function Home() {
 
         <div className="ticker" aria-label="Giochi supportati"><div className="ticker-track"><span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span><i /> <span>ROCKET LEAGUE</span><i /> <span>LEAGUE OF LEGENDS</span><i /> <span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span></div></div>
 
-        <section className="image-story" aria-label="La storia PeakGG">
+        <section className="image-story cinema-chapter" data-frame="story" aria-label="La storia PeakGG">
           <img src="/assets/peakgg-story.webp" alt="Due player analizzano insieme una partita" />
           <div className="story-copy reveal-item"><span>THIS IS PEAKGG // 001</span><h2>NON È SOLO<br />UN ALTRO MATCH.</h2><p>È il momento in cui il talento trova una misura, un team trova il suo quinto e una performance diventa reputazione. PeakGG connette tutto ciò che succede prima, durante e dopo la competizione.</p><a href="#competition">SCOPRI L'ECOSISTEMA →</a></div>
         </section>
 
-        <section className="competition section-pad" id="competition">
+        <section className="competition section-pad cinema-chapter" data-frame="story" id="competition">
           <div className="section-kicker reveal-item"><span>01</span> COMPETE</div>
           <div className="section-heading reveal-item"><h2>OGNI MATCH<br />CONTA DAVVERO.</h2><p>Dal primo qualifier alla finale. Entra in competizioni strutturate, affronta avversari al tuo livello e trasforma ogni risultato in reputazione verificata.</p></div>
           <div className="format-grid">
@@ -58,7 +65,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="rank-section section-pad" id="rankings">
+        <section className="rank-section section-pad cinema-chapter" data-frame="team" id="rankings">
           <div className="rank-intro reveal-item"><div className="section-kicker"><span>02</span> PROVE IT</div><h2>IL RANKING<br />CHE NON MENTE.</h2><p>Performance, consistenza e qualità degli avversari. Un punteggio trasparente che racconta quanto vali davvero.</p></div>
           <div className="ranking-table reveal-item" role="table" aria-label="Top player dimostrativi">
             <div className="rank-head" role="row"><span>#</span><span>PLAYER</span><span>ROLE</span><span>TEAM</span><span>RATING</span><span>7D</span></div>
@@ -76,7 +83,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="team-poster" aria-label="Community PeakGG">
+        <section className="team-poster cinema-chapter" data-frame="team" aria-label="Community PeakGG">
           <img src="/assets/peakgg-team.webp" alt="Lineup di player della community PeakGG" />
           <div className="team-title reveal-item"><span>THE COMMUNITY</span><h2>NOI SIAMO<br /><b>PEAKGG.</b></h2><p>PLAYER · TEAM · COACH · CREATOR</p></div>
         </section>

@@ -51,11 +51,19 @@ export default function PeakMotion({ children }: { children: React.ReactNode }) 
       gsap.utils.toArray<HTMLElement>('.reveal-item').forEach((el) => gsap.from(el, { y: 55, autoAlpha: 0, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 87%', once: true } }));
       gsap.to('.ticker-track', { xPercent: -28, ease: 'none', scrollTrigger: { trigger: '.ticker', start: 'top bottom', end: 'bottom top', scrub: 1 } });
       gsap.to('.hero-art > img', { yPercent: 12, scale: 1.02, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: .8 } });
+
+      gsap.set('.frame-hero', { autoAlpha: 1, scale: 1.05 });
+      gsap.set('.frame-story, .frame-team', { autoAlpha: 0, scale: 1.1 });
+      gsap.to('.frame-hero', { autoAlpha: 0, scale: 1.12, ease: 'none', scrollTrigger: { trigger: '.image-story', start: 'top 92%', end: 'top 34%', scrub: true } });
+      gsap.to('.frame-story', { autoAlpha: 1, scale: 1.03, ease: 'none', scrollTrigger: { trigger: '.image-story', start: 'top 92%', end: 'top 34%', scrub: true } });
+      gsap.to('.frame-story', { autoAlpha: 0, scale: 1.12, ease: 'none', scrollTrigger: { trigger: '.rank-section', start: 'top 88%', end: 'top 32%', scrub: true } });
+      gsap.to('.frame-team', { autoAlpha: 1, scale: 1.03, ease: 'none', scrollTrigger: { trigger: '.rank-section', start: 'top 88%', end: 'top 32%', scrub: true } });
+
       gsap.utils.toArray<HTMLElement>('.image-story, .team-poster').forEach((section) => {
         const picture = section.querySelector('img');
         if (picture) {
           gsap.fromTo(picture, { yPercent: -7, scale: 1.12 }, { yPercent: 7, scale: 1.02, ease: 'none', scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 } });
-          gsap.from(section, { clipPath: 'polygon(0 12%, 100% 0, 100% 0, 0 0)', scrollTrigger: { trigger: section, start: 'top 90%', end: 'top 35%', scrub: 1 } });
+          gsap.fromTo(picture, { clipPath: 'polygon(0 9%, 100% 0, 100% 100%, 0 94%)' }, { clipPath: 'polygon(0 0, 100% 4%, 100% 96%, 0 100%)', ease: 'none', scrollTrigger: { trigger: section, start: 'top 90%', end: 'top 30%', scrub: 1 } });
         }
       });
       gsap.utils.toArray<HTMLElement>('.path-card').forEach((card, index) => gsap.from(card, { x: 90, autoAlpha: 0, duration: .85, scrollTrigger: { trigger: card, start: 'top 84%', once: true }, delay: index * .05 }));
