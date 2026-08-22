@@ -17,7 +17,7 @@ export default function Home() {
     <PeakMotion>
       <main className="site-shell">
         <nav className="nav" aria-label="Navigazione principale">
-          <a className="brand" href="#top" aria-label="PeakGG home"><span className="brand-mark" aria-hidden="true">P</span><span>PEAK<span className="accent">GG</span></span></a>
+          <a className="brand" href="#top" aria-label="PeakGG home"><img className="brand-logo" src="/assets/peakgg-logo.png" alt="" /><span>PEAK<span className="accent">GG</span></span></a>
           <div className="nav-links"><a href="#competition">Competizioni</a><a href="#rankings">Rankings</a><a href="#teams">Teams</a></div>
           <a className="nav-cta" href="#join">Entra in PeakGG <span aria-hidden="true">↗</span></a>
         </nav>
@@ -31,15 +31,22 @@ export default function Home() {
             <div className="hero-actions hero-reveal"><a className="primary-action" href="#competition">Trova una competizione <span>→</span></a><a className="text-action" href="#rankings">Esplora i ranking</a></div>
             <div className="proof hero-reveal" aria-label="Statistiche dimostrative PeakGG"><div><strong>12.8K</strong><span>Player attivi</span></div><div><strong>480+</strong><span>Team verificati</span></div><div><strong>€35K</strong><span>Prize pool mensile</span></div></div>
           </div>
-          <div className="match-console hero-console" aria-label="Partite competitive">
-            <div className="console-head"><span>MATCH CENTER</span><span className="system-status">SYSTEM ONLINE</span></div>
-            <div className="featured-match"><div className="featured-meta"><span>VALORANT · PEAK SERIES</span><span className="live-label">LIVE</span></div><div className="versus"><div><span className="team-glyph">N</span><strong>NOVA</strong><small>#03 EU</small></div><p><strong>11</strong><span>MAP 2 / BO3</span><strong>9</strong></p><div><span className="team-glyph alt">K</span><strong>KRAKEN</strong><small>#07 EU</small></div></div><div className="round-progress"><span style={{ width: '64%' }} /></div></div>
-            <div className="match-list">{matches.map((match) => <div className="match-row" key={`${match.game}-${match.left}`}><span className="game-tag">{match.game}</span><span>{match.left} <i>vs</i> {match.right}</span><strong>{match.score}</strong><small>{match.phase}</small></div>)}</div>
-            <div className="console-foot"><span>UPDATED 14 SEC AGO</span><a href="#competition">VIEW ALL MATCHES →</a></div>
+          <div className="hero-art hero-console">
+            <img src="/assets/peakgg-hero.webp" alt="Tre player PeakGG entrano in un'arena competitiva" />
+            <div className="hero-art-stamp"><span>SEASON // 01</span><strong>ENTER<br />THE PEAK</strong></div>
+            <div className="match-console" aria-label="Partite competitive">
+              <div className="console-head"><span>MATCH CENTER</span><span className="system-status">LIVE</span></div>
+              <div className="match-list">{matches.slice(0, 2).map((match) => <div className="match-row" key={`${match.game}-${match.left}`}><span className="game-tag">{match.game}</span><span>{match.left} <i>vs</i> {match.right}</span><strong>{match.score}</strong><small>{match.phase}</small></div>)}</div>
+            </div>
           </div>
         </section>
 
         <div className="ticker" aria-label="Giochi supportati"><div className="ticker-track"><span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span><i /> <span>ROCKET LEAGUE</span><i /> <span>LEAGUE OF LEGENDS</span><i /> <span>VALORANT</span><i /> <span>COUNTER-STRIKE 2</span></div></div>
+
+        <section className="image-story" aria-label="La storia PeakGG">
+          <img src="/assets/peakgg-story.webp" alt="Due player analizzano insieme una partita" />
+          <div className="story-copy reveal-item"><span>THIS IS PEAKGG // 001</span><h2>NON È SOLO<br />UN ALTRO MATCH.</h2><p>È il momento in cui il talento trova una misura, un team trova il suo quinto e una performance diventa reputazione. PeakGG connette tutto ciò che succede prima, durante e dopo la competizione.</p><a href="#competition">SCOPRI L'ECOSISTEMA →</a></div>
+        </section>
 
         <section className="competition section-pad" id="competition">
           <div className="section-kicker reveal-item"><span>01</span> COMPETE</div>
@@ -69,8 +76,13 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="team-poster" aria-label="Community PeakGG">
+          <img src="/assets/peakgg-team.webp" alt="Lineup di player della community PeakGG" />
+          <div className="team-title reveal-item"><span>THE COMMUNITY</span><h2>NOI SIAMO<br /><b>PEAKGG.</b></h2><p>PLAYER · TEAM · COACH · CREATOR</p></div>
+        </section>
+
         <section className="final-cta" id="join"><div className="cta-grid" aria-hidden="true"/><p className="section-kicker"><span>READY?</span> YOUR NEXT MATCH STARTS HERE</p><h2>NON GIOCARE<br />NELL’OMBRA.</h2><a href="mailto:join@peakgg.gg">CREA IL TUO PROFILO <span>↗</span></a><small>GRATIS PER I PLAYER · NESSUNA CARTA RICHIESTA</small></section>
-        <footer><a className="brand" href="#top"><span className="brand-mark">P</span><span>PEAK<span className="accent">GG</span></span></a><p>THE COMPETITIVE LAYER FOR THE NEXT GENERATION.</p><div><a href="#competition">Competizioni</a><a href="#rankings">Rankings</a><a href="#teams">Teams</a></div><span>© 2026 PEAKGG — CONCEPT HOMEPAGE</span></footer>
+        <footer><a className="brand" href="#top"><img className="brand-logo" src="/assets/peakgg-logo.png" alt="" /><span>PEAK<span className="accent">GG</span></span></a><p>THE COMPETITIVE LAYER FOR THE NEXT GENERATION.</p><div><a href="#competition">Competizioni</a><a href="#rankings">Rankings</a><a href="#teams">Teams</a></div><span>© 2026 PEAKGG — CONCEPT HOMEPAGE</span></footer>
       </main>
     </PeakMotion>
   );
