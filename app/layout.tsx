@@ -7,6 +7,7 @@ import './globals.css';
 import './brand.css';
 import './product.css';
 import './internal-pages.css';
+import './launch-polish.css';
 import SiteHeader from '../components/shared/SiteHeader';
 import SiteFooter from '../components/shared/SiteFooter';
 import {getSessionUser} from '../lib/auth/session';
