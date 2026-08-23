@@ -1,2 +1,9 @@
-import {ProductPage,EmptyState} from '../../components/ui/ProductPage';
-export default function Players(){return <ProductPage eyebrow="PEAKGG / PLAYER DIRECTORY" title="FIND YOUR FIVE." description="SEARCH EUROPEAN COMPETITORS BY REGION, ROLE, AND TEAM STATUS."><form className="peak-container product-grid" role="search"><div className="form-field product-card"><label htmlFor="search">SEARCH</label><input id="search" name="search"/></div><div className="form-field product-card"><label htmlFor="region">REGION</label><select id="region" name="region"><option>ALL</option><option>EU WEST</option><option>EU NORTH/EAST</option><option>EU OTHER</option></select></div><div className="form-field product-card"><label htmlFor="role">ROLE</label><select id="role" name="role"><option>ALL</option><option>DUELIST</option><option>CONTROLLER</option><option>INITIATOR</option><option>SENTINEL</option><option>FLEX</option></select></div></form><div className="peak-container"><EmptyState title="NO PLAYERS MATCH THESE FILTERS." body="PLAYER PROFILES WILL APPEAR HERE AFTER ONBOARDING."/></div></ProductPage>}
+import {ProductPage} from '../../components/ui/ProductPage';
+import PlayersDirectory from '../../components/players/PlayersDirectory';
+import {normalizePlayerFilters} from '../../lib/internal-pages-models.mjs';
+
+export default async function Players({searchParams}:{searchParams:Promise<{search?:string;region?:string;role?:string;status?:string}>}){
+  const query=await searchParams;
+  const initialFilters=normalizePlayerFilters(query);
+  return <ProductPage eyebrow="PEAKGG / PLAYER DIRECTORY" title="FIND YOUR FIVE." description="SEARCH EUROPEAN COMPETITORS BY REGION, ROLE, AND TEAM STATUS."><PlayersDirectory initialFilters={initialFilters}/></ProductPage>
+}
