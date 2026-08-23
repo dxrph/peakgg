@@ -11,7 +11,7 @@ import type {DirectoryPlayer, PlayerFilters} from '../../lib/internal-pages-mode
 export default function PlayersDirectory({initialFilters}: {initialFilters: PlayerFilters}) {
   const [filters, setFilters] = useState<PlayerFilters>(() => normalizePlayerFilters(initialFilters));
   const players = DEMO_PLAYERS as readonly DirectoryPlayer[];
-  const visible = useMemo(() => filterPlayers(players, filters), [players, filters]);
+  const visible = useMemo<DirectoryPlayer[]>(() => filterPlayers(players, filters) as DirectoryPlayer[], [players, filters]);
   const active = hasActivePlayerFilters(filters);
 
   function update(next: Partial<PlayerFilters>) {
