@@ -1,0 +1,3 @@
+import Link from 'next/link';
+import {supabaseConfigured} from '../../lib/supabase/config';
+export default function AuthForm({title,error,children,footer}:{title:string;error?:string;children:React.ReactNode;footer:React.ReactNode}){return <main className="auth-page"><section><p className="mono-label">PEAKGG / ACCOUNT</p><h1>{title}</h1>{!supabaseConfigured&&<p className="form-error" role="alert">SUPABASE IS NOT CONFIGURED. ADD THE REQUIRED ENVIRONMENT VALUES TO CONTINUE.</p>}{error&&<p className="form-error" role="alert">{error}</p>}{children}<footer>{footer}</footer><Link href="/">BACK TO PEAKGG</Link></section></main>}

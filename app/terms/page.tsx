@@ -1,0 +1,1 @@
+import {ProductPage} from '../../components/ui/ProductPage';export default function Terms(){return <ProductPage eyebrow="PEAKGG / LEGAL" title="TERMS" description="USERS MUST PROVIDE ACCURATE COMPETITIVE INFORMATION, FOLLOW TOURNAMENT RULES, AND RESPECT PLATFORM MODERATION AND VERIFIED RESULT PROCEDURES."/>}

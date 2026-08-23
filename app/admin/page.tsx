@@ -1,0 +1,1 @@
+import {AdminPage} from '../../components/admin/AdminPage';export default function Admin(){return <AdminPage code="CONTROL ROOM / OVERVIEW" title="NEEDS ATTENTION" columns={['OPEN TOURNAMENTS','LIVE TOURNAMENTS','PENDING REGISTRATIONS','ACTIVE MATCHES','OPEN DISPUTES']}/>}

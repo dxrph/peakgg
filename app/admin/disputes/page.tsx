@@ -1,0 +1,1 @@
+import {AdminPage} from '../../../components/admin/AdminPage';export default function AdminDisputes(){return <AdminPage code="CONTROL ROOM / DISPUTES" title="DISPUTES" columns={['MATCH','TOURNAMENT','OPENED BY','STATE','CREATED','ACTION']}/>}

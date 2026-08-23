@@ -1,0 +1,1 @@
+import Link from 'next/link';import {ProductPage} from '../components/ui/ProductPage';export default function NotFound(){return <ProductPage eyebrow="PEAKGG / 404" title="NOT FOUND." description="THIS COMPETITIVE ROUTE DOES NOT EXIST OR IS NO LONGER AVAILABLE." actions={<Link className="peak-button" href="/play">RETURN TO PLAY</Link>}/>}

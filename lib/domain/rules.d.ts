@@ -1,0 +1,12 @@
+export type Leadership='CAPTAIN'|'CO_CAPTAIN'|'MEMBER';
+export function authorizeRoute(user:{id:string}|null,next:string):{allowed:boolean;redirect?:string};
+export function validateTeam(team:{name:string;tag:string;region:string}):{ok:boolean;errors:Record<string,string>};
+export function canInvitePlayer(input:{leadership:Leadership;activeCount:number;alreadyInvited:boolean;targetHasTeam:boolean}):boolean;
+export function validateRegistration(input:{leadership:Leadership;tournamentOpen:boolean;teamAlreadyRegistered:boolean;capacityAvailable:boolean;waitlistEnabled:boolean;starters:string[];substitutes:string[]}):{ok:boolean;state:'REGISTERED'|'WAITLISTED'|null;errors:string[]};
+export function canEditRoster(now:Date,lock:Date,isAdmin:boolean):boolean;
+export function canCheckIn(input:{leadership:Leadership;status:string;now:Date;open:Date;close:Date}):boolean;
+export function nextTournamentState(current:string,requested?:string):string;
+export function confirmResult(input:{status:string;teamA:string;teamB:string;scoreA:number;scoreB:number}):{status:string;winner:string;advance:boolean};
+export function createDispute(input:{status:string;reason:string}):{matchStatus:string;disputeStatus:string;advance:boolean};
+export function calculatePoints(type:string,tier:string):number;
+export function canAdmin(role:string,action:string):boolean;

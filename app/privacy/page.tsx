@@ -1,0 +1,1 @@
+import {ProductPage} from '../../components/ui/ProductPage';export default function Privacy(){return <ProductPage eyebrow="PEAKGG / LEGAL" title="PRIVACY" description="PEAKGG PROCESSES ACCOUNT, PROFILE, TEAM, TOURNAMENT, AND MATCH DATA REQUIRED TO OPERATE THE COMPETITIVE PLATFORM. CONTACT PEAKGG FOR DATA ACCESS OR DELETION REQUESTS."/>}

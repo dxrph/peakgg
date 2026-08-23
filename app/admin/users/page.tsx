@@ -1,0 +1,1 @@
+import {AdminPage} from '../../../components/admin/AdminPage';export default function AdminUsers(){return <AdminPage code="CONTROL ROOM / USERS" title="USERS" columns={['USERNAME','REGION','TEAM','ROLE','ACCOUNT STATUS','ACTIONS']}/>}

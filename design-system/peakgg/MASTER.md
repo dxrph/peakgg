@@ -11,6 +11,10 @@
 **Category:** Gaming
 **Design Dials:** Variance 9/10 (Bold / Asymmetric) | Motion 10/10 (Complex) | Density 5/10 (Standard)
 
+**Locked Identity:** COMPETITIVE × EDITORIAL × CINEMATIC
+
+All homepage campaign work uses void black (`#050506`), black (`#090A0C`), Peak red (`#FF2638`), and paper (`#F4F2EE`) only. Pink and purple reference material informs composition and technical framing, never palette.
+
 ---
 
 ## Global Rules
@@ -19,29 +23,29 @@
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#7C3AED` | `--color-primary` |
+| Primary | `#FF2638` | `--color-primary` |
 | On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#A78BFA` | `--color-secondary` |
-| On Secondary | `#0F172A` | `--color-on-secondary` |
-| Accent/CTA | `#F43F5E` | `--color-accent` |
+| Secondary | `#B5091B` | `--color-secondary` |
+| On Secondary | `#080808` | `--color-on-secondary` |
+| Accent/CTA | `#FF2638` | `--color-accent` |
 | On Accent/CTA | `#000000` | `--color-on-accent` |
-| Background | `#0F0F23` | `--color-background` |
-| Foreground | `#E2E8F0` | `--color-foreground` |
-| Card | `#1E1C35` | `--color-card` |
-| Card Foreground | `#E2E8F0` | `--color-card-foreground` |
-| Muted | `#27273B` | `--color-muted` |
-| Muted Foreground | `#94A3B8` | `--color-muted-foreground` |
-| Border | `#4C1D95` | `--color-border` |
+| Background | `#050506` | `--color-background` |
+| Foreground | `#F4F2EE` | `--color-foreground` |
+| Card | `#111216` | `--color-card` |
+| Card Foreground | `#F4F2EE` | `--color-card-foreground` |
+| Muted | `#191A1F` | `--color-muted` |
+| Muted Foreground | `#96979D` | `--color-muted-foreground` |
+| Border | `#650812` | `--color-border` |
 | Destructive | `#EF4444` | `--color-destructive` |
 | On Destructive | `#000000` | `--color-on-destructive` |
-| Ring | `#7C3AED` | `--color-ring` |
+| Ring | `#FF3045` | `--color-ring` |
 
-**Color Notes:** Neon purple + rose action
+**Color Notes:** Black / red / white — competitive broadcast contrast
 
 ### Typography
 
-- **Heading Font:** Russo One
-- **Body Font:** Chakra Petch
+- **Heading Font:** Space Grotesk
+- **Body / Metadata Font:** Space Grotesk / JetBrains Mono
 - **Mood:** gaming, bold, action, esports, competitive, energetic
 - **Google Fonts:** [Russo One + Chakra Petch](https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap)
 
@@ -82,7 +86,7 @@
 ```css
 /* Primary Button */
 .btn-primary {
-  background: #F43F5E;
+  background: #FF3045;
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -99,8 +103,8 @@
 /* Secondary Button */
 .btn-secondary {
   background: transparent;
-  color: #7C3AED;
-  border: 2px solid #7C3AED;
+  color: #FF3045;
+  border: 2px solid #FF3045;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -113,7 +117,7 @@
 
 ```css
 .card {
-  background: #0F0F23;
+  background: #030303;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -132,16 +136,16 @@
 ```css
 .input {
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #F4F1EB;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 200ms ease;
 }
 
 .input:focus {
-  border-color: #7C3AED;
+  border-color: #FF3045;
   outline: none;
-  box-shadow: 0 0 0 3px #7C3AED20;
+  box-shadow: 0 0 0 3px #FF304520;
 }
 ```
 

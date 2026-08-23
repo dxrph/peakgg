@@ -1,0 +1,2 @@
+const steps=[['REGISTER','Enter with your team.'],['CHECK-IN','Confirm your roster.'],['COMPETE','Play the scheduled match.'],['ADVANCE','Move through the bracket.'],['WIN','Claim the event.']];
+export default function CompetitionFlow(){return <section className="t-flow" aria-labelledby="flow-title"><div className="t-wrap"><p className="t-label">03 / COMPETITION FLOW</p><h2 id="flow-title">HOW<br/>IT WORKS</h2><ol>{steps.map(([title,copy],index)=><li key={title}><span>0{index+1}</span><b>{title}</b><p>{copy}</p></li>)}</ol></div></section>}
