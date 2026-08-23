@@ -1,7 +1,8 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {PEAK_RANKS, getRankBySlug, type PeakRank} from '../../lib/internal-pages-models.mjs';
+import {PEAK_RANKS, getRankBySlug} from '../../lib/internal-pages-models.mjs';
+import type {PeakRank} from '../../lib/internal-pages-models';
 
 const RANKS = PEAK_RANKS as readonly PeakRank[];
 
