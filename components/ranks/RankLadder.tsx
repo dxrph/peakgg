@@ -13,10 +13,9 @@ export default function RankLadder({initialRank}: {initialRank?: string}) {
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    const fromUrl = query.get('rank');
-    if (fromUrl && getRankBySlug(fromUrl).slug !== active.slug) setSlug(getRankBySlug(fromUrl).slug);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const onPopState = () => setSlug(getRankBySlug(new URLSearchParams(window.location.search).get('rank')).slug);
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   const select = useCallback((next: string, focus = false) => {
@@ -120,3 +119,4 @@ function RankEmblem({rank}: {rank: PeakRank}) {
     <g className="rank-emblem-grain" filter={`url(#${id}-grain)`} aria-hidden="true"><rect width="120" height="128"/></g>
   </svg>;
 }
+

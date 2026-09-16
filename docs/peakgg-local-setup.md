@@ -56,3 +56,18 @@ insert into public.user_roles (user_id, role)
 values ('AUTH_USER_UUID', 'SUPER_ADMIN')
 on conflict (user_id) do update set role = excluded.role;
 ```
+
+
+
+## Authentication callback configuration
+
+The SSR authentication flow now uses `/auth/callback` to exchange PKCE codes.
+Set `NEXT_PUBLIC_SITE_URL` to the actual origin of this environment. Configure
+the corresponding callback URLs, including required return query parameters,
+in Supabase Auth redirect allowlists before testing email confirmation/recovery.
+Use `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+(or the existing legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Never use a service
+role/secret key in a public variable. The local config does not modify production.
+
+Do not apply the current migration history to an existing database until the
+schema mismatch documented in `peakgg-audit-2026-09-16.md` is resolved.

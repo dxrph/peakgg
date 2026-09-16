@@ -11,17 +11,23 @@ export async function updateSession(request: NextRequest) {
   const {url, anonKey} = getSupabaseConfig();
   const supabase = createServerClient<Database>(url, anonKey, {cookies:{getAll:()=>request.cookies.getAll(),setAll:values=>{values.forEach(({name,value})=>request.cookies.set(name,value));response=NextResponse.next({request});values.forEach(({name,value,options})=>response.cookies.set(name,value,options));}}});
   const {data:{user}} = await supabase.auth.getUser();
+  const redirectWithCookies = (url: URL) => {
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach(cookie => redirect.cookies.set(cookie));
+    return redirect;
+  };
   const path = request.nextUrl.pathname;
   const needsUser = authenticated.some(prefix => path === prefix || path.startsWith(`${prefix}/`));
   if (needsUser && !user) {
     const login = new URL('/login', request.url);
     login.searchParams.set('next', `${path}${request.nextUrl.search}`);
-    return NextResponse.redirect(login);
+    return redirectWithCookies(login);
   }
-  if (path.startsWith('/admin')) {
-    if (!user) return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, request.url));
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    if (!user) return redirectWithCookies(new URL(`/login?next=${encodeURIComponent(path)}`, request.url));
     const {data} = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
-    if (!data || !['MODERATOR','ADMIN','SUPER_ADMIN'].includes(data.role)) return NextResponse.redirect(new URL('/access-denied', request.url));
+    if (!data || typeof data.role !== 'string' || !['MODERATOR','ADMIN','SUPER_ADMIN'].includes(data.role)) return redirectWithCookies(new URL('/access-denied', request.url));
   }
   return response;
 }
+
