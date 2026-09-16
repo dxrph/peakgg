@@ -158,7 +158,7 @@ export default function EditorialHomepage() {
     <HomeNavigation />
     <main>
       <section className="eh-hero" aria-labelledby="home-title">
-        <img className="eh-hero-image" src={heroImage} alt="" fetchPriority="high" />
+        <img className="eh-hero-image" src={heroImage} alt="" />
         <div className="eh-hero-treatment" aria-hidden="true" />
         <div className="eh-hero-left-rail" aria-hidden="true"><b>01</b><span>50.1109° N / 08.6821° E</span><i /></div>
         <div className="eh-hero-copy">
@@ -212,7 +212,7 @@ export default function EditorialHomepage() {
           </div>
         </div>
         <aside className="eh-cup-cuts">
-          <figure><img src={peakRaster.player} alt="" loading="lazy" /></figure>
+          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
           <figure><img src={heroImage} alt="" loading="lazy" /></figure>
           <em>{t("homeEditorial.cup.annotation")}</em>
         </aside>
@@ -227,7 +227,7 @@ export default function EditorialHomepage() {
       <section className="eh-match" aria-label={t("homeEditorial.match.label")}>
         <h2>{t("homeEditorial.match.title")}</h2>
         <div className="eh-match-scorebug"><small>{t("homeEditorial.signal.fixture")}</small><strong>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</strong><span>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</span><i>{featured?.status ?? t("homeEditorial.cup.announced")}</i></div>
-        <div className="eh-match-stills"><img src={peakRaster.player} alt="" loading="lazy" /><img src={heroImage} alt="" loading="lazy" /></div>
+        <div className="eh-match-stills"><img src={heroImage} alt="" loading="lazy" /><img src={heroImage} alt="" loading="lazy" /></div>
       </section>
 
       <section className="eh-ranks">
@@ -256,7 +256,7 @@ export default function EditorialHomepage() {
             </article>;
           })}
         </div>
-        <aside className="eh-roster-art"><img src={peakRaster.player} alt="" loading="lazy" /><em>{t("homeEditorial.roster.annotation")}</em></aside>
+        <aside className="eh-roster-art"><img src={heroImage} alt="" loading="lazy" /><em>{t("homeEditorial.roster.annotation")}</em></aside>
       </section>
 
       <section className="eh-moment">
