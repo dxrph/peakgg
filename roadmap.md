@@ -1,6 +1,6 @@
 # Roadmap
 
-- [x] Rebuild homepage into eight editorial broadcast chapters
-- [x] Add EN/FR/IT homepage translations
-- [x] Verify desktop, mobile, interactions and reduced motion
-- [x] Run typecheck, focused lint, tests and production build
+- [ ] Rebuild homepage as a dense continuous editorial poster
+- [ ] Validate the 1440px composition and iterate against the approved proportions
+- [ ] Validate the intentional 390px recomposition
+- [ ] Run focused typecheck, lint, tests and production build
