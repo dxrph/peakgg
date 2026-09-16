@@ -752,5 +752,85 @@
         }
       }
     }
+  },
+  "homeEditorial": {
+    "hero": {
+      "kicker": "VALORANT COMPETITIVO EU / CLOSED BETA",
+      "line1": "COMPETI.",
+      "line2": "MIGLIORA.",
+      "line3": "APPARTIENI.",
+      "copy": "Costruisci un roster di cinque player, entra in competizioni strutturate e conquista un rank forgiato in match verificati.",
+      "enter": "Entra in Peak",
+      "watch": "Come funziona",
+      "next": "Prossimo evento",
+      "stills": "Immagini eventi PeakGG",
+      "scroll": "Continua al segnale live"
+    },
+    "signal": {
+      "label": "Segnale live PeakGG",
+      "closedBeta": "Closed beta",
+      "fixture": "Prossimo match",
+      "rosters": "Roster iscritti"
+    },
+    "cup": {
+      "label": "Torneo in evidenza",
+      "announced": "Annunciato",
+      "fallbackTitle": "PeakGG Open Cup #001",
+      "fallbackCopy": "Ingresso gratuito. Cinque player. Un bracket verificato. Il primo passo verso il Peak Championship.",
+      "elimination": "Eliminazione diretta",
+      "view": "Vedi torneo",
+      "preview": "Anteprima progressione",
+      "presentational": "Anteprima formato",
+      "note": "La tua prima scalata inizia qui."
+    },
+    "ranks": {
+      "label": "Il rank è identità",
+      "title": "Sette rank. Un nome da lasciare.",
+      "copy": "Ogni risultato verificato muove il tuo Peak rating. Nessun rank importato, nessuna scorciatoia—solo competizione."
+    },
+    "roster": {
+      "label": "Trova i tuoi cinque",
+      "title": "Nessuno scala da solo.",
+      "copy": "Scopri veri free agent per ruolo, rating, regione, lingua e disponibilità. Gli slot restano aperti finché arriva il player giusto.",
+      "available": "Disponibile",
+      "openSlot": "Slot libero",
+      "scouting": "Scouting",
+      "find": "Trova player",
+      "build": "Crea il tuo team"
+    },
+    "moment": {
+      "label": "I momenti ci definiscono",
+      "title": "Un round cambia tutto.",
+      "copy": "Niente ladder infinita. Una chiamata, un trade, un momento che appartiene al tuo team."
+    },
+    "upcoming": {
+      "label": "Prossimi tornei",
+      "title": "La prossima scalata.",
+      "all": "Tutti i tornei",
+      "empty": "La prossima competizione sarà annunciata presto."
+    },
+    "enter": {
+      "label": "Entra in Peak",
+      "line1": "Il tuo team.",
+      "line2": "Il tuo picco.",
+      "copy": "Il livello competitivo attorno a Valorant per player europei seri.",
+      "cta": "Crea account"
+    },
+    "common": {
+      "date": "Data",
+      "format": "Formato",
+      "squad": "Team",
+      "slots": "Slot",
+      "tbd": "Data da confermare"
+    },
+    "footer": {
+      "players": "Player",
+      "leaderboard": "Classifica",
+      "about": "Chi siamo",
+      "contact": "Contatti",
+      "terms": "Termini",
+      "navigation": "Navigazione footer",
+      "disclaimer": "Non affiliato a Riot Games."
+    }
   }
 }
