@@ -5,4 +5,4 @@
 - [x] Validate the intentional 390px recomposition
 - [x] Run focused typecheck, lint, tests and production build
 
-- [ ] Apply and validate the approved poster typography system
+- [x] Apply and validate the approved poster typography system
