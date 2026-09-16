@@ -5,6 +5,7 @@ import { ArrowDown, ArrowRight, Crosshair, Play, Radio, Users } from "lucide-rea
 import Navbar from "@/components/landing/Navbar";
 import BrandLogo from "@/components/BrandLogo";
 import SEO from "@/components/SEO";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { RANKS, getRankByElo } from "@/lib/ranks";
@@ -77,6 +78,7 @@ function SiteFooter() {
 
 export default function EditorialHomepage() {
   const { t, tRank, locale } = useI18n();
+  const { user } = useAuth();
 
   const { data: tournaments = [] } = useQuery<Tournament[]>({
     queryKey: ["editorial-home-tournaments"],
@@ -100,6 +102,7 @@ export default function EditorialHomepage() {
 
   const { data: agents = [] } = useQuery<Agent[]>({
     queryKey: ["editorial-home-agents"],
+    enabled: Boolean(user),
     queryFn: async () => {
       const { data: profiles } = await supabase.from("profiles")
         .select("id, username, display_name, avatar_url, role, region, language, availability")
@@ -135,7 +138,7 @@ export default function EditorialHomepage() {
     <Navbar />
     <main>
       <section className="eh-hero" aria-labelledby="home-title">
-        <img className="eh-hero-image" src={heroImage} alt="" fetchPriority="high" />
+        <img className="eh-hero-image" src={heroImage} alt="" />
         <div className="eh-hero-mask" />
         <div className="eh-grid-lines" aria-hidden="true" />
         <div className="eh-hero-rail eh-hero-rail-left"><span>01</span><span>VALORANT / EU</span><span>50.1109° N</span></div>
@@ -155,7 +158,7 @@ export default function EditorialHomepage() {
         </div>
         <div className="eh-still-strip" aria-label={t("homeEditorial.hero.stills")}>
           <figure><img src={peakRaster.trophy} alt="" /><figcaption>EVENT / 001</figcaption></figure>
-          <figure><img src={peakRaster.player} alt="" /><figcaption>PLAYER / 005</figcaption></figure>
+          <figure><img src={heroImage} alt="" /><figcaption>PLAYER / 005</figcaption></figure>
         </div>
         <a href="#live-signal" className="eh-scroll-cue" aria-label={t("homeEditorial.hero.scroll")}><ArrowDown /></a>
       </section>
