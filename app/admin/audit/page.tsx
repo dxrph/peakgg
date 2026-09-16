@@ -1,1 +1,0 @@
-import {AdminPage} from '../../../components/admin/AdminPage';export default function Audit(){return <AdminPage code="CONTROL ROOM / AUDIT" title="AUDIT LOG" columns={['ACTOR','ACTION','ENTITY TYPE','ENTITY ID','CREATED AT']}/>}

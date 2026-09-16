@@ -1,0 +1,2 @@
+ALTER FUNCTION public.calculate_dynamic_elo_delta(integer, integer, boolean) SET search_path = public;
+ALTER FUNCTION public.calculate_dynamic_elo_delta(integer, integer, boolean, integer) SET search_path = public;

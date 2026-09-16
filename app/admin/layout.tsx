@@ -1,1 +1,0 @@
-import AdminSidebar from '../../components/admin/AdminSidebar';import {requireStaff} from '../../lib/auth/session';export default async function AdminLayout({children}:{children:React.ReactNode}){await requireStaff();return <main className="admin-shell"><AdminSidebar/><section className="admin-main">{children}</section></main>}

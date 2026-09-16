@@ -1,1 +1,0 @@
-import {AdminPage} from '../../../components/admin/AdminPage';export default function AdminMatches(){return <AdminPage code="CONTROL ROOM / MATCHES" title="MATCHES" columns={['MATCH ID','EVENT','ROUND','TEAMS','SCHEDULED','STATUS','ACTIONS']}/>}

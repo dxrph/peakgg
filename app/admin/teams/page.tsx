@@ -1,1 +1,0 @@
-import {AdminPage} from '../../../components/admin/AdminPage';export default function AdminTeams(){return <AdminPage code="CONTROL ROOM / TEAMS" title="TEAMS" columns={['TEAM','CAPTAIN','REGION','MEMBERS','STATUS','ACTIONS']}/>}

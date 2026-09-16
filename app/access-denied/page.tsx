@@ -1,1 +1,0 @@
-import Link from 'next/link';import {ProductPage} from '../../components/ui/ProductPage';export default function AccessDenied(){return <ProductPage eyebrow="PEAKGG / AUTHORIZATION" title="ACCESS DENIED." description="YOUR ACCOUNT DOES NOT HAVE PERMISSION TO ENTER THIS AREA." actions={<Link className="peak-button" href="/dashboard">RETURN TO DASHBOARD</Link>}/>}

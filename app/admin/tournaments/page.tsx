@@ -1,1 +1,0 @@
-import Link from 'next/link';import {AdminPage} from '../../../components/admin/AdminPage';export default function AdminTournaments(){return <><Link className="peak-button" href="/admin/tournaments/new">CREATE TOURNAMENT</Link><AdminPage code="CONTROL ROOM / TOURNAMENTS" title="TOURNAMENTS" columns={['EVENT','STATUS','REGISTRATION','TEAMS','START DATE','ACTIONS']}/></>}

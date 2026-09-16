@@ -1,2 +1,0 @@
-const steps=['FIND YOUR FIVE.','ENTER COMPETITION.','BUILD YOUR NAME.','CLIMB THE PEAK.'];
-export default function CompetitivePath(){return <section className="path-new section"><div className="kicker">02 / WHAT IS PEAKGG</div><ol>{steps.map((x,i)=><li key={x}><small>0{i+1}</small><strong>{x}</strong></li>)}</ol><p>PeakGG connects European VALORANT players to teams, structured events, match rooms, and a visible competitive path.</p></section>}

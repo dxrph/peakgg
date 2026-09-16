@@ -1,1 +1,0 @@
-import {AdminPage} from '../../../../components/admin/AdminPage';export default async function AdminTournament({params}:{params:Promise<{id:string}>}){const {id}=await params;return <AdminPage code={`CONTROL ROOM / EVENT ${id}`} title="EVENT MANAGEMENT" columns={['OVERVIEW','REGISTRATIONS','ROSTERS','BRACKET','MATCHES','ANNOUNCEMENTS','SETTINGS']}/>}

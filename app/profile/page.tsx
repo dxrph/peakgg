@@ -1,2 +1,0 @@
-import {ProductPage,EmptyState} from '../../components/ui/ProductPage';import {requireUser} from '../../lib/auth/session';
-export default async function Profile(){const user=await requireUser('/profile');return <ProductPage eyebrow="PEAKGG / PROFILE" title="YOUR COMPETITIVE IDENTITY." description={user.email||'AUTHENTICATED PLAYER'}><section className="peak-container data-section"><EmptyState title="COMPLETE YOUR COMPETITIVE PROFILE." body="USERNAME, RIOT ID, REGION, ROLES, AVAILABILITY, AND LOOKING-FOR-TEAM STATUS ARE MANAGED HERE."/></section></ProductPage>}
