@@ -164,8 +164,8 @@ export default function EditorialHomepage() {
         <div className="eh-hero-left-rail" aria-hidden="true"><b>01</b><span>50.1109° N / 08.6821° E</span><i /></div>
         <div className="eh-hero-copy">
           <p className="eh-kicker">{t("homeEditorial.hero.kicker")}</p>
-          <h1 id="home-title"><span>{t("homeEditorial.hero.prove")}</span><span>{t("homeEditorial.hero.you")}</span><span>{t("homeEditorial.hero.belong")}</span></h1>
-          <em className="eh-handwritten">{t("homeEditorial.hero.accent")}</em>
+          <h1 id="home-title"><span data-text={t("homeEditorial.hero.prove")}>{t("homeEditorial.hero.prove")}</span><span data-text={t("homeEditorial.hero.you")}>{t("homeEditorial.hero.you")}</span><span data-text={t("homeEditorial.hero.belong")}>{t("homeEditorial.hero.belong")}<i aria-hidden="true" /></span></h1>
+          <em className="eh-handwritten"><span>{t("homeEditorial.hero.accent")}</span></em>
           <p className="eh-hero-intro">{t("homeEditorial.hero.copy")}</p>
           <div className="eh-actions">
             <Link className="eh-button eh-button-primary" to="/register">{t("homeEditorial.hero.enter")}<ArrowRight /></Link>
