@@ -752,5 +752,85 @@
         }
       }
     }
+  },
+  "homeEditorial": {
+    "hero": {
+      "kicker": "EU COMPETITIVE VALORANT / CLOSED BETA",
+      "line1": "COMPETE.",
+      "line2": "IMPROVE.",
+      "line3": "BELONG.",
+      "copy": "Build a five-player roster, enter structured competitions and earn a rank forged in verified play.",
+      "enter": "Enter Peak",
+      "watch": "How it works",
+      "next": "Next event",
+      "stills": "PeakGG event stills",
+      "scroll": "Continue to live signal"
+    },
+    "signal": {
+      "label": "PeakGG live signal",
+      "closedBeta": "Closed beta",
+      "fixture": "Next fixture",
+      "rosters": "Registered rosters"
+    },
+    "cup": {
+      "label": "Featured tournament",
+      "announced": "Announced",
+      "fallbackTitle": "PeakGG Open Cup #001",
+      "fallbackCopy": "Free entry. Five players. One verified bracket. The first step on the road to the Peak Championship.",
+      "elimination": "Single elimination",
+      "view": "View tournament",
+      "preview": "Progression preview",
+      "presentational": "Format preview",
+      "note": "Your first ascent starts here."
+    },
+    "ranks": {
+      "label": "Rank is identity",
+      "title": "Seven ranks. One name to make.",
+      "copy": "Every verified result moves your Peak rating. No imported rank, no shortcut—only competition."
+    },
+    "roster": {
+      "label": "Find your five",
+      "title": "Nobody climbs alone.",
+      "copy": "Scout real free agents by role, rating, region, language and availability. Empty places remain open until the right player arrives.",
+      "available": "Available",
+      "openSlot": "Open slot",
+      "scouting": "Scouting",
+      "find": "Find players",
+      "build": "Build your team"
+    },
+    "moment": {
+      "label": "Moments define us",
+      "title": "One round changes everything.",
+      "copy": "No endless ladder. One call, one trade, one moment your team owns forever."
+    },
+    "upcoming": {
+      "label": "Upcoming tournaments",
+      "title": "The next ascent.",
+      "all": "All tournaments",
+      "empty": "The next competition will be announced soon."
+    },
+    "enter": {
+      "label": "Enter Peak",
+      "line1": "Your team.",
+      "line2": "Your peak.",
+      "copy": "The competitive layer around Valorant for serious European players.",
+      "cta": "Create account"
+    },
+    "common": {
+      "date": "Date",
+      "format": "Format",
+      "squad": "Squad",
+      "slots": "Slots",
+      "tbd": "Date TBC"
+    },
+    "footer": {
+      "players": "Players",
+      "leaderboard": "Leaderboard",
+      "about": "About",
+      "contact": "Contact",
+      "terms": "Terms",
+      "navigation": "Footer navigation",
+      "disclaimer": "Not affiliated with Riot Games."
+    }
   }
 }

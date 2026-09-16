@@ -751,5 +751,85 @@
         }
       }
     }
+  },
+  "homeEditorial": {
+    "hero": {
+      "kicker": "VALORANT COMPÉTITIF EU / BÊTA FERMÉE",
+      "line1": "AFFRONTE.",
+      "line2": "PROGRESSE.",
+      "line3": "APPARTIENS.",
+      "copy": "Construis un roster de cinq joueurs, participe à des compétitions structurées et gagne un rang forgé en match vérifié.",
+      "enter": "Entrer dans Peak",
+      "watch": "Comment ça marche",
+      "next": "Prochain événement",
+      "stills": "Images événements PeakGG",
+      "scroll": "Continuer vers le signal live"
+    },
+    "signal": {
+      "label": "Signal live PeakGG",
+      "closedBeta": "Bêta fermée",
+      "fixture": "Prochain match",
+      "rosters": "Rosters inscrits"
+    },
+    "cup": {
+      "label": "Tournoi à la une",
+      "announced": "Annoncé",
+      "fallbackTitle": "PeakGG Open Cup #001",
+      "fallbackCopy": "Entrée gratuite. Cinq joueurs. Un bracket vérifié. La première étape vers le Peak Championship.",
+      "elimination": "Élimination directe",
+      "view": "Voir le tournoi",
+      "preview": "Aperçu progression",
+      "presentational": "Aperçu du format",
+      "note": "Ta première ascension commence ici."
+    },
+    "ranks": {
+      "label": "Le rang est une identité",
+      "title": "Sept rangs. Un nom à imposer.",
+      "copy": "Chaque résultat vérifié fait évoluer ton Peak rating. Aucun rang importé, aucun raccourci—seulement la compétition."
+    },
+    "roster": {
+      "label": "Trouve ton cinq",
+      "title": "Personne ne grimpe seul.",
+      "copy": "Repère de vrais agents libres par rôle, rating, région, langue et disponibilité. Les places restent ouvertes jusqu’au bon joueur.",
+      "available": "Disponible",
+      "openSlot": "Place libre",
+      "scouting": "Recrutement",
+      "find": "Trouver des joueurs",
+      "build": "Créer ton équipe"
+    },
+    "moment": {
+      "label": "Les moments nous définissent",
+      "title": "Un round change tout.",
+      "copy": "Pas de ladder sans fin. Un call, un trade, un moment qui appartient à ton équipe."
+    },
+    "upcoming": {
+      "label": "Tournois à venir",
+      "title": "La prochaine ascension.",
+      "all": "Tous les tournois",
+      "empty": "La prochaine compétition sera bientôt annoncée."
+    },
+    "enter": {
+      "label": "Entrer dans Peak",
+      "line1": "Ton équipe.",
+      "line2": "Ton sommet.",
+      "copy": "La couche compétitive de Valorant pour les joueurs européens sérieux.",
+      "cta": "Créer un compte"
+    },
+    "common": {
+      "date": "Date",
+      "format": "Format",
+      "squad": "Équipe",
+      "slots": "Places",
+      "tbd": "Date à confirmer"
+    },
+    "footer": {
+      "players": "Joueurs",
+      "leaderboard": "Classement",
+      "about": "À propos",
+      "contact": "Contact",
+      "terms": "Conditions",
+      "navigation": "Navigation du pied de page",
+      "disclaimer": "Non affilié à Riot Games."
+    }
   }
 }
