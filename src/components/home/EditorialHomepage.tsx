@@ -13,7 +13,7 @@ import { useI18n } from "@/i18n";
 import { RANKS, getRankByElo } from "@/lib/ranks";
 import { isPublicPlayer, hasCompetitiveActivity } from "@/lib/public-users";
 import { peakRaster } from "@/data/peakRaster";
-import heroImage from "@/assets/peakgg-afterburn-hero.webp";
+import playerImage from "@/assets/editorial-player.webp";
 import rookie from "@/assets/ranks/rookie.png";
 import contender from "@/assets/ranks/contender.png";
 import rival from "@/assets/ranks/rival.png";
@@ -158,8 +158,9 @@ export default function EditorialHomepage() {
     <HomeNavigation />
     <main>
       <section className="eh-hero" aria-labelledby="home-title">
-        <img className="eh-hero-image" src={heroImage} alt="" />
+        <img className="eh-hero-image" src={peakRaster.hero} alt="" />
         <div className="eh-hero-treatment" aria-hidden="true" />
+        <div className="eh-hero-grid" aria-hidden="true" />
         <div className="eh-hero-left-rail" aria-hidden="true"><b>01</b><span>50.1109° N / 08.6821° E</span><i /></div>
         <div className="eh-hero-copy">
           <p className="eh-kicker">{t("homeEditorial.hero.kicker")}</p>
@@ -181,7 +182,7 @@ export default function EditorialHomepage() {
           <time>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</time>
           <small>{featured?.status ?? t("homeEditorial.signal.closedBeta")}</small>
           <Link to={tournamentHref(featured)} aria-label={t("homeEditorial.cup.view")}><ArrowDownRight /></Link>
-          <figure><img src={peakRaster.trophy} alt="" /></figure>
+          <figure><img src={playerImage} alt="" /></figure>
         </aside>
         <a className="eh-scroll" href="#signal" aria-label={t("homeEditorial.hero.scroll")}><span>SCROLL</span><ArrowDownRight /></a>
       </section>
@@ -199,7 +200,7 @@ export default function EditorialHomepage() {
       <section id="open-cup" className="eh-cup">
         <div className="eh-cup-side">
           <SectionIndex number="02" label={t("homeEditorial.cup.label")} />
-          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
+           <figure><img src={playerImage} alt="" loading="lazy" /></figure>
           <em>{t("homeEditorial.cup.note")}</em>
         </div>
         <div className="eh-cup-stage">
@@ -212,8 +213,9 @@ export default function EditorialHomepage() {
           </div>
         </div>
         <aside className="eh-cup-cuts">
-          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
-          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
+           <figure><img src={playerImage} alt="" loading="lazy" /></figure>
+           <figure><img src={peakRaster.crowd} alt="" loading="lazy" /></figure>
+           <figure><img src={peakRaster.hero} alt="" loading="lazy" /></figure>
           <em>{t("homeEditorial.cup.annotation")}</em>
         </aside>
         <div className="eh-bracket" aria-label={t("homeEditorial.cup.preview")}>
@@ -225,9 +227,9 @@ export default function EditorialHomepage() {
       </section>
 
       <section className="eh-match" aria-label={t("homeEditorial.match.label")}>
-        <h2>{t("homeEditorial.match.title")}</h2>
+         <div className="eh-match-lead"><img src={playerImage} alt="" loading="lazy" /><h2>{t("homeEditorial.match.title")}</h2><span>EU / VALORANT</span></div>
         <div className="eh-match-scorebug"><small>{t("homeEditorial.signal.fixture")}</small><strong>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</strong><span>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</span><i>{featured?.status ?? t("homeEditorial.cup.announced")}</i></div>
-        <div className="eh-match-stills"><img src={heroImage} alt="" loading="lazy" /><img src={heroImage} alt="" loading="lazy" /></div>
+         <div className="eh-match-stills"><img src={peakRaster.crowd} alt="" loading="lazy" /><img src={peakRaster.hero} alt="" loading="lazy" /></div>
       </section>
 
       <section className="eh-ranks">
@@ -256,7 +258,7 @@ export default function EditorialHomepage() {
             </article>;
           })}
         </div>
-        <aside className="eh-roster-art"><img src={heroImage} alt="" loading="lazy" /><em>{t("homeEditorial.roster.annotation")}</em></aside>
+         <aside className="eh-roster-art"><img src={playerImage} alt="" loading="lazy" /><em>{t("homeEditorial.roster.annotation")}</em></aside>
       </section>
 
       <section className="eh-moment">
@@ -266,17 +268,17 @@ export default function EditorialHomepage() {
       </section>
 
       <section className="eh-upcoming">
-        <header><SectionIndex number="06" label={t("homeEditorial.upcoming.label")} /><h2>{t("homeEditorial.upcoming.title")}</h2></header>
+         <header><SectionIndex number="06" label={t("homeEditorial.upcoming.label")} /><h2>{t("homeEditorial.upcoming.title")}</h2><Link className="eh-inline-link" to="/tournaments">{t("homeEditorial.upcoming.all")}<ArrowRight /></Link></header>
         <div className="eh-schedule">
           {tournaments.length ? tournaments.map((tournament, index) => <Link to={tournamentHref(tournament)} className="eh-schedule-row" key={tournament.id}>
             <small>0{index + 1}</small><time>{formatDate(tournament.start_date, locale, t("homeEditorial.common.tbd"))}</time><strong>{tournament.name}</strong><span>{tournament.format ?? t("homeEditorial.cup.elimination")}</span><b>{signupCounts[tournament.id] ?? 0}/{tournament.max_teams ?? 16}</b><i>{tournament.status ?? t("homeEditorial.cup.announced")}</i><ArrowRight />
           </Link>) : <div className="eh-schedule-empty"><strong>{t("homeEditorial.upcoming.empty")}</strong><Link to="/tournaments">{t("homeEditorial.upcoming.all")}<ArrowRight /></Link></div>}
         </div>
-        <aside><img src={heroImage} alt="" loading="lazy" /><span>EU / 2026</span></aside>
+         <aside><img src={peakRaster.trophy} alt="" loading="lazy" /><span>EU / 2026</span></aside>
       </section>
 
       <section className="eh-enter">
-        <img src={heroImage} alt="" loading="lazy" />
+         <img src={peakRaster.crowd} alt="" loading="lazy" />
         <div className="eh-enter-copy"><SectionIndex number="07" label={t("homeEditorial.enter.label")} /><em>{t("homeEditorial.enter.poster")}</em><h2>{t("homeEditorial.enter.line2")}</h2><Link className="eh-button eh-button-primary" to="/register">{t("homeEditorial.enter.cta")}<ArrowRight /></Link></div>
         <nav aria-label={t("homeEditorial.footer.navigation")}><Link to="/tournaments">TOURNAMENTS</Link><Link to="/teams">TEAMS</Link><Link to="/free-agents">{t("homeEditorial.footer.players")}</Link><Link to="/leaderboard">{t("homeEditorial.footer.leaderboard")}</Link><Link to="/about">{t("homeEditorial.footer.about")}</Link><Link to="/faq">FAQ</Link></nav>
       </section>
