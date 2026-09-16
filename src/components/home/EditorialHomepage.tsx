@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ArrowDown, ArrowRight, Crosshair, Play, Radio, Users } from "lucide-react";
-import Navbar from "@/components/landing/Navbar";
+import { ArrowDownRight, ArrowRight, Crosshair, Menu, Play, Search, X } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import SEO from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { openPeakCommand } from "@/components/navigation/PeakCommandPalette";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
@@ -47,10 +49,6 @@ type Agent = {
 
 const rankImages = [rookie, contender, rival, expert, elite, master, apex];
 
-function SectionLabel({ number, label }: { number: string; label: string }) {
-  return <div className="eh-section-label"><span>{number}</span><i />{label}</div>;
-}
-
 function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) return fallback;
   return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
@@ -60,20 +58,41 @@ function tournamentHref(tournament?: Tournament | null) {
   return tournament?.slug ? `/tournaments/${tournament.slug}` : "/tournaments";
 }
 
-function SiteFooter() {
+function SectionIndex({ number, label }: { number: string; label: string }) {
+  return <div className="eh-index"><b>{number}</b><span>{label}</span></div>;
+}
+
+function HomeNavigation() {
   const { t } = useI18n();
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
   const links = [
-    ["Tournaments", "/tournaments"], ["Teams", "/teams"], [t("homeEditorial.footer.players"), "/free-agents"],
-    [t("homeEditorial.footer.leaderboard"), "/leaderboard"], ["ELO", "/elo"], [t("homeEditorial.footer.about"), "/about"],
-    ["FAQ", "/faq"], [t("homeEditorial.footer.contact"), "/contact"], ["Privacy", "/privacy"], [t("homeEditorial.footer.terms"), "/terms"],
+    [t("homeEditorial.nav.compete"), "/play"],
+    [t("homeEditorial.nav.tournaments"), "/tournaments"],
+    [t("homeEditorial.nav.players"), "/free-agents"],
+    [t("homeEditorial.nav.teams"), "/teams"],
+    [t("homeEditorial.nav.community"), "/about"],
   ];
-  return <footer className="eh-footer">
-    <Link to="/" className="eh-footer-brand" aria-label="PeakGG home"><BrandLogo /><b>PEAKGG</b></Link>
-    <nav aria-label={t("homeEditorial.footer.navigation")}>
+
+  return <header className="eh-nav">
+    <Link to="/" className="eh-wordmark" aria-label="PeakGG home"><BrandLogo /><strong>PEAK<span>GG</span></strong></Link>
+    <nav className="eh-nav-center" aria-label={t("homeEditorial.nav.primary")}>
       {links.map(([label, path]) => <Link key={path} to={path}>{label}</Link>)}
     </nav>
-    <p>© 2026 PEAKGG · {t("homeEditorial.footer.disclaimer")}</p>
-  </footer>;
+    <div className="eh-nav-actions">
+      {user && <Button variant="ghost" size="icon" className="eh-search" onClick={openPeakCommand} aria-label={t("homeEditorial.nav.search")}><Search /></Button>}
+      <LanguageSwitcher className="eh-language" />
+      <Link className="eh-signin" to={user ? "/dashboard" : "/login"}>{user ? t("homeEditorial.nav.dashboard") : t("homeEditorial.nav.signIn")}</Link>
+      <Link className="eh-nav-enter" to={user ? "/dashboard" : "/register"}>{t("homeEditorial.hero.enter")}</Link>
+      <Button variant="ghost" size="icon" className="eh-menu" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={t("homeEditorial.nav.menu")}>
+        {open ? <X /> : <Menu />}
+      </Button>
+    </div>
+    {open && <nav className="eh-mobile-nav" aria-label={t("homeEditorial.nav.mobile")}>
+      {links.map(([label, path], index) => <Link key={path} to={path} onClick={() => setOpen(false)}><small>0{index + 1}</small>{label}<ArrowRight /></Link>)}
+      <Link to={user ? "/dashboard" : "/login"} onClick={() => setOpen(false)}>{user ? t("homeEditorial.nav.dashboard") : t("homeEditorial.nav.signIn")}<ArrowRight /></Link>
+    </nav>}
+  </header>;
 }
 
 export default function EditorialHomepage() {
@@ -124,6 +143,7 @@ export default function EditorialHomepage() {
   });
 
   const featured = tournaments[0] ?? null;
+  const featuredPlayer = agents[0] ?? null;
   const signupCounts = useMemo(() => signupRows.reduce<Record<string, number>>((counts, row) => {
     counts[row.tournament_id] = (counts[row.tournament_id] ?? 0) + 1;
     return counts;
@@ -135,131 +155,132 @@ export default function EditorialHomepage() {
 
   return <div className="peak-home">
     <SEO title="PeakGG — Competitive Valorant Europe" description="Build your Valorant roster, enter structured European competitions and earn your Peak rank." path="/" />
-    <Navbar />
+    <HomeNavigation />
     <main>
       <section className="eh-hero" aria-labelledby="home-title">
-        <img className="eh-hero-image" src={heroImage} alt="" />
-        <div className="eh-hero-mask" />
-        <div className="eh-grid-lines" aria-hidden="true" />
-        <div className="eh-hero-rail eh-hero-rail-left"><span>01</span><span>VALORANT / EU</span><span>50.1109° N</span></div>
+        <img className="eh-hero-image" src={heroImage} alt="" fetchPriority="high" />
+        <div className="eh-hero-treatment" aria-hidden="true" />
+        <div className="eh-hero-left-rail" aria-hidden="true"><b>01</b><span>50.1109° N / 08.6821° E</span><i /></div>
         <div className="eh-hero-copy">
           <p className="eh-kicker">{t("homeEditorial.hero.kicker")}</p>
-          <h1 id="home-title"><span>{t("homeEditorial.hero.line1")}</span><span>{t("homeEditorial.hero.line2")}</span><span>{t("homeEditorial.hero.line3")}</span></h1>
+          <h1 id="home-title"><span>{t("homeEditorial.hero.prove")}</span><span>{t("homeEditorial.hero.you")}</span><span>{t("homeEditorial.hero.belong")}</span></h1>
+          <em className="eh-handwritten">{t("homeEditorial.hero.accent")}</em>
           <p className="eh-hero-intro">{t("homeEditorial.hero.copy")}</p>
           <div className="eh-actions">
             <Link className="eh-button eh-button-primary" to="/register">{t("homeEditorial.hero.enter")}<ArrowRight /></Link>
-            <a className="eh-button eh-button-text" href="#how-it-works"><Play />{t("homeEditorial.hero.watch")}</a>
+            <a className="eh-button eh-button-quiet" href="#open-cup"><Play />{t("homeEditorial.hero.watch")}</a>
+          </div>
+          <div className="eh-proof">
+            <div className="eh-proof-marks" aria-hidden="true"><i /><i /><i /><i /></div>
+            <span>{t("homeEditorial.hero.proof")}</span>
           </div>
         </div>
-        <div className="eh-hero-event">
+        <aside className="eh-next-event">
           <span>{t("homeEditorial.hero.next")}</span>
           <strong>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</strong>
-          <small>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</small>
-        </div>
-        <div className="eh-still-strip" aria-label={t("homeEditorial.hero.stills")}>
-          <figure><img src={peakRaster.trophy} alt="" /><figcaption>EVENT / 001</figcaption></figure>
-          <figure><img src={heroImage} alt="" /><figcaption>PLAYER / 005</figcaption></figure>
-        </div>
-        <a href="#live-signal" className="eh-scroll-cue" aria-label={t("homeEditorial.hero.scroll")}><ArrowDown /></a>
+          <time>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</time>
+          <small>{featured?.status ?? t("homeEditorial.signal.closedBeta")}</small>
+          <Link to={tournamentHref(featured)} aria-label={t("homeEditorial.cup.view")}><ArrowDownRight /></Link>
+          <figure><img src={peakRaster.trophy} alt="" /></figure>
+        </aside>
+        <a className="eh-scroll" href="#signal" aria-label={t("homeEditorial.hero.scroll")}><span>SCROLL</span><ArrowDownRight /></a>
       </section>
 
-      <section id="live-signal" className="eh-signal" aria-label={t("homeEditorial.signal.label")}>
+      <section id="signal" className="eh-signal" aria-label={t("homeEditorial.signal.label")}>
         <div className="eh-signal-track">
-          <div><Radio /><b>{t("homeEditorial.signal.closedBeta")}</b></div>
-          <div><span>REGION</span><b>EUROPE</b></div>
+          <div className="eh-signal-lead"><i /> <b>{t("homeEditorial.signal.nextSignal")}</b></div>
+          <div><span>{t("homeEditorial.signal.closedBeta")}</span><b>PEAKGG / EU</b></div>
           <div><span>{t("homeEditorial.signal.fixture")}</span><b>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</b></div>
-          <div><span>{t("homeEditorial.signal.rosters")}</span><b>{featured ? `${registered}/${capacity}` : "—"}</b></div>
-          <div><span>GAME</span><b>VALORANT</b></div>
+          <div><span>{t("homeEditorial.signal.registration")}</span><b>{featured ? `${registered}/${capacity}` : "—"}</b></div>
+          <div><span>REGION</span><b>EUROPE</b></div>
         </div>
       </section>
 
-      <section id="how-it-works" className="eh-chapter eh-cup">
-        <SectionLabel number="03" label={t("homeEditorial.cup.label")} />
-        <div className="eh-cup-art"><img src={peakRaster.trophy} alt="" loading="lazy" /><span>OPEN<br />CUP</span></div>
-        <article className="eh-cup-copy">
-          <p className="eh-kicker">{featured?.status?.toUpperCase() ?? t("homeEditorial.cup.announced")}</p>
-          <h2>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</h2>
-          <p>{featured?.short_description ?? t("homeEditorial.cup.fallbackCopy")}</p>
-          <dl className="eh-event-meta">
-            <div><dt>{t("homeEditorial.common.date")}</dt><dd>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</dd></div>
-            <div><dt>{t("homeEditorial.common.format")}</dt><dd>{featured?.format ?? t("homeEditorial.cup.elimination")}</dd></div>
-            <div><dt>{t("homeEditorial.common.squad")}</dt><dd>{teamSize}</dd></div>
-            <div><dt>{t("homeEditorial.common.slots")}</dt><dd>{featured ? `${registered}/${capacity}` : `0/${capacity}`}</dd></div>
-          </dl>
-          <Link className="eh-button eh-button-primary" to={tournamentHref(featured)}>{t("homeEditorial.cup.view")}<ArrowRight /></Link>
-        </article>
-        <div className="eh-bracket" aria-label={t("homeEditorial.cup.preview")}>
-          <div className="eh-bracket-head"><span>{t("homeEditorial.cup.preview")}</span><small>{t("homeEditorial.cup.presentational")}</small></div>
-          <div className="eh-bracket-body">
-            <div className="eh-bracket-round"><span>R01</span><i /><i /><i /><i /></div>
-            <div className="eh-bracket-round"><span>R02</span><i /><i /></div>
-            <div className="eh-bracket-round eh-bracket-final"><span>FINAL</span><i /></div>
+      <section id="open-cup" className="eh-cup">
+        <div className="eh-cup-side">
+          <SectionIndex number="02" label={t("homeEditorial.cup.label")} />
+          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
+          <em>{t("homeEditorial.cup.note")}</em>
+        </div>
+        <div className="eh-cup-stage">
+          <img src={peakRaster.trophy} alt="" loading="lazy" />
+          <div className="eh-cup-title"><small>EUROPE / VALORANT / {teamSize}</small><h2>OPEN<br />CUP</h2><b>{featured ? `#${featured.id.slice(0, 3).toUpperCase()}` : "#001"}</b></div>
+          <div className="eh-cup-meta">
+            <span>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</span>
+            <time>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</time>
+            <Link className="eh-button eh-button-primary" to={tournamentHref(featured)}>{t("homeEditorial.cup.view")}<ArrowRight /></Link>
           </div>
         </div>
-        <em className="eh-note">{t("homeEditorial.cup.note")}</em>
-      </section>
-
-      <section className="eh-chapter eh-ranks">
-        <SectionLabel number="04" label={t("homeEditorial.ranks.label")} />
-        <div className="eh-ranks-head"><h2>{t("homeEditorial.ranks.title")}</h2><p>{t("homeEditorial.ranks.copy")}</p></div>
-        <div className="eh-rank-track">
-          {RANKS.map((rank, index) => <Link to={`/elo?rank=${rank.name.toLowerCase()}`} className={`eh-rank eh-rank-${index + 1}`} key={rank.name}>
-            <span className="eh-rank-index">0{index + 1}</span>
-            <img src={rankImages[index]} alt={`${tRank(rank.name)} rank emblem`} loading="lazy" />
-            <div><b>{tRank(rank.name)}</b><small>{rank.name === "Apex" ? `${rank.minElo}+ ELO` : `${rank.minElo}—${rank.maxElo}`}</small></div>
-          </Link>)}
+        <aside className="eh-cup-cuts">
+          <figure><img src={peakRaster.player} alt="" loading="lazy" /></figure>
+          <figure><img src={heroImage} alt="" loading="lazy" /></figure>
+          <em>{t("homeEditorial.cup.annotation")}</em>
+        </aside>
+        <div className="eh-bracket" aria-label={t("homeEditorial.cup.preview")}>
+          <div><small>R01</small><i /><i /><i /><i /></div>
+          <div><small>R02</small><i /><i /></div>
+          <div><small>FINAL</small><i /></div>
+          <span>{t("homeEditorial.cup.presentational")}</span>
         </div>
       </section>
 
-      <section className="eh-chapter eh-roster">
-        <SectionLabel number="05" label={t("homeEditorial.roster.label")} />
-        <header><h2>{t("homeEditorial.roster.title")}</h2><p>{t("homeEditorial.roster.copy")}</p></header>
+      <section className="eh-match" aria-label={t("homeEditorial.match.label")}>
+        <h2>{t("homeEditorial.match.title")}</h2>
+        <div className="eh-match-scorebug"><small>{t("homeEditorial.signal.fixture")}</small><strong>{featured?.name ?? t("homeEditorial.cup.fallbackTitle")}</strong><span>{formatDate(featured?.start_date ?? null, locale, t("homeEditorial.common.tbd"))}</span><i>{featured?.status ?? t("homeEditorial.cup.announced")}</i></div>
+        <div className="eh-match-stills"><img src={peakRaster.player} alt="" loading="lazy" /><img src={heroImage} alt="" loading="lazy" /></div>
+      </section>
+
+      <section className="eh-ranks">
+        <header><SectionIndex number="03" label={t("homeEditorial.ranks.label")} /><h2>{t("homeEditorial.ranks.identity")}</h2></header>
+        <div className="eh-rank-track">
+          {RANKS.map((rank, index) => <Link to={`/elo?rank=${rank.name.toLowerCase()}`} className={`eh-rank eh-rank-${index + 1}`} key={rank.name}>
+            <img src={rankImages[index]} alt={`${tRank(rank.name)} rank emblem`} loading="lazy" />
+            <span><b>{tRank(rank.name)}</b><small>{rank.name === "Apex" ? `${rank.minElo}+` : rank.minElo}</small></span>
+          </Link>)}
+        </div>
+        <aside className="eh-top-rank">
+          <small>{t("homeEditorial.ranks.topRank")}</small>
+          {featuredPlayer ? <><strong>{featuredPlayer.display_name || featuredPlayer.username}</strong><span>{getRankByElo(featuredPlayer.elo).name} / {featuredPlayer.elo}</span></> : <strong>{t("homeEditorial.ranks.noPlayer")}</strong>}
+        </aside>
+      </section>
+
+      <section className="eh-roster">
+        <header><SectionIndex number="04" label={t("homeEditorial.roster.label")} /><h2>{t("homeEditorial.roster.findFive")}</h2><p>{t("homeEditorial.roster.copy")}</p><Link className="eh-inline-link" to="/free-agents">{t("homeEditorial.roster.find")}<ArrowRight /></Link></header>
         <div className="eh-roster-lineup">
           {Array.from({ length: 5 }, (_, index) => {
             const agent = agents[index];
             const rank = agent ? getRankByElo(agent.elo) : null;
             return <article className={`eh-player-slot ${agent ? "is-filled" : "is-open"}`} key={agent?.id ?? `open-${index}`}>
-              <span className="eh-slot-number">0{index + 1}</span>
-              {agent ? <>
-                <div className="eh-player-avatar">{agent.avatar_url ? <img src={agent.avatar_url} alt="" loading="lazy" /> : <span>{agent.username.slice(0, 2).toUpperCase()}</span>}</div>
-                <h3>{agent.display_name || agent.username}</h3>
-                <dl><div><dt>ROLE</dt><dd>{agent.role}</dd></div><div><dt>RANK</dt><dd>{rank?.name} / {agent.elo}</dd></div><div><dt>REGION</dt><dd>{agent.region ?? "EU"}</dd></div><div><dt>LANG</dt><dd>{agent.language?.toUpperCase() ?? "—"}</dd></div></dl>
-                <small>{agent.availability ?? t("homeEditorial.roster.available")}</small>
-              </> : <><Crosshair /><h3>{t("homeEditorial.roster.openSlot")}</h3><p>{t("homeEditorial.roster.scouting")}</p></>}
+              <small>0{index + 1}</small>
+              {agent ? <><div className="eh-player-avatar">{agent.avatar_url ? <img src={agent.avatar_url} alt="" loading="lazy" /> : agent.username.slice(0, 2).toUpperCase()}</div><h3>{agent.display_name || agent.username}</h3><span>{agent.role} / {rank?.name}</span><i>{agent.region ?? "EU"} · {agent.language?.toUpperCase() ?? "—"}</i></> : <><Crosshair /><h3>{t("homeEditorial.roster.openSlot")}</h3><span>{t("homeEditorial.roster.scouting")}</span></>}
             </article>;
           })}
         </div>
-        <div className="eh-roster-actions"><Link className="eh-button eh-button-primary" to="/free-agents">{t("homeEditorial.roster.find")}<ArrowRight /></Link><Link className="eh-button eh-button-text" to="/teams"><Users />{t("homeEditorial.roster.build")}</Link></div>
+        <aside className="eh-roster-art"><img src={peakRaster.player} alt="" loading="lazy" /><em>{t("homeEditorial.roster.annotation")}</em></aside>
       </section>
 
       <section className="eh-moment">
         <img src={peakRaster.crowd} alt="" loading="lazy" />
-        <div className="eh-moment-mask" />
-        <SectionLabel number="06" label={t("homeEditorial.moment.label")} />
-        <div className="eh-moment-score"><span>00:42</span><i>ROUND 24 / MATCH POINT</i></div>
-        <h2>{t("homeEditorial.moment.title")}</h2>
-        <p>{t("homeEditorial.moment.copy")}</p>
+        <div className="eh-moment-copy"><SectionIndex number="05" label={t("homeEditorial.moment.label")} /><h2>{t("homeEditorial.moment.define")}</h2></div>
+        <div className="eh-moment-time"><strong>00:42</strong><span>ROUND 24 / MATCH POINT</span></div>
       </section>
 
-      <section className="eh-chapter eh-upcoming">
-        <SectionLabel number="07" label={t("homeEditorial.upcoming.label")} />
-        <div className="eh-upcoming-head"><h2>{t("homeEditorial.upcoming.title")}</h2><Link to="/tournaments">{t("homeEditorial.upcoming.all")}<ArrowRight /></Link></div>
+      <section className="eh-upcoming">
+        <header><SectionIndex number="06" label={t("homeEditorial.upcoming.label")} /><h2>{t("homeEditorial.upcoming.title")}</h2></header>
         <div className="eh-schedule">
           {tournaments.length ? tournaments.map((tournament, index) => <Link to={tournamentHref(tournament)} className="eh-schedule-row" key={tournament.id}>
-            <span>0{index + 1}</span><time>{formatDate(tournament.start_date, locale, t("homeEditorial.common.tbd"))}</time><strong>{tournament.name}</strong>
-            <b>{tournament.format ?? t("homeEditorial.cup.elimination")}</b><em>{signupCounts[tournament.id] ?? 0}/{tournament.max_teams ?? 16}</em><i>{tournament.status ?? t("homeEditorial.cup.announced")}</i><ArrowRight />
-          </Link>) : <div className="eh-schedule-empty"><span>—</span><strong>{t("homeEditorial.upcoming.empty")}</strong><Link to="/tournaments">{t("homeEditorial.upcoming.all")}<ArrowRight /></Link></div>}
+            <small>0{index + 1}</small><time>{formatDate(tournament.start_date, locale, t("homeEditorial.common.tbd"))}</time><strong>{tournament.name}</strong><span>{tournament.format ?? t("homeEditorial.cup.elimination")}</span><b>{signupCounts[tournament.id] ?? 0}/{tournament.max_teams ?? 16}</b><i>{tournament.status ?? t("homeEditorial.cup.announced")}</i><ArrowRight />
+          </Link>) : <div className="eh-schedule-empty"><strong>{t("homeEditorial.upcoming.empty")}</strong><Link to="/tournaments">{t("homeEditorial.upcoming.all")}<ArrowRight /></Link></div>}
         </div>
+        <aside><img src={heroImage} alt="" loading="lazy" /><span>EU / 2026</span></aside>
       </section>
 
       <section className="eh-enter">
-        <SectionLabel number="08" label={t("homeEditorial.enter.label")} />
-        <div className="eh-enter-mark" aria-hidden="true"><BrandLogo /></div>
-        <h2><span>{t("homeEditorial.enter.line1")}</span><span>{t("homeEditorial.enter.line2")}</span></h2>
-        <p>{t("homeEditorial.enter.copy")}</p>
-        <Link className="eh-button eh-button-primary" to="/register">{t("homeEditorial.enter.cta")}<ArrowRight /></Link>
+        <img src={heroImage} alt="" loading="lazy" />
+        <div className="eh-enter-copy"><SectionIndex number="07" label={t("homeEditorial.enter.label")} /><em>{t("homeEditorial.enter.poster")}</em><h2>{t("homeEditorial.enter.line2")}</h2><Link className="eh-button eh-button-primary" to="/register">{t("homeEditorial.enter.cta")}<ArrowRight /></Link></div>
+        <nav aria-label={t("homeEditorial.footer.navigation")}><Link to="/tournaments">TOURNAMENTS</Link><Link to="/teams">TEAMS</Link><Link to="/free-agents">{t("homeEditorial.footer.players")}</Link><Link to="/leaderboard">{t("homeEditorial.footer.leaderboard")}</Link><Link to="/about">{t("homeEditorial.footer.about")}</Link><Link to="/faq">FAQ</Link></nav>
       </section>
     </main>
-    <SiteFooter />
+    <footer className="eh-footer"><Link to="/" className="eh-wordmark"><BrandLogo /><strong>PEAK<span>GG</span></strong></Link><p>© 2026 PEAKGG · {t("homeEditorial.footer.disclaimer")}</p><nav><Link to="/privacy">PRIVACY</Link><Link to="/terms">{t("homeEditorial.footer.terms")}</Link><Link to="/contact">{t("homeEditorial.footer.contact")}</Link></nav></footer>
   </div>;
 }
