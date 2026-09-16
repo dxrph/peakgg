@@ -754,6 +754,19 @@
     }
   },
   "homeEditorial": {
+    "nav": {
+      "primary": "Navigazione principale",
+      "mobile": "Navigazione mobile",
+      "menu": "Apri menu",
+      "search": "Apri ricerca",
+      "compete": "Competi",
+      "tournaments": "Tornei",
+      "players": "Player",
+      "teams": "Team",
+      "community": "Community",
+      "signIn": "Accedi",
+      "dashboard": "Dashboard"
+    },
     "hero": {
       "kicker": "VALORANT COMPETITIVO EU / CLOSED BETA",
       "line1": "COMPETI.",
@@ -765,12 +778,19 @@
       "next": "Prossimo evento",
       "stills": "Immagini eventi PeakGG",
       "scroll": "Continua al segnale live"
+      ,"prove": "Dimostra",
+      "you": "Chi",
+      "belong": "Sei.",
+      "accent": "Più di un gioco",
+      "proof": "Costruito per player competitivi europei"
     },
     "signal": {
       "label": "Segnale live PeakGG",
       "closedBeta": "Closed beta",
       "fixture": "Prossimo match",
       "rosters": "Roster iscritti"
+      ,"nextSignal": "Prossimo segnale",
+      "registration": "Iscrizioni"
     },
     "cup": {
       "label": "Torneo in evidenza",
@@ -782,11 +802,15 @@
       "preview": "Anteprima progressione",
       "presentational": "Anteprima formato",
       "note": "La tua prima scalata inizia qui."
+      ,"annotation": "La strada inizia qui"
     },
     "ranks": {
       "label": "Il rank è identità",
       "title": "Sette rank. Un nome da lasciare.",
       "copy": "Ogni risultato verificato muove il tuo Peak rating. Nessun rank importato, nessuna scorciatoia—solo competizione."
+      ,"identity": "Il rank è identità.",
+      "topRank": "Top rank / segnale pubblico",
+      "noPlayer": "Nessun player pubblico"
     },
     "roster": {
       "label": "Trova i tuoi cinque",
@@ -797,11 +821,14 @@
       "scouting": "Scouting",
       "find": "Trova player",
       "build": "Crea il tuo team"
+      ,"findFive": "Trova i tuoi cinque.",
+      "annotation": "Cinque menti. Una call."
     },
     "moment": {
       "label": "I momenti ci definiscono",
       "title": "Un round cambia tutto.",
       "copy": "Niente ladder infinita. Una chiamata, un trade, un momento che appartiene al tuo team."
+      ,"define": "I momenti ci definiscono."
     },
     "upcoming": {
       "label": "Prossimi tornei",
@@ -815,6 +842,11 @@
       "line2": "Il tuo picco.",
       "copy": "Il livello competitivo attorno a Valorant per player europei seri.",
       "cta": "Crea account"
+      ,"poster": "Entra in Peak"
+    },
+    "match": {
+      "label": "Segnale prossimo match",
+      "title": "Match"
     },
     "common": {
       "date": "Data",
