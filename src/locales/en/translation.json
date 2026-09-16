@@ -754,6 +754,19 @@
     }
   },
   "homeEditorial": {
+    "nav": {
+      "primary": "Primary navigation",
+      "mobile": "Mobile navigation",
+      "menu": "Open menu",
+      "search": "Open search",
+      "compete": "Compete",
+      "tournaments": "Tournaments",
+      "players": "Players",
+      "teams": "Teams",
+      "community": "Community",
+      "signIn": "Sign in",
+      "dashboard": "Dashboard"
+    },
     "hero": {
       "kicker": "EU COMPETITIVE VALORANT / CLOSED BETA",
       "line1": "COMPETE.",
@@ -765,12 +778,19 @@
       "next": "Next event",
       "stills": "PeakGG event stills",
       "scroll": "Continue to live signal"
+      ,"prove": "Prove",
+      "you": "You",
+      "belong": "Belong.",
+      "accent": "More than a game",
+      "proof": "Built for competitive European players"
     },
     "signal": {
       "label": "PeakGG live signal",
       "closedBeta": "Closed beta",
       "fixture": "Next fixture",
       "rosters": "Registered rosters"
+      ,"nextSignal": "Next signal",
+      "registration": "Registration"
     },
     "cup": {
       "label": "Featured tournament",
@@ -782,11 +802,15 @@
       "preview": "Progression preview",
       "presentational": "Format preview",
       "note": "Your first ascent starts here."
+      ,"annotation": "The road starts here"
     },
     "ranks": {
       "label": "Rank is identity",
       "title": "Seven ranks. One name to make.",
       "copy": "Every verified result moves your Peak rating. No imported rank, no shortcut—only competition."
+      ,"identity": "Rank is identity.",
+      "topRank": "Top rank / public signal",
+      "noPlayer": "No public player yet"
     },
     "roster": {
       "label": "Find your five",
@@ -797,11 +821,14 @@
       "scouting": "Scouting",
       "find": "Find players",
       "build": "Build your team"
+      ,"findFive": "Find your five.",
+      "annotation": "Five minds. One call."
     },
     "moment": {
       "label": "Moments define us",
       "title": "One round changes everything.",
       "copy": "No endless ladder. One call, one trade, one moment your team owns forever."
+      ,"define": "Moments define us."
     },
     "upcoming": {
       "label": "Upcoming tournaments",
@@ -815,6 +842,11 @@
       "line2": "Your peak.",
       "copy": "The competitive layer around Valorant for serious European players.",
       "cta": "Create account"
+      ,"poster": "Enter Peak"
+    },
+    "match": {
+      "label": "Next match signal",
+      "title": "Match"
     },
     "common": {
       "date": "Date",
