@@ -60,6 +60,7 @@
   align-items: center;
   gap: 20px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .site-nav-iconbtn {
