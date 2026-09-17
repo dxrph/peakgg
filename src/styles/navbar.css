@@ -7,13 +7,13 @@
   right: 0;
   z-index: 50;
   height: 56px;
-  background: rgba(5, 5, 5, 0.72);
-  border-bottom: 1px solid var(--border);
+  background: rgb(var(--background) / 0.72);
+  border-bottom: 1px solid rgb(var(--border));
   transition: background-color 180ms ease;
 }
 
 .site-nav.is-scrolled {
-  background: var(--bg);
+  background: rgb(var(--background));
 }
 
 .site-nav-inner {
@@ -25,17 +25,13 @@
 }
 
 .site-nav-logo {
-  font-family: var(--font-label);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: var(--text);
+  color: rgb(var(--foreground));
   flex-shrink: 0;
-}
-
-.site-nav-logo span {
-  color: var(--accent);
 }
 
 .site-nav-links {
@@ -48,15 +44,16 @@
 
 .site-nav-link {
   font-family: var(--font-label);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: rgb(var(--muted-foreground));
   transition: color 180ms ease;
 }
 
 .site-nav-link:hover {
-  color: var(--text);
+  color: rgb(var(--foreground));
 }
 
 .site-nav-actions {
@@ -75,26 +72,27 @@
   padding: 0;
   background: transparent;
   border: 0;
-  color: var(--text-muted);
+  color: rgb(var(--muted-foreground));
   cursor: pointer;
   transition: color 180ms ease;
 }
 
 .site-nav-iconbtn:hover {
-  color: var(--text);
+  color: rgb(var(--foreground));
 }
 
 .site-nav-signin {
   font-family: var(--font-label);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text);
+  color: rgb(var(--foreground));
   transition: color 180ms ease;
 }
 
 .site-nav-signin:hover {
-  color: var(--text-muted);
+  color: rgb(var(--muted-foreground));
 }
 
 .site-nav-cta {
@@ -103,19 +101,19 @@
   justify-content: center;
   height: 36px;
   padding: 0 18px;
-  background: var(--accent);
-  border-radius: 4px;
+  background: rgb(var(--primary));
+  border-radius: var(--radius);
   font-family: var(--font-label);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text);
+  color: rgb(var(--primary-foreground));
   transition: background-color 180ms ease;
 }
 
 .site-nav-cta:hover {
-  background: var(--accent-hover);
+  background: rgb(var(--accent-hover));
 }
 
 .site-nav-burger {
@@ -136,13 +134,13 @@
   display: block;
   width: 18px;
   height: 2px;
-  background: var(--text);
+  background: rgb(var(--foreground));
 }
 
-/* Accessible focus state — 2px accent */
+/* Accessible focus state — 2px ring */
 .site-nav a:focus-visible,
 .site-nav button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgb(var(--ring));
   outline-offset: 2px;
 }
 
@@ -153,8 +151,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg);
-  border-top: 1px solid var(--border);
+  background: rgb(var(--background));
+  border-top: 1px solid rgb(var(--border));
   display: flex;
   flex-direction: column;
   padding: 24px;
@@ -168,12 +166,13 @@
 
 .site-nav-mobile-link {
   padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgb(var(--border));
   font-family: var(--font-label);
   font-size: 13px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text);
+  color: rgb(var(--foreground));
 }
 
 .site-nav-mobile-actions {
@@ -185,9 +184,10 @@
 .site-nav-mobile-signin {
   font-family: var(--font-label);
   font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: rgb(var(--muted-foreground));
 }
 
 .site-nav-mobile .site-nav-cta {

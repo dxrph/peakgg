@@ -34,7 +34,7 @@ export default function Navbar() {
     <header className={`site-nav${scrolled ? " is-scrolled" : ""}`}>
       <div className="site-nav-inner">
         <a href="/" className="site-nav-logo" aria-label={t("common.brand")}>
-          PEAK<span>GG</span>
+          PEAKGG
         </a>
 
         <nav className="site-nav-links" aria-label={t("nav.ariaMain")}>
