@@ -1,28 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root,
 .dark {
-  --background: #050505;
-  --foreground: #ede9e7;
-  --card: #141414;
-  --border: #2a2a2a;
-  --input: #2a2a2a;
-  --primary: #e2312f;
-  --primary-foreground: #ede9e7;
-  --secondary: #141414;
-  --muted: #141414;
-  --muted-foreground: #9a9a9a;
-  --accent: #e2312f;
-  --ring: #e2312f;
+  /* canali RGB separati da spazi: servono a Tailwind per le opacita' */
+  --background: 5 5 5;               /* #050505 */
+  --foreground: 237 233 231;         /* #EDE9E7 */
+  --card: 20 20 20;                  /* #141414 */
+  --card-foreground: 237 233 231;
+  --popover: 20 20 20;
+  --popover-foreground: 237 233 231;
+  --border: 42 42 42;                /* #2A2A2A */
+  --input: 42 42 42;
+  --primary: 226 49 47;              /* #E2312F */
+  --primary-foreground: 237 233 231;
+  --secondary: 20 20 20;
+  --secondary-foreground: 237 233 231;
+  --muted: 20 20 20;
+  --muted-foreground: 154 154 154;   /* #9A9A9A */
+  --accent: 226 49 47;
+  --accent-foreground: 237 233 231;
+  --destructive: 181 33 31;          /* #B5211F */
+  --destructive-foreground: 237 233 231;
+  --ring: 226 49 47;
+  --radius: 4px;
+  --accent-hover: 181 33 31;
 
-  /* Legacy aliases — point to canonical tokens only */
-  --bg: var(--background);
-  --surface: var(--card);
-  --text: var(--foreground);
-  --text-muted: var(--muted-foreground);
-  --accent-hover: #b5211f;
+  /* alias pronti per il CSS diretto */
+  --bg: rgb(var(--background));
+  --surface: rgb(var(--card));
+  --text: rgb(var(--foreground));
+  --text-muted: rgb(var(--muted-foreground));
+  --brand: rgb(var(--primary));
+  --brand-hover: rgb(var(--accent-hover));
 
   --font-display: "Anton", "Arial Narrow", sans-serif;
   --font-label: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -30,17 +43,8 @@
   --font-hand: "Caveat", cursive;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  min-height: 100%;
-}
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
 
 body {
   margin: 0;
@@ -50,46 +54,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-img,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-}
+img, svg, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+.font-display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: -0.02em; }
+.font-label { font-family: var(--font-label); text-transform: uppercase; font-size: 12px; letter-spacing: 0.12em; }
+.font-body { font-family: var(--font-body); }
+.font-hand { font-family: var(--font-hand); }
 
-/* Font roles */
-.font-display {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-}
-
-.font-label {
-  font-family: var(--font-label);
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-}
-
-.font-body {
-  font-family: var(--font-body);
-}
-
-.font-hand {
-  font-family: var(--font-hand);
-}
-
-/* Home shell */
-.home-root {
-  min-height: 100vh;
-  background: var(--bg);
-}
-
-.home-slot {
-  /* structural placeholder only — no design yet */
-}
+.home-root { min-height: 100vh; background: var(--bg); }
