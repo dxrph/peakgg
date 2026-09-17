@@ -20,5 +20,33 @@
     "enterPeak": "Enter Peak",
     "menuOpen": "Open menu",
     "menuClose": "Close menu"
+  },
+  "hero": {
+    "sectionNumber": "01",
+    "rail": {
+      "compete": "Compete",
+      "improve": "Improve",
+      "belong": "Belong"
+    },
+    "headline": {
+      "prove": "Prove",
+      "you": "You",
+      "belong": "Belong"
+    },
+    "note": "More than a game",
+    "copy": "PeakGG is a competitive platform for players, teams and communities. Tournaments. Rankings. Real opportunities.",
+    "enterPeak": "Enter Peak",
+    "watchTrailer": "Watch trailer",
+    "playersOnline": "{{count}} players online",
+    "artworkAlt": "Competitive player seen from behind in red light",
+    "tournament": {
+      "label": "Next tournament",
+      "title": "Open Cup",
+      "open": "View tournament",
+      "thumbnailAlt": "Open Cup tournament preview",
+      "play": "Play",
+      "compete": "Compete",
+      "improve": "Improve"
+    }
   }
 }

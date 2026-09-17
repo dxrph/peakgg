@@ -44,14 +44,15 @@ export type TournamentStatus = "announced" | "open" | "live" | "finished";
 export interface Tournament {
   id: string;
   game: GameSlug;
+  titleKey: string;
   number: number;
   date: string;
+  time: string;
+  timezone: string;
   region: string;
   format: string;
   slots: number;
-  registered: number;
   status: TournamentStatus;
-  prize: string;
 }
 
 export type MatchStatus = "scheduled" | "live" | "finished";
@@ -79,7 +80,23 @@ export const valorant: Game = {
 
 export const games: Game[] = [valorant];
 
+export const playersOnline = 1284;
+
+export const featuredTournament: Tournament = {
+  id: "open-cup-004",
+  game: "valorant",
+  titleKey: "hero.tournament.title",
+  number: 4,
+  date: "2026-09-16",
+  time: "20:00",
+  timezone: "CEST",
+  region: "Europe",
+  format: "5v5",
+  slots: 16,
+  status: "open",
+};
+
 export const players: Player[] = [];
 export const teams: Team[] = [];
-export const tournaments: Tournament[] = [];
+export const tournaments: Tournament[] = [featuredTournament];
 export const matches: Match[] = [];
