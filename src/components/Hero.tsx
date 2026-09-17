@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import characterArtwork from "../assets/hero-character.svg";
@@ -19,19 +20,44 @@ const formatTournamentDate = (date: string, language: string) => {
 
 export default function Hero() {
   const { t, i18n } = useTranslation();
+  const heroRef = useRef<HTMLElement>(null);
   const tournamentDate = formatTournamentDate(featuredTournament.date, i18n.language);
   const tournamentNumber = String(featuredTournament.number).padStart(3, "0");
 
+  useEffect(() => {
+    const updateNavbar = () => {
+      const hero = heroRef.current;
+      if (!hero) return;
+      document.body.classList.toggle("hero-nav-overlay", hero.getBoundingClientRect().bottom > 56);
+    };
+
+    updateNavbar();
+    window.addEventListener("scroll", updateNavbar, { passive: true });
+    window.addEventListener("resize", updateNavbar);
+    return () => {
+      document.body.classList.remove("hero-nav-overlay");
+      window.removeEventListener("scroll", updateNavbar);
+      window.removeEventListener("resize", updateNavbar);
+    };
+  }, []);
+
   return (
-    <section data-section="hero" className="peak-hero">
-      <aside className="peak-hero-rail" aria-label={t("hero.sectionNumber")}>
+    <section ref={heroRef} data-section="hero" className="peak-hero">
+      <div className="peak-hero-background" aria-hidden="true">
+        <div className="peak-hero-backlight" />
+        <img src={characterArtwork} alt="" />
+        <div className="peak-hero-grain" />
+        <div className="peak-hero-shade" />
+      </div>
+
+      <div className="peak-hero-micro" aria-label={t("hero.sectionNumber")}>
         <span className="peak-hero-number">{t("hero.sectionNumber")}</span>
         <div className="peak-hero-rail-words">
           <span>{t("hero.rail.compete")}</span>
           <span>{t("hero.rail.improve")}</span>
           <span>{t("hero.rail.belong")}</span>
         </div>
-      </aside>
+      </div>
 
       <div className="peak-hero-main">
         <div className="peak-hero-heading-wrap">
@@ -69,20 +95,9 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="peak-hero-artwork" aria-hidden="true">
-        <div className="peak-hero-backlight" />
-        <img src={characterArtwork} alt="" />
-        <div className="peak-hero-grain" />
-      </div>
-
       <aside className="peak-hero-event">
         <div className="peak-hero-event-head">
           <span>{t("hero.tournament.label")}</span>
-          <a href="#tournaments" aria-label={t("hero.tournament.open")}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14M14 7l5 5-5 5" />
-            </svg>
-          </a>
         </div>
 
         <div className="peak-hero-event-title">
@@ -90,20 +105,27 @@ export default function Hero() {
           <span>#{tournamentNumber}</span>
         </div>
 
-        <div className="peak-hero-event-meta">
-          <span>{tournamentDate}</span>
-          <span>{featuredTournament.time} {featuredTournament.timezone}</span>
+        <div className="peak-hero-event-info">
+          <div className="peak-hero-event-meta">
+            <span>{tournamentDate}</span>
+            <span>{featuredTournament.time} {featuredTournament.timezone}</span>
+          </div>
+          <a href="#tournaments" aria-label={t("hero.tournament.open")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M14 7l5 5-5 5" />
+            </svg>
+          </a>
         </div>
 
         <div className="peak-hero-event-visual">
           <div className="peak-hero-event-thumb" role="img" aria-label={t("hero.tournament.thumbnailAlt")}>
             <img src={characterArtwork} alt="" />
           </div>
-          <div className="peak-hero-event-script" aria-hidden="true">
-            <span>{t("hero.tournament.play")}</span>
-            <span>{t("hero.tournament.compete")}</span>
-            <span>{t("hero.tournament.improve")}</span>
-          </div>
+        </div>
+        <div className="peak-hero-event-script" aria-hidden="true">
+          <span>{t("hero.tournament.play")}</span>
+          <span>{t("hero.tournament.compete")}</span>
+          <span>{t("hero.tournament.improve")}</span>
         </div>
       </aside>
     </section>
