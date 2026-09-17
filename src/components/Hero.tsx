@@ -50,39 +50,43 @@ export default function Hero() {
         <div className="peak-hero-shade" />
       </div>
 
-      <div className="peak-hero-micro" aria-label={t("hero.sectionNumber")}>
-        <span className="peak-hero-number">{t("hero.sectionNumber")}</span>
-        <div className="peak-hero-rail-words">
-          <span>{t("hero.rail.compete")}</span>
-          <span>{t("hero.rail.improve")}</span>
-          <span>{t("hero.rail.belong")}</span>
-        </div>
-      </div>
+      <div className="peak-hero-left">
+        <div className="peak-hero-left-top">
+          <div className="peak-hero-micro" aria-label={t("hero.sectionNumber")}>
+            <span className="peak-hero-number">{t("hero.sectionNumber")}</span>
+            <div className="peak-hero-rail-words">
+              <span>{t("hero.rail.compete")}</span>
+              <span>{t("hero.rail.improve")}</span>
+              <span>{t("hero.rail.belong")}</span>
+            </div>
+          </div>
 
-      <div className="peak-hero-main">
-        <div className="peak-hero-heading-wrap">
-          <h1 className="peak-hero-heading">
-            <span>{t("hero.headline.prove")}</span>
-            <span>{t("hero.headline.you")}</span>
-            <span>
-              {t("hero.headline.belong")}<b aria-hidden="true">.</b>
-            </span>
-          </h1>
-          <span className="peak-hero-note">{t("hero.note")}</span>
-        </div>
+          <div className="peak-hero-main">
+            <div className="peak-hero-heading-wrap">
+              <h1 className="peak-hero-heading">
+                <span>{t("hero.headline.prove")}</span>
+                <span>{t("hero.headline.you")}</span>
+                <span>
+                  {t("hero.headline.belong")}<b aria-hidden="true">.</b>
+                </span>
+              </h1>
+              <span className="peak-hero-note">{t("hero.note")}</span>
+            </div>
 
-        <p className="peak-hero-copy">{t("hero.copy")}</p>
+            <p className="peak-hero-copy">{t("hero.copy")}</p>
 
-        <div className="peak-hero-ctas">
-          <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
-            {t("hero.enterPeak")}
-          </a>
-          <a className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path d="m5.5 3 6 5-6 5V3Z" />
-            </svg>
-            {t("hero.watchTrailer")}
-          </a>
+            <div className="peak-hero-ctas">
+              <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
+                {t("hero.enterPeak")}
+              </a>
+              <a className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="m5.5 3 6 5-6 5V3Z" />
+                </svg>
+                {t("hero.watchTrailer")}
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="peak-hero-status">

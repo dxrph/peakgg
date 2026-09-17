@@ -53,11 +53,23 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   mix-blend-mode: screen;
 }
 
-.peak-hero-micro {
+/* Colonna sinistra: micro header in alto, riga avatar in basso */
+
+.peak-hero-left {
   position: absolute;
   z-index: 5;
-  top: 90px;
+  top: 0;
+  bottom: 0;
   left: 48px;
+  width: 40%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 90px 0 60px;
+}
+
+.peak-hero-micro {
   display: flex;
   align-items: flex-start;
   gap: 18px;
@@ -85,16 +97,12 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 }
 
 .peak-hero-main {
-  position: absolute;
-  z-index: 5;
-  top: 146px;
-  left: 88px;
+  margin: 22px 0 0 40px;
   width: 470px;
 }
 
 .peak-hero-heading-wrap {
   position: relative;
-  width: 540px;
 }
 
 .peak-hero-heading {
@@ -102,9 +110,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   flex-direction: column;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(104px, 7.9vw, 114px);
+  font-size: clamp(64px, 11.5vw, 200px);
   font-weight: 400;
-  line-height: 0.84;
+  line-height: 0.85;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: rgb(var(--foreground));
@@ -122,9 +130,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 
 .peak-hero-note {
   position: absolute;
-  top: 94px;
-  left: 275px;
-  width: 185px;
+  top: 150px;
+  left: 400px;
+  width: 200px;
   font-family: var(--font-hand);
   font-size: 22px;
   font-weight: 400;
@@ -201,7 +209,6 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   display: flex;
   align-items: center;
   gap: 13px;
-  margin-top: 25px;
   font-family: var(--font-label);
   font-size: 10px;
   font-weight: 400;
@@ -228,12 +235,18 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   background: rgb(var(--border));
 }
 
+/* Colonna destra: torneo in alto, thumbnail a meta' altezza, marker all'80% */
+
 .peak-hero-event {
   position: absolute;
   z-index: 5;
-  top: 122px;
+  top: 0;
+  bottom: 0;
   right: 48px;
   width: 250px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 122px;
 }
 
 .peak-hero-event-head {
@@ -307,12 +320,15 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 }
 
 .peak-hero-event-visual {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  right: 0;
   width: 150px;
   height: 130px;
-  margin-top: 24px;
+  margin: 0;
   overflow: hidden;
   border: 1px solid rgb(var(--border));
+  transform: translateY(-50%);
 }
 
 .peak-hero-event-thumb,
@@ -344,18 +360,18 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 }
 
 .peak-hero-event-script {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  position: absolute;
+  top: 80%;
+  right: 0;
   width: 175px;
-  margin-top: 18px;
+  margin: 0;
   font-family: var(--font-hand);
   font-size: 20px;
   font-weight: 400;
   line-height: 1.05;
   text-transform: uppercase;
   color: rgb(var(--foreground));
-  transform: rotate(-5deg);
+  transform: translateY(-100%) rotate(-5deg);
 }
 
 .peak-hero-event-script span:nth-child(2) {
@@ -368,7 +384,11 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 
 @media (max-width: 900px) {
   .peak-hero {
+    display: flex;
+    flex-direction: column;
+    height: auto;
     min-height: 844px;
+    padding: 78px 18px 24px;
   }
 
   .peak-hero-background > img {
@@ -380,9 +400,15 @@ body.hero-nav-overlay .site-nav.is-scrolled {
     background: linear-gradient(90deg, rgb(var(--background)) 0%, rgb(var(--background) / 0.92) 48%, rgb(var(--background) / 0.12) 100%);
   }
 
+  .peak-hero-left {
+    position: static;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    flex: 1 0 auto;
+  }
+
   .peak-hero-micro {
-    top: 78px;
-    left: 18px;
     gap: 12px;
   }
 
@@ -395,18 +421,13 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   }
 
   .peak-hero-main {
-    top: 128px;
-    left: 20px;
+    margin: 20px 0 0;
     width: calc(100% - 40px);
   }
 
-  .peak-hero-heading-wrap {
-    width: 100%;
-  }
-
   .peak-hero-heading {
-    font-size: 78px;
-    line-height: 0.84;
+    font-size: clamp(44px, 16vw, 72px);
+    line-height: 0.85;
   }
 
   .peak-hero-note {
@@ -432,17 +453,21 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   }
 
   .peak-hero-status {
-    margin-top: 18px;
+    margin-top: 25px;
     font-size: 9px;
   }
 
   .peak-hero-event {
+    position: relative;
     top: auto;
-    right: 18px;
-    bottom: 24px;
-    left: 18px;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    display: block;
     width: auto;
     min-height: 204px;
+    margin-top: 24px;
+    padding: 0;
   }
 
   .peak-hero-event-title {
@@ -456,20 +481,15 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   }
 
   .peak-hero-event-visual {
-    position: absolute;
     top: 0;
-    right: 0;
-    width: 150px;
-    height: 130px;
     margin: 0;
+    transform: none;
   }
 
   .peak-hero-event-script {
-    position: absolute;
     top: 140px;
-    right: 0;
-    width: 150px;
     margin: 0;
+    transform: rotate(-5deg);
     font-size: 16px;
   }
 }
