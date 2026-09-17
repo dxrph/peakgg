@@ -5,5 +5,20 @@
   },
   "common": {
     "brand": "PeakGG"
+  },
+  "nav": {
+    "ariaMain": "Main navigation",
+    "links": {
+      "compete": "Compete",
+      "tournaments": "Tournaments",
+      "players": "Players",
+      "teams": "Teams",
+      "community": "Community"
+    },
+    "search": "Search",
+    "signIn": "Sign in",
+    "enterPeak": "Enter Peak",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu"
   }
 }
