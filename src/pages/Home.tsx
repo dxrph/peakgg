@@ -1,8 +1,10 @@
+import Navbar from "../components/Navbar";
+
 export default function Home() {
   return (
     <main className="home-root">
       {/* 01 — Navigation */}
-      <section data-section="navigation" className="home-slot" />
+      <Navbar />
       {/* 02 — Hero */}
       <section data-section="hero" className="home-slot" />
       {/* 03 — Live strip */}
