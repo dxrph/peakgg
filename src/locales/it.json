@@ -20,5 +20,33 @@
     "enterPeak": "Enter Peak",
     "menuOpen": "Apri menu",
     "menuClose": "Chiudi menu"
+  },
+  "hero": {
+    "sectionNumber": "01",
+    "rail": {
+      "compete": "Competi",
+      "improve": "Migliora",
+      "belong": "Fai squadra"
+    },
+    "headline": {
+      "prove": "Dimostra",
+      "you": "Di",
+      "belong": "Meritarlo"
+    },
+    "note": "Più di una partita",
+    "copy": "PeakGG è la piattaforma competitiva per giocatori, team e community. Tornei. Classifiche. Occasioni reali.",
+    "enterPeak": "Enter Peak",
+    "watchTrailer": "Guarda il trailer",
+    "playersOnline": "{{count}} giocatori online",
+    "artworkAlt": "Giocatore competitivo visto di spalle nella luce rossa",
+    "tournament": {
+      "label": "Prossimo torneo",
+      "title": "Open Cup",
+      "open": "Vedi il torneo",
+      "thumbnailAlt": "Anteprima del torneo Open Cup",
+      "play": "Gioca",
+      "compete": "Competi",
+      "improve": "Migliora"
+    }
   }
 }

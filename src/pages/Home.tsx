@@ -1,3 +1,4 @@
+import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
 
 export default function Home() {
@@ -6,7 +7,7 @@ export default function Home() {
       {/* 01 — Navigation */}
       <Navbar />
       {/* 02 — Hero */}
-      <section data-section="hero" className="home-slot" />
+      <Hero />
       {/* 03 — Live strip */}
       <section data-section="live-strip" className="home-slot" />
       {/* 04 — Open Cup */}
