@@ -2,14 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #050505;
-  --surface: #141414;
+:root,
+.dark {
+  --background: #050505;
+  --foreground: #ede9e7;
+  --card: #141414;
   --border: #2a2a2a;
+  --input: #2a2a2a;
+  --primary: #e2312f;
+  --primary-foreground: #ede9e7;
+  --secondary: #141414;
+  --muted: #141414;
+  --muted-foreground: #9a9a9a;
   --accent: #e2312f;
+  --ring: #e2312f;
+
+  /* Legacy aliases — point to canonical tokens only */
+  --bg: var(--background);
+  --surface: var(--card);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
   --accent-hover: #b5211f;
-  --text: #ede9e7;
-  --text-muted: #9a9a9a;
 
   --font-display: "Anton", "Arial Narrow", sans-serif;
   --font-label: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
