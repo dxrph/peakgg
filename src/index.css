@@ -3,35 +3,80 @@
 @tailwind utilities;
 
 :root {
-  --bg: #050506;
-  --fg: #f4f2ee;
+  --bg: #050505;
+  --surface: #141414;
+  --border: #2a2a2a;
+  --accent: #e2312f;
+  --accent-hover: #b5211f;
+  --text: #ede9e7;
+  --text-muted: #9a9a9a;
+
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-label: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--fg);
-  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
-.reset-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
 }
 
-.reset-screen h1 {
-  margin: 0;
-  font-size: clamp(18px, 4vw, 32px);
-  font-weight: 600;
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Font roles */
+.font-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.font-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  font-size: 12px;
   letter-spacing: 0.12em;
-  text-align: center;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-hand {
+  font-family: var(--font-hand);
+}
+
+/* Home shell */
+.home-root {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.home-slot {
+  /* structural placeholder only — no design yet */
 }
