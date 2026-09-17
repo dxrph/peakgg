@@ -364,6 +364,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   position: absolute;
   top: 80%;
   right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 175px;
   margin: 0;
   font-family: var(--font-hand);
