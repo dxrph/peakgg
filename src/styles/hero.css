@@ -110,8 +110,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   flex-direction: column;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(64px, 11.5vw, 200px);
-  font-weight: 400;
+  font-size: clamp(56px, 11.5vw, 200px);
+  font-weight: 900;
+  font-variation-settings: "wdth" 62, "wght" 900;
   line-height: 0.85;
   letter-spacing: -0.02em;
   text-transform: uppercase;
@@ -363,6 +364,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   position: absolute;
   top: 80%;
   right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 175px;
   margin: 0;
   font-family: var(--font-hand);
