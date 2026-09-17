@@ -97,7 +97,7 @@ export default function Hero() {
 
         <div className="peak-hero-event-visual">
           <div className="peak-hero-event-thumb" role="img" aria-label={t("hero.tournament.thumbnailAlt")}>
-            <span>#{tournamentNumber}</span>
+            <img src={characterArtwork} alt="" />
           </div>
           <div className="peak-hero-event-script" aria-hidden="true">
             <span>{t("hero.tournament.play")}</span>

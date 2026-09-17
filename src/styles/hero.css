@@ -3,7 +3,7 @@
 .peak-hero {
   position: relative;
   display: grid;
-  grid-template-columns: 64px minmax(420px, 460px) minmax(0, 1fr) 232px;
+  grid-template-columns: 64px calc(38% - 64px) 42% 20%;
   width: 100%;
   height: 672px;
   margin-top: 56px;
@@ -199,8 +199,8 @@
 .peak-hero-artwork {
   position: absolute;
   z-index: 2;
-  left: 35%;
-  right: 174px;
+  left: 38%;
+  right: 20%;
   bottom: -84px;
   height: 744px;
   overflow: hidden;
@@ -247,7 +247,7 @@
   flex-direction: column;
   padding: 37px 24px 0;
   border-left: 1px solid rgb(var(--border));
-  background: rgb(var(--background) / 0.76);
+  background: rgb(var(--background) / 0.48);
 }
 
 .peak-hero-event-head {
@@ -255,7 +255,6 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgb(var(--border));
   font-family: var(--font-label);
   font-size: 10px;
   letter-spacing: 0.12em;
@@ -325,36 +324,23 @@
   background: rgb(var(--card));
 }
 
-.peak-hero-event-thumb::before {
-  content: "";
-  position: absolute;
-  inset: 14% -25% -25% 20%;
-  border: 1px solid rgb(var(--primary));
-  transform: rotate(-24deg);
-  background: rgb(var(--primary) / 0.13);
-}
-
 .peak-hero-event-thumb::after {
   content: "";
   position: absolute;
-  top: -18%;
-  left: 17%;
-  width: 38%;
-  height: 140%;
-  background: rgb(var(--primary));
-  opacity: 0.7;
-  transform: rotate(20deg);
+  inset: 0;
+  background: rgb(var(--primary) / 0.13);
+  mix-blend-mode: multiply;
 }
 
-.peak-hero-event-thumb > span {
+.peak-hero-event-thumb img {
   position: absolute;
-  z-index: 2;
-  right: 15px;
-  bottom: 18px;
-  font-family: var(--font-display);
-  font-size: 62px;
-  line-height: 1;
-  color: rgb(var(--foreground) / 0.14);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 53% 18%;
+  opacity: 0.48;
+  filter: grayscale(1) contrast(1.2);
 }
 
 .peak-hero-event-script {
@@ -374,7 +360,7 @@
 
 @media (max-width: 1080px) {
   .peak-hero {
-    grid-template-columns: 48px minmax(360px, 420px) minmax(0, 1fr) 210px;
+    grid-template-columns: 48px calc(38% - 48px) 42% 20%;
   }
 
   .peak-hero-main {
