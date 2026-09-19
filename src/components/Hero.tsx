@@ -79,7 +79,7 @@ export default function Hero() {
               <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
                 {t("hero.enterPeak")}
               </a>
-              <a className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
+              <a id="trailer" className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
                 <svg viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M2 7h9L8 4l1-1 5 5-5 5-1-1 3-3H2V7Z" />
                 </svg>
