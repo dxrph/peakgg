@@ -124,7 +124,7 @@ export default function Navbar({ onSearch = () => undefined, onAuth = () => unde
             ))}
           </nav>
           <div className="site-nav-mobile-actions">
-            <button type="button" className="site-nav-mobile-signin" onClick={() => { setOpen(false); session ? undefined : onAuth("signin"); }}>
+            <button type="button" className="site-nav-mobile-signin" onClick={() => { setOpen(false); if (!session) onAuth("signin"); }}>
               {session ? t("nav.account") : t("nav.signIn")}
             </button>
             <button type="button" className="site-nav-cta" onClick={() => { setOpen(false); onAuth("signup"); }}>
