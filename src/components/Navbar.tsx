@@ -13,9 +13,9 @@ const NAV_LINKS = [
   { key: "community", href: "#community" },
 ] as const;
 
-interface NavbarProps { onSearch: () => void; onAuth: (mode: "signin" | "signup") => void }
+interface NavbarProps { onSearch?: () => void; onAuth?: (mode: "signin" | "signup") => void }
 
-export default function Navbar({ onSearch, onAuth }: NavbarProps) {
+export default function Navbar({ onSearch = () => undefined, onAuth = () => undefined }: NavbarProps) {
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);

@@ -7,13 +7,14 @@
   right: 0;
   z-index: 50;
   height: 56px;
-  background: rgb(var(--background) / 0.72);
-  border-bottom: 1px solid rgb(var(--border));
+  background: transparent;
+  border-bottom: 1px solid transparent;
   transition: background-color 180ms ease;
 }
 
 .site-nav.is-scrolled {
   background: rgb(var(--background));
+  border-bottom-color: rgb(var(--border));
 }
 
 .site-nav-inner {
@@ -28,7 +29,7 @@
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: rgb(var(--foreground));
   flex-shrink: 0;
@@ -76,12 +77,16 @@
   cursor: pointer;
   transition: color 180ms ease;
 }
+.site-nav-iconbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 
 .site-nav-iconbtn:hover {
   color: rgb(var(--foreground));
 }
 
 .site-nav-signin {
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-family: var(--font-label);
   font-size: 12px;
   font-weight: 400;
@@ -110,6 +115,8 @@
   text-transform: uppercase;
   color: rgb(var(--primary-foreground));
   transition: background-color 180ms ease;
+  border: 0;
+  cursor: pointer;
 }
 
 .site-nav-cta:hover {
@@ -183,6 +190,10 @@
 }
 
 .site-nav-mobile-signin {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
   font-family: var(--font-label);
   font-size: 12px;
   font-weight: 400;
