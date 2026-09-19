@@ -69,6 +69,10 @@ export interface Match {
   status: MatchStatus;
 }
 
+export interface SignalItem { labelKey: string; valueKey: string }
+export interface RosterSlot { id: string; role: string; rank: string; region: string; language: string }
+export interface UpcomingTournament { id: string; date: string; nameKey: string; statusKey: string }
+
 export const valorant: Game = {
   slug: "valorant",
   name: "VALORANT",
@@ -80,14 +84,12 @@ export const valorant: Game = {
 
 export const games: Game[] = [valorant];
 
-export const playersOnline = 1284;
-
 export const featuredTournament: Tournament = {
   id: "open-cup-004",
   game: "valorant",
   titleKey: "hero.tournament.title",
   number: 4,
-  date: "2026-09-16",
+  date: "2026-09-24",
   time: "20:00",
   timezone: "CEST",
   region: "Europe",
@@ -100,3 +102,27 @@ export const players: Player[] = [];
 export const teams: Team[] = [];
 export const tournaments: Tournament[] = [featuredTournament];
 export const matches: Match[] = [];
+
+export const liveSignals: SignalItem[] = [
+  { labelKey: "signal.beta", valueKey: "signal.eu" },
+  { labelKey: "signal.firstCup", valueKey: "signal.registrationSoon" },
+  { labelKey: "signal.teamFinder", valueKey: "signal.open" },
+  { labelKey: "signal.playerProfiles", valueKey: "signal.open" },
+];
+
+export const rankNames = valorant.ranks;
+
+export const rosterSlots: RosterSlot[] = [
+  { id: "duelist", role: "Duelist", rank: "Elite", region: "EU West", language: "EN" },
+  { id: "initiator", role: "Initiator", rank: "Expert", region: "EU West", language: "EN / IT" },
+  { id: "controller", role: "Controller", rank: "Rival", region: "EU Central", language: "EN" },
+  { id: "sentinel", role: "Sentinel", rank: "Elite", region: "EU Central", language: "EN / IT" },
+  { id: "flex", role: "Flex", rank: "Contender", region: "EU West", language: "EN" },
+];
+
+export const upcomingTournaments: UpcomingTournament[] = [
+  { id: "solo-night", date: "2026-09-21", nameKey: "upcoming.events.solo", statusKey: "upcoming.status.registration" },
+  { id: "community-05", date: "2026-09-24", nameKey: "upcoming.events.community", statusKey: "upcoming.status.open" },
+  { id: "peak-series", date: "2026-10-02", nameKey: "upcoming.events.series", statusKey: "upcoming.status.soon" },
+  { id: "open-005", date: "2026-10-10", nameKey: "upcoming.events.openCup", statusKey: "upcoming.status.soon" },
+];

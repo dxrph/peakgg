@@ -18,7 +18,9 @@ const formatTournamentDate = (date: string, language: string) => {
     .toUpperCase();
 };
 
-export default function Hero() {
+interface HeroProps { onEnter: () => void }
+
+export default function Hero({ onEnter }: HeroProps) {
   const { t, i18n } = useTranslation();
   const heroRef = useRef<HTMLElement>(null);
   const tournamentDate = formatTournamentDate(featuredTournament.date, i18n.language);
@@ -76,10 +78,10 @@ export default function Hero() {
             <p className="peak-hero-copy">{t("hero.copy")}</p>
 
             <div className="peak-hero-ctas">
-              <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
+              <button className="peak-hero-cta peak-hero-cta-primary" type="button" onClick={onEnter}>
                 {t("hero.enterPeak")}
-              </a>
-              <a id="trailer" className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
+              </button>
+              <a className="peak-hero-cta peak-hero-cta-secondary" href="#moments">
                 <svg viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M2 7h9L8 4l1-1 5 5-5 5-1-1 3-3H2V7Z" />
                 </svg>

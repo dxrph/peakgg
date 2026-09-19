@@ -9,7 +9,8 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 .peak-hero {
   position: relative;
   width: 100%;
-  height: clamp(620px, 54vw, 780px);
+  height: 100svh;
+  min-height: 720px;
   overflow: hidden;
   background: rgb(var(--background));
   border-bottom: 1px solid rgb(var(--border));
@@ -112,11 +113,10 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   flex-direction: column;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(102px, 8.15vw, 126px);
-  font-weight: 900;
-  font-variation-settings: "wdth" 64, "wght" 900;
+  font-size: clamp(100px, 9vw, 150px);
+  font-weight: 400;
   line-height: 0.85;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: rgb(var(--foreground));
   text-shadow: 1px 0 rgb(var(--foreground) / 0.28);
@@ -136,7 +136,8 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   position: absolute;
   top: 82px;
   left: min(26vw, 374px);
-  width: 165px;
+  width: 145px;
+  white-space: pre-line;
   font-family: var(--font-hand);
   font-size: 20px;
   font-weight: 400;
@@ -277,8 +278,6 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   margin-top: 15px;
   font-family: var(--font-display);
   font-size: 32px;
-  font-weight: 900;
-  font-variation-settings: "wdth" 76, "wght" 900;
   font-weight: 400;
   line-height: 0.92;
   letter-spacing: -0.02em;

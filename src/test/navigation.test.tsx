@@ -12,7 +12,7 @@ describe("navigation", () => {
     for (const link of container.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')) {
       expect(document.getElementById(link.hash.slice(1)), link.hash).not.toBeNull();
     }
-    expect(screen.getByText(/live data unavailable/)).toBeInTheDocument();
+    expect(screen.getByText(/Beta \/ Europe/)).toBeInTheDocument();
     expect(screen.queryByText(/1,284 players online/)).not.toBeInTheDocument();
   });
 
@@ -26,7 +26,7 @@ describe("navigation", () => {
     expect(close).toHaveFocus();
     expect(document.body.style.overflow).toBe("hidden");
     fireEvent.keyDown(close, { key: "Tab", shiftKey: true });
-    expect(within(dialog).getByRole("link", { name: "Enter Peak" })).toHaveFocus();
+    expect(within(dialog).getByRole("button", { name: "Enter Peak" })).toHaveFocus();
     fireEvent.keyDown(document.activeElement!, { key: "Tab" });
     expect(close).toHaveFocus();
     fireEvent.keyDown(close, { key: "Escape" });
