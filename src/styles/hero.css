@@ -98,7 +98,7 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 
 .peak-hero-main {
   margin: 22px 0 0 40px;
-  width: 470px;
+  width: clamp(320px, 35vw, 600px);
 }
 
 .peak-hero-heading-wrap {
@@ -110,9 +110,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   flex-direction: column;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(56px, 11.5vw, 200px);
+  font-size: clamp(56px, 11.17vw, 190px);
   font-weight: 900;
-  font-variation-settings: "wdth" 62, "wght" 900;
+  font-variation-settings: "wdth" 69, "wght" 900;
   line-height: 0.85;
   letter-spacing: -0.02em;
   text-transform: uppercase;
