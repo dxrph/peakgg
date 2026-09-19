@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import characterArtwork from "../assets/peak-hero-cinematic.jpg";
-import { featuredTournament, playersOnline } from "../data/mock";
+import { featuredTournament } from "../data/mock";
 import "../styles/hero.css";
 
 const formatTournamentDate = (date: string, language: string) => {
@@ -95,8 +95,7 @@ export default function Hero() {
               <span key={index} />
             ))}
           </div>
-          <span>{t("hero.playersOnline", { count: playersOnline.toLocaleString(i18n.language) })}</span>
-          <span className="peak-sr-only">{t("hero.previewStatus")}</span>
+          <span>{t("hero.previewStatus")}</span>
         </div>
       </div>
 
