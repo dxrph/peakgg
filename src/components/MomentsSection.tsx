@@ -1,0 +1,3 @@
+import { useTranslation } from "react-i18next";
+import art from "../assets/peak-hero-cinematic.jpg";
+export default function MomentsSection(){const{t}=useTranslation();return <section id="moments" className="moments-section"><img src={art} alt=""/><div className="moments-shade"/><span className="moments-time">02:14</span><h2>{t("moments.title1")}<br/>{t("moments.title2")}<br/>{t("moments.title3")}</h2><p>{t("moments.copy")}</p><div className="moments-meta">PEAKGG EU / 2026<br/>{t("moments.meta")}</div></section>}
