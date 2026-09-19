@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import characterArtwork from "../assets/hero-character.svg";
-import { featuredTournament, playersOnline } from "../data/mock";
+import { featuredTournament } from "../data/mock";
 import "../styles/hero.css";
 
 const formatTournamentDate = (date: string, language: string) => {
@@ -42,7 +42,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={heroRef} data-section="hero" className="peak-hero">
+    <section ref={heroRef} id="compete" data-section="hero" className="peak-hero">
       <div className="peak-hero-background" aria-hidden="true">
         <div className="peak-hero-backlight" />
         <img src={characterArtwork} alt="" />
@@ -79,11 +79,11 @@ export default function Hero() {
               <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
                 {t("hero.enterPeak")}
               </a>
-              <a className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
+              <a className="peak-hero-cta peak-hero-cta-secondary" href="#tournaments">
                 <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="m5.5 3 6 5-6 5V3Z" />
+                  <path d="M2 7h9L8 4l1-1 5 5-5 5-1-1 3-3H2V7Z" />
                 </svg>
-                {t("hero.watchTrailer")}
+                {t("hero.exploreTournaments")}
               </a>
             </div>
           </div>
@@ -95,13 +95,13 @@ export default function Hero() {
               <span key={index} />
             ))}
           </div>
-          <span>{t("hero.playersOnline", { count: playersOnline.toLocaleString("en-US") })}</span>
+          <span>{t("hero.previewStatus")}</span>
         </div>
       </div>
 
       <aside className="peak-hero-event">
         <div className="peak-hero-event-head">
-          <span>{t("hero.tournament.label")}</span>
+          <span>{t("hero.tournament.previewLabel")}</span>
         </div>
 
         <div className="peak-hero-event-title">

@@ -22,6 +22,8 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -100,9 +102,9 @@ Deno.serve(async (req) => {
         .eq("match_id", match.id);
 
       if (rosters && rosters.length > 0) {
-        const winnerRoster = rosters.find((r: any) => r.user_id === match.winner_id || r.team_id === match.winner_id);
+        const winnerRoster = rosters.find((r: { user_id: string; team_id: string | null; side: string | null }) => r.user_id === match.winner_id || r.team_id === match.winner_id);
         const winnerSide = winnerRoster?.side ?? null;
-        rosters.forEach((r: any) => {
+        rosters.forEach((r: { user_id: string; team_id: string | null; side: string | null }) => {
           const won = winnerSide ? r.side === winnerSide : r.team_id === match.winner_id || r.user_id === match.winner_id;
           participants.push({ userId: r.user_id, won });
         });
@@ -120,7 +122,7 @@ Deno.serve(async (req) => {
         .from("team_members")
         .select("team_id, user_id")
         .in("team_id", teamIds);
-      (members ?? []).forEach((m: any) => {
+      (members ?? []).forEach((m: { user_id: string; team_id: string }) => {
         participants.push({ userId: m.user_id, won: m.team_id === match.winner_id });
       });
     }
@@ -132,7 +134,7 @@ Deno.serve(async (req) => {
     }
 
     const game = match.game as GameId;
-    const updated: any[] = [];
+    const updated: { user_id: string; won: boolean; elo: number }[] = [];
 
     // Default starting ELO for new players is 500 (Contender entry).
     const DEFAULT_ELO = 500;
@@ -146,7 +148,7 @@ Deno.serve(async (req) => {
         .eq("game", game)
         .in("user_id", userIds);
       if (!data || data.length === 0) return DEFAULT_ELO;
-      return Math.round(data.reduce((s, r: any) => s + (r.elo ?? DEFAULT_ELO), 0) / data.length);
+      return Math.round(data.reduce((s: number, r: { elo: number | null }) => s + (r.elo ?? DEFAULT_ELO), 0) / data.length);
     }
 
     const winners = participants.filter(p => p.won).map(p => p.userId);
@@ -161,7 +163,7 @@ Deno.serve(async (req) => {
       .select("id, fast_track")
       .in("id", allIds);
     const fastTrack = new Map<string, boolean>();
-    (profs ?? []).forEach((p: any) => fastTrack.set(p.id, !!p.fast_track));
+    (profs ?? []).forEach((p: { id: string; fast_track: boolean | null }) => fastTrack.set(p.id, !!p.fast_track));
 
     for (const p of participants) {
       // Read current per-game stat (auto-create if missing)

@@ -46,7 +46,41 @@
       "thumbnailAlt": "Anteprima del torneo Open Cup",
       "play": "Gioca",
       "compete": "Competi",
-      "improve": "Migliora"
-    }
+      "improve": "Migliora",
+      "previewLabel": "Torneo di esempio · demo"
+    },
+    "previewStatus": "Anteprima · dati live non disponibili",
+    "exploreTournaments": "Scopri i tornei"
+  },
+  "home": {
+    "skip": "Vai al contenuto",
+    "preview": "Anteprima della piattaforma",
+    "tournaments": {
+      "title": "La prossima sfida.",
+      "copy": "Uno spazio per i tornei competitivi. La Open Cup mostrata sopra è un esempio grafico, non un evento con iscrizioni aperte.",
+      "status": "Calendario da annunciare"
+    },
+    "players": {
+      "title": "Il rank è identità.",
+      "copy": "Competi, migliora e trova il tuo posto. Profili e classifiche dei giocatori sono in ricostruzione.",
+      "status": "Classifiche non ancora disponibili"
+    },
+    "teams": {
+      "title": "Trova il tuo team.",
+      "copy": "Un obiettivo condiviso. Una squadra con cui crescere. Ricerca team e reclutamento arriveranno in una prossima versione.",
+      "status": "Elenco team in arrivo"
+    },
+    "community": {
+      "title": "Più di un gioco.",
+      "copy": "PeakGG riunisce giocatori che vogliono competere e migliorare. I canali ufficiali della community saranno indicati qui quando disponibili.",
+      "status": "Canali della community in arrivo"
+    },
+    "entryStatus": "La piattaforma è in ricostruzione. Accesso e registrazione non sono disponibili in questa anteprima.",
+    "backTop": "Torna in alto",
+    "footer": "COMPETI. MIGLIORA. TROVA IL TUO POSTO."
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "back": "Torna su PeakGG"
   }
 }

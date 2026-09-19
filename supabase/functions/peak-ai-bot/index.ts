@@ -117,7 +117,7 @@ function pickCta(text: string): { label?: string; url?: string } {
   return {};
 }
 
-async function callLovableAI(messages: any[], opts: { temperature?: number } = {}) {
+async function callLovableAI(messages: { role: string; content: string }[], opts: { temperature?: number } = {}) {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY not configured");
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -133,13 +133,11 @@ async function callLovableAI(messages: any[], opts: { temperature?: number } = {
     }),
   });
   if (res.status === 429) {
-    const e: any = new Error("rate_limited");
-    e.status = 429;
+    const e = Object.assign(new Error("rate_limited"), { status: 429 });
     throw e;
   }
   if (res.status === 402) {
-    const e: any = new Error("payment_required");
-    e.status = 402;
+    const e = Object.assign(new Error("payment_required"), { status: 402 });
     throw e;
   }
   if (!res.ok) {
@@ -165,8 +163,8 @@ Deno.serve(async (req) => {
     const context = (body.context && typeof body.context === "object") ? body.context : {};
 
     if (!MODULES.includes(module)) return err("invalid_module");
-    if (!TONES.includes(tone as any)) return err("invalid_tone");
-    if (!LANGS.includes(language as any)) return err("invalid_language");
+    if (!TONES.includes(tone as typeof TONES[number])) return err("invalid_tone");
+    if (!LANGS.includes(language as typeof LANGS[number])) return err("invalid_language");
     if (message.length > 2000) return err("message_too_long");
 
     // Auth — required for personal modules and admin modules
@@ -191,7 +189,7 @@ Deno.serve(async (req) => {
           .from("user_roles")
           .select("role")
           .eq("user_id", userId);
-        isAdmin = (roles ?? []).some((r: any) => r.role === "admin");
+        isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
       }
     }
 
@@ -219,9 +217,9 @@ Deno.serve(async (req) => {
           { role: "system", content: sys + ctxLine },
           { role: "user", content: message },
         ]);
-      } catch (e: any) {
-        if (e?.status === 429) return err("rate_limited", 429);
-        if (e?.status === 402) return err("payment_required", 402);
+      } catch (e: unknown) {
+        if ((e as { status?: number } | null)?.status === 429) return err("rate_limited", 429);
+        if ((e as { status?: number } | null)?.status === 402) return err("payment_required", 402);
         throw e;
       }
 
@@ -295,9 +293,9 @@ JSON SHAPE:
           ],
           { temperature: 0.8 },
         );
-      } catch (e: any) {
-        if (e?.status === 429) return err("rate_limited", 429);
-        if (e?.status === 402) return err("payment_required", 402);
+      } catch (e: unknown) {
+        if ((e as { status?: number } | null)?.status === 429) return err("rate_limited", 429);
+        if ((e as { status?: number } | null)?.status === 402) return err("payment_required", 402);
         throw e;
       }
 
@@ -307,7 +305,7 @@ JSON SHAPE:
         .replace(/\s*```$/i, "")
         .trim();
 
-      let parsed: any = null;
+      let parsed: Record<string, unknown> | null = null;
       try {
         parsed = JSON.parse(cleaned);
       } catch {
@@ -342,12 +340,15 @@ JSON SHAPE:
         variants: Array.isArray(parsed.variants)
           ? parsed.variants
               .slice(0, 4)
-              .map((v: any) => ({
+              .map((value: unknown) => {
+                const v = value && typeof value === "object" ? value as Record<string, unknown> : {};
+                return {
                 label: clip(v?.label, 24) || "Variant",
                 title: clip(v?.title, 120),
                 body: clip(v?.body, 4000),
-              }))
-              .filter((v: any) => v.title && v.body)
+                };
+              })
+              .filter((v) => v.title && v.body)
           : [],
       };
 
@@ -427,9 +428,9 @@ JSON SHAPE:
           ],
           { temperature: 0.75 },
         );
-      } catch (e: any) {
-        if (e?.status === 429) return err("rate_limited", 429);
-        if (e?.status === 402) return err("payment_required", 402);
+      } catch (e: unknown) {
+        if ((e as { status?: number } | null)?.status === 429) return err("rate_limited", 429);
+        if ((e as { status?: number } | null)?.status === 402) return err("payment_required", 402);
         throw e;
       }
 
@@ -438,7 +439,7 @@ JSON SHAPE:
         .replace(/\s*```$/i, "")
         .trim();
 
-      let parsed: any = null;
+      let parsed: Record<string, unknown> | null = null;
       try {
         parsed = JSON.parse(cleaned);
       } catch {
@@ -474,13 +475,16 @@ JSON SHAPE:
         variants: Array.isArray(parsed.variants)
           ? parsed.variants
               .slice(0, 4)
-              .map((v: any) => ({
+              .map((value: unknown) => {
+                const v = value && typeof value === "object" ? value as Record<string, unknown> : {};
+                return {
                 label: clipLine(v?.label, 24) || "Variant",
                 tagline: clipLine(v?.tagline, 120),
                 description: clipMulti(v?.description, 1500),
                 rules: clipMulti(v?.rules, 1500),
-              }))
-              .filter((v: any) => v.description)
+                };
+              })
+              .filter((v) => v.description)
           : [],
       };
 
@@ -505,8 +509,8 @@ JSON SHAPE:
       error: "module_coming_soon",
       message: "This PeakBot module is being built. Available now: PeakBot chat (assistant).",
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("peak-ai-bot error:", e);
-    return err(e?.message ?? "internal_error", 500);
+    return err("internal_error", 500);
   }
 });

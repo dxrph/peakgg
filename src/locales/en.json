@@ -46,7 +46,41 @@
       "thumbnailAlt": "Open Cup tournament preview",
       "play": "Play",
       "compete": "Compete",
-      "improve": "Improve"
-    }
+      "improve": "Improve",
+      "previewLabel": "Sample tournament · demo"
+    },
+    "previewStatus": "Platform preview · live data unavailable",
+    "exploreTournaments": "Explore tournaments"
+  },
+  "home": {
+    "skip": "Skip to content",
+    "preview": "Platform preview",
+    "tournaments": {
+      "title": "The next challenge.",
+      "copy": "A home for competitive tournaments. The Open Cup shown above is a design preview, not an event open for registration.",
+      "status": "Calendar to be announced"
+    },
+    "players": {
+      "title": "Rank is identity.",
+      "copy": "Compete, improve and find your place. Player profiles and rankings are being rebuilt.",
+      "status": "Rankings not yet available"
+    },
+    "teams": {
+      "title": "Find your five.",
+      "copy": "A shared ambition. A team to grow with. Team discovery and recruitment are coming in a future release.",
+      "status": "Team directory coming soon"
+    },
+    "community": {
+      "title": "More than a game.",
+      "copy": "PeakGG brings together players who want to compete and improve. Official community channels will be listed here when available.",
+      "status": "Community channels coming soon"
+    },
+    "entryStatus": "The platform is being rebuilt. Sign-in and registration are not available in this preview.",
+    "backTop": "Back to top",
+    "footer": "COMPETE. IMPROVE. BELONG."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Return to PeakGG"
   }
 }
