@@ -96,6 +96,7 @@ export default function Hero() {
             ))}
           </div>
           <span>{t("hero.playersOnline", { count: playersOnline.toLocaleString(i18n.language) })}</span>
+          <span className="peak-sr-only">{t("hero.previewStatus")}</span>
         </div>
       </div>
 
