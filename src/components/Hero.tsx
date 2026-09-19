@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import characterArtwork from "../assets/hero-character.svg";
+import characterArtwork from "../assets/peak-hero-cinematic.jpg";
 import { featuredTournament } from "../data/mock";
 import "../styles/hero.css";
 
@@ -45,7 +45,7 @@ export default function Hero() {
     <section ref={heroRef} id="compete" data-section="hero" className="peak-hero">
       <div className="peak-hero-background" aria-hidden="true">
         <div className="peak-hero-backlight" />
-        <img src={characterArtwork} alt="" />
+        <img src={characterArtwork} alt="" width={1920} height={1080} />
         <div className="peak-hero-grain" />
         <div className="peak-hero-shade" />
       </div>
