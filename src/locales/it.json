@@ -1,19 +1,167 @@
 {
-  "meta": { "language": "Italiano", "locale": "it" },
-  "common": { "brand": "PeakGG", "close": "Chiudi" },
-  "nav": { "ariaMain": "Navigazione principale", "links": { "compete": "Competi", "tournaments": "Tornei", "players": "Giocatori", "teams": "Team", "community": "Community" }, "search": "Cerca", "signIn": "Accedi", "account": "Account", "enterPeak": "Enter Peak", "menuOpen": "Apri menu", "menuClose": "Chiudi menu" },
-  "search": { "title": "Cerca su PeakGG", "placeholder": "Dove vuoi andare?", "empty": "Nessuna destinazione trovata." },
-  "auth": { "kicker": "Account PeakGG", "signIn": "Accedi", "create": "Crea account", "email": "Email", "password": "Password", "submitSignIn": "Entra in PeakGG", "submitCreate": "Crea account", "loading": "Attendi...", "validation": "Inserisci un'email valida e una password di almeno 6 caratteri.", "checkEmail": "Controlla la tua email per confermare l'account.", "success": "Accesso eseguito." },
-  "hero": { "sectionNumber": "01", "rail": { "compete": "Competi", "improve": "Migliora", "belong": "Fai squadra" }, "headline": { "prove": "Dimostra", "you": "Di", "belong": "Meritarlo" }, "note": "Più di una\npartita", "copy": "Trova giocatori che parlano, restano e giocano per vincere. Costruisci il tuo team. Entra nella prossima cup.", "enterPeak": "Enter Peak", "watchTrailer": "Guarda i momenti", "artworkAlt": "Giocatore competitivo nella luce rossa", "tournament": { "label": "Prossimo torneo", "title": "Open Cup", "open": "Vedi il torneo", "thumbnailAlt": "Anteprima Open Cup", "play": "Gioca", "compete": "Competi", "improve": "Migliora", "previewLabel": "Anteprima torneo" }, "previewStatus": "Beta / Europa", "exploreTournaments": "Scopri i tornei" },
-  "signal": { "aria": "Stato del lancio PeakGG", "beta": "PeakGG Beta", "eu": "Regione EU", "firstCup": "Prima Cup", "registrationSoon": "Iscrizioni presto", "teamFinder": "Trova team", "playerProfiles": "Profili giocatori", "open": "Aperto" },
-  "cup": { "kicker": "Torneo in evidenza", "nextStop": "Prossima tappa", "title": "Open Cup", "teams": "Team", "cta": "Vedi il torneo", "map": "Ascent", "standard": "Stesso gioco / standard più alti" },
-  "match": { "kicker": "Anteprima formato", "live": "Live", "demo": "Match demo / scrim pre-season", "cta": "Scopri il formato", "info": "Primo a 13 round. Supplementari attivi. Questo punteggio mostra il formato, non è un risultato live." },
-  "rank": { "kicker": "Rank PeakGG", "title": "Il rank è identità", "copy": "Sette livelli. Una traccia di come competi, comunichi e ti presenti.", "cta": "Esplora i rank", "profile": "Profilo beta", "slot": "Il tuo posto", "preview": "Il tuo storico competitivo apparirà qui quando apriranno le classifiche.", "select": "Vedi rank", "selected": "{{rank}} è un livello nella progressione PeakGG a sette rank." },
-  "five": { "kicker": "Trova team", "title": "Trova i tuoi cinque", "cta": "Trova giocatori", "note": "Bravi giocatori / persone migliori", "role": "Ruolo", "region": "Regione", "all": "Tutti", "openSlot": "Posto libero", "sample": "Requisito esempio" },
-  "moments": { "title1": "I momenti", "title2": "Ci", "title3": "Definiscono", "copy": "Match point. Un round da tutto.", "meta": "Competi / Migliora / Fai squadra" },
-  "upcoming": { "kicker": "Calendario", "title": "Prossimi tornei", "viewAll": "Vedi tutti", "events": { "solo": "Solo Queue Night", "community": "Community Cup #05", "series": "Peak Series", "openCup": "Open Cup #005" }, "status": { "registration": "Iscrizioni", "open": "Aperto", "soon": "Presto" } },
-  "enter": { "kicker": "Community", "title": "Enter Peak.", "copy": "Niente random queue. Trova le persone che vuoi accanto quando il match conta.", "cta": "Crea account" },
-  "footer": { "privacy": "Privacy", "terms": "Termini", "privacyCopy": "Usiamo i dati dell'account solo per fornire e proteggere l'accesso a PeakGG. La policy completa arriverà al lancio.", "termsCopy": "Gioca pulito. Rispetta il team. Regole competitive e termini completi arriveranno prima degli eventi ufficiali." },
-  "home": { "skip": "Vai al contenuto", "preview": "Anteprima piattaforma", "footer": "Competi. Migliora. Fai squadra." },
-  "notFound": { "title": "Pagina non trovata", "back": "Torna su PeakGG" }
+  "meta": {
+    "language": "Italiano",
+    "locale": "it"
+  },
+  "common": {
+    "brand": "PeakGG",
+    "close": "Chiudi"
+  },
+  "nav": {
+    "ariaMain": "Navigazione principale",
+    "links": {
+      "compete": "Competi",
+      "tournaments": "Tornei",
+      "players": "Giocatori",
+      "teams": "Team",
+      "community": "Community"
+    },
+    "search": "Cerca",
+    "signIn": "Accedi",
+    "account": "Account",
+    "enterPeak": "Enter Peak",
+    "menuOpen": "Apri menu",
+    "menuClose": "Chiudi menu"
+  },
+  "search": {
+    "title": "Cerca su PeakGG",
+    "placeholder": "Dove vuoi andare?",
+    "empty": "Nessuna destinazione trovata."
+  },
+  "auth": {
+    "kicker": "Account PeakGG",
+    "signIn": "Accedi",
+    "create": "Crea account",
+    "email": "Email",
+    "password": "Password",
+    "submitSignIn": "Entra in PeakGG",
+    "submitCreate": "Crea account",
+    "loading": "Attendi...",
+    "validation": "Inserisci un'email valida e una password di almeno 6 caratteri.",
+    "checkEmail": "Controlla la tua email per confermare l'account.",
+    "success": "Accesso eseguito."
+  },
+  "hero": {
+    "sectionNumber": "01",
+    "rail": {
+      "compete": "Competi",
+      "improve": "Migliora",
+      "belong": "Fai squadra"
+    },
+    "headline": {
+      "prove": "Dimostra",
+      "you": "Di",
+      "belong": "Meritarlo"
+    },
+    "note": "Più di una\npartita",
+    "copy": "Trova giocatori che si presentano. Costruisci i tuoi cinque. Gioca le cup EU. Fai contare il tuo record.",
+    "enterPeak": "Enter Peak",
+    "watchTrailer": "Guarda i momenti",
+    "artworkAlt": "Giocatore competitivo nella luce rossa",
+    "tournament": {
+      "label": "Prossimo torneo",
+      "title": "Open Cup",
+      "open": "Vedi il torneo",
+      "thumbnailAlt": "Anteprima Open Cup",
+      "play": "Gioca",
+      "compete": "Competi",
+      "improve": "Migliora",
+      "previewLabel": "Anteprima torneo"
+    },
+    "previewStatus": "Beta / Europa",
+    "exploreTournaments": "Scopri i tornei"
+  },
+  "signal": {
+    "aria": "Stato del lancio PeakGG",
+    "beta": "PeakGG Beta",
+    "eu": "Regione EU",
+    "firstCup": "Prima Cup",
+    "registrationSoon": "Iscrizioni presto",
+    "teamFinder": "Trova team",
+    "playerProfiles": "Profili giocatori",
+    "open": "Aperto"
+  },
+  "cup": {
+    "kicker": "Torneo in evidenza",
+    "nextStop": "Prossima tappa",
+    "title": "Open Cup",
+    "teams": "Team",
+    "cta": "Vedi il torneo",
+    "map": "Ascent",
+    "standard": "Stesso gioco / standard più alti"
+  },
+  "match": {
+    "kicker": "Anteprima formato",
+    "live": "Live",
+    "demo": "Match demo / scrim pre-season",
+    "cta": "Scopri il formato",
+    "info": "Primo a 13 round. Supplementari attivi. Questo punteggio mostra il formato, non è un risultato live."
+  },
+  "rank": {
+    "kicker": "Rank PeakGG",
+    "title": "Il rank è identità",
+    "copy": "Sette livelli. Un solo record. Il rank segue come ti presenti.",
+    "cta": "Esplora i rank",
+    "profile": "Profilo beta",
+    "slot": "Il tuo posto",
+    "preview": "Il tuo storico competitivo apparirà qui quando apriranno le classifiche.",
+    "select": "Vedi rank",
+    "selected": "{{rank}} è un livello nella progressione PeakGG a sette rank."
+  },
+  "five": {
+    "kicker": "Trova team",
+    "title": "Trova i tuoi cinque",
+    "cta": "Trova giocatori",
+    "note": "Bravi giocatori / persone migliori",
+    "role": "Ruolo",
+    "region": "Regione",
+    "all": "Tutti",
+    "openSlot": "Posto libero",
+    "sample": "Requisito esempio",
+    "copy": "Ruolo. Rank. Lingua. Orari. Trova l'incastro prima della queue."
+  },
+  "moments": {
+    "title1": "I momenti",
+    "title2": "Ci",
+    "title3": "Definiscono",
+    "copy": "Match point. Un round da tutto.",
+    "meta": "Competi / Migliora / Fai squadra"
+  },
+  "upcoming": {
+    "kicker": "Calendario",
+    "title": "Prossimi tornei",
+    "viewAll": "Vedi tutti",
+    "events": {
+      "solo": "Solo Queue Night",
+      "community": "Community Cup #05",
+      "series": "Peak Series",
+      "openCup": "Open Cup #005"
+    },
+    "status": {
+      "registration": "Iscrizioni",
+      "open": "Aperto",
+      "soon": "Presto"
+    }
+  },
+  "enter": {
+    "kicker": "Community",
+    "title": "Enter Peak.",
+    "copy": "Smetti di affidarti ai random. Trova le persone che vuoi accanto quando il match conta.",
+    "cta": "Crea account"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Termini",
+    "privacyCopy": "Usiamo i dati dell'account solo per fornire e proteggere l'accesso a PeakGG. La policy completa arriverà al lancio.",
+    "termsCopy": "Gioca pulito. Rispetta il team. Regole competitive e termini completi arriveranno prima degli eventi ufficiali."
+  },
+  "home": {
+    "skip": "Vai al contenuto",
+    "preview": "Anteprima piattaforma",
+    "footer": "Competi. Migliora. Fai squadra."
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "back": "Torna su PeakGG"
+  }
 }
