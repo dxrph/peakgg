@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import characterArtwork from "../assets/peak-hero-cinematic.jpg";
-import { featuredTournament } from "../data/mock";
+import { featuredTournament, playersOnline } from "../data/mock";
 import "../styles/hero.css";
 
 const formatTournamentDate = (date: string, language: string) => {
@@ -79,11 +79,11 @@ export default function Hero() {
               <a className="peak-hero-cta peak-hero-cta-primary" href="#enter">
                 {t("hero.enterPeak")}
               </a>
-              <a className="peak-hero-cta peak-hero-cta-secondary" href="#tournaments">
+              <a className="peak-hero-cta peak-hero-cta-secondary" href="#trailer">
                 <svg viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M2 7h9L8 4l1-1 5 5-5 5-1-1 3-3H2V7Z" />
                 </svg>
-                {t("hero.exploreTournaments")}
+                {t("hero.watchTrailer")}
               </a>
             </div>
           </div>
@@ -95,13 +95,13 @@ export default function Hero() {
               <span key={index} />
             ))}
           </div>
-          <span>{t("hero.previewStatus")}</span>
+          <span>{t("hero.playersOnline", { count: playersOnline.toLocaleString(i18n.language) })}</span>
         </div>
       </div>
 
       <aside className="peak-hero-event">
         <div className="peak-hero-event-head">
-          <span>{t("hero.tournament.previewLabel")}</span>
+          <span>{t("hero.tournament.label")}</span>
         </div>
 
         <div className="peak-hero-event-title">

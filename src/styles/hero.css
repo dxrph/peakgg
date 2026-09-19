@@ -9,7 +9,7 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 .peak-hero {
   position: relative;
   width: 100%;
-  height: clamp(680px, 57.5vw, 840px);
+  height: clamp(620px, 54vw, 780px);
   overflow: hidden;
   background: rgb(var(--background));
   border-bottom: 1px solid rgb(var(--border));
@@ -62,13 +62,13 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   z-index: 5;
   top: 0;
   bottom: 0;
-  left: clamp(32px, 6.5vw, 96px);
+  left: clamp(32px, 4.5vw, 66px);
   width: 39%;
   max-width: 570px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 86px 0 34px;
+  padding: 76px 0 30px;
 }
 
 .peak-hero-micro {
@@ -99,7 +99,7 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 }
 
 .peak-hero-main {
-  margin: 8px 0 0 38px;
+  margin: 6px 0 0 24px;
   width: clamp(410px, 35vw, 530px);
 }
 
@@ -114,11 +114,12 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   font-family: var(--font-display);
   font-size: clamp(102px, 8.15vw, 126px);
   font-weight: 900;
-  font-variation-settings: "wdth" 69, "wght" 900;
+  font-variation-settings: "wdth" 64, "wght" 900;
   line-height: 0.85;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: rgb(var(--foreground));
+  text-shadow: 1px 0 rgb(var(--foreground) / 0.28);
 }
 
 .peak-hero-heading span {
@@ -133,8 +134,8 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 
 .peak-hero-note {
   position: absolute;
-  top: 90px;
-  left: min(27vw, 390px);
+  top: 82px;
+  left: min(26vw, 374px);
   width: 165px;
   font-family: var(--font-hand);
   font-size: 20px;
@@ -149,8 +150,8 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   max-width: 302px;
   margin: 18px 0 0;
   font-family: var(--font-body);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.48;
   color: rgb(var(--muted-foreground));
 }
 
@@ -213,7 +214,7 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   align-items: center;
   gap: 13px;
   font-family: var(--font-label);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -245,11 +246,11 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   z-index: 5;
   top: 0;
   bottom: 0;
-  right: clamp(32px, 6.5vw, 96px);
+  right: clamp(32px, 4.5vw, 66px);
   width: 210px;
   display: flex;
   flex-direction: column;
-  padding-top: 92px;
+  padding-top: 78px;
 }
 
 .peak-hero-event-head {
@@ -275,7 +276,9 @@ body.hero-nav-overlay .site-nav.is-scrolled {
   flex-direction: column;
   margin-top: 15px;
   font-family: var(--font-display);
-  font-size: 35px;
+  font-size: 32px;
+  font-weight: 900;
+  font-variation-settings: "wdth" 76, "wght" 900;
   font-weight: 400;
   line-height: 0.92;
   letter-spacing: -0.02em;
@@ -364,7 +367,7 @@ body.hero-nav-overlay .site-nav.is-scrolled {
 
 .peak-hero-event-script {
   position: absolute;
-  top: 71%;
+  top: 73%;
   right: 0;
   display: flex;
   flex-direction: column;
