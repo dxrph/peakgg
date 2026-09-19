@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "../integrations/supabase/client";
 
 import "../styles/navbar.css";
 
@@ -11,18 +13,27 @@ const NAV_LINKS = [
   { key: "community", href: "#community" },
 ] as const;
 
-export default function Navbar() {
+interface NavbarProps { onSearch: () => void; onAuth: (mode: "signin" | "signup") => void }
+
+export default function Navbar({ onSearch, onAuth }: NavbarProps) {
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY >= (document.getElementById("compete")?.offsetHeight ?? 720) - 56);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+    return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -75,12 +86,13 @@ export default function Navbar() {
         </nav>
 
         <div className="site-nav-actions">
-          <a href="#signin" className="site-nav-signin">
-            {t("nav.signIn")}
-          </a>
-          <a href="#enter" className="site-nav-cta">
+          <button type="button" className="site-nav-iconbtn" onClick={onSearch} aria-label={t("nav.search")}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></button>
+          <button type="button" className="site-nav-signin" onClick={() => session ? undefined : onAuth("signin")}>
+            {session ? t("nav.account") : t("nav.signIn")}
+          </button>
+          <button type="button" className="site-nav-cta" onClick={() => onAuth("signup")}>
             {t("nav.enterPeak")}
-          </a>
+          </button>
           <button
             type="button"
             ref={toggleRef}
@@ -112,12 +124,12 @@ export default function Navbar() {
             ))}
           </nav>
           <div className="site-nav-mobile-actions">
-            <a href="#signin" className="site-nav-mobile-signin" onClick={() => setOpen(false)}>
-              {t("nav.signIn")}
-            </a>
-            <a href="#enter" className="site-nav-cta" onClick={() => setOpen(false)}>
+            <button type="button" className="site-nav-mobile-signin" onClick={() => { setOpen(false); session ? undefined : onAuth("signin"); }}>
+              {session ? t("nav.account") : t("nav.signIn")}
+            </button>
+            <button type="button" className="site-nav-cta" onClick={() => { setOpen(false); onAuth("signup"); }}>
               {t("nav.enterPeak")}
-            </a>
+            </button>
           </div>
         </div>
       )}
